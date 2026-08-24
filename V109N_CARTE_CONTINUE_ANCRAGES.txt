@@ -1,0 +1,10 @@
+VALDORA V109N — CARTE CONTINUE / ANCRAGES
+
+- Progression principale réorganisée en chaîne unique : 15 villes et 14 routes, dans l’ordre town0 -> route0 -> town1 ... -> route13 -> town14.
+- Aucun embranchement principal ne permet de sauter une ville ou une route.
+- Les routes secondaires historiques pouvant servir de raccourci sont verrouillées tant que le tronçon principal correspondant n’a pas déjà été découvert.
+- Arrivées réécrites : le joueur apparaît devant le portail exact qui ramène vers la zone quittée, avec orientation cohérente.
+- Le moteur V105D construit les rues des villes et routes à partir de cette nouvelle topologie, donc les sorties sont raccordées au réseau de chemins.
+- Citadelle déplacée après Aubeval afin d’empêcher de terminer la progression avant la dernière ville / Route d’Aube.
+- Retour en arrière conservé.
+- Retour K.O. V109M conservé et compatible avec la nouvelle séquence route i -> ville i.

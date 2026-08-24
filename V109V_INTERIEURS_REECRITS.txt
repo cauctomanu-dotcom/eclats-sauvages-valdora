@@ -1,0 +1,53 @@
+ÉCLATS SAUVAGES — VALDORA V109V
+RÉÉCRITURE TOTALE DES INTÉRIEURS ET DES INTERACTIONS
+
+Base : V109U
+Référence : MOBILIER_REFERENCE_VALDORA_V105X (1).json fourni par l’utilisateur.
+
+1. MOTEUR D’INTÉRIEURS RÉÉCRIT
+- Nouveau moteur unique : game/V109V_INTERIEUR_REWRITE.js.
+- Les anciennes dimensions génériques ne sont plus utilisées par ce moteur.
+- Les 16 types de bâtiments et leurs 25 pièces sont lus directement depuis le JSON V105X.
+- Largeur, hauteur, x, y, w, h, rotation, flipX, flipY, vue, z-index, collisions et assets sont utilisés directement.
+- 247 instances de mobilier sont conservées.
+- Tous les assets référencés par le JSON sont présents.
+- Un seul PNJ de service est créé dans les bâtiments spéciaux et il reste mobile/animé.
+
+2. SOL / DESIGN
+- Le JSON V105X ne sérialise pas de texture de sol distincte.
+- Le fond neutre V109U est supprimé.
+- Le rendu du sol a été réécrit à partir du langage visuel des intérieurs de référence Valdora :
+  parquet chaud (Maison/Hôtel/Résidence), carreaux blanc-bleu (Centre de soins/Laboratoire),
+  dalles crème (Boutique/Gare), pierre beige (Musée), pierre sombre (Gardien/Citadelle), etc.
+- Le rendu de fond ne modifie jamais la géométrie du JSON.
+
+3. INTERACTIONS RÉÉCRITES
+- Nouveau gestionnaire central de proximité.
+- Indication contextuelle : « E / Entrée — <élément> ».
+- Détection sur le bord réel du rectangle du meuble, et non sur son centre.
+- Rayon d’interaction 150 unités afin que les éléments placés derrière comptoirs/mobilier restent accessibles.
+- Les fonctions utiles sont prioritaires sur les éléments décoratifs voisins.
+- Tous les mobiliers hors murs de collision peuvent être observés/interagis, même si leur fonction est « decor ».
+- Les 46 valeurs différentes du champ « fonction » présentes dans le JSON ont toutes un gestionnaire.
+- PC public / console : ouvrir_stockage -> openPC().
+- Centre de soins : soins_centre -> séquence de soin.
+- Boutique : ouvrir_boutique -> boutique.
+- Lit : repos_15s_soin_complet.
+- Assises : s_asseoir.
+- Archives/lore, repas, hôtel, gare, distributeur, starters, Codex, casiers, école, Gardien, Guilde,
+  ascenseurs et passages de pièces sont reliés au moteur.
+
+4. PASSAGES / CITADELLE
+- Les passages au sol sont activés automatiquement en marchant dessus.
+- 25 passages de mobilier + 26 entrées du registre global ont été audités : toutes leurs destinations existent.
+- Citadelle : principal <-> salle_2 <-> salle_3 <-> salle_4 <-> salle_5.
+- Le déplacement dans la Citadelle extérieure temple_final utilise un moteur de déplacement dédié.
+
+5. CONTRÔLES
+- 16 bâtiments, 25 pièces, 247 meubles, 46 fonctions.
+- 46/46 fonctions prises en charge.
+- 243/243 éléments hors murs atteignables depuis une zone marchable à distance d’interaction.
+- Test Node isolé : entrée Centre de soins, PC public ouvre le stockage, soin déclenché, passage Citadelle principal -> salle_2.
+- Test de dispatch : 46/46 fonctions exécutées sans exception dans le banc d’essai isolé.
+- Vérification syntaxique Node des scripts Joueur et Créateur : aucune erreur.
+- Le JSON embarqué a le même SHA-256 que le fichier fourni.

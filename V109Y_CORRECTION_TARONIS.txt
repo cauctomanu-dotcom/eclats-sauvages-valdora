@@ -1,0 +1,8 @@
+VALDORA V109Y — CORRECTION TARONIS
+
+- Correction du verrou fantôme qui demandait un « Sceau 12 » pour quitter Sylvaris vers route12.
+- Mathis devient le verrou narratif explicite pour la Route de Taronis.
+- La mission « Autorisation pour la Route de Taronis » est validable à Sylvaris dès que les 13 villes précédentes sont enregistrées.
+- Liaison physique forcée et réciproque : Sylvaris <-> Route de Taronis <-> Taronis.
+- Nettoyage des arbres/obstacles sur le corridor de la Route de Taronis et autour de ses portails.
+- Les correctifs V109X précédents restent intégrés (soins / KO / PNJ finaux / Codex).

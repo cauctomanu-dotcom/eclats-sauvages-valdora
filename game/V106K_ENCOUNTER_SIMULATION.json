@@ -1,0 +1,10 @@
+{
+  "simulations": 50000,
+  "minimum_steps": 29,
+  "average_steps": 43.56,
+  "median_steps": 42.0,
+  "p90_steps": 56,
+  "p95_steps": 61,
+  "maximum_steps": 82,
+  "hard_limit": 82
+}

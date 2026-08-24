@@ -1,0 +1,7 @@
+V109S — INTÉRIEURS STRICTS + MONTÉE DE NIVEAU
+
+- Le fichier MOBILIER_REFERENCE_VALDORA_V105X.json est utilisé sans recalibrage logique : mêmes dimensions de pièce, coordonnées, tailles, rotations, collisions et fonctions.
+- Un seul PNJ de fonction est créé dans chaque bâtiment spécial : infirmière, professeur, marchand, agent de gare, directeur/directrice de musée, professeur d’école, Gardien, aubergiste, etc.
+- Le PNJ de service est placé près de son vrai mobilier de fonction et garde une petite mobilité compatible avec les collisions.
+- Les surfaces multi-pièces / multi-étages restent celles du fichier V105X.
+- Chaque montée de niveau affiche les gains réels utilisés par le moteur : PV, Attaque, Défense, Vitesse, EXP actuelle et EXP restante avant le niveau suivant.

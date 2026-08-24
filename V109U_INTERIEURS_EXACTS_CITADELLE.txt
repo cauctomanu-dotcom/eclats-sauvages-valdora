@@ -1,0 +1,10 @@
+ÉCLATS SAUVAGES — VALDORA V109U
+
+- Le fichier MOBILIER_REFERENCE_VALDORA_V105X (1).json fourni par l'utilisateur est la source de vérité des intérieurs.
+- Dimensions des pièces, proportions, positions, tailles, orientations, rotations, flips, ordre Z, collisions, passages et fonctions sont lus sans recalibrage de layout.
+- Les anciens backdrops génériques (pièce fictive, fausse porte, faux bandeau) ne sont plus dessinés par le moteur V109U.
+- Le JSON ne définit pas une texture/asset de sol séparé : le moteur affiche donc un fond neutre dans la surface exacte et n'invente aucun motif.
+- Personnage et PNJ sont mis à l'échelle dans le même référentiel que le mobilier.
+- Les passages au sol fonctionnent désormais en walk-over selon leurs coordonnées exactes et leurs arrivalX/arrivalY.
+- Les limites de déplacement intérieur utilisent la largeur/hauteur réelle de chaque pièce.
+- Citadelle : positions héritées invalides sécurisées et déplacement rétabli ; les passages entre les 5 pièces V105X sont marchables.

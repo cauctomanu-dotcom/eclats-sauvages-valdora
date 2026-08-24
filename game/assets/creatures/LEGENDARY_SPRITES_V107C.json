@@ -1,0 +1,112 @@
+[
+  {
+    "id": 151,
+    "name": "Sylvarion",
+    "directions": {
+      "front": "151_Sylvarion/front.png",
+      "right": "151_Sylvarion/right.png",
+      "left": "151_Sylvarion/left.png",
+      "back": "151_Sylvarion/back.png"
+    }
+  },
+  {
+    "id": 152,
+    "name": "Ignivar",
+    "directions": {
+      "front": "152_Ignivar/front.png",
+      "right": "152_Ignivar/right.png",
+      "left": "152_Ignivar/left.png",
+      "back": "152_Ignivar/back.png"
+    }
+  },
+  {
+    "id": 153,
+    "name": "Thalassys",
+    "directions": {
+      "front": "153_Thalassys/front.png",
+      "right": "153_Thalassys/right.png",
+      "left": "153_Thalassys/left.png",
+      "back": "153_Thalassys/back.png"
+    }
+  },
+  {
+    "id": 154,
+    "name": "Fulgurion",
+    "directions": {
+      "front": "154_Fulgurion/front.png",
+      "right": "154_Fulgurion/right.png",
+      "left": "154_Fulgurion/left.png",
+      "back": "154_Fulgurion/back.png"
+    }
+  },
+  {
+    "id": 155,
+    "name": "Noctyrex",
+    "directions": {
+      "front": "155_Noctyrex/front.png",
+      "right": "155_Noctyrex/right.png",
+      "left": "155_Noctyrex/left.png",
+      "back": "155_Noctyrex/back.png"
+    }
+  },
+  {
+    "id": 156,
+    "name": "Monolithys",
+    "directions": {
+      "front": "156_Monolithys/front.png",
+      "right": "156_Monolithys/right.png",
+      "left": "156_Monolithys/left.png",
+      "back": "156_Monolithys/back.png"
+    }
+  },
+  {
+    "id": 157,
+    "name": "Aeralyon",
+    "directions": {
+      "front": "157_Aeralyon/front.png",
+      "right": "157_Aeralyon/right.png",
+      "left": "157_Aeralyon/left.png",
+      "back": "157_Aeralyon/back.png"
+    }
+  },
+  {
+    "id": 158,
+    "name": "Mycelord",
+    "directions": {
+      "front": "158_Mycelord/front.png",
+      "right": "158_Mycelord/right.png",
+      "left": "158_Mycelord/left.png",
+      "back": "158_Mycelord/back.png"
+    }
+  },
+  {
+    "id": 159,
+    "name": "Crysalune",
+    "directions": {
+      "front": "159_Crysalune/front.png",
+      "right": "159_Crysalune/right.png",
+      "left": "159_Crysalune/left.png",
+      "back": "159_Crysalune/back.png"
+    }
+  },
+  {
+    "id": 160,
+    "name": "Solaryx",
+    "directions": {
+      "front": "160_Solaryx/front.png",
+      "right": "160_Solaryx/right.png",
+      "left": "160_Solaryx/left.png",
+      "back": "160_Solaryx/back.png"
+    }
+  },
+  {
+    "id": 161,
+    "name": "Equinoxe",
+    "directions": {
+      "front": "161_Equinoxe/front.png",
+      "right": "161_Equinoxe/right.png",
+      "left": "161_Equinoxe/left.png",
+      "back": "161_Equinoxe/back.png"
+    }
+  }
+]

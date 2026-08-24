@@ -1,0 +1,21 @@
+VALDORA V107K — VALIDATION
+
+Cause du bug de progression identifiée :
+Le moteur de liaisons bidirectionnelles V78 remplaçait checkPortal() et changeait directement state.zone pour les routes canoniques. Il ne passait donc jamais par transitionWithQuestGate()/enterZone(), ce qui rendait les textes de verrou visibles mais les conditions inopérantes.
+
+Correction V107K :
+- Un contrôleur de progression final intercepte le checkPortal réellement actif, après V78 et les autres extensions.
+- En mode Joueur, une sortie vers une nouvelle progression vérifie les missions required:true de la ville.
+- Clairval exige également au moins 3 créatures niveau 10 à 12 inclus.
+- Les Gardiens/Sceaux restent obligatoires lorsque définis.
+- Une route ne permet pas l'accès à une nouvelle ville tant que ses dresseurs obligatoires ne sont pas vaincus.
+- Le retour vers une ville/route déjà découverte reste autorisé.
+- Le mode Créateur contourne explicitement ces verrous.
+
+Noms :
+- 161 noms d'Éclats ont été diversifiés.
+- Les IDs numériques, familles, types, statistiques, attaques et chemins de sprites restent inchangés.
+- Compatibilité des sauvegardes conservée.
+- Voir game/MAPPING_NOMS_ECLATS_V107K.txt.
+
+Contrôle syntaxique : 60 scripts JS / fichier HTML, 0 erreur dans index.html et CREATEUR.html.

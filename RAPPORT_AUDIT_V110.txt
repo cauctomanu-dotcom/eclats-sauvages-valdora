@@ -1,0 +1,56 @@
+ÉCLATS SAUVAGES — VALDORA V110 STABLE
+RAPPORT D’AUDIT ET DE NON-RÉGRESSION
+
+BASE AUDITÉE
+- Archive source : Eclats_Sauvages_Valdora_V109Y_TARONIS_CORRIGE_Windows.zip
+- Éditions : Joueur et Créateur
+- Exécution hors ligne sous Chromium/Chrome, depuis les fichiers Windows du paquet
+
+PROBLÈMES TROUVÉS
+1. La Route des Horizons pouvait être absente au démarrage selon l’ordre d’exécution des anciennes couches.
+2. Aubeval et les onze sanctuaires légendaires pouvaient alors posséder des portails sans destination ou sans retour.
+3. Plusieurs routes secondaires (Simdor, routes montagneuses et Route 4 bis) pouvaient perdre leur liaison réciproque après une reconstruction tardive de la carte.
+4. L’ancien audit V105D pouvait parcourir une collection de route non initialisée et lever une TypeError.
+5. La topologie dépendait de plusieurs temporisations concurrentes, ce qui la rendait fragile malgré un lancement visuellement réussi.
+
+RÉÉCRITURE EFFECTUÉE
+- Ajout d’un module final unique VALDORA_STABLE_V110.js, partagé par les éditions Joueur et Créateur.
+- Normalisation idempotente des collections de scènes, routes, sorties, bâtiments et herbes.
+- Reconstruction déterministe du réseau Aubeval -> Route des Horizons -> Carrefour des Sanctuaires.
+- Reconstruction des onze allers-retours entre le Carrefour et les zones légendaires.
+- Rétablissement automatique des retours manquants pour les liaisons secondaires valides.
+- Audit public final ValdoraStableV110.audit(), exécuté après les anciennes reconstructions tardives.
+- Marquage visuel V110 STABLE dans les deux éditions.
+
+TESTS AUTOMATISÉS PASSÉS DANS LES DEUX ÉDITIONS
+- Lancement complet sans erreur JavaScript non interceptée.
+- Présence et cohérence de 50 scènes instanciables.
+- Vérification de toutes les destinations et de tous les retours de la topologie stabilisée.
+- Parcours programmatique des 50 zones avec coordonnées de joueur valides.
+- Export manuel d’un fichier .valdora et validation de son enveloppe JSON.
+- Distinction correcte des sauvegardes Joueur et Créateur.
+- 169 créatures, identifiants uniques, données minimales présentes.
+- 70 familles ; cohérence des types sur les stades évolutifs ordinaires.
+- 288 attaques chargées ; nom, type, précision et initialisation des PP vérifiés.
+- Démarrage réel d’un combat sauvage et affichage de l’interface de combat.
+- Présence des interfaces : objectifs, équipe, codex, journal, sac, musique, sauvegarde, vol, défis, Aventure+, aide et écrin des Sceaux.
+- Présence des systèmes secondaires : boutiques, PC, soins, objectifs, codex, sac, gardiens, verrous de progression, collisions et interactions.
+- Présence de la navigation supplémentaire dans l’édition Créateur uniquement.
+
+CONTRÔLES STATIQUES ET DE COHÉRENCE
+- Lanceurs Windows Joueur et Créateur présents et pointant vers les bons fichiers.
+- Ressources locales chargées hors ligne.
+- Villes principales présentes, dont Sylvaris (town12), Taronis (town13) et Aubeval (town14).
+- Carrefour de Simdor, Route des Horizons, Route 4 bis, Citadelle et onze biomes légendaires présents.
+- APIs de combat, capture/orbes, quêtes, Team Taron, transports, boutiques, soins, PC, mobilier et gardiens chargées.
+
+LIMITES DE VÉRIFICATION
+- Une campagne humaine complète de plusieurs dizaines d’heures (chaque dialogue, chaque animation, chaque combinaison d’attaque et chaque mission dans tous ses états) n’est pas reproductible intégralement par l’automatisation fournie.
+- Les musiques et voix ont été vérifiées au niveau chargement/commande, sans jugement auditif humain.
+- Le sélecteur Windows « Enregistrer sous » est remplacé par le téléchargement de secours dans le navigateur de test ; le fichier produit a été ouvert et validé.
+- Les verrous normaux de progression restent volontairement actifs en édition Joueur. La couverture exhaustive des zones utilise l’édition Créateur et l’audit topologique pour ne pas falsifier une sauvegarde Joueur.
+
+RÉSULTAT
+- Les deux éditions démarrent.
+- L’audit V110 final ne signale aucune liaison absente.
+- Tous les tests de non-régression automatisés décrits ci-dessus passent.

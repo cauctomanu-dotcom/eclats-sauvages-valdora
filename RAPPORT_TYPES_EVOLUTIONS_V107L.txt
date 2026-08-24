@@ -1,0 +1,45 @@
+VALDORA V107L — TYPES DES ÉVOLUTIONS
+
+RÈGLE STRICTE : chaque créature conserve exactement le même type lorsqu’elle évolue.
+Aucune exception n’est active dans cette version.
+
+Familles évolutives contrôlées : 33
+Incohérences présentes dans la table V107K au chargement : 0
+
+V107L ajoute un verrou de cohérence au chargement et au moment précis de l’évolution.
+La source de vérité commune CREATURES/BY alimente ensuite Encyclopédie, PC, combats, filtres de types, faiblesses, résistances et fiches.
+Noms, sprites, IDs, niveaux d’évolution, statistiques et attaques restent inchangés.
+
+Famille 00 | Nature    | Florin, Floror, Florex
+Famille 01 | Feu       | Pyroin, Pyroor, Pyroex
+Famille 02 | Eau       | Aquain, Aquaor, Aquaex
+Famille 03 | Foudre    | Voltin, Voltor, Voltex
+Famille 04 | Ombre     | Noctin, Noctor, Noctex
+Famille 05 | Roche     | Rocin, Rocor, Rocex
+Famille 06 | Air       | Zephin, Zephor, Zephex
+Famille 07 | Spore     | Myrin, Myror, Myrex
+Famille 08 | Nature    | Cervin, Cervor, Cervex
+Famille 09 | Glace     | Brumin, Brumor, Brumex
+Famille 10 | Feu       | Solarin, Solaror, Solarex
+Famille 11 | Glace     | Cryoin, Cryoor, Cryoex
+Famille 12 | Ombre     | Lunain, Lunaor, Lunaex
+Famille 13 | Roche     | Terrain, Terraor, Terraex
+Famille 14 | Foudre    | Fulgin, Fulgor, Fulgex
+Famille 15 | Nature    | Sylvin, Sylvor, Sylvex
+Famille 16 | Eau       | Coralin, Coralor, Coralex
+Famille 17 | Feu       | Cendrin, Cendror, Cendrex
+Famille 18 | Ombre     | Onyxin, Onyxor, Onyxex
+Famille 19 | Eau       | Azurin, Azuror, Azurex
+Famille 20 | Glace     | Nivin, Nivor, Nivex
+Famille 21 | Spore     | Muscin, Muscor, Muscex
+Famille 22 | Roche     | Runain, Runaor, Runaex
+Famille 23 | Air       | Aeroin, Aeroor, Aeroex
+Famille 24 | Roche     | Dunain, Dunaor, Dunaex
+Famille 25 | Lumière   | Prismin, Prismor, Prismex
+Famille 26 | Spore     | Sporain, Sporaor, Sporaex
+Famille 27 | Neutre    | Feralin, Feralor, Feralex
+Famille 28 | Lumière   | Lumain, Lumaor, Lumaex
+Famille 29 | Eau       | Marein, Mareor, Mareex
+Famille 30 | Air       | Vifin, Vifor, Vifex
+Famille 31 | Ombre     | Obsidin, Obsidor, Obsidex
+Famille 32 | Lumière   | Étherin, Étheror, Étherex

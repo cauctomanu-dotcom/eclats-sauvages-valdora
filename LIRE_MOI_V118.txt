@@ -1,0 +1,45 @@
+ÉCLATS SAUVAGES — VALDORA V118 — MONDE VIVANT
+
+LANCEMENT
+1. Décompresse entièrement l’archive ZIP.
+2. Lance JOUER_VALDORA.bat pour la version Joueur.
+3. Lance CREATOR_VALDORA.bat pour la version Créateur et ses outils de contrôle.
+
+NOUVEAUTÉS DU MONDE VIVANT
+- Chaque ville possède désormais 12 habitants, ou 18 dans les grandes villes : 210 PNJ extérieurs au total.
+- Les habitants sont placés sur des zones piétonnes libres, à distance les uns des autres et hors des bâtiments.
+- Les PNJ non liés à un service ou à une scène se déplacent suivant de petites routines locales, changent de direction et marquent des pauses.
+- Les interactions de quête, de Gardien et de Team Taron restent prioritaires.
+- Après leur rôle narratif, les habitants utilisent les dialogues contextuels de la V118.
+- La banque contient 1 440 dialogues uniques : 96 compositions propres à chacune des 15 villes.
+- Les maisons ordinaires reçoivent 3 habitants mobiles.
+- Les résidences et bâtiments publics reçoivent 3 à 5 résidents, visiteurs ou clients, en plus des PNJ de service déjà présents.
+- Les habitants intérieurs évitent le mobilier, les sorties et les autres PNJ.
+- Des bulles d’émotion, particules locales et indications d’interaction animent les villes.
+
+GAMEPLAY SUPPLÉMENTAIRE
+Le menu « Vie locale V118 » propose quatre activités dans chacune des 15 villes, soit 60 objectifs secondaires :
+- Visages du quartier : rencontrer plusieurs habitants différents.
+- Porte à porte : visiter plusieurs intérieurs.
+- Chroniques vivantes : multiplier les conversations locales.
+- Ami de la ville : combiner rencontres, visites et discussions.
+
+Ces activités attribuent des Voltrons, Orbes, Potions, SuperOrbes et SuperPotions. Leur progression et les récompenses sont sauvegardées dans la partie.
+
+IMPLANTATION ET STABILITÉ
+- Les bâtiments fortement engagés sur une chaussée sont replacés de manière conservatrice.
+- Les gares liées aux rails et les parvis d’hôtels conservent leur implantation spéciale.
+- Les emplacements de circulation sont mis en cache afin de garder un rendu fluide.
+- Le moteur final protège les animations et interactions V118 contre les anciens modules périodiques.
+- Les versions Joueur et Créateur démarrent sans erreur ni avertissement de console.
+
+OUTILS CRÉATEUR
+- Ouvre « Vie locale V118 » pour voir les 60 activités.
+- « Tester une maison habitée » place directement le joueur près d’un résident.
+- « Actualiser l’audit V118 » relance le diagnostic du monde vivant.
+- Les autres contrôles de routes, musées, sanctuaires et légendaires restent disponibles.
+
+SAUVEGARDES
+Les anciennes sauvegardes restent compatibles. Pour transférer une partie entre versions, exporte son fichier .valdora depuis l’ancienne version puis importe-le depuis l’écran d’accueil de la V118.
+
+Consulte RAPPORT_V118.md pour le détail des corrections et des tests.

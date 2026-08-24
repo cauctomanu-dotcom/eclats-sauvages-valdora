@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#56d3ff"/>
+      <stop offset="0.48" stop-color="#258fd0"/>
+      <stop offset="1" stop-color="#165a9a"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4dc8fb"/>
+      <stop offset="1" stop-color="#0d477c"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9fbff"/>
+      <stop offset="0.42" stop-color="#8ed9ef"/>
+      <stop offset="1" stop-color="#287aa6"/>
+    </linearGradient>
+    <radialGradient id="wheel" cx="45%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#687786"/>
+      <stop offset="0.35" stop-color="#263542"/>
+      <stop offset="1" stop-color="#071018"/>
+    </radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="170%" height="180%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+  <ellipse cx="324" cy="303" rx="252" ry="30" fill="#00121f" opacity=".28" filter="url(#shadow)"/>
+  <g>
+    <!-- rounded chibi body -->
+    <path d="M80 107 Q86 60 142 50 H448 Q515 51 557 95 L596 137 Q611 154 611 193 V247 Q611 277 579 282 H106 Q72 278 70 245 V139 Q70 118 80 107Z" fill="url(#body)" stroke="#0c436f" stroke-width="8"/>
+    <!-- front 3D nose, facing right -->
+    <path d="M470 61 Q528 68 566 105 L601 144 Q613 158 613 188 V244 Q613 267 589 279 L520 278 Q532 256 532 218 V128 Q531 89 470 61Z" fill="url(#front)" opacity=".95"/>
+    <!-- roof highlight -->
+    <path d="M126 60 H450 Q496 61 531 82" fill="none" stroke="#d8f6ff" stroke-width="12" stroke-linecap="round" opacity=".72"/>
+    <!-- side windows -->
+    <rect x="117" y="91" width="105" height="83" rx="19" fill="url(#glass)" stroke="#d4f7ff" stroke-width="6"/>
+    <rect x="235" y="91" width="105" height="83" rx="19" fill="url(#glass)" stroke="#d4f7ff" stroke-width="6"/>
+    <rect x="353" y="91" width="95" height="83" rx="19" fill="url(#glass)" stroke="#d4f7ff" stroke-width="6"/>
+    <!-- windshield slanted -->
+    <path d="M477 88 Q528 95 559 126 L579 148 V175 H478Z" fill="url(#glass)" stroke="#d4f7ff" stroke-width="6"/>
+    <!-- door -->
+    <rect x="451" y="180" width="66" height="91" rx="14" fill="#134f7b" stroke="#9ce7fa" stroke-width="5"/>
+    <path d="M483 184 V267" stroke="#9ce7fa" stroke-width="4" opacity=".8"/>
+    <!-- lower cream bumper band -->
+    <path d="M79 223 H524 Q548 222 568 207 L608 181 V244 Q608 267 584 278 H101 Q75 274 73 248Z" fill="#f7edd5" opacity=".98"/>
+    <path d="M87 221 H521" stroke="#ffcc51" stroke-width="9" stroke-linecap="round"/>
+    <!-- destination sign -->
+    <rect x="154" y="69" width="184" height="25" rx="10" fill="#072b3f"/>
+    <text x="246" y="87" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#fbe37d">VALDORA</text>
+    <!-- face / headlights gives chibi personality -->
+    <ellipse cx="568" cy="208" rx="18" ry="13" fill="#fff8b3" stroke="#d09c29" stroke-width="4"/>
+    <ellipse cx="596" cy="207" rx="10" ry="12" fill="#fff8b3" stroke="#d09c29" stroke-width="4"/>
+    <path d="M555 242 Q580 257 602 240" fill="none" stroke="#15384b" stroke-width="6" stroke-linecap="round"/>
+    <!-- mirrors -->
+    <path d="M584 140 Q620 131 625 151" fill="none" stroke="#163e58" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="626" cy="155" rx="11" ry="15" fill="#245a79"/>
+    <!-- wheels -->
+    <g>
+      <circle cx="178" cy="276" r="45" fill="url(#wheel)" stroke="#0a1821" stroke-width="7"/>
+      <circle cx="178" cy="276" r="22" fill="#9cadb8" stroke="#d9e7ee" stroke-width="5"/>
+      <circle cx="503" cy="276" r="45" fill="url(#wheel)" stroke="#0a1821" stroke-width="7"/>
+      <circle cx="503" cy="276" r="22" fill="#9cadb8" stroke="#d9e7ee" stroke-width="5"/>
+    </g>
+    <!-- tiny sparkles -->
+    <g fill="#fff" opacity=".85">
+      <path d="M111 190 l5 11 11 5-11 5-5 11-5-11-11-5 11-5Z"/>
+      <path d="M388 204 l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/>
+    </g>
+  </g>
+</svg>

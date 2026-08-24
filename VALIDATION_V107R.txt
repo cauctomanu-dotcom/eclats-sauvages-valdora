@@ -1,0 +1,12 @@
+VALDORA V107R — VALIDATION
+
+- Catalogue : 156 créatures uniques (#001 à #156).
+- Nouvelles espèces : Schneck, Drago, Quetzal, Phenie, Kroka, Wang.
+- Types : Eau, Foudre, Feu, Lumière, Nature, Nature.
+- Évolutions : aucune pour les six dragons (evolve = null, stade unique).
+- Starter Professeur Aurine : Florin / Pyroin / Aquain / Schneck.
+- Schneck est le 4e choix du starter.
+- 24 nouveaux sprites directionnels PNG 256x256 transparents (face/gauche/droite/dos).
+- Codex : total dynamique 156.
+- Syntaxe JavaScript vérifiée sur index.html et CREATEUR.html avec node --check.
+- Assets vérifiés : 4 sprites valides pour chacune des 6 nouvelles espèces.

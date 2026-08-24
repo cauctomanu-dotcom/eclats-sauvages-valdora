@@ -1,0 +1,10 @@
+V109J — AMÉNAGEMENT DES BÂTIMENTS À PARTIR DES ASSETS EXISTANTS
+
+- Moteur V109I conservé, mobilier réécrit pour utiliser directement le catalogue complet V105X.
+- Aménagements spécifiques : maison, centre de soins, boutique, gare, laboratoire, musée, auberge/hôtel, école, bâtiment du Gardien.
+- Aucun asset inventé : uniquement les fichiers assets/mobilier existants et attribués à la catégorie.
+- Tailles recalibrées sur un personnage d’environ 62 unités de haut.
+- Couloir de sortie central maintenu libre.
+- Collisions dérivées des meubles réellement affichés.
+- Variantes déterministes pour les bâtiments non critiques afin d’éviter des intérieurs strictement identiques.
+- Versions Joueur et Créateur mises à jour.

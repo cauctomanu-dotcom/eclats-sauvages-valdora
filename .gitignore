@@ -1,0 +1,32 @@
+# Sauvegardes et données locales des joueurs
+*.valdora
+*.sav
+*.save
+sauvegardes/
+backups/
+
+# Archives de distribution générées localement
+*.zip
+*.7z
+*.rar
+
+# Fichiers temporaires et journaux
+*.tmp
+*.temp
+*.log
+*.bak
+*.old
+*.pyc
+__pycache__/
+~$*
+_site/
+
+# Systèmes et éditeurs
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+
+# Environnement Git local
+.git/

@@ -1,0 +1,7 @@
+ÉCLATS SAUVAGES — VALDORA V108O
+
+Réécritures ciblées depuis V108N :
+- HUD Équipe : les portraits des 8 mascottes Phantasialand (IDs 162–169) sont embarqués directement dans le composant, supprimant le risque de carré vide lié au chargement de fichiers.
+- PNJ intérieurs : le rendu réellement actif utilise désormais n.dir et n.moving ; les PNJ se tournent vers le joueur lors d'une interaction et peuvent se déplacer dans une zone cohérente autour de leur poste en respectant obstacles et porte.
+- Soins : pendant les 5 secondes, les créatures de l'équipe défilent dans une animation médicale avec anneau pulsant, croix médicales, scan et particules, en plus de la barre de progression existante.
+- Aucun changement volontaire des cartes, quêtes, progression, attaques ou sauvegardes.

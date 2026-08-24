@@ -1,0 +1,8 @@
+ÉCLATS SAUVAGES — VALDORA V109E
+
+Réécriture centrale des entrées de bâtiments.
+- Une seule détection de porte pour tous les bâtiments.
+- Entrées standards, centres de soins, boutiques, laboratoires, auberges et gares restaurées.
+- Musées V109C conservés et prioritaires.
+- Immeubles de mégalopole conservent le moteur V70.
+- Train V109D conservé sans modification de son menu de destinations.

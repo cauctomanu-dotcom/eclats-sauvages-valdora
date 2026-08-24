@@ -1,0 +1,9 @@
+VALDORA V109M — CENTRES DE SOINS / RETOUR K.O.
+
+- Correction de la cause du centre de soins vide et bloqué après un K.O. : le retour passe désormais par le moteur central V109I et crée une vraie session intérieure.
+- L'infirmière Élise est donc instanciée normalement, les déplacements intérieurs restent actifs et la sortie reste praticable.
+- Les anciens intérieurs chargés sans session sont reconstruits automatiquement quand un bâtiment est identifiable, au lieu de laisser le joueur bloqué.
+- Après K.O. total, retour uniquement vers un centre de soins d'une ville déjà découverte.
+- Sur Route N, priorité à la ville antérieure connue (Route 1 -> Clairval, Route 2 -> Bois-Murmure, etc.), jamais à la ville suivante non découverte.
+- Fallback : dernière ville connue possédant un centre de soins, puis Clairval.
+- Versions Joueur et Créateur mises à jour.

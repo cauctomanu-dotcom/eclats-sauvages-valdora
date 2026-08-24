@@ -1,0 +1,9 @@
+VALDORA V107N — CORRECTION NOM DU JOUEUR
+
+Correction : les trois choix de Nouvelle Partie convergent désormais vers la saisie du nom :
+- Découvrir le jeu
+- Je connais déjà les bases
+- Passer le tutoriel
+
+Le nom est demandé et confirmé avant de lancer la branche choisie.
+Le reste du moteur de jeu n'a pas été modifié.

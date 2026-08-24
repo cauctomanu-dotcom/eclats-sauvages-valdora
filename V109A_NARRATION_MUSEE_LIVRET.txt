@@ -1,0 +1,19 @@
+VALDORA V109A — NARRATION, MUSÉE & LIVRET
+
+Base : V108T.
+Référence : feuille de route narrative & gameplay du 22 août 2026.
+
+Intégrations principales :
+- Direction du musée avec missions narratives et retours ultérieurs.
+- Chaîne de quête « L’œuf inconnu » : musée -> professeur -> Lac Azur / Hautes-Roches / Nivéa -> musée.
+- Mission « Les archives disparues » avec témoignages dans trois villes.
+- Livret secret PDF protégé par mot de passe, remis par le 3e Gardien.
+- Premiers dossiers du livret reliés à de vraies conditions de progression : œuf, archives, convoi Résonance, sept inscriptions, message incomplet.
+- PNJ mémoriels et événements de voyage rares.
+- Réactions contextuelles du premier Éclat dans certains environnements.
+- Convergence narrative ajoutée aux conditions finales de la Citadelle (contournée en version Créateur).
+- Directeurs de musée : réapprentissage des attaques oubliées et reproposition des attaques refusées, pour l’équipe et le PC.
+- Historique d’attaques rétrocompatible stocké directement sur chaque créature.
+- Règle des quatre attaques conservée : choix explicite de l’attaque à oublier ou annulation, jamais de remplacement automatique.
+
+Le musée conserve ses assets actuels : la feuille de route précise que le réaménagement graphique complet avec les véritables assets est une étape future.

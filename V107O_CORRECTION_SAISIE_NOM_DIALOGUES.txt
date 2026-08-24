@@ -1,0 +1,9 @@
+VALDORA V107O — CORRECTION SAISIE DU NOM ET DIALOGUES
+
+- Les champs texte neutralisent désormais tous les raccourcis clavier du gameplay pendant la saisie.
+- Les lettres E, M, Z, Q, S, D, A, W et les autres caractères peuvent être saisies normalement.
+- Le nom choisi est conservé dans state.playerName et dans une sauvegarde de session de secours.
+- Le Journal et le panneau JOUEUR utilisent le nom choisi.
+- Le Professeur Aurine s'adresse au joueur avec le nom choisi.
+- Les placeholders explicites Dresseur destinés au héros sont résolus avec le nom choisi.
+- Les noms génériques des dresseurs adverses (ex. Dresseur de la Route 1) ne sont pas modifiés.

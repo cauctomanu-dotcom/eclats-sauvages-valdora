@@ -1,0 +1,42 @@
+ÉCLATS SAUVAGES — VALDORA V117 — SANCTUAIRES STABLES
+
+LANCEMENT
+1. Décompresse entièrement l’archive ZIP.
+2. Lance JOUER_VALDORA.bat pour la version Joueur.
+3. Lance CREATOR_VALDORA.bat pour la version Créateur et les outils de test.
+
+CORRECTIONS PRINCIPALES
+- Le décor des sanctuaires ne clignote plus : une seule boucle principale dessine désormais le monde.
+- Le repaire du légendaire reste affiché et conserve une opacité stable.
+- Les anciens modules de biome ne peuvent plus vider ou reconstruire les décors V117.
+- Le menu de droite conserve un ordre, une taille et un nombre de boutons stables.
+- Le bouton anonyme créé par un ancien module musical est supprimé.
+- La Carte du monde reste identifiée V117 et le Livret secret suit la même règle d’affichage dans tous les modules.
+- L’ancien panneau de routes superposé est masqué.
+
+SANCTUAIRES PERSONNALISÉS
+Les onze sanctuaires ont chacun quatre familles visuelles propres, huit éléments majeurs et douze accents de décor :
+- Nature : racines, stèles végétales, vasques et lucioles.
+- Feu : obsidienne, braseros et lave volcanique.
+- Eau : coraux, coquillages et îlot marin.
+- Orage : paratonnerres, bobines, cristaux, rivière et pont.
+- Usine : générateurs, cuves, conduites et machinerie ancienne.
+- Roche : monolithes, cairns et relief minéral.
+- Air : vents, nuages et cristaux aériens.
+- Spores : champignons géants, lanternes et végétation fongique.
+- Glace : arches et aiguilles cristallines.
+- Lumière : miroirs solaires et prismes.
+- Origine : prismes et orbites d’énergie.
+
+SAUVEGARDES
+Pour transférer une partie depuis une version antérieure, exporte le fichier .valdora depuis l’ancienne version puis importe-le à l’écran d’accueil de la V117.
+
+CONTRÔLES EFFECTUÉS
+- Version Joueur et version Créateur ouvertes et contrôlées.
+- Stabilité prolongée du menu et des sanctuaires.
+- Inspection des onze sanctuaires.
+- Déplacement réel dans le sanctuaire Orage : rivière bloquante et pont franchissable.
+- Déclenchement réel d’un combat légendaire avec attaques, PP, précision, puissance, Sac, Orbes, changement et fuite.
+- Audit automatique V117 : aucun problème détecté.
+
+Le détail technique et la liste des tests se trouvent dans RAPPORT_V117.md.

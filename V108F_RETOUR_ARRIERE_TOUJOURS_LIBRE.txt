@@ -1,0 +1,9 @@
+ÉCLATS SAUVAGES — VALDORA V108F
+
+Règle de progression corrigée :
+- Les conditions ne bloquent que le sens vers l’avant.
+- Depuis une route, retourner à la ville précédente est toujours autorisé.
+- Cas Route 1 -> Clairval corrigé : aucun dresseur n’est requis pour revenir à Clairval.
+- Les dresseurs obligatoires ne peuvent bloquer que la sortie vers la ville suivante.
+- Les verrous de Gardien/quêtes restent uniquement sur les transitions de progression vers l’avant.
+- Sauvegardes et système des 220 attaques V108E conservés.

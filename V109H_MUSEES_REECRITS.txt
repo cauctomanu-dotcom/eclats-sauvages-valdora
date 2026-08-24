@@ -1,0 +1,10 @@
+V109H — MUSÉES ENTIÈREMENT RÉÉCRITS
+
+- Suppression de la logique de normalisation périodique des musées.
+- Un seul moteur détecte désormais un musée par son rôle/type/urbanType/id/label.
+- Toute entrée dans un musée, ville classique ou mégalopole, utilise le même intérieur canonique.
+- Le musée de Taronis reste la référence fonctionnelle, sans moteur parallèle pour les autres villes.
+- Un seul directeur/directrice canonique est créé dans l'intérieur musée.
+- Menu conservé : Missions du musée / Réapprendre / Attaques refusées / Livret si Sceau 3 obtenu.
+- Aucun code du Livret n'est révélé par le musée.
+- Aucune mutation périodique des bâtiments ou des cartes.

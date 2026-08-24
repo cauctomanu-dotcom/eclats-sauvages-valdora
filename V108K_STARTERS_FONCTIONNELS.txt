@@ -1,0 +1,9 @@
+VALDORA V108K — STARTERS FONCTIONNELS
+
+Correction de fond : le système V108G de movepools appelait une constante V108E hors de sa portée JavaScript, ce qui faisait échouer la création d’un starter au clic.
+
+- Brindel, Tisonnet, Rivelot et Schneck peuvent à nouveau être choisis.
+- Le choix crée la créature N.5, l’ajoute à l’équipe et ferme l’écran de sélection.
+- Le système des 220 attaques est conservé.
+- Un fallback empêche désormais la création d’une créature d’échouer si la bibliothèque de movepools est momentanément indisponible.
+- Appliqué aux versions Joueur et Créateur.

@@ -1,0 +1,5 @@
+V108I — Portraits Équipe
+- Le panneau Équipe et le menu Équipe utilisent désormais le même moteur de rendu que l'écran de sélection des starters.
+- Rendu répété après 80 ms, 260 ms et 700 ms pour laisser les PNG finir leur chargement.
+- Plus de dépendance à une table d'IDs 001/1 pour les portraits du panneau.
+- Conserve V108G : 220 attaques rééquilibrées, sauvegardes, progression et retours arrière.

@@ -1,0 +1,7 @@
+VALIDATION AUTOMATISÉE V108M
+
+Résultat navigateur : FINAL_ASSERTIONS_OK — 0 erreur console/page.
+Scripts HTML : 64/64 valides côté Joueur et 64/64 valides côté Créateur.
+Bibliothèque : 220 attaques, 0 puissance manquante, 0 PP manquant, 0 précision manquante, 0 effet textuel manquant.
+Créateur : mascottes 162 à 169 présentes au PC, aucune injectée dans l'équipe.
+Sauvegardes : lecture brute, enveloppée et payload testée ; état de mascottes existantes conservé.

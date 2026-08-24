@@ -1,0 +1,10 @@
+V109T — MOUVEMENT RÉTABLI
+
+Cause corrigée :
+La V109S avait accidentellement remplacé la fonction globale move() du monde extérieur par une fonction de déplacement intérieur dépendante d'une session de bâtiment. Hors bâtiment, cette fonction retournait immédiatement, rendant le personnage immobile.
+
+Correction :
+- restauration de la vraie fonction de déplacement extérieur ;
+- conservation du déplacement intérieur isolé dans ValdoraBuildingV109I ;
+- flèches / ZQSD / WASD utilisent de nouveau le moteur de déplacement du monde ;
+- aucune modification du mobilier V105X, des intérieurs stricts ou du récapitulatif de montée de niveau.

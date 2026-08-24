@@ -1,0 +1,11 @@
+ÉCLATS SAUVAGES — VALDORA V111 PRO
+
+Pour jouer : ouvrez le dossier game, puis double-cliquez sur index.html.
+Pour créer/modifier : ouvrez game\CREATEUR.html.
+
+Nouveautés principales :
+- Carte vivante de Valdora avec 15 villes, exploration et voyages rapides.
+- Livret secret interactif avec pistes, progression et récompenses.
+- Animations visibles pour le bus, le train, le Vol et le vélo.
+
+Consultez RAPPORT_VALDORA_V111_PRO.txt pour le détail des tests.

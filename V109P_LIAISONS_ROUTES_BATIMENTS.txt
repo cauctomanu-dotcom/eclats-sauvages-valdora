@@ -1,0 +1,10 @@
+ÉCLATS SAUVAGES — VALDORA V109P
+
+- Entrée des bâtiments réparée dans le moteur central : passage réel en scène interior.
+- 14 liaisons principales recréées avec métadonnées V78 A/B cohérentes.
+- Routes d'Aube et autres routes principales bidirectionnelles.
+- Toutes les sorties de villes sont physiquement raccordées au réseau routier visible.
+- Aubeval : Route des Horizons au nord et Citadelle au sud, toutes deux reliées aux rues.
+- Route des Horizons nettoyée de tout bâtiment hérité et reliée au Carrefour des Sanctuaires.
+- Route 4 bis conservée comme Lac des Reflets avec nageurs et bouée canard.
+- Audit automatique des destinations, retours et raccordements physiques.

@@ -1,0 +1,7 @@
+V109R — DÉMARRAGE RÉTABLI
+
+- Base reprise depuis V109P, version qui se lançait.
+- Suppression de la couche V109Q qui enveloppait drawWorld/drawRouteBase après chargement.
+- Lac des Reflets rendu directement via le moteur d'objets de route existant, sans modifier le moteur global.
+- Nageurs et bouée canard conservés depuis la base V109P.
+- Liaisons et entrées bâtiments V109P conservées.

@@ -1,0 +1,10 @@
+ÉCLATS SAUVAGES — VALDORA V109C
+MUSÉES UNIFIÉS
+
+- Tous les bâtiments dont le rôle réel est Musée utilisent désormais le même intérieur Musée.
+- Les musées de mégalopoles ne sont plus traités comme des immeubles génériques à étages.
+- Aménagement commun : vitrines historiques, statue/socle, cordons de sécurité, bureau de conservation et plantes.
+- Un directeur/directrice du musée est présent dans chaque musée.
+- Le directeur donne accès au système V109A : missions du musée, réapprentissage d'anciennes attaques, attaques refusées et Livret des Éclats quand débloqué.
+- Les bâtiments extérieurs, cartes, villes et autres systèmes restent inchangés.
+- Compatibilité des sauvegardes conservée : aucun identifiant de créature ou d'objet n'est modifié.

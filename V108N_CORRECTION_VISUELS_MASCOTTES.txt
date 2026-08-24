@@ -1,0 +1,8 @@
+V108N — Correction visuelle des huit mascottes Phantasialand
+
+- Petit encadré Équipe : suppression du rendu canvas asynchrone pour les portraits.
+- Les portraits utilisent désormais directement le front.png correspondant à l'ID réel de la créature.
+- Même source de vérité utilisée dans le menu Équipe.
+- Quetzal (ID 164) et Wang (ID 167) : quatre orientations graphiques remises sur les bons personnages.
+- Vérification ciblée : Schneck 162, Drago 163, Quetzal 164, Phœny 165, Kroka 166, Wang 167, Hack 168, Buddl 169.
+- Aucun changement de gameplay, type, attaque, progression ou sauvegarde.

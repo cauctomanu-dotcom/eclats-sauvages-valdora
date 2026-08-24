@@ -1,0 +1,1407 @@
+{
+  "version": "V105P",
+  "project": "Valdora",
+  "asset_type": "mobilier chibi 3D directionnel",
+  "generation_mode": "outil de création d'images intégré",
+  "style": "chibi 3D, formes arrondies, matériaux lisibles, palette Valdora, fond transparent",
+  "directions": [
+    "front",
+    "left",
+    "back"
+  ],
+  "category_count": 14,
+  "furniture_count": 65,
+  "sprite_count": 195,
+  "sprite_size": [
+    512,
+    512
+  ],
+  "categories": [
+    {
+      "id": "maison",
+      "name": "Maison et maison du héros",
+      "items": [
+        {
+          "id": "lit_simple",
+          "name": "Lit simple"
+        },
+        {
+          "id": "console_salon",
+          "name": "Console de salon"
+        },
+        {
+          "id": "table_cuisine",
+          "name": "Table et chaises"
+        },
+        {
+          "id": "bibliotheque",
+          "name": "Bibliothèque domestique"
+        },
+        {
+          "id": "television",
+          "name": "Téléviseur"
+        }
+      ]
+    },
+    {
+      "id": "centre_soins",
+      "name": "Centre de soins",
+      "items": [
+        {
+          "id": "comptoir_medical",
+          "name": "Comptoir médical"
+        },
+        {
+          "id": "machine_soin",
+          "name": "Machine de soin"
+        },
+        {
+          "id": "canape_attente",
+          "name": "Canapé d'attente"
+        },
+        {
+          "id": "pc_public",
+          "name": "PC de stockage public"
+        },
+        {
+          "id": "carte_murale",
+          "name": "Carte murale de Valdora"
+        }
+      ]
+    },
+    {
+      "id": "boutique",
+      "name": "Boutique et galerie",
+      "items": [
+        {
+          "id": "comptoir_vente",
+          "name": "Comptoir de vente"
+        },
+        {
+          "id": "etagere_produits",
+          "name": "Étagère de produits"
+        },
+        {
+          "id": "caisse_enregistreuse",
+          "name": "Caisse enregistreuse"
+        },
+        {
+          "id": "cartons_decor",
+          "name": "Cartons de stock"
+        }
+      ]
+    },
+    {
+      "id": "hotel",
+      "name": "Hôtel",
+      "items": [
+        {
+          "id": "reception_hotel",
+          "name": "Banque de réception"
+        },
+        {
+          "id": "chariot_bagages",
+          "name": "Chariot à bagages"
+        },
+        {
+          "id": "lit_luxe",
+          "name": "Lit de luxe"
+        },
+        {
+          "id": "plante_pot",
+          "name": "Plante en pot"
+        }
+      ]
+    },
+    {
+      "id": "gare",
+      "name": "Gare",
+      "items": [
+        {
+          "id": "guichet_billets",
+          "name": "Guichet de billetterie"
+        },
+        {
+          "id": "tourniquet_acces",
+          "name": "Tourniquet d'accès"
+        },
+        {
+          "id": "banc_quai",
+          "name": "Banc de quai"
+        },
+        {
+          "id": "panneau_horaires",
+          "name": "Panneau d'affichage"
+        },
+        {
+          "id": "distributeur_boissons",
+          "name": "Distributeur automatique"
+        }
+      ]
+    },
+    {
+      "id": "laboratoire",
+      "name": "Laboratoire",
+      "items": [
+        {
+          "id": "table_starters",
+          "name": "Table des starters"
+        },
+        {
+          "id": "supercalculateur",
+          "name": "Supercalculateur"
+        },
+        {
+          "id": "tableau_blanc",
+          "name": "Tableau de recherche"
+        },
+        {
+          "id": "incubateur",
+          "name": "Incubateur d'œufs"
+        }
+      ]
+    },
+    {
+      "id": "musee",
+      "name": "Musée",
+      "items": [
+        {
+          "id": "vitrine_verre",
+          "name": "Vitrine d'exposition"
+        },
+        {
+          "id": "socle_statue",
+          "name": "Socle de statue"
+        },
+        {
+          "id": "cordon_securite",
+          "name": "Cordon de sécurité"
+        },
+        {
+          "id": "bureau_conservateur",
+          "name": "Bureau du conservateur"
+        }
+      ]
+    },
+    {
+      "id": "restaurant_cafe",
+      "name": "Restaurant et café",
+      "items": [
+        {
+          "id": "comptoir_restaurant",
+          "name": "Comptoir de restaurant"
+        },
+        {
+          "id": "table_restaurant",
+          "name": "Table de restaurant"
+        },
+        {
+          "id": "chaise_restaurant",
+          "name": "Chaise de restaurant"
+        },
+        {
+          "id": "cuisine_professionnelle",
+          "name": "Bloc de cuisine professionnelle"
+        },
+        {
+          "id": "presentoir_desserts",
+          "name": "Présentoir à desserts"
+        }
+      ]
+    },
+    {
+      "id": "residence",
+      "name": "Résidence et appartement",
+      "items": [
+        {
+          "id": "canape_modulaire",
+          "name": "Canapé modulaire"
+        },
+        {
+          "id": "table_basse",
+          "name": "Table basse"
+        },
+        {
+          "id": "armoire",
+          "name": "Armoire"
+        },
+        {
+          "id": "bureau_domestique",
+          "name": "Bureau domestique"
+        },
+        {
+          "id": "commode",
+          "name": "Commode"
+        }
+      ]
+    },
+    {
+      "id": "bureau_guilde",
+      "name": "Bureau et maison des Guildes",
+      "items": [
+        {
+          "id": "bureau_direction",
+          "name": "Bureau de direction"
+        },
+        {
+          "id": "fauteuil_bureau",
+          "name": "Fauteuil de bureau"
+        },
+        {
+          "id": "table_reunion",
+          "name": "Table de réunion"
+        },
+        {
+          "id": "classeur_archives",
+          "name": "Classeur d'archives"
+        },
+        {
+          "id": "tableau_missions",
+          "name": "Tableau des missions"
+        }
+      ]
+    },
+    {
+      "id": "bibliotheque_publique",
+      "name": "Bibliothèque publique",
+      "items": [
+        {
+          "id": "comptoir_bibliotheque",
+          "name": "Comptoir de bibliothèque"
+        },
+        {
+          "id": "rayonnage_livres",
+          "name": "Rayonnage de livres"
+        },
+        {
+          "id": "table_lecture",
+          "name": "Table de lecture"
+        },
+        {
+          "id": "presentoir_archives",
+          "name": "Présentoir d'archives"
+        }
+      ]
+    },
+    {
+      "id": "ecole",
+      "name": "École et académie",
+      "items": [
+        {
+          "id": "bureau_professeur",
+          "name": "Bureau du professeur"
+        },
+        {
+          "id": "pupitre_eleve",
+          "name": "Pupitre d'élève"
+        },
+        {
+          "id": "tableau_cours",
+          "name": "Tableau de cours"
+        },
+        {
+          "id": "casier_ecole",
+          "name": "Casier d'école"
+        },
+        {
+          "id": "globe_valdora",
+          "name": "Globe de Valdora"
+        }
+      ]
+    },
+    {
+      "id": "gardien",
+      "name": "Bâtiment du Gardien",
+      "items": [
+        {
+          "id": "pupitre_gardien",
+          "name": "Pupitre du Gardien"
+        },
+        {
+          "id": "autel_sceau",
+          "name": "Autel du Sceau"
+        },
+        {
+          "id": "banniere_gardien",
+          "name": "Bannière du Gardien"
+        },
+        {
+          "id": "presentoir_trophees",
+          "name": "Présentoir de trophées"
+        },
+        {
+          "id": "banc_defi",
+          "name": "Banc de défi"
+        }
+      ]
+    },
+    {
+      "id": "citadelle",
+      "name": "Citadelle du Cœur",
+      "items": [
+        {
+          "id": "trone_citadelle",
+          "name": "Trône de la Citadelle"
+        },
+        {
+          "id": "autel_coeur",
+          "name": "Autel du Cœur"
+        },
+        {
+          "id": "brasero_sacre",
+          "name": "Brasero sacré"
+        },
+        {
+          "id": "table_strategique",
+          "name": "Table stratégique"
+        },
+        {
+          "id": "pilier_eclat",
+          "name": "Pilier d'Éclat"
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "lit_simple",
+      "name": "Lit simple",
+      "category_id": "maison",
+      "category_name": "Maison et maison du héros",
+      "directions": {
+        "front": "assets/mobilier/maison/lit_simple/front.png",
+        "left": "assets/mobilier/maison/lit_simple/left.png",
+        "back": "assets/mobilier/maison/lit_simple/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "console_salon",
+      "name": "Console de salon",
+      "category_id": "maison",
+      "category_name": "Maison et maison du héros",
+      "directions": {
+        "front": "assets/mobilier/maison/console_salon/front.png",
+        "left": "assets/mobilier/maison/console_salon/left.png",
+        "back": "assets/mobilier/maison/console_salon/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_cuisine",
+      "name": "Table et chaises",
+      "category_id": "maison",
+      "category_name": "Maison et maison du héros",
+      "directions": {
+        "front": "assets/mobilier/maison/table_cuisine/front.png",
+        "left": "assets/mobilier/maison/table_cuisine/left.png",
+        "back": "assets/mobilier/maison/table_cuisine/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "bibliotheque",
+      "name": "Bibliothèque domestique",
+      "category_id": "maison",
+      "category_name": "Maison et maison du héros",
+      "directions": {
+        "front": "assets/mobilier/maison/bibliotheque/front.png",
+        "left": "assets/mobilier/maison/bibliotheque/left.png",
+        "back": "assets/mobilier/maison/bibliotheque/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "television",
+      "name": "Téléviseur",
+      "category_id": "maison",
+      "category_name": "Maison et maison du héros",
+      "directions": {
+        "front": "assets/mobilier/maison/television/front.png",
+        "left": "assets/mobilier/maison/television/left.png",
+        "back": "assets/mobilier/maison/television/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "comptoir_medical",
+      "name": "Comptoir médical",
+      "category_id": "centre_soins",
+      "category_name": "Centre de soins",
+      "directions": {
+        "front": "assets/mobilier/centre_soins/comptoir_medical/front.png",
+        "left": "assets/mobilier/centre_soins/comptoir_medical/left.png",
+        "back": "assets/mobilier/centre_soins/comptoir_medical/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "machine_soin",
+      "name": "Machine de soin",
+      "category_id": "centre_soins",
+      "category_name": "Centre de soins",
+      "directions": {
+        "front": "assets/mobilier/centre_soins/machine_soin/front.png",
+        "left": "assets/mobilier/centre_soins/machine_soin/left.png",
+        "back": "assets/mobilier/centre_soins/machine_soin/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "canape_attente",
+      "name": "Canapé d'attente",
+      "category_id": "centre_soins",
+      "category_name": "Centre de soins",
+      "directions": {
+        "front": "assets/mobilier/centre_soins/canape_attente/front.png",
+        "left": "assets/mobilier/centre_soins/canape_attente/left.png",
+        "back": "assets/mobilier/centre_soins/canape_attente/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "pc_public",
+      "name": "PC de stockage public",
+      "category_id": "centre_soins",
+      "category_name": "Centre de soins",
+      "directions": {
+        "front": "assets/mobilier/centre_soins/pc_public/front.png",
+        "left": "assets/mobilier/centre_soins/pc_public/left.png",
+        "back": "assets/mobilier/centre_soins/pc_public/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "carte_murale",
+      "name": "Carte murale de Valdora",
+      "category_id": "centre_soins",
+      "category_name": "Centre de soins",
+      "directions": {
+        "front": "assets/mobilier/centre_soins/carte_murale/front.png",
+        "left": "assets/mobilier/centre_soins/carte_murale/left.png",
+        "back": "assets/mobilier/centre_soins/carte_murale/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "comptoir_vente",
+      "name": "Comptoir de vente",
+      "category_id": "boutique",
+      "category_name": "Boutique et galerie",
+      "directions": {
+        "front": "assets/mobilier/boutique/comptoir_vente/front.png",
+        "left": "assets/mobilier/boutique/comptoir_vente/left.png",
+        "back": "assets/mobilier/boutique/comptoir_vente/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "etagere_produits",
+      "name": "Étagère de produits",
+      "category_id": "boutique",
+      "category_name": "Boutique et galerie",
+      "directions": {
+        "front": "assets/mobilier/boutique/etagere_produits/front.png",
+        "left": "assets/mobilier/boutique/etagere_produits/left.png",
+        "back": "assets/mobilier/boutique/etagere_produits/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "caisse_enregistreuse",
+      "name": "Caisse enregistreuse",
+      "category_id": "boutique",
+      "category_name": "Boutique et galerie",
+      "directions": {
+        "front": "assets/mobilier/boutique/caisse_enregistreuse/front.png",
+        "left": "assets/mobilier/boutique/caisse_enregistreuse/left.png",
+        "back": "assets/mobilier/boutique/caisse_enregistreuse/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "cartons_decor",
+      "name": "Cartons de stock",
+      "category_id": "boutique",
+      "category_name": "Boutique et galerie",
+      "directions": {
+        "front": "assets/mobilier/boutique/cartons_decor/front.png",
+        "left": "assets/mobilier/boutique/cartons_decor/left.png",
+        "back": "assets/mobilier/boutique/cartons_decor/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "reception_hotel",
+      "name": "Banque de réception",
+      "category_id": "hotel",
+      "category_name": "Hôtel",
+      "directions": {
+        "front": "assets/mobilier/hotel/reception_hotel/front.png",
+        "left": "assets/mobilier/hotel/reception_hotel/left.png",
+        "back": "assets/mobilier/hotel/reception_hotel/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "chariot_bagages",
+      "name": "Chariot à bagages",
+      "category_id": "hotel",
+      "category_name": "Hôtel",
+      "directions": {
+        "front": "assets/mobilier/hotel/chariot_bagages/front.png",
+        "left": "assets/mobilier/hotel/chariot_bagages/left.png",
+        "back": "assets/mobilier/hotel/chariot_bagages/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "lit_luxe",
+      "name": "Lit de luxe",
+      "category_id": "hotel",
+      "category_name": "Hôtel",
+      "directions": {
+        "front": "assets/mobilier/hotel/lit_luxe/front.png",
+        "left": "assets/mobilier/hotel/lit_luxe/left.png",
+        "back": "assets/mobilier/hotel/lit_luxe/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "plante_pot",
+      "name": "Plante en pot",
+      "category_id": "hotel",
+      "category_name": "Hôtel",
+      "directions": {
+        "front": "assets/mobilier/hotel/plante_pot/front.png",
+        "left": "assets/mobilier/hotel/plante_pot/left.png",
+        "back": "assets/mobilier/hotel/plante_pot/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "guichet_billets",
+      "name": "Guichet de billetterie",
+      "category_id": "gare",
+      "category_name": "Gare",
+      "directions": {
+        "front": "assets/mobilier/gare/guichet_billets/front.png",
+        "left": "assets/mobilier/gare/guichet_billets/left.png",
+        "back": "assets/mobilier/gare/guichet_billets/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "tourniquet_acces",
+      "name": "Tourniquet d'accès",
+      "category_id": "gare",
+      "category_name": "Gare",
+      "directions": {
+        "front": "assets/mobilier/gare/tourniquet_acces/front.png",
+        "left": "assets/mobilier/gare/tourniquet_acces/left.png",
+        "back": "assets/mobilier/gare/tourniquet_acces/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "banc_quai",
+      "name": "Banc de quai",
+      "category_id": "gare",
+      "category_name": "Gare",
+      "directions": {
+        "front": "assets/mobilier/gare/banc_quai/front.png",
+        "left": "assets/mobilier/gare/banc_quai/left.png",
+        "back": "assets/mobilier/gare/banc_quai/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "panneau_horaires",
+      "name": "Panneau d'affichage",
+      "category_id": "gare",
+      "category_name": "Gare",
+      "directions": {
+        "front": "assets/mobilier/gare/panneau_horaires/front.png",
+        "left": "assets/mobilier/gare/panneau_horaires/left.png",
+        "back": "assets/mobilier/gare/panneau_horaires/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "distributeur_boissons",
+      "name": "Distributeur automatique",
+      "category_id": "gare",
+      "category_name": "Gare",
+      "directions": {
+        "front": "assets/mobilier/gare/distributeur_boissons/front.png",
+        "left": "assets/mobilier/gare/distributeur_boissons/left.png",
+        "back": "assets/mobilier/gare/distributeur_boissons/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_starters",
+      "name": "Table des starters",
+      "category_id": "laboratoire",
+      "category_name": "Laboratoire",
+      "directions": {
+        "front": "assets/mobilier/laboratoire/table_starters/front.png",
+        "left": "assets/mobilier/laboratoire/table_starters/left.png",
+        "back": "assets/mobilier/laboratoire/table_starters/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "supercalculateur",
+      "name": "Supercalculateur",
+      "category_id": "laboratoire",
+      "category_name": "Laboratoire",
+      "directions": {
+        "front": "assets/mobilier/laboratoire/supercalculateur/front.png",
+        "left": "assets/mobilier/laboratoire/supercalculateur/left.png",
+        "back": "assets/mobilier/laboratoire/supercalculateur/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "tableau_blanc",
+      "name": "Tableau de recherche",
+      "category_id": "laboratoire",
+      "category_name": "Laboratoire",
+      "directions": {
+        "front": "assets/mobilier/laboratoire/tableau_blanc/front.png",
+        "left": "assets/mobilier/laboratoire/tableau_blanc/left.png",
+        "back": "assets/mobilier/laboratoire/tableau_blanc/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "incubateur",
+      "name": "Incubateur d'œufs",
+      "category_id": "laboratoire",
+      "category_name": "Laboratoire",
+      "directions": {
+        "front": "assets/mobilier/laboratoire/incubateur/front.png",
+        "left": "assets/mobilier/laboratoire/incubateur/left.png",
+        "back": "assets/mobilier/laboratoire/incubateur/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "vitrine_verre",
+      "name": "Vitrine d'exposition",
+      "category_id": "musee",
+      "category_name": "Musée",
+      "directions": {
+        "front": "assets/mobilier/musee/vitrine_verre/front.png",
+        "left": "assets/mobilier/musee/vitrine_verre/left.png",
+        "back": "assets/mobilier/musee/vitrine_verre/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "socle_statue",
+      "name": "Socle de statue",
+      "category_id": "musee",
+      "category_name": "Musée",
+      "directions": {
+        "front": "assets/mobilier/musee/socle_statue/front.png",
+        "left": "assets/mobilier/musee/socle_statue/left.png",
+        "back": "assets/mobilier/musee/socle_statue/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "cordon_securite",
+      "name": "Cordon de sécurité",
+      "category_id": "musee",
+      "category_name": "Musée",
+      "directions": {
+        "front": "assets/mobilier/musee/cordon_securite/front.png",
+        "left": "assets/mobilier/musee/cordon_securite/left.png",
+        "back": "assets/mobilier/musee/cordon_securite/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "bureau_conservateur",
+      "name": "Bureau du conservateur",
+      "category_id": "musee",
+      "category_name": "Musée",
+      "directions": {
+        "front": "assets/mobilier/musee/bureau_conservateur/front.png",
+        "left": "assets/mobilier/musee/bureau_conservateur/left.png",
+        "back": "assets/mobilier/musee/bureau_conservateur/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "comptoir_restaurant",
+      "name": "Comptoir de restaurant",
+      "category_id": "restaurant_cafe",
+      "category_name": "Restaurant et café",
+      "directions": {
+        "front": "assets/mobilier/restaurant_cafe/comptoir_restaurant/front.png",
+        "left": "assets/mobilier/restaurant_cafe/comptoir_restaurant/left.png",
+        "back": "assets/mobilier/restaurant_cafe/comptoir_restaurant/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_restaurant",
+      "name": "Table de restaurant",
+      "category_id": "restaurant_cafe",
+      "category_name": "Restaurant et café",
+      "directions": {
+        "front": "assets/mobilier/restaurant_cafe/table_restaurant/front.png",
+        "left": "assets/mobilier/restaurant_cafe/table_restaurant/left.png",
+        "back": "assets/mobilier/restaurant_cafe/table_restaurant/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "chaise_restaurant",
+      "name": "Chaise de restaurant",
+      "category_id": "restaurant_cafe",
+      "category_name": "Restaurant et café",
+      "directions": {
+        "front": "assets/mobilier/restaurant_cafe/chaise_restaurant/front.png",
+        "left": "assets/mobilier/restaurant_cafe/chaise_restaurant/left.png",
+        "back": "assets/mobilier/restaurant_cafe/chaise_restaurant/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "cuisine_professionnelle",
+      "name": "Bloc de cuisine professionnelle",
+      "category_id": "restaurant_cafe",
+      "category_name": "Restaurant et café",
+      "directions": {
+        "front": "assets/mobilier/restaurant_cafe/cuisine_professionnelle/front.png",
+        "left": "assets/mobilier/restaurant_cafe/cuisine_professionnelle/left.png",
+        "back": "assets/mobilier/restaurant_cafe/cuisine_professionnelle/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "presentoir_desserts",
+      "name": "Présentoir à desserts",
+      "category_id": "restaurant_cafe",
+      "category_name": "Restaurant et café",
+      "directions": {
+        "front": "assets/mobilier/restaurant_cafe/presentoir_desserts/front.png",
+        "left": "assets/mobilier/restaurant_cafe/presentoir_desserts/left.png",
+        "back": "assets/mobilier/restaurant_cafe/presentoir_desserts/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "canape_modulaire",
+      "name": "Canapé modulaire",
+      "category_id": "residence",
+      "category_name": "Résidence et appartement",
+      "directions": {
+        "front": "assets/mobilier/residence/canape_modulaire/front.png",
+        "left": "assets/mobilier/residence/canape_modulaire/left.png",
+        "back": "assets/mobilier/residence/canape_modulaire/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_basse",
+      "name": "Table basse",
+      "category_id": "residence",
+      "category_name": "Résidence et appartement",
+      "directions": {
+        "front": "assets/mobilier/residence/table_basse/front.png",
+        "left": "assets/mobilier/residence/table_basse/left.png",
+        "back": "assets/mobilier/residence/table_basse/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "armoire",
+      "name": "Armoire",
+      "category_id": "residence",
+      "category_name": "Résidence et appartement",
+      "directions": {
+        "front": "assets/mobilier/residence/armoire/front.png",
+        "left": "assets/mobilier/residence/armoire/left.png",
+        "back": "assets/mobilier/residence/armoire/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "bureau_domestique",
+      "name": "Bureau domestique",
+      "category_id": "residence",
+      "category_name": "Résidence et appartement",
+      "directions": {
+        "front": "assets/mobilier/residence/bureau_domestique/front.png",
+        "left": "assets/mobilier/residence/bureau_domestique/left.png",
+        "back": "assets/mobilier/residence/bureau_domestique/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "commode",
+      "name": "Commode",
+      "category_id": "residence",
+      "category_name": "Résidence et appartement",
+      "directions": {
+        "front": "assets/mobilier/residence/commode/front.png",
+        "left": "assets/mobilier/residence/commode/left.png",
+        "back": "assets/mobilier/residence/commode/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "bureau_direction",
+      "name": "Bureau de direction",
+      "category_id": "bureau_guilde",
+      "category_name": "Bureau et maison des Guildes",
+      "directions": {
+        "front": "assets/mobilier/bureau_guilde/bureau_direction/front.png",
+        "left": "assets/mobilier/bureau_guilde/bureau_direction/left.png",
+        "back": "assets/mobilier/bureau_guilde/bureau_direction/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "fauteuil_bureau",
+      "name": "Fauteuil de bureau",
+      "category_id": "bureau_guilde",
+      "category_name": "Bureau et maison des Guildes",
+      "directions": {
+        "front": "assets/mobilier/bureau_guilde/fauteuil_bureau/front.png",
+        "left": "assets/mobilier/bureau_guilde/fauteuil_bureau/left.png",
+        "back": "assets/mobilier/bureau_guilde/fauteuil_bureau/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_reunion",
+      "name": "Table de réunion",
+      "category_id": "bureau_guilde",
+      "category_name": "Bureau et maison des Guildes",
+      "directions": {
+        "front": "assets/mobilier/bureau_guilde/table_reunion/front.png",
+        "left": "assets/mobilier/bureau_guilde/table_reunion/left.png",
+        "back": "assets/mobilier/bureau_guilde/table_reunion/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "classeur_archives",
+      "name": "Classeur d'archives",
+      "category_id": "bureau_guilde",
+      "category_name": "Bureau et maison des Guildes",
+      "directions": {
+        "front": "assets/mobilier/bureau_guilde/classeur_archives/front.png",
+        "left": "assets/mobilier/bureau_guilde/classeur_archives/left.png",
+        "back": "assets/mobilier/bureau_guilde/classeur_archives/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "tableau_missions",
+      "name": "Tableau des missions",
+      "category_id": "bureau_guilde",
+      "category_name": "Bureau et maison des Guildes",
+      "directions": {
+        "front": "assets/mobilier/bureau_guilde/tableau_missions/front.png",
+        "left": "assets/mobilier/bureau_guilde/tableau_missions/left.png",
+        "back": "assets/mobilier/bureau_guilde/tableau_missions/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "comptoir_bibliotheque",
+      "name": "Comptoir de bibliothèque",
+      "category_id": "bibliotheque_publique",
+      "category_name": "Bibliothèque publique",
+      "directions": {
+        "front": "assets/mobilier/bibliotheque_publique/comptoir_bibliotheque/front.png",
+        "left": "assets/mobilier/bibliotheque_publique/comptoir_bibliotheque/left.png",
+        "back": "assets/mobilier/bibliotheque_publique/comptoir_bibliotheque/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "rayonnage_livres",
+      "name": "Rayonnage de livres",
+      "category_id": "bibliotheque_publique",
+      "category_name": "Bibliothèque publique",
+      "directions": {
+        "front": "assets/mobilier/bibliotheque_publique/rayonnage_livres/front.png",
+        "left": "assets/mobilier/bibliotheque_publique/rayonnage_livres/left.png",
+        "back": "assets/mobilier/bibliotheque_publique/rayonnage_livres/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_lecture",
+      "name": "Table de lecture",
+      "category_id": "bibliotheque_publique",
+      "category_name": "Bibliothèque publique",
+      "directions": {
+        "front": "assets/mobilier/bibliotheque_publique/table_lecture/front.png",
+        "left": "assets/mobilier/bibliotheque_publique/table_lecture/left.png",
+        "back": "assets/mobilier/bibliotheque_publique/table_lecture/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "presentoir_archives",
+      "name": "Présentoir d'archives",
+      "category_id": "bibliotheque_publique",
+      "category_name": "Bibliothèque publique",
+      "directions": {
+        "front": "assets/mobilier/bibliotheque_publique/presentoir_archives/front.png",
+        "left": "assets/mobilier/bibliotheque_publique/presentoir_archives/left.png",
+        "back": "assets/mobilier/bibliotheque_publique/presentoir_archives/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "bureau_professeur",
+      "name": "Bureau du professeur",
+      "category_id": "ecole",
+      "category_name": "École et académie",
+      "directions": {
+        "front": "assets/mobilier/ecole/bureau_professeur/front.png",
+        "left": "assets/mobilier/ecole/bureau_professeur/left.png",
+        "back": "assets/mobilier/ecole/bureau_professeur/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "pupitre_eleve",
+      "name": "Pupitre d'élève",
+      "category_id": "ecole",
+      "category_name": "École et académie",
+      "directions": {
+        "front": "assets/mobilier/ecole/pupitre_eleve/front.png",
+        "left": "assets/mobilier/ecole/pupitre_eleve/left.png",
+        "back": "assets/mobilier/ecole/pupitre_eleve/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "tableau_cours",
+      "name": "Tableau de cours",
+      "category_id": "ecole",
+      "category_name": "École et académie",
+      "directions": {
+        "front": "assets/mobilier/ecole/tableau_cours/front.png",
+        "left": "assets/mobilier/ecole/tableau_cours/left.png",
+        "back": "assets/mobilier/ecole/tableau_cours/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "casier_ecole",
+      "name": "Casier d'école",
+      "category_id": "ecole",
+      "category_name": "École et académie",
+      "directions": {
+        "front": "assets/mobilier/ecole/casier_ecole/front.png",
+        "left": "assets/mobilier/ecole/casier_ecole/left.png",
+        "back": "assets/mobilier/ecole/casier_ecole/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "globe_valdora",
+      "name": "Globe de Valdora",
+      "category_id": "ecole",
+      "category_name": "École et académie",
+      "directions": {
+        "front": "assets/mobilier/ecole/globe_valdora/front.png",
+        "left": "assets/mobilier/ecole/globe_valdora/left.png",
+        "back": "assets/mobilier/ecole/globe_valdora/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "pupitre_gardien",
+      "name": "Pupitre du Gardien",
+      "category_id": "gardien",
+      "category_name": "Bâtiment du Gardien",
+      "directions": {
+        "front": "assets/mobilier/gardien/pupitre_gardien/front.png",
+        "left": "assets/mobilier/gardien/pupitre_gardien/left.png",
+        "back": "assets/mobilier/gardien/pupitre_gardien/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "autel_sceau",
+      "name": "Autel du Sceau",
+      "category_id": "gardien",
+      "category_name": "Bâtiment du Gardien",
+      "directions": {
+        "front": "assets/mobilier/gardien/autel_sceau/front.png",
+        "left": "assets/mobilier/gardien/autel_sceau/left.png",
+        "back": "assets/mobilier/gardien/autel_sceau/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "banniere_gardien",
+      "name": "Bannière du Gardien",
+      "category_id": "gardien",
+      "category_name": "Bâtiment du Gardien",
+      "directions": {
+        "front": "assets/mobilier/gardien/banniere_gardien/front.png",
+        "left": "assets/mobilier/gardien/banniere_gardien/left.png",
+        "back": "assets/mobilier/gardien/banniere_gardien/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "presentoir_trophees",
+      "name": "Présentoir de trophées",
+      "category_id": "gardien",
+      "category_name": "Bâtiment du Gardien",
+      "directions": {
+        "front": "assets/mobilier/gardien/presentoir_trophees/front.png",
+        "left": "assets/mobilier/gardien/presentoir_trophees/left.png",
+        "back": "assets/mobilier/gardien/presentoir_trophees/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "banc_defi",
+      "name": "Banc de défi",
+      "category_id": "gardien",
+      "category_name": "Bâtiment du Gardien",
+      "directions": {
+        "front": "assets/mobilier/gardien/banc_defi/front.png",
+        "left": "assets/mobilier/gardien/banc_defi/left.png",
+        "back": "assets/mobilier/gardien/banc_defi/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "trone_citadelle",
+      "name": "Trône de la Citadelle",
+      "category_id": "citadelle",
+      "category_name": "Citadelle du Cœur",
+      "directions": {
+        "front": "assets/mobilier/citadelle/trone_citadelle/front.png",
+        "left": "assets/mobilier/citadelle/trone_citadelle/left.png",
+        "back": "assets/mobilier/citadelle/trone_citadelle/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "autel_coeur",
+      "name": "Autel du Cœur",
+      "category_id": "citadelle",
+      "category_name": "Citadelle du Cœur",
+      "directions": {
+        "front": "assets/mobilier/citadelle/autel_coeur/front.png",
+        "left": "assets/mobilier/citadelle/autel_coeur/left.png",
+        "back": "assets/mobilier/citadelle/autel_coeur/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "brasero_sacre",
+      "name": "Brasero sacré",
+      "category_id": "citadelle",
+      "category_name": "Citadelle du Cœur",
+      "directions": {
+        "front": "assets/mobilier/citadelle/brasero_sacre/front.png",
+        "left": "assets/mobilier/citadelle/brasero_sacre/left.png",
+        "back": "assets/mobilier/citadelle/brasero_sacre/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "table_strategique",
+      "name": "Table stratégique",
+      "category_id": "citadelle",
+      "category_name": "Citadelle du Cœur",
+      "directions": {
+        "front": "assets/mobilier/citadelle/table_strategique/front.png",
+        "left": "assets/mobilier/citadelle/table_strategique/left.png",
+        "back": "assets/mobilier/citadelle/table_strategique/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    },
+    {
+      "id": "pilier_eclat",
+      "name": "Pilier d'Éclat",
+      "category_id": "citadelle",
+      "category_name": "Citadelle du Cœur",
+      "directions": {
+        "front": "assets/mobilier/citadelle/pilier_eclat/front.png",
+        "left": "assets/mobilier/citadelle/pilier_eclat/left.png",
+        "back": "assets/mobilier/citadelle/pilier_eclat/back.png"
+      },
+      "size": [
+        512,
+        512
+      ],
+      "format": "PNG RGBA"
+    }
+  ]
+}

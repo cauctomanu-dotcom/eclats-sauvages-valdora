@@ -1,0 +1,10 @@
+ÉCLATS SAUVAGES — VALDORA V109W
+
+Corrections ciblées depuis V109V :
+- Citadelle : 10 gardiens réellement présents, déplacement dédié et barrière finale cohérente.
+- Simdor : liaison directe et réciproque Simdor <-> Sentier des Hautes Brumes <-> Cimes-d’Or ; orthographe unifiée.
+- Nova-Cité : la mission globale « Dresseur confirmé » reste disponible mais ne bloque plus la progression principale ; les verrous de route ignorent les agents spéciaux, Team Taron et revanches.
+- Route 4 : agent Team Taron dédié ; victoire = Capsule Vol (enseignable aux créatures Air).
+- EXP : distribuée pour chaque adversaire uniquement aux Éclats conscients ayant réellement participé contre cet adversaire.
+- Boutique : paliers réels ; Rappel dès le palier 1, Élixir Vital dès le palier 2, tous les articles finissent par apparaître.
+- Intérieurs V109V conservés sans modification.

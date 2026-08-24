@@ -1,0 +1,14 @@
+Éclats Sauvages — Valdora V109I
+
+RÉÉCRITURE COMPLÈTE DU SYSTÈME DES BÂTIMENTS
+- Un seul registre de classification des bâtiments.
+- Un seul moteur de portes/entrées.
+- Un seul moteur d’intérieurs et de sorties.
+- Un seul système de collisions intérieures.
+- Un seul système de PNJ intérieurs, orientation et déplacements.
+- Services reconnectés : laboratoire, soins, boutique, gare, musée, gardien, auberge, école et maisons.
+- Bâtiments des mégalopoles classés par rôle réel au lieu d’un moteur parallèle.
+- Musée = même moteur canonique partout + directeur + missions/réapprentissage/livret.
+- Gare = moteur train V109D conservé.
+- Centre de soins = séquence de soin conservée.
+- Ancienne sauvegarde chargée dans un intérieur obsolète replacée proprement dans la ville.

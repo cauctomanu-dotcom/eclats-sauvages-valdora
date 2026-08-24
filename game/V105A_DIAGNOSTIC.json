@@ -1,0 +1,5 @@
+{
+  "root_cause": "V105 used undefined kBuildWorld/kDrawWorld/kDrawTown/kDrawMega/kDrawRoute/kPortalCheck aliases. ReferenceError stopped the V105 script before activation. PNJ script repeated the same kBuildWorld error.",
+  "fix": "autonomous v105Activate + direct drawWorld/collision renderer replacement + PNJ graph direct activation",
+  "engine_marker": "document.documentElement.dataset.worldEngine = V105A"
+}

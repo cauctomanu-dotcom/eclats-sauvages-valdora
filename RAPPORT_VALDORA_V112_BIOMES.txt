@@ -1,0 +1,140 @@
+ÉCLATS SAUVAGES — VALDORA V112 BIOMES
+RAPPORT DE RÉÉCRITURE, D’INTÉGRATION ET DE TEST
+Date : 23 août 2026
+
+1. LIVRABLE
+
+Cette édition contient deux versions hors ligne pour Windows :
+- JOUER_VALDORA.bat : version Joueur ;
+- CREATOR_VALDORA.bat : version Créateur.
+
+Le nouveau module principal est game/VALDORA_BIOMES_V112.js. Il est chargé après les moteurs stables existants afin de conserver les combats, la progression, les sauvegardes, les intérieurs, les boutiques et les missions déjà fonctionnels, tout en remplaçant proprement la topologie et les rendus concernés.
+
+2. CARTE DU MONDE ET TOPOLOGIE CANONIQUE
+
+La carte V112 comporte 16 lieux nommés et 20 liaisons bidirectionnelles :
+
+Clairval — Route 1 — Rochebrune
+Rochebrune — Route 2 — Azurive
+Azurive — Route 3 — Montfaucon
+Montfaucon — Route 4 — Belrive
+Montfaucon — Corniche de Simdor — Simdor
+Belrive — Route 5 — Soléria
+Belrive — Route 4 bis / Lac des Reflets — Soléria
+Soléria — Route 6 — Nova-Cité
+Soléria — Passe de Soléria — Simdor
+Nova-Cité — Route 7 — Valombre
+Nova-Cité — Col de Nova — Simdor
+Valombre — Route des Cimes — Cimes-d’Or
+Valombre — Route des Ombres — Simdor
+Cimes-d’Or — Sentier des Hauts de Brume — Simdor
+Cimes-d’Or — Route du Littoral — Port-Écume
+Port-Écume — Détroit de Luminor — Luminor
+Luminor — Route des Brumes — Brumelac
+Brumelac — Route Sylvestre — Sylvaris
+Sylvaris — Route de Taronis — Taronis
+Taronis — Route des Aubes — Aubeval
+
+Aubeval conserve ses accès spéciaux vers la Citadelle du Cœur et la Route des Horizons menant aux onze sanctuaires légendaires.
+
+Réécriture effectuée :
+- reconstruction déclarative des accès des villes et des deux extrémités de chaque route ;
+- suppression automatique des anciens raccords fantômes Montfaucon/route_m1, Montfaucon/route_m5 et Brumelac/route_m1 ;
+- distinction stricte entre Cimes-d’Or et Simdor ;
+- carte illustrée interactive avec sélection des lieux, destination suivie, bus, Vol, Livret secret, Citadelle et biomes légendaires ;
+- affichage des noms exacts des routes dans le panneau latéral, sans surcharger l’illustration ;
+- lieux non découverts masqués dans la version Joueur ;
+- prévisualisation directe des villes, routes, du lac et des sanctuaires dans la version Créateur.
+
+3. BIOMES ET DIRECTION ARTISTIQUE
+
+Chaque lieu reçoit une identité graphique cohérente : prairies de l’aube, roche rouge, lacs azurés, automne, vallée fluviale, plaine solaire, métropole boréale, ombres violettes, cimes enneigées et dorées, carrefour montagnard de Simdor, littoral turquoise, détroit lumineux, lac brumeux, forêt sylvestre, bastion industriel et vallée de l’aurore.
+
+Port-Écume a été repris comme véritable front de mer : promenade en bois, plage dorée, parasols, coquillages, eau turquoise et vagues animées. Les routes utilisent des ensembles chibi 3D (arbres, buissons, clôtures, caisses et panneaux) posés le long du chemin à au moins 330 unités de son axe, jamais sur la chaussée. Les arbres répétitifs des scènes sont recouverts par un nouvel arbre chibi 3D avec variantes de teinte adaptées aux régions.
+
+Les onze sanctuaires légendaires possèdent maintenant une palette, des particules et des monuments propres à leur type : Nature, Feu, Eau, Foudre, Ombre, Roche, Air, Spore, Glace, Lumière et Neutre. Les anciens arbres plats y sont retirés au profit du décor thématique.
+
+4. ROUTE 4 BIS — LAC DES REFLETS
+
+Le rendu de la zone a été réécrit, et non simplement recouvert d’une petite correction :
+- véritable étendue d’eau en dégradé, courants et reflets animés ;
+- pontons aux embarcadères de Belrive et Soléria ;
+- nénuphars, fleurs, balises et ombrage de profondeur ;
+- six PNJ nageurs et quatre dresseurs représentés avec un personnage chibi 3D dans une bouée ;
+- variantes colorées sans multiplier les fichiers ;
+- joueur représenté par son buste dans une bouée rouge et blanche, sans pieds visibles ;
+- vélo masqué pendant la traversée ;
+- ancien sol, anciennes silhouettes terrestres et ancien héros masqués par le nouveau moteur du lac ;
+- collisions, interactions et combats des nageurs conservés sous le nouveau rendu.
+
+5. LIVRET SECRET ET GAMEPLAY
+
+Le Livret secret interactif de l’édition Pro est conservé et relié à la nouvelle carte V112. Ses six dossiers sont disponibles : œuf inconnu, archives disparues, sept inscriptions, message incomplet, convoi perdu et maîtrise de Valdora. Les indices affichent leur progression, désignent une prochaine zone, suivent cette destination sur la carte et débloquent leurs récompenses lorsque les conditions sont remplies.
+
+Une ancienne liaison interne ouvrait encore la carte V111 depuis le bouton « Afficher la prochaine piste sur la carte ». Elle a été réécrite pour ouvrir la carte V112 et sélectionner directement la bonne destination.
+
+L’animation du bus utilise bien un véhicule illustré visible, le réseau Fluo Val d’Ora et une destination affichée. Les animations train, Vol et vélo restent celles de l’édition Pro validée ; leurs systèmes n’ont pas été remplacés par la couche V112.
+
+6. TESTS EFFECTUÉS
+
+Tests réels dans le navigateur, version Joueur et version Créateur :
+- chargement complet des deux pages et identité V112 correcte ;
+- nouvelle partie, choix du niveau de tutoriel, saisie « Alya », confirmation du nom et arrivée à Clairval ;
+- carte V112 : 16 lieux, 20 liaisons, illustration 1536 × 1024 chargée, Citadelle et onze biomes accessibles ;
+- topologie bidirectionnelle et absence des trois anciens raccords fantômes ;
+- Livret secret : six dossiers, indices, progression et ouverture de la bonne destination sur la carte V112 ;
+- animation du bus : véhicule visible, texte du réseau et destination, fermeture automatique ;
+- Codex : accès fonctionnel et entrées jusqu’au numéro 169 ;
+- Objectifs et Sac : ouverture, contenu et fermeture ;
+- version Créateur : carte complète, prévisualisation directe, lac, Clairval, Port-Écume, Route 1, sanctuaires Nature, Feu et Glace ;
+- Route 1 : végétation et mobilier chibi 3D visibles sur les bords, voie de circulation dégagée ;
+- Route 4 bis : eau plein écran, joueur en bouée, nageurs/dresseurs en bouée, absence des anciennes silhouettes terrestres ;
+- Port-Écume : front de mer, sable et vagues visibles ;
+- contrôle syntaxique des modules V111 et V112 ;
+- contrôle global interne effectué dans les deux versions.
+
+Résultat du contrôle global V112 :
+- 50 scènes chargées ;
+- 169 créatures ;
+- 288 attaques ;
+- 16 lieux cartographiés ;
+- 20 routes canoniques ;
+- 11 biomes légendaires ;
+- 6 PNJ nageurs et 4 dresseurs nageurs ;
+- déplacements/collisions, interactions, combats, Codex, objectifs, Sac, boutiques, centres de soins, PC, sauvegarde fichier, transports et Livret secret : interfaces ou fonctions chargées ;
+- tous les assets V112 chargés ;
+- audit final : OK, aucune anomalie de topologie ou de système détectée.
+
+7. LIMITES DE VÉRIFICATION
+
+Le navigateur de test a ouvert la boîte de dialogue système « Enregistrer sous » du bouton Sauver, mais cette fenêtre Windows ne peut pas être pilotée jusqu’au choix d’un dossier par le test automatisé. Les fonctions d’export et d’import .valdora sont bien présentes et inchangées depuis l’édition stable précédemment validée. Une vérification manuelle du choix de fichier reste recommandée sur l’ordinateur final.
+
+La campagne complète, tous les combats possibles, chaque combinaison d’attaque/type/PP, toutes les captures, toutes les évolutions, les onze combats légendaires et chaque embranchement de mission n’ont pas été rejoués manuellement de zéro jusqu’au générique dans cette passe graphique. Les moteurs concernés sont conservés, leurs données principales sont chargées et leur non-régression structurelle est validée. Un test humain de longue durée reste conseillé avant une diffusion commerciale.
+
+8. ASSETS V112 CRÉÉS AVEC LE GÉNÉRATEUR D’IMAGES INTÉGRÉ
+
+Emplacements dans le projet :
+- game/assets/v112/world_map_valdora_v112.png
+- game/assets/v112/swimmer_npc_chibi3d_v112.png
+- game/assets/v112/player_buoy_chibi3d_v112.png
+- game/assets/v112/roadside_cluster_chibi3d_v112.png
+- game/assets/v112/tree_chibi3d_v112.png
+
+Mode utilisé : génération d’images intégrée à Codex, avec fond transparent pour les personnages et accessoires isolés.
+
+Prompts de production, résumés fidèlement :
+- Carte : île de Valdora professionnelle, vue du dessus/haut trois-quarts chibi 3D, régions nettement différenciées, réseau routier exact, végétation uniquement sur les bords, sans texte ni filigrane.
+- Nageur : un PNJ nageur chibi 3D amical dans une bouée turquoise, haut du corps uniquement, fond réellement transparent.
+- Joueur : un explorateur adulte de Valdora, 22 ans, casquette rouge, veste marine et sangles de sac, dans une bouée rouge et blanche, haut du corps uniquement, fond transparent.
+- Bord de route : groupe cohérent chibi 3D comprenant arbre, buisson fleuri, clôture en bois, caisse et panneau vierge, fond transparent.
+- Arbre : un arbre feuillu chibi 3D premium, canopée ronde sculptée, tronc court chaleureux, vue orthographique haut trois-quarts, isolé sur fond transparent.
+
+9. FICHIERS PRINCIPAUX MODIFIÉS OU AJOUTÉS
+
+- game/VALDORA_BIOMES_V112.js : nouveau système V112 de topologie, carte, palettes, lac, végétation et aperçus Créateur.
+- game/VALDORA_PRO_V111.js : délégation du suivi du Livret vers la carte V112.
+- game/index.html : chargement V112 et identité Joueur.
+- game/CREATEUR.html : chargement V112 et identité Créateur.
+- game/assets/v112/* : cinq nouveaux assets visuels.
+
+FIN DU RAPPORT

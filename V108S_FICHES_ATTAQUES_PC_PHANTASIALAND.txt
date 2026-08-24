@@ -1,0 +1,11 @@
+ÉCLATS SAUVAGES — VALDORA V108S
+
+Modifications ciblées à partir de V108R :
+- Fiche détaillée des attaques dans le menu Équipe : type, puissance, précision, PP actuels/max et effet complet.
+- La ligne de chaque créature du menu Équipe est cliquable et ouvre sa fiche détaillée.
+- Les boutons d'attaque en combat réaffichent également l'effet réel annoncé.
+- Les anciennes attaques dépourvues d'effectText reçoivent un descriptif fonctionnel cohérent avec leur kind.
+- Le PC utilise désormais la même source de portraits que le composant Équipe.
+- Vérification des portraits frontaux des 8 mascottes Phantasialand IDs 162 à 169.
+- Versions Joueur et Créateur modifiées.
+- Aucun changement des cartes, quêtes, progression, sauvegardes ou ordre permanent d'équipe.

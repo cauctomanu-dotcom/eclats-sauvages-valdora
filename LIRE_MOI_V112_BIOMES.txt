@@ -1,0 +1,20 @@
+ÉCLATS SAUVAGES — VALDORA V112 BIOMES
+
+Pour jouer : double-cliquez sur JOUER_VALDORA.bat.
+Pour tester librement toutes les zones : double-cliquez sur CREATOR_VALDORA.bat.
+
+Nouveautés principales :
+- nouvelle carte illustrée et interactive de Valdora ;
+- topologie corrigée avec Simdor et Cimes-d’Or distincts ;
+- Port-Écume transformé en véritable front de mer ;
+- Route 4 bis réécrite comme lac animé ;
+- joueur, nageurs et dresseurs en bouée sur le lac ;
+- végétation et accessoires chibi 3D placés sur les bords des routes ;
+- arbre chibi 3D dans les scènes ;
+- onze sanctuaires légendaires thématiques ;
+- Livret secret relié à la nouvelle carte ;
+- aperçus directs des villes, routes, lac et sanctuaires dans la version Créateur.
+
+Les sauvegardes utilisent le format .valdora. Conservez vos fichiers de sauvegarde dans un dossier sûr.
+
+Le compte rendu complet se trouve dans RAPPORT_VALDORA_V112_BIOMES.txt.

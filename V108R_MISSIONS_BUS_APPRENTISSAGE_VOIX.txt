@@ -1,0 +1,8 @@
+ÉCLATS SAUVAGES — VALDORA V108R
+
+- Missions de capture : équipe + PC comptent, espèces dédupliquées.
+- Missions de visite de villes réajustées pour rester réalisables au moment où elles sont données (Sacha 4/4 à Cendrebourg, etc.).
+- Réseau de bus : nombre de lignes affiché ; toutes les lignes passent dans les mégalopoles.
+- Bouton Apprendre réécrit : messages d’erreur explicites, Nage fonctionnelle pour les types Eau, choix manuel si 4 attaques.
+- Voix de dialogue optionnelles via les voix système françaises de Windows/Chrome, bouton Voix ON/OFF.
+- Base : V108Q ; autres systèmes préservés.

@@ -1,0 +1,14 @@
+ÉCLATS SAUVAGES — VALDORA V115 — BIOMES VIVANTS
+
+Pour jouer : JOUER_VALDORA.bat
+Pour tester et créer : CREATOR_VALDORA.bat
+
+La V115 conserve les corrections de la V114 et ajoute :
+- des sols et routes ancrés au monde, sans texture qui glisse sous la caméra ;
+- onze environnements légendaires possédant chacun leur sol, leurs assets et leurs effets ;
+- un Plateau des Orages avec véritables éclairs et flashs blancs, sans pictogrammes de nuages ;
+- une Usine du Néant entièrement industrielle et abandonnée ;
+- une musique moderne, atmosphérique et distincte pour chaque biome ;
+- un sélecteur « Biomes V115 » dans la version Créateur.
+
+Consulte RAPPORT_V115.md pour les tests et PROMPTS_IMAGES_V115.md pour les assets générés.

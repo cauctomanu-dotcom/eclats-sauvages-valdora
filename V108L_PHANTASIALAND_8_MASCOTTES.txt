@@ -1,0 +1,8 @@
+ÉCLATS SAUVAGES — VALDORA V108L
+
+Intégration ciblée des 8 mascottes Phantasialand.
+Types officiels : Drago Foudre, Phœny Lumière, Quetzal Feu, Wang Spore, Kroka Nature, Schneck Ombre, Hack Roche, Buddl Neutre.
+Hack ID 168, Buddl ID 169. Aucun n’est légendaire.
+Hack/Buddl ne sont pas ajoutés aux rencontres sauvages joueur.
+Version Créateur : les 8 mascottes sont ajoutées au PC, jamais automatiquement dans l’équipe.
+Assets Hack/Buddl : 4 PNG transparents 256x256, véritables vues face/gauche/droite/dos.

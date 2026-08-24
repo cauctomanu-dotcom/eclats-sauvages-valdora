@@ -1,0 +1,16 @@
+ÉCLATS SAUVAGES — VALDORA V114
+
+Pour jouer : JOUER_VALDORA.bat
+Pour tester/créer : CREATOR_VALDORA.bat
+
+Le correctif V114 rétablit les bâtiments, aligne les sorties sur les routes, rend la Route 4 bis praticable dans les deux sens et remplace les sols/décors faibles par un rendu chibi 3D plus cohérent.
+
+Dans l’édition Créateur, le bouton « Diagnostic V114 » place immédiatement le joueur devant :
+- Soléria → Lac ;
+- Lac → Soléria ;
+- Belrive → Lac ;
+- Lac → Belrive ;
+- le laboratoire ;
+- le musée.
+
+Consulte RAPPORT_V114.md pour le détail des essais.

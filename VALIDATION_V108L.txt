@@ -1,0 +1,27 @@
+ÉCLATS SAUVAGES — VALDORA V108L — VALIDATION PHANTASIALAND
+
+Base : V108K_STARTERS_FONCTIONNELS.
+Catalogue : 169 créatures au total après ajout de Hack (168) et Buddl (169).
+
+Types officiels :
+162 Schneck — Ombre
+163 Drago — Foudre
+164 Quetzal — Feu
+165 Phœny — Lumière
+166 Kroka — Nature
+167 Wang — Spore
+168 Hack — Roche
+169 Buddl — Neutre
+
+Contrôles effectués :
+- 64 scripts inline Joueur : syntaxe JavaScript validée avec node --check.
+- 64 scripts inline Créateur : syntaxe JavaScript validée avec node --check.
+- 24 sprites existants des six mascottes 162-167 : checksums identiques à la V108K.
+- 8 nouveaux sprites Hack/Buddl : PNG RGBA transparents 256x256, face/dos/gauche/droite.
+- Hack/Buddl absents du tableau des légendaires ; légendaires inchangés IDs 151-161.
+- Hack/Buddl marqués wild=false et exclus du pool sauvage principal.
+- Les 8 mascottes sont injectées au PC uniquement en mode Créateur.
+- Movepools calculés depuis le type réel dans la bibliothèque de 220 attaques.
+- Compatibilité : IDs 162-167 inchangés ; anciennes attaques valides conservées lors de migration legacy.
+- STAB Neutre activé pour que Buddl soit réellement traité comme type Neutre.
+- Lanceurs Windows Joueur et Créateur présents.

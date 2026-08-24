@@ -1,0 +1,9 @@
+ÉCLATS SAUVAGES — VALDORA V107Z
+
+La sauvegarde a été simplifiée à la demande de l'utilisateur :
+- Sauvegarder = téléchargement immédiat d'un fichier .valdora.
+- Aucun stockage AppData.
+- Aucun choix de dossier.
+- Aucun serveur local.
+- Continuer = sélectionner manuellement un fichier .valdora.
+- Les appels internes save(false) n'écrivent plus de sauvegarde automatique.

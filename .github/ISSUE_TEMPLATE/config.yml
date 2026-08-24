@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Consignes de sécurité
+    url: ../../security/policy
+    about: Ne publie pas de sauvegarde ou de donnée personnelle dans une issue publique.

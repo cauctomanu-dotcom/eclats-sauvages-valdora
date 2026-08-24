@@ -1,0 +1,8 @@
+ÉCLATS SAUVAGES — VALDORA V107X
+
+Correction des niveaux des six dragons :
+- Schneck reste niveau 5 lorsqu'il est choisi comme starter.
+- Drago, Quetzal, Phenie, Kroka et Wang n'ont plus de niveau 5 forcé.
+- En rencontre sauvage, leur niveau est désormais celui de la zone/route où ils apparaissent.
+- Les cinq dragons non-starters sont exclus des hautes herbes d'entraînement de Clairval afin de ne pas apparaître artificiellement au niveau 2–5.
+- Ils restent sans évolution.

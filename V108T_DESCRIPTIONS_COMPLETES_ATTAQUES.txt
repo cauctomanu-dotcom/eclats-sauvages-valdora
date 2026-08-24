@@ -1,0 +1,12 @@
+ÉCLATS SAUVAGES — VALDORA V108T
+DESCRIPTIONS COMPLÈTES DES ATTAQUES
+
+Base : V108S.
+
+- Les 220 attaques officielles conservent leurs données de gameplay.
+- Chaque attaque possède désormais une vraie description en français distincte de son effet chiffré.
+- La fiche Équipe affiche : catégorie, type, puissance, précision, PP, description et effet exact.
+- Les descriptions sont également visibles lors du choix d'une attaque en combat.
+- Le menu d'apprentissage affiche la description de la nouvelle attaque et des quatre attaques déjà connues.
+- Les anciennes capacités encore utilisées (Rugissement, Nage, Vol, Surf...) disposent d'un descriptif de secours cohérent.
+- Aucun changement des dégâts, PP, types, movepools ou sauvegardes dans cette version.

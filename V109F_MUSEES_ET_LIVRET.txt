@@ -1,0 +1,13 @@
+ÉCLATS SAUVAGES — VALDORA V109F
+
+Corrections ciblées :
+- Taronis devient le modèle unique de fonctionnement des musées.
+- Tout bâtiment reconnu comme musée (type, urbanType, id ou libellé) est normalisé vers le même intérieur musée.
+- La normalisation est répétée à l'exécution afin de couvrir aussi les musées créés/recréés tardivement par les constructeurs de villes/mégalopoles.
+- Le directeur/directrice du musée est disponible dans chaque musée via le même système.
+- Le menu du musée ne révèle plus le code du Livret des Éclats.
+- L'ouverture du Livret ne réaffiche plus le code.
+- Le code est révélé uniquement lors de la victoire contre le Gardien du Sceau n°3.
+- Après cette victoire, le code est conservé dans l'objectif « Livret des Éclats ».
+- Une sauvegarde ayant reçu le code prématurément est nettoyée si elle ne possède pas réellement le Sceau 3.
+- Une sauvegarde possédant déjà réellement le Sceau 3 conserve l'accès au Livret.

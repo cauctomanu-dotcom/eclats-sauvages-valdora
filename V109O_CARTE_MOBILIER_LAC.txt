@@ -1,0 +1,12 @@
+ÉCLATS SAUVAGES — VALDORA V109O
+
+- MOBILIER_REFERENCE_VALDORA_V105X.json devient la source de vérité des intérieurs.
+- Tous les éléments de mobilier sont interactifs ; leur fonction déclarée est appelée.
+- Multi-pièces/étages, passages et ascenseurs reliés au moteur central.
+- PNJ intérieurs : service + visiteurs mobiles et animés.
+- Carte principale reconstruite en une chaîne continue de 15 villes / 14 routes.
+- Routes et sorties recalculées avec ancrages cohérents.
+- Route 4 bis est un vrai Lac des Reflets, secondaire.
+- 6 PNJ nageurs mobiles avec bouées.
+- Joueur affiché dans une bouée canard sur le lac.
+- Nage reste nécessaire pour s'engager sur le lac.

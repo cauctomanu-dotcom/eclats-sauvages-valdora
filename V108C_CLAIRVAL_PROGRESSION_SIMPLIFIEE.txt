@@ -1,0 +1,12 @@
+ÉCLATS SAUVAGES — VALDORA V108C
+
+Clairval : progression simplifiée
+- Conditions uniques pour quitter Clairval :
+  1. avoir récupéré son premier Éclat chez le Professeur Aurine ;
+  2. avoir au moins 3 créatures de niveau 10 minimum dans l'équipe.
+- Suppression des blocages liés aux quêtes de Clairval et à l'apprentissage du PC.
+- Suppression de l'ancienne limite supérieure niveau 12 : niveau 10 ou plus compte.
+- Rencontres sauvages de Clairval limitées aux types de début : Nature, Feu, Eau, Foudre et Neutre.
+- Les autres types sont réservés aux zones suivantes.
+- Textes/tutoriels de Clairval mis à jour.
+- Modifications appliquées aux versions Joueur et Créateur.

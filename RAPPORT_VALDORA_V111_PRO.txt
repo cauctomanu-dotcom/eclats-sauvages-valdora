@@ -1,0 +1,91 @@
+ÉCLATS SAUVAGES — VALDORA V111 PRO
+Rapport de réalisation et de validation — 23 août 2026
+
+RÉSUMÉ
+La V111 Pro transforme la carte du monde, le Livret secret et les transports en véritables systèmes de jeu. Les ajouts ont été intégrés aux éditions Joueur et Créateur sans supprimer les fonctionnalités déjà stabilisées dans la V110.
+
+1. CARTE VIVANTE DE VALDORA
+- Nouvelle illustration haute définition de Valdora, conçue sans texte incrusté afin que les noms restent lisibles et modifiables dans l’interface.
+- 15 villes positionnées sur la carte : Clairval, Montfaucon, Rochebrune, Belrive, Port-Écume, Soléria, Brumelac, Nova-Cité, Cimes-d’Or, Azurive, Luminor, Taronis, Sylvaris, Valombre et Aubeval.
+- Repères distincts pour la position actuelle, la destination suivie et les zones inconnues.
+- Affichage du nombre de villes découvertes, des Sceaux obtenus et des liaisons de chaque ville.
+- Sélection d’une destination et suivi d’objectif directement depuis la carte.
+- Voyage rapide intégré : bus régional payant et Vol lorsqu’il est disponible.
+- Accès direct au Livret secret depuis la carte.
+
+2. LIVRET SECRET RÉÉCRIT
+Le PDF historique reste consultable comme fac-similé, mais le cœur du Livret est maintenant interactif et relié à la progression réelle.
+
+Six dossiers d’enquête :
+- L’œuf inconnu : relevés à Azurive, Belrive et Nova-Cité.
+- Les archives disparues : progression des archives du musée.
+- Les sept inscriptions : suivi des sept textes anciens.
+- Le message incomplet : collecte des quatre fragments.
+- Le convoi perdu : enquête liée au bus et à la Team Taron.
+- Maîtrise de Valdora : progression globale, Codex, Gardiens et exploration.
+
+Améliorations de gameplay :
+- chaque indice est validé à partir de l’état réel de la sauvegarde ;
+- barres de progression, objectifs détaillés et prochaine piste ;
+- la prochaine piste peut être affichée sur la carte ;
+- les dossiers terminés accordent une récompense réelle, une seule fois ;
+- l’état du Livret et les récompenses sont conservés dans la sauvegarde ;
+- déblocage progressif en édition Joueur et disponibilité immédiate en édition Créateur.
+
+3. ANIMATIONS ET TRANSPORTS
+- Bus : le véritable véhicule Fluo Val d’Ora traverse l’écran avec décor routier, titre et destination.
+- Incident du bus perdu : l’animation se déclenche lors du dialogue concerné.
+- Train : rame visible animée avec fenêtres et roues.
+- Vol : transition aérienne dédiée avant l’arrivée.
+- Vélo : roues et cadre visibles sous le personnage lorsqu’il est utilisé.
+- Toutes les transitions retirent proprement leur surcouche après l’arrivée.
+
+4. STABILITÉ CONSERVÉE
+- Le réseau stable de 15 villes et 14 routes de la V110 est conservé et auto-vérifié.
+- Les liaisons spéciales et réciproques restent réparées de façon idempotente.
+- Les éditions Joueur et Créateur utilisent le même module V111, ce qui évite les divergences.
+- L’identité finale « V111 Pro » est maintenant cohérente dans la fenêtre et le bandeau.
+- Les diagnostics obsolètes des anciennes couches ne provoquent plus de faux échecs.
+
+5. TESTS EFFECTUÉS
+Tests de non-régression V110, dans les deux éditions :
+- lancement local et absence d’erreur d’exécution ;
+- sauvegarde/export .valdora et mode Joueur/Créateur correct ;
+- 50 scènes et transitions du monde ;
+- continuité des 15 villes et 14 routes ;
+- base de 169 créatures, 288 attaques et 70 familles d’évolution ;
+- déclenchement d’un combat sauvage ;
+- interfaces principales et API secondaires.
+
+Tests spécifiques V111, dans les deux éditions :
+- chargement de la nouvelle carte haute définition ;
+- présence et sélection des 15 repères ;
+- position actuelle, destination suivie et quatre actions de carte ;
+- ouverture des six dossiers du Livret ;
+- progression des indices ;
+- attribution unique d’une récompense au gameplay ;
+- animation du bus avec l’image officielle ;
+- disparition propre de la transition ;
+- animation visible du train ;
+- maintien de la topologie V110 après installation de la V111 ;
+- validation visuelle de la carte et du Livret en 1440 × 960.
+
+Résultat final : tous les contrôles automatisés exécutés sont réussis dans index.html et CREATEUR.html, sans erreur JavaScript détectée.
+
+6. ÉLÉMENTS NON ENTIÈREMENT VÉRIFIABLES AUTOMATIQUEMENT
+- Une campagne humaine complète, du premier écran jusqu’à la fin, avec toutes les variantes de dialogue et tous les choix possibles, demanderait plusieurs heures de jeu manuel.
+- Le ressenti d’équilibrage, le rythme narratif, la difficulté et la qualité musicale restent subjectifs et gagnent à être évalués par plusieurs joueurs.
+- Les animations sont de vraies transitions visuelles intégrées au moteur actuel ; elles ne constituent pas encore un système 3D ou un moteur de cinématiques image par image.
+
+7. LANCEMENT
+- Édition Joueur : ouvrir game\index.html.
+- Édition Créateur : ouvrir game\CREATEUR.html.
+- Le bouton « Carte du monde » ouvre la carte vivante.
+- Le bouton « Livret secret » apparaît une fois les conditions remplies en édition Joueur ; il est toujours disponible en édition Créateur.
+
+FICHIERS PRINCIPAUX AJOUTÉS OU RÉÉCRITS
+- game\VALDORA_PRO_V111.js : carte, Livret, récompenses et animations.
+- game\VALDORA_STABLE_V110.js : normalisation stable et audit auto-réparant.
+- game\assets\world_map_valdora_v111.png : nouvelle illustration de la carte.
+- game\index.html et game\CREATEUR.html : intégration commune et identité V111 Pro.
+

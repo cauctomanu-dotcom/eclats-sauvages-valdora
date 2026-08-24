@@ -1,0 +1,9 @@
+VALDORA V106K — RENCONTRES SAUVAGES
+
+Correction de la cadence des rencontres sauvages introduite en V106J.
+- 28 déplacements admissibles minimum sans rencontre.
+- Probabilité progressive ensuite.
+- Rencontre garantie au plus tard au 82e déplacement admissible dans une zone de rencontre.
+- Suppression automatique de l’ancien seuil targetSteps V106J dans les sauvegardes existantes.
+- Clairval et toutes les routes conservent leurs zones de rencontres existantes.
+- Le reste des changements V106J est conservé.

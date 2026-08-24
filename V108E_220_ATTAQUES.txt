@@ -1,0 +1,16 @@
+ÉCLATS SAUVAGES — VALDORA V108E
+
+- 220 capacités : 20 pour chacun des 11 types.
+- Puissance, précision, PP et descriptions intégrés selon le cahier des charges.
+- Movepools distincts par espèce et progression par niveau.
+- Maximum 4 attaques actives.
+- Si les 4 emplacements sont pleins, le joueur choisit explicitement l’attaque à oublier ou refuse la nouvelle capacité.
+- Aucun remplacement automatique.
+- Compatibilité des sauvegardes conservée.
+
+Contrôles :
+- 220/220 capacités présentes (20 x 11 types).
+- Sélecteur manuel d'attaque à oublier conservé et renforcé.
+- Option de refus d'apprentissage présente.
+- Affichage puissance/précision/PP/effet dans la fenêtre d'apprentissage.
+- Syntaxe JavaScript validée pour Joueur et Créateur.

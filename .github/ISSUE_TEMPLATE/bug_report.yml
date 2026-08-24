@@ -1,0 +1,61 @@
+name: Signaler un problème dans le jeu
+description: Décrire un défaut reproductible dans Éclats Sauvages — Valdora.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: dropdown
+    id: edition
+    attributes:
+      label: Édition
+      options:
+        - Joueur
+        - Créateur
+        - GitHub Pages
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: V118
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Ville, route ou bâtiment
+      placeholder: Clairval, Route 4 bis, maison…
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      description: Décris précisément les actions effectuées avant le problème.
+      placeholder: |
+        1. Charger la sauvegarde…
+        2. Entrer dans…
+        3. Parler à…
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Résultat observé
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Résultat attendu
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Capture ou information complémentaire
+      description: Ne publie aucune sauvegarde ou donnée personnelle dans un dépôt public.

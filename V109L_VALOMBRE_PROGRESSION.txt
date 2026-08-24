@@ -1,0 +1,6 @@
+V109L — Progression Valombre corrigée
+
+- Mission obligatoire de Syl à Valombre : « Les cinq Sceaux » devient « Les quatre Sceaux ».
+- Objectif : 4 Sceaux, cohérent avec les quatre Sceaux réellement accessibles à ce stade de l’aventure.
+- Audit des autres missions obligatoires fondées sur les Sceaux : aucune autre condition de Sceaux impossible détectée à l’étape Valombre.
+- Versions Joueur et Créateur mises à jour.

@@ -1,0 +1,8 @@
+ÉCLATS SAUVAGES — VALDORA V108A
+
+Sauvegarde corrigée :
+- Un clic manuel sur Sauvegarder ouvre « Enregistrer sous… » lorsque Chrome/Edge le permet.
+- Le joueur choisit lui-même le dossier et le nom du fichier .valdora.
+- Aucun AppData, aucun dossier saves imposé, aucun serveur local.
+- Annuler la fenêtre n’enregistre rien.
+- Charger/Continuer permet de sélectionner un fichier .valdora existant.

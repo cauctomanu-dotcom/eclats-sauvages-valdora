@@ -1,0 +1,7 @@
+ÉCLATS SAUVAGES — VALDORA V108B
+
+- Le système « Enregistrer sous… » de la V108A est conservé.
+- Le chargement n'utilise plus l'ancien importeur V96 : écriture et lecture sont maintenant gérées par le même système.
+- Lecture compatible avec les enveloppes V108A, les sauvegardes brutes JSON et plusieurs anciens formats .valdora.
+- Le chargeur accepte aussi les fichiers contenant un JSON doublement encapsulé et les fichiers avec BOM UTF-8.
+- En cas de problème, le message indique désormais la cause réelle au lieu d'un simple « impossible de lire ».

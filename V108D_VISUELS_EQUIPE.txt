@@ -1,0 +1,8 @@
+ÉCLATS SAUVAGES — VALDORA V108D
+
+Correctif ciblé du panneau Équipe :
+- Les portraits du panneau Équipe à droite utilisent directement les vrais sprites front.png.
+- Le menu détaillé Équipe utilise lui aussi directement les vrais sprites.
+- Correction appliquée aux créatures ordinaires, aux 11 légendaires et aux six dragons ajoutés.
+- Vérification : un portrait front.png est disponible pour les 167 identifiants de créatures actuellement utilisés.
+- Aucun changement apporté au système de sauvegarde V108B ni aux conditions de sortie de Clairval V108C.

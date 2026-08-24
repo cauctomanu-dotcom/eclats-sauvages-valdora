@@ -1,0 +1,18 @@
+{
+  "version": "V107S",
+  "server_removed": true,
+  "launch_player": "game/index.html",
+  "launch_creator": "game/CREATEUR.html",
+  "save_files": [
+    "save_1.valdora",
+    "save_2.valdora",
+    "save_3.valdora",
+    "autosave.valdora"
+  ],
+  "fallbacks": [
+    "localStorage",
+    "IndexedDB",
+    "export/import .valdora"
+  ],
+  "internet_required": false
+}

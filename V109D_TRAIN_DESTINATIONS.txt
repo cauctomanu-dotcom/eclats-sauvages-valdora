@@ -1,0 +1,7 @@
+VALDORA V109D — TRAIN / DESTINATIONS
+- Réécriture du flux gare -> destinations -> billet -> trajet.
+- Le chef de gare ouvre directement le menu standard du jeu.
+- Une seule source de destinations, selon gares existantes + villes découvertes.
+- Mode Créateur : toutes les gares du réseau accessibles.
+- Prix vérifié avant départ, débit unique, voyage animé conservé.
+- Anciennes fonctions v62/v106z reroutées vers le moteur unique V109D.

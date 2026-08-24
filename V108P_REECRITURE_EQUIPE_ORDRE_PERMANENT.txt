@@ -1,0 +1,23 @@
+ÉCLATS SAUVAGES — VALDORA V108P
+
+RÉÉCRITURE DU PANNEAU ÉQUIPE
+- Ancien système V108O de portraits embarqués supprimé.
+- Nouvelle source unique de 169 portraits ID -> front.png.
+- Résolution spéciale par nom pour les 8 mascottes Phantasialand : Schneck, Drago, Quetzal, Phœny, Kroka, Wang, Hack, Buddl.
+- Le petit panneau Équipe à droite est maintenant construit en DOM avec de vrais <img>.
+- En cas d'échec exceptionnel d'une image, le même renderer de créature sert de secours.
+- Le menu Équipe détaillé utilise la même source de vérité.
+
+ORDRE PERMANENT DE L'ÉQUIPE
+- Seuls les boutons Monter / Descendre et les actions explicites du PC peuvent modifier l'ordre.
+- Un changement de créature en combat ne modifie plus state.team.
+- Un remplacement après K.-O. ne modifie plus state.team.
+- Le soin ne modifie pas l'ordre.
+- Un nouveau combat commence avec la première créature APTE dans l'ordre défini par le joueur. Après soin complet, la position 1 définie par le joueur redevient naturellement la première combattante.
+
+VALIDATIONS
+- 169/169 chemins de portraits présents dans Joueur et Créateur.
+- 8 sprites frontaux Phantasialand présents, PNG RGBA 256x256.
+- 69 scripts JS Joueur : syntaxe OK.
+- 69 scripts JS Créateur : syntaxe OK.
+- Aucune mutation automatique state.team splice+unshift restante dans les changements de combat.

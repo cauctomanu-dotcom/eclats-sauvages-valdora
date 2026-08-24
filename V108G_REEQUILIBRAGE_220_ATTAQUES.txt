@@ -1,0 +1,14 @@
+ÉCLATS SAUVAGES — VALDORA V108G
+
+Rééquilibrage complet du combat en conservant les 220 attaques V108E.
+
+- 220/220 attaques conservées.
+- Les attaques de statut affichent désormais explicitement « Puissance — (statut) ».
+- Ordre d’apprentissage basé sur le tier réel : plus d’attaque ultime accessible à très bas niveau par permutation du movepool.
+- Movepools toujours distincts par famille/espèce.
+- Formule de dégâts recalculée avec : niveau du lanceur, niveau de la cible, ATQ/DEF, puissance, STAB, type, critique et variance.
+- Table des types rééquilibrée pour garder les avantages sans dégâts disproportionnés.
+- Probabilité des altérations modulée modérément selon l’écart de niveau.
+- Effets mécaniques ajoutés/corrigés : poison, brûlure, paralysie, gel, sommeil, baisse/hausse ATQ/DEF/VIT/précision/esquive, soins, drain sur dégâts réels, contrecoup sur dégâts réels, régénération, dégâts résiduels, boucliers, marque Ombre, Recharge Foudre, boosts Nature/Eau, Reflet Noir, Disparition, Grâce Lumineuse, Analyse, etc.
+- Remplacement manuel des 4 attaques conservé : aucun remplacement automatique.
+- Sauvegardes existantes conservées.

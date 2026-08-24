@@ -1,0 +1,13 @@
+ÉCLATS SAUVAGES — VALDORA V108Q
+
+RÉÉCRITURE COMPLÈTE DES PNJ INTÉRIEURS
+- Un seul moteur de déplacement/orientation pour les intérieurs standards.
+- Tous les PNJ intérieurs disposent d’un déplacement réel dans une zone adaptée à leur rôle.
+- PNJ de service (soins, boutique, laboratoire, gare, arène, auberge) : déplacements courts autour du poste et orientation vers l’entrée au repos.
+- Lors d’une interaction, le PNJ s’arrête et regarde réellement le joueur.
+- Le PNJ reprend son activité après fermeture du dialogue.
+- Les collisions avec murs, mobilier, autres PNJ, joueur et sortie sont respectées.
+- L’interaction avec un PNJ a priorité sur le mobilier, afin que les comptoirs ne capturent plus l’action à sa place.
+- Suppression/neutralisation des anciens moteurs V108O/V104 concurrents.
+
+Aucun changement volontaire des cartes, combats, sauvegardes, équipe ou progression.

@@ -1,0 +1,33 @@
+ÉCLATS SAUVAGES — VALDORA V108M
+
+Base de travail : V108L — PHANTASIALAND 8 MASCOTTES.
+
+TRAVAUX DU CAHIER DES CHARGES
+- Panneau Équipe à droite et menu Équipe fiabilisés autour d'une source unique ID -> sprite frontal ; rendu canvas commun et portraits 1–169 testés, notamment Schneck, Hack et Buddl.
+- PNJ intérieurs : résidents persistants, orientation vers le joueur pendant l'interaction, déplacement simple des PNJ mobiles avec limites de pièce, obstacles, autres PNJ et couloir de porte protégés ; les PNJ de service restent fixes.
+- Objectifs / missions : les missions inconnues ne sont plus révélées sous forme 0/x ; affichage selon découverte/acceptation réelle, journal filtré de la même façon.
+- Codex : chaque palier récupéré annonce explicitement Voltrons + objet + quantité ; le palier est marqué récupéré avant le message pour empêcher une double attribution.
+- Vol : verrou logique central jusqu'à la victoire contre le Gardien du Sceau 5 ; les anciens flags de sauvegarde ne contournent plus le verrou ; message explicite avant déblocage.
+- Rugissement : capacité de statut à puissance 0 qui réduit réellement d'un niveau l'Attaque adverse.
+- 220 attaques conservées : puissance, précision et PP complets ; formule de dégâts basée sur puissance, niveaux, ATQ/DEF, STAB, table des 11 types, critiques et variation ; capacités de statut à 0 dégât.
+- Effets de combat reliés au moteur : poison, brûlure, paralysie, gel, sommeil, hésitation, soins, drains, régénération, buffs/debuffs, précision/esquive, priorité, multi-coups, dégâts persistants, contrecoup, protection, réflexion et effets conditionnels.
+- Effets conditionnels vérifiés : Colère Forestière, Torrent, Traque Nocturne, Combustion, Court-Circuit, Infection, Double Frappe 35×2, Fournaise, Zéro Absolu, etc.
+- Apprentissage : progression par niveau conservée ; si quatre attaques sont déjà connues, choix manuel obligatoire de l'attaque à oublier ou refus de la nouvelle capacité. Aucun remplacement automatique.
+- Version Créateur : les huit mascottes Phantasialand sont bien ajoutées au PC et jamais imposées dans l'équipe.
+
+VALIDATION EFFECTUÉE
+- 64 blocs JavaScript vérifiés dans index.html : 0 erreur de syntaxe.
+- 64 blocs JavaScript vérifiés dans CREATEUR.html : 0 erreur de syntaxe.
+- Test navigateur sans erreur console/page : Joueur + Créateur.
+- 220 attaques : aucune puissance/PP/précision/description manquante.
+- Quatre starters testés séparément : Brindel, Tisonnet, Rivelot, Schneck.
+- Portraits panneau + menu testés avec créature standard, Schneck, Hack, Buddl.
+- Récompense Codex testée deux fois : aucune double attribution.
+- Vol testé avec ancien flag actif : refus avant Sceau 5, autorisé après Sceau 5.
+- Rugissement testé : puissance 0, baisse d'Attaque réelle.
+- Dégâts testés : attaque faible < attaque ultime, niveau élevé > niveau faible, faiblesse > résistance, STAB actif, statut = 0 dégât.
+- Sélection manuelle d'attaque testée avec quatre emplacements complets.
+- Sauvegarde ancienne/enveloppe/payload lue ; IDs, niveau, EXP et emplacement des mascottes conservés dans le test de migration.
+- Hack et Buddl : quatre orientations PNG transparentes présentes.
+- Les 24 sprites des six mascottes déjà présentes sont identiques à la V108L.
+- Aucun asset de carte/route/bâtiment n'a été modifié : seuls index.html, CREATEUR.html et ce fichier de notes diffèrent de la V108L.

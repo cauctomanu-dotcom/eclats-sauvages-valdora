@@ -1,0 +1,10 @@
+ÉCLATS SAUVAGES — VALDORA V109K
+
+- Réécriture de l’interaction avec les PNJ extérieurs : tous les PNJ peuvent être abordés.
+- Dialogues de quête / Team Taron prioritaires ; dialogues d’ambiance contextuels en fallback.
+- Plus de 600 combinaisons de dialogues possibles selon lieu, biome, progression, PNJ et visites.
+- Musée : Réapprendre / Attaques refusées commence désormais par le choix de la créature.
+- Choix parmi Équipe + PC, portrait/niveau/type affichés.
+- Après choix, seules les attaques disponibles pour cette créature sont proposées.
+- Règle des 4 attaques conservée : choix de l’attaque à oublier ou annulation, aucun remplacement automatique.
+- Compatibilité anciennes sauvegardes conservée.

@@ -1,0 +1,11 @@
+ÉCLATS SAUVAGES — VALDORA V107W
+
+Correctifs :
+- Les 6 dragons ont maintenant leurs propres IDs 162 à 167, sans conflit avec les 11 légendaires 151 à 161.
+- Orthographe : Phenie et Kroka.
+- Types : Schneck Eau, Drago Foudre, Quetzal Feu, Phenie Lumière, Kroka Nature, Wang Nature.
+- Aucun des 6 dragons ne peut évoluer.
+- Niveau minimum/initial des 6 dragons : 5.
+- Schneck reste le 4e starter, au niveau 5.
+- Version Créateur : les 6 dragons sont placés dans le PC au niveau 5.
+- Visuels des dragons corrigés dans le panneau Équipe et via leurs nouveaux dossiers de sprites.

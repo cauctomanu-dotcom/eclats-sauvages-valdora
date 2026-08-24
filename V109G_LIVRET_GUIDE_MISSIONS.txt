@@ -1,0 +1,9 @@
+ÉCLATS SAUVAGES — VALDORA V109G
+
+Réécriture du Livret des Éclats en véritable guide de missions.
+- Guide pas-à-pas des dossiers réellement jouables.
+- Lieux exacts, conditions de validation et retours au musée.
+- Dossiers futurs clairement marqués comme non encore activés.
+- Objectifs en jeu enrichis avec les lieux restant à visiter.
+- Le code d'ouverture reste exclusivement remis par le Gardien du Sceau 3 et n'est pas imprimé dans le Livret.
+- Sauvegardes compatibles avec V109F.

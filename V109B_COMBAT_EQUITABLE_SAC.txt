@@ -1,0 +1,9 @@
+VALDORA V109B — COMBAT ÉQUITABLE ET SAC
+
+- PP identiques pour une même attaque, joueur / sauvage / dresseur.
+- Attaques portant le même nom normalisées vers la définition officielle des 220 attaques.
+- Anciennes sauvegardes et capsules migrées sans doublons actifs.
+- Sac de combat réécrit avec ciblage explicite et objets fonctionnels.
+- Orbes utilisables en combat sauvage.
+- Interface combat allégée : nom, type, puissance, précision, PP uniquement.
+- Descriptions complètes conservées dans le menu Équipe.
