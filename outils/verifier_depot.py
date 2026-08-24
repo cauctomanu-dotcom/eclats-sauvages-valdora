@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -17,8 +18,12 @@ REQUIRED = [
     ROOT / "JOUER_VALDORA.bat",
     ROOT / "CREATOR_VALDORA.bat",
     ROOT / ".github" / "workflows" / "verify.yml",
+    ROOT / ".github" / "workflows" / "pages.yml",
     GAME / "index.html",
     GAME / "CREATEUR.html",
+    GAME / "manifest.webmanifest",
+    GAME / "pwa.js",
+    GAME / "sw.js",
     GAME / "VALDORA_LIVING_WORLD_V118.js",
     GAME / "VALDORA_SANCTUARIES_V117.js",
 ]
@@ -77,6 +82,16 @@ def main() -> int:
         if size >= MAX_GITHUB_FILE:
             issues.append(f"Fichier refusé par GitHub (100 Mio ou plus) : {path.relative_to(ROOT).as_posix()}")
 
+    manifest_file = GAME / "manifest.webmanifest"
+    if manifest_file.is_file():
+        try:
+            manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+            for key in ("name", "short_name", "start_url", "display", "icons"):
+                if not manifest.get(key):
+                    issues.append(f"Manifest Web incomplet : propriété {key} absente")
+        except (OSError, json.JSONDecodeError) as error:
+            issues.append(f"Manifest Web invalide : {error}")
+
     for html_file in (GAME / "index.html", GAME / "CREATEUR.html"):
         if not html_file.is_file():
             continue
@@ -112,7 +127,7 @@ def main() -> int:
             print(f"- {issue}", file=sys.stderr)
         return 1
 
-    print("Dépôt privé compatible avec GitHub.")
+    print("Dépôt compatible avec GitHub et GitHub Pages.")
     return 0
 
 

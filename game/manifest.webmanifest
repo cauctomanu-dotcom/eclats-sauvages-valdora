@@ -1,0 +1,28 @@
+{
+  "name": "Éclats Sauvages — Valdora",
+  "short_name": "Valdora",
+  "description": "Explore Valdora, entraîne tes Éclats et affronte la Team Taron dans une aventure installable.",
+  "lang": "fr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#102334",
+  "theme_color": "#174d70",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "assets/orbes/orbe_eclat_v105u.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/orbes/orbe_eclat_v105u.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

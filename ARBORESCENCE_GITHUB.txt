@@ -6,6 +6,7 @@ Les deux manifestes générés sont volontairement exclus de leur propre liste.
 .gitattributes
 .github/ISSUE_TEMPLATE/bug_report.yml
 .github/ISSUE_TEMPLATE/config.yml
+.github/workflows/pages.yml
 .github/workflows/verify.yml
 .gitignore
 CHANGELOG.md
@@ -1126,6 +1127,7 @@ game/INDEX_PNJ_V102K.txt
 game/LANCER_JEU.bat
 game/LANCER_MODE_CREATEUR.bat
 game/LIVRET_SECRET_VALDORA.pdf
+game/manifest.webmanifest
 game/MAPPING_NOMS_ECLATS_V107K.txt
 game/MOBILIER_REFERENCE_VALDORA.json
 game/MOBILIER_REFERENCE_VALDORA_V105X.js
@@ -1817,6 +1819,7 @@ game/prologue_train_v101y.png
 game/prologue_train_v102c.png
 game/prologue_train_v102d.png
 game/prologue_train_v102e.png
+game/pwa.js
 game/route_trainers_pack_102c.png
 game/SOURCE_CONCEPT_PNJ_ASSETS_VALIDE.png
 game/SOURCE_EXACTE_BASE_FEMMES_V102L.jpg
@@ -1834,6 +1837,7 @@ game/SOURCE_SERVICES_FACE_GAUCHE_DROITE_DERRIERE.jpeg
 game/SOURCE_TRAIN_CHIBI_VALIDE_V102F.png
 game/SOURCE_TRAIN_UTILISATEUR_V102B.png
 game/SOURCE_TRAIN_VALIDE.png
+game/sw.js
 game/title_v101y.png
 game/train_tgv_v102d.png
 game/train_tgv_v102e.png

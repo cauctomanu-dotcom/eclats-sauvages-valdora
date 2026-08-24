@@ -6,19 +6,31 @@ Jeu d’aventure et de collection de créatures se déroulant dans la région de
 
 ## Jouer
 
+### Dans le navigateur ou sur iPhone
+
+Le jeu est publié à l’adresse :
+
+**https://cauctomanu-dotcom.github.io/eclats-sauvages-valdora/**
+
+Sur iPhone, ouvre cette adresse dans Safari, touche **Partager**, puis **Sur l’écran d’accueil** et **Ajouter**. Valdora s’ouvre ensuite comme une application, en plein écran. Le mode paysage est recommandé.
+
 ### Sur Windows
 
 1. Télécharge la dernière archive depuis la page **Releases** du dépôt.
 2. Décompresse entièrement l’archive.
 3. Lance `JOUER_VALDORA.bat`.
 
-La version de création et de diagnostic est accessible avec `CREATOR_VALDORA.bat`.
+La version de création et de diagnostic est accessible avec `CREATOR_VALDORA.bat`. Consulte [PUBLICATION_GITHUB.md](PUBLICATION_GITHUB.md) pour la publication et l’installation de l’application Web.
 
-### Confidentialité du dépôt
+### Application Web installable
 
-Cette édition GitHub est prévue pour un dépôt **privé**. GitHub Pages n’est pas activé afin de ne pas publier le jeu sur le Web. Les personnes autorisées peuvent récupérer le dépôt ou télécharger l’archive Windows depuis une Release privée.
+- commandes tactiles intégrées pour les téléphones et tablettes ;
+- interface plein écran adaptée aux encoches de l’iPhone ;
+- menu du jeu accessible avec le bouton tactile **MENU** ;
+- installation depuis Safari ou depuis le bouton **Installer** des navigateurs compatibles ;
+- cache local progressif pour accélérer les prochaines ouvertures et conserver le cœur de l’application hors connexion.
 
-Consulte [PUBLICATION_GITHUB.md](PUBLICATION_GITHUB.md) pour la première publication et l’ajout éventuel de collaborateurs.
+Le dépôt et l’adresse GitHub Pages sont publics : toute personne qui reçoit le lien peut jouer sans compte GitHub.
 
 ## V118 — Monde vivant
 
@@ -39,7 +51,7 @@ Le rapport complet est disponible dans [RAPPORT_V118.md](RAPPORT_V118.md).
 | --- | --- |
 | `game/` | Jeu complet, pages HTML, scripts, graphismes, sons et musiques |
 | `creator/` | Informations relatives à l’édition Créateur |
-| `.github/workflows/` | Vérification automatique de l’intégrité du dépôt |
+| `.github/workflows/` | Vérification automatique et publication de l’application Web |
 | `outils/` | Vérification et génération des manifestes |
 | `JOUER_VALDORA.bat` | Lancement de l’édition Joueur sous Windows |
 | `CREATOR_VALDORA.bat` | Lancement de l’édition Créateur sous Windows |
