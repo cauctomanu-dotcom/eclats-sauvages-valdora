@@ -2,6 +2,7 @@
 
 ## V118 — Joystick et interface smartphone
 
+- Bouton FERMER affiché sous MENU et ACTION pendant les dialogues tactiles.
 - Croix directionnelle remplacée par un joystick analogique tactile.
 - Joystick, MENU et ACTION maintenus dans les bâtiments et sur les cartes extérieures.
 - Écran de choix du premier Éclat entièrement utilisable en mode paysage.

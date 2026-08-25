@@ -6942,12 +6942,16 @@ function updateTouchVisibilityV86(){
   const actions=root.querySelector('.actions');
 
   // Les déplacements tactiles restent disponibles dehors comme dans les bâtiments.
+  const dialogBox=document.getElementById('dialog');
+  const dialogOpen=!!dialogBox&&(dialogBox.classList.contains('show')||dialogBox.style.display==='flex');
   const exploration=((scene==='world'||scene==='interior') && !v86OverlayOpen());
   if(cluster)cluster.style.display=exploration?'block':'none';
 
   // Les boutons ACTION/MENU sont également masqués dans les écrans qui
   // possèdent déjà leurs propres commandes, pour éviter toute superposition.
-  if(actions)actions.style.display=exploration?'block':'none';
+  if(actions)actions.style.display=(exploration||dialogOpen)?'grid':'none';
+  const closeButton=root.querySelector('#valdoraDialogClose');
+  if(closeButton)closeButton.hidden=!dialogOpen;
 }
 
 function installTouchVisibilityV86(){
@@ -18581,9 +18585,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script src="VALDORA_BIOMES_AUDIO_V115.js?v=115-final-5"></script>
 <script src="VALDORA_SANCTUARIES_V117.js?v=117-stable-1"></script>
 <script src="VALDORA_LIVING_WORLD_V118.js?v=118-living-14"></script>
-<script src="pwa.js?v=118-pwa-5"></script>
+<script src="pwa.js?v=118-pwa-6"></script>
 <script src="VALDORA_SAVE_V118.js?v=118-save-1"></script>
-<script src="VALDORA_MOBILE_UI_V118.js?v=118-mobile-2"></script>
+<script src="VALDORA_MOBILE_UI_V118.js?v=118-mobile-3"></script>
 </body></html
 >
 

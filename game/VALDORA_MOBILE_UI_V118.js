@@ -1,15 +1,15 @@
 (() => {
   'use strict';
 
-  const VERSION = 'V118-MOBILE-2';
+  const VERSION = 'V118-MOBILE-3';
   const RELEASE_KEY = 'valdora_last_seen_update';
   const RELEASE = {
-    id: 'v118-mobile-2',
+    id: 'v118-mobile-3',
     title: 'Mise à jour — Confort sur smartphone',
     intro: 'Cette mise à jour améliore les commandes et l’affichage de Valdora sur les écrans mobiles.',
     notes: [
-      'La croix directionnelle est remplacée par un joystick tactile plus naturel.',
-      'Le joystick, MENU et ACTION restent disponibles à l’intérieur des bâtiments.',
+      'Un bouton FERMER apparaît sous MENU et ACTION pendant les dialogues.',
+      'Le joystick tactile remplace la croix et reste disponible avec MENU/ACTION dans les bâtiments.',
       'Le choix du premier Éclat et les autres écrans de sélection s’adaptent au mode paysage.',
       'Les menus, dialogues et grilles se redimensionnent désormais selon l’espace disponible.',
       'Une fenêtre résume automatiquement les nouveautés lors de la première ouverture de chaque mise à jour.'
@@ -30,6 +30,11 @@
     #valdoraJoystick.active{border-color:rgba(121,226,255,.9);box-shadow:inset 0 0 0 8px rgba(111,218,248,.1),0 0 0 4px rgba(76,176,211,.16),0 10px 25px rgba(0,0,0,.38)}
     #valdoraJoystick.active #valdoraJoystickKnob{transition:none;box-shadow:0 8px 18px rgba(0,0,0,.45),0 0 16px rgba(137,229,255,.34)}
     #valdoraJoystickHint{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.62);font-size:11px;font-weight:950;letter-spacing:.08em;pointer-events:none}
+    #touchControlsV79 .actions{grid-template-columns:auto auto;grid-template-areas:"menu action" "close close";align-items:center;justify-items:center}
+    #touchControlsV79 #v79Menu{grid-area:menu}#touchControlsV79 #v79Action{grid-area:action}
+    #valdoraDialogClose{grid-area:close;width:100%;min-height:38px;height:38px;margin-top:5px;padding:0 10px;border-radius:999px!important;background:linear-gradient(145deg,rgba(169,54,48,.96),rgba(112,31,31,.96))!important;color:#fff;font-size:11px!important;font-weight:950!important;letter-spacing:.035em;pointer-events:auto;touch-action:manipulation!important;box-shadow:0 5px 14px rgba(0,0,0,.3)!important}
+    #valdoraDialogClose[hidden]{display:none!important}
+    #gamewrap.valdoraTouchRails #touchControlsV79 #valdoraDialogClose{width:100%!important;min-width:100%!important;height:34px!important;min-height:34px!important;margin-top:var(--touch-action-gap,6px)!important;padding:0 6px!important;border-radius:999px!important;font-size:clamp(8px,1.45vw,11px)!important}
     #valdoraUpdateDialog{position:fixed;inset:0;z-index:2300000;display:grid;place-items:center;padding:calc(16px + var(--safe-top,0px)) calc(16px + var(--safe-right,0px)) calc(16px + var(--safe-bottom,0px)) calc(16px + var(--safe-left,0px));background:rgba(5,18,29,.88);backdrop-filter:blur(13px)}
     #valdoraUpdateDialog[hidden]{display:none}.valdoraUpdateCard{width:min(620px,100%);max-height:100%;overflow:auto;padding:24px;border-radius:26px;background:linear-gradient(150deg,#f9fdff,#e7f4f8);color:#173548;border:1px solid rgba(255,255,255,.86);box-shadow:0 30px 90px rgba(0,0,0,.54)}
     .valdoraUpdateKicker{display:inline-block;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:#d9f1e7;color:#256145;font-size:11px;font-weight:950;letter-spacing:.07em}.valdoraUpdateCard h2{margin:0;color:#174d70;font-size:27px}.valdoraUpdateCard>p{margin:9px 0 14px;line-height:1.5;color:#587180}.valdoraUpdateList{display:grid;gap:8px;margin:0 0 17px;padding:0;list-style:none}.valdoraUpdateList li{position:relative;padding:10px 11px 10px 38px;border-radius:14px;background:#fff;border:1px solid #d0e1e7;line-height:1.4}.valdoraUpdateList li:before{content:"✓";position:absolute;left:12px;top:9px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#3eaa76;color:#fff;font-size:11px;font-weight:1000}.valdoraUpdateClose{width:100%;min-height:48px;background:linear-gradient(145deg,#216b91,#174d70);color:#fff;font-weight:950}
@@ -174,10 +179,32 @@
     return true;
   }
 
+  function installDialogCloseButton() {
+    const root = document.getElementById('touchControlsV79');
+    const actions = root?.querySelector('.actions');
+    if (!actions || actions.querySelector('#valdoraDialogClose')) return false;
+    const button = document.createElement('button');
+    button.id = 'valdoraDialogClose';
+    button.type = 'button';
+    button.hidden = true;
+    button.textContent = 'FERMER';
+    button.setAttribute('aria-label', 'Fermer la boîte de dialogue');
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      try { if (typeof closeDialog === 'function') closeDialog(true); } catch (error) {
+        console.error('Fermeture du dialogue Valdora', error);
+      }
+    });
+    actions.appendChild(button);
+    return true;
+  }
+
   function scheduleInstall() {
     cancelAnimationFrame(installFrame);
     installFrame = requestAnimationFrame(() => {
       installJoystick();
+      installDialogCloseButton();
       installNewsButton();
     });
   }
@@ -268,6 +295,7 @@
     version: VERSION,
     release: RELEASE,
     installJoystick,
+    installDialogCloseButton,
     stopJoystick,
     openUpdateDialog,
     closeUpdateDialog
