@@ -1,11 +1,12 @@
-const VERSION = 'v118-pwa-2';
+const VERSION = 'v118-pwa-5';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './pwa.js',
+  './pwa.js?v=118-pwa-4',
+  './VALDORA_SAVE_V118.js?v=118-save-1',
   './assets/orbes/orbe_eclat_v105u.png',
   './assets/title_valdora_v106r.png',
   './V109V_INTERIEUR_REWRITE.js?v=118-stable-1',

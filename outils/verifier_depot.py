@@ -24,6 +24,7 @@ REQUIRED = [
     GAME / "manifest.webmanifest",
     GAME / "pwa.js",
     GAME / "sw.js",
+    GAME / "VALDORA_SAVE_V118.js",
     GAME / "VALDORA_LIVING_WORLD_V118.js",
     GAME / "VALDORA_SANCTUARIES_V117.js",
 ]

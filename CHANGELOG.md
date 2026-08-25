@@ -1,5 +1,15 @@
 # Historique des versions
 
+## V118 — Confort tactile et sauvegardes
+
+- Commandes tactiles recalculées à partir de la zone réellement dessinée du jeu.
+- Croix directionnelle confinée à la bande latérale gauche et boutons MENU/ACTION à la bande droite.
+- Taille des commandes adaptée automatiquement à la largeur disponible et à l’orientation.
+- Sauvegarde locale et sauvegarde automatique rétablies après la neutralisation introduite par l’ancien gestionnaire « Enregistrer sous ».
+- Copie précédente conservée pour permettre une restauration rapide.
+- Nouveau centre de sauvegardes avec export `.valdora`, partage iOS vers Fichiers/iCloud et import depuis le sélecteur natif.
+- Le bouton Continuer reprend d’abord la partie de l’appareil, puis utilise les copies de secours disponibles.
+
 ## V118 — Monde vivant
 
 - 210 habitants extérieurs répartis dans les 15 villes.
