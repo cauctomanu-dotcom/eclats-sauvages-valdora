@@ -1,5 +1,13 @@
 # Historique des versions
 
+## V118 — Joystick et interface smartphone
+
+- Croix directionnelle remplacée par un joystick analogique tactile.
+- Joystick, MENU et ACTION maintenus dans les bâtiments et sur les cartes extérieures.
+- Écran de choix du premier Éclat entièrement utilisable en mode paysage.
+- Menus, dialogues, listes et grilles adaptés aux petits écrans et aux changements d’orientation.
+- Résumé des nouveautés affiché une seule fois après chaque mise à jour, avec accès permanent depuis le bouton NOUVEAUTÉS.
+
 ## V118 — Confort tactile et sauvegardes
 
 - Commandes tactiles recalculées à partir de la zone réellement dessinée du jeu.

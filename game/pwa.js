@@ -162,6 +162,7 @@
 
     const dpad = Math.max(38, Math.min(68, Math.floor((gutter - 26) / 3)));
     const dpadGap = Math.max(2, Math.min(5, Math.floor(gutter / 70)));
+    const joystick = Math.max(92, Math.min(136, Math.floor(gutter - 20)));
     let action = Math.max(48, Math.min(78, Math.round(gutter * .38)));
     let menu = Math.max(44, Math.min(66, Math.round(gutter * .32)));
     let actionGap = Math.max(6, Math.min(12, Math.round(gutter * .04)));
@@ -177,6 +178,7 @@
     root.style.setProperty('--touch-right-center', `${rect.width - gutter / 2}px`);
     root.style.setProperty('--touch-dpad-size', `${dpad}px`);
     root.style.setProperty('--touch-dpad-gap', `${dpadGap}px`);
+    root.style.setProperty('--touch-joystick-size', `${joystick}px`);
     root.style.setProperty('--touch-menu-size', `${menu}px`);
     root.style.setProperty('--touch-action-size', `${action}px`);
     root.style.setProperty('--touch-action-gap', `${actionGap}px`);
