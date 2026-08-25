@@ -1,4 +1,4 @@
-const VERSION = 'v118-pwa-8';
+const VERSION = 'v118-pwa-9';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -6,8 +6,8 @@ const SHELL = [
   './index.html',
   './manifest.webmanifest',
   './pwa.js?v=118-pwa-6',
-  './VALDORA_SAVE_V118.js?v=118-save-1',
-  './VALDORA_MOBILE_UI_V118.js?v=118-mobile-3',
+  './VALDORA_SAVE_V118.js?v=118-save-2',
+  './VALDORA_MOBILE_UI_V118.js?v=118-mobile-4',
   './assets/orbes/orbe_eclat_v105u.png',
   './assets/title_valdora_v106r.png',
   './V109V_INTERIEUR_REWRITE.js?v=118-stable-1',
@@ -17,7 +17,7 @@ const SHELL = [
   './VALDORA_BIOMES_V112.js?v=115-base-2',
   './VALDORA_POLISH_V113.js?v=114-final',
   './VALDORA_ROUTES_BIOMES_V114.js?v=115-base-2',
-  './VALDORA_BIOMES_AUDIO_V115.js?v=115-final-5',
+  './VALDORA_BIOMES_AUDIO_V115.js?v=118-audio-1',
   './VALDORA_SANCTUARIES_V117.js?v=117-stable-1',
   './VALDORA_LIVING_WORLD_V118.js?v=118-living-14'
 ];

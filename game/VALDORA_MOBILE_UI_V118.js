@@ -1,18 +1,18 @@
 (() => {
   'use strict';
 
-  const VERSION = 'V118-MOBILE-3';
+  const VERSION = 'V118-MOBILE-4';
   const RELEASE_KEY = 'valdora_last_seen_update';
   const RELEASE = {
-    id: 'v118-mobile-3',
-    title: 'Mise à jour — Confort sur smartphone',
-    intro: 'Cette mise à jour améliore les commandes et l’affichage de Valdora sur les écrans mobiles.',
+    id: 'v118-mobile-4',
+    title: 'Mise à jour — Musique et sauvegardes',
+    intro: 'Cette mise à jour fiabilise deux fonctions essentielles de Valdora sur smartphone.',
     notes: [
+      'La musique démarre après le premier toucher autorisé par le téléphone et reprend au retour dans le jeu.',
+      'Chaque sauvegarde est vérifiée et conservée dans deux stockages locaux indépendants.',
+      'Continuer choisit automatiquement la copie valide la plus récente.',
       'Un bouton FERMER apparaît sous MENU et ACTION pendant les dialogues.',
-      'Le joystick tactile remplace la croix et reste disponible avec MENU/ACTION dans les bâtiments.',
-      'Le choix du premier Éclat et les autres écrans de sélection s’adaptent au mode paysage.',
-      'Les menus, dialogues et grilles se redimensionnent désormais selon l’espace disponible.',
-      'Une fenêtre résume automatiquement les nouveautés lors de la première ouverture de chaque mise à jour.'
+      'Le joystick et les écrans adaptés au mode paysage restent disponibles.'
     ]
   };
 

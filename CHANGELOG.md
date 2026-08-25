@@ -1,5 +1,13 @@
 # Historique des versions
 
+## V118 — Musique et sauvegardes smartphone
+
+- Déverrouillage de la musique Web Audio au premier geste tactile autorisé par iOS et Android.
+- Reprise musicale après retour dans l’application et recréation du moteur si le téléphone l’a fermé.
+- Sauvegarde vérifiée dans le stockage rapide et dans une base locale de secours indépendante.
+- Chargement automatique de la copie valide la plus récente et restauration de la copie précédente.
+- Demande de conservation persistante au système lorsque le navigateur la prend en charge.
+
 ## V118 — Joystick et interface smartphone
 
 - Bouton FERMER affiché sous MENU et ACTION pendant les dialogues tactiles.

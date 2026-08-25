@@ -1,15 +1,18 @@
 (() => {
   'use strict';
 
-  const VERSION = 'V118-SAVE-1';
+  const VERSION = 'V118-SAVE-2';
   const FORMAT = 'ECLATS_SAUVAGES_VALDORA_SAVE';
   const DB_NAME = 'ValdoraSaveDB';
   const DB_STORE = 'saves';
   const DB_SLOT = 'main';
+  const DB_BACKUP = 'backup';
   const AUTOSAVE_DELAY = 20000;
   const WRITE_THROTTLE = 4000;
   let lastWrite = 0;
   let fileInput = null;
+  let lastPersistResult = { localOk: false, idbOk: false, savedAt: 0 };
+  let lastPersistPromise = Promise.resolve(lastPersistResult);
 
   const saveKey = () => (typeof SAVE !== 'undefined' && SAVE) ? SAVE : 'valdora_v41_player';
   const getState = () => (typeof state !== 'undefined' ? state : null);
@@ -121,6 +124,12 @@
     };
   }
 
+  function requestPersistence() {
+    try {
+      if (navigator.storage?.persist) navigator.storage.persist().catch(() => false);
+    } catch (_) {}
+  }
+
   function persistLocal(options = {}) {
     const current = getState();
     if (!current || typeof current !== 'object' || Array.isArray(current) || !current.zone) return false;
@@ -128,13 +137,15 @@
 
     try {
       if (typeof ensureInventoryV81 === 'function') ensureInventoryV81(current);
-      const currentFingerprint = progressFingerprint(current);
       current._saveMeta = makeMeta(current);
       const payload = JSON.stringify(current);
+      const currentFingerprint = progressFingerprint(payload);
       const key = saveKey();
+      let previous = null;
+      let localOk = false;
 
       try {
-        const previous = localStorage.getItem(key);
+        previous = localStorage.getItem(key);
         const previousFingerprint = progressFingerprint(previous);
         if (options.rotateBackup !== false && previous && previousFingerprint && previousFingerprint !== currentFingerprint) {
           localStorage.setItem(`${key}_backup`, previous);
@@ -143,25 +154,54 @@
         }
         localStorage.setItem(key, payload);
         localStorage.setItem(`${key}_meta`, JSON.stringify(current._saveMeta));
+        localOk = progressFingerprint(localStorage.getItem(key)) === currentFingerprint;
+        if (!localOk) throw new Error('La vérification du stockage local a échoué.');
       } catch (error) {
         console.warn('V118 stockage local indisponible', error);
       }
 
-      if (typeof window.v96SaveIndexedDB === 'function') window.v96SaveIndexedDB(payload);
+      lastPersistPromise = writeIndexedSnapshot(payload, {
+        backupRaw: previous,
+        rotateBackup: options.rotateBackup !== false
+      }).then(idbOk => {
+        lastPersistResult = { localOk, idbOk, savedAt: Number(current._saveMeta?.savedAt || Date.now()) };
+        return lastPersistResult;
+      }).catch(error => {
+        console.warn('V118 stockage IndexedDB indisponible', error);
+        lastPersistResult = { localOk, idbOk: false, savedAt: Number(current._saveMeta?.savedAt || Date.now()) };
+        return lastPersistResult;
+      });
       lastWrite = Date.now();
-      return true;
+      return localOk || Boolean(window.indexedDB);
     } catch (error) {
       console.error('V118 sauvegarde locale', error);
+      lastPersistResult = { localOk: false, idbOk: false, savedAt: Date.now() };
+      lastPersistPromise = Promise.resolve(lastPersistResult);
       if (!options.silent) notify(`Impossible d’enregistrer : ${error?.message || error}`);
       return false;
     }
   }
 
   function saveGame(show = true) {
+    if (show) {
+      requestPersistence();
+      centerMessage('Enregistrement en cours…');
+    }
     const success = persistLocal({ force: Boolean(show), silent: !show });
-    if (show && success) {
-      notify('Partie enregistrée sur cet appareil ✓');
-      refreshCenter();
+    if (show) {
+      lastPersistPromise.then(result => {
+        if (result.localOk || result.idbOk) {
+          const detail = result.localOk && result.idbOk
+            ? 'Partie enregistrée sur cet appareil avec copie de secours ✓'
+            : 'Partie enregistrée dans le stockage disponible ✓';
+          notify(detail);
+          centerMessage(detail, 'success');
+        } else {
+          notify('Impossible d’enregistrer la partie sur cet appareil.');
+          centerMessage('Échec de la sauvegarde locale. Exporte une copie vers Fichiers/iCloud.', 'error');
+        }
+        refreshCenter();
+      });
     }
     return success;
   }
@@ -297,19 +337,61 @@
     });
   }
 
-  async function readIndexedDB() {
+  async function readIndexedSlots(database = null) {
+    let ownDatabase = false;
     try {
-      const database = await openDatabase();
-      const raw = await new Promise((resolve, reject) => {
+      if (!database) {
+        database = await openDatabase();
+        ownDatabase = true;
+      }
+      const values = await new Promise((resolve, reject) => {
         const transaction = database.transaction(DB_STORE, 'readonly');
-        const request = transaction.objectStore(DB_STORE).get(DB_SLOT);
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
+        const store = transaction.objectStore(DB_STORE);
+        const mainRequest = store.get(DB_SLOT);
+        const backupRequest = store.get(DB_BACKUP);
+        transaction.oncomplete = () => resolve({
+          main: mainRequest.result || null,
+          backup: backupRequest.result || null
+        });
+        transaction.onerror = () => reject(transaction.error || new Error('Lecture IndexedDB impossible'));
+        transaction.onabort = () => reject(transaction.error || new Error('Lecture IndexedDB interrompue'));
       });
+      if (ownDatabase) database.close();
+      return values;
+    } catch (error) {
+      try { if (ownDatabase) database?.close(); } catch (_) {}
+      return { main: null, backup: null, error };
+    }
+  }
+
+  async function writeIndexedSnapshot(payload, options = {}) {
+    if (!window.indexedDB) return false;
+    let database = null;
+    try {
+      database = await openDatabase();
+      const existing = await readIndexedSlots(database);
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction(DB_STORE, 'readwrite');
+        const store = transaction.objectStore(DB_STORE);
+        const existingMain = existing.main;
+        const backupCandidate = options.backupRaw || existingMain;
+        if (options.rotateBackup !== false && backupCandidate && progressFingerprint(backupCandidate) !== progressFingerprint(payload)) {
+          store.put(backupCandidate, DB_BACKUP);
+        } else if (!existing.backup) {
+          store.put(payload, DB_BACKUP);
+        }
+        store.put(payload, DB_SLOT);
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error('Écriture IndexedDB impossible'));
+        transaction.onabort = () => reject(transaction.error || new Error('Écriture IndexedDB interrompue'));
+      });
+      const verification = await readIndexedSlots(database);
       database.close();
-      return raw;
-    } catch (_) {
-      return null;
+      return progressFingerprint(verification.main) === progressFingerprint(payload);
+    } catch (error) {
+      try { database?.close(); } catch (_) {}
+      console.warn('V118 écriture IndexedDB', error);
+      return false;
     }
   }
 
@@ -317,12 +399,23 @@
     const button = document.getElementById('continue');
     if (button) button.disabled = true;
     try {
-      for (const candidate of localCandidates()) {
-        if (!tryUnwrap(candidate.raw)) continue;
-        return applyState(candidate.raw, candidate.label, { rotateBackup: !candidate.backup });
-      }
-      const indexed = await readIndexedDB();
-      if (indexed && tryUnwrap(indexed)) return applyState(indexed, 'copie locale de secours', { rotateBackup: false });
+      const indexed = await readIndexedSlots();
+      const candidates = [
+        ...localCandidates().map(candidate => ({ ...candidate, source: 'local' })),
+        { raw: indexed.main, label: 'sauvegarde sécurisée de cet appareil', backup: false, source: 'indexedDB' },
+        { raw: indexed.backup, label: 'copie sécurisée précédente', backup: true, source: 'indexedDB' }
+      ].map((candidate, order) => {
+        const parsed = tryUnwrap(candidate.raw);
+        return parsed ? {
+          ...candidate,
+          parsed,
+          order,
+          savedAt: Number(parsed._saveMeta?.savedAt || 0)
+        } : null;
+      }).filter(Boolean);
+      candidates.sort((a, b) => b.savedAt - a.savedAt || Number(a.backup) - Number(b.backup) || a.order - b.order);
+      const selected = candidates[0];
+      if (selected) return applyState(selected.raw, selected.label, { rotateBackup: !selected.backup });
       openCenter('Aucune sauvegarde locale n’a été trouvée. Utilise « Importer depuis Fichiers » pour récupérer une copie .valdora.');
       return false;
     } finally {
@@ -434,7 +527,7 @@
     target.className = type;
   }
 
-  function refreshCenter() {
+  async function refreshCenter() {
     const center = document.getElementById('valdoraSaveCenter');
     if (!center) return;
     const key = saveKey();
@@ -444,6 +537,12 @@
       primary = formatSavedAt(localStorage.getItem(key));
       backup = formatSavedAt(localStorage.getItem(`${key}_backup`));
     } catch (_) {}
+    if (!primary || !backup) {
+      const indexed = await readIndexedSlots();
+      if (!primary) primary = formatSavedAt(indexed.main);
+      if (!backup) backup = formatSavedAt(indexed.backup);
+    }
+    if (!document.getElementById('valdoraSaveCenter')) return;
     const primaryText = document.getElementById('valdoraPrimaryStatus');
     const backupText = document.getElementById('valdoraBackupStatus');
     if (primaryText) primaryText.textContent = primary ? `${primary.name} — ${primary.zone} — ${primary.text}` : 'Aucune partie enregistrée';
@@ -466,16 +565,43 @@
     if (center) center.hidden = true;
   }
 
-  function restoreBackup() {
+  async function restoreBackup() {
     const key = saveKey();
     let backup = null;
     try { backup = localStorage.getItem(`${key}_backup`); } catch (_) {}
+    if (!backup || !tryUnwrap(backup)) backup = (await readIndexedSlots()).backup;
     if (!backup || !tryUnwrap(backup)) {
       centerMessage('Aucune copie précédente valide n’est disponible.', 'error');
       return false;
     }
     if (!window.confirm('Remplacer la partie actuelle par la copie précédente ?')) return false;
     return applyState(backup, 'copie précédente', { rotateBackup: false });
+  }
+
+  async function storageStatus() {
+    const key = saveKey();
+    let localMain = null;
+    let localBackup = null;
+    try {
+      localMain = localStorage.getItem(key);
+      localBackup = localStorage.getItem(`${key}_backup`);
+    } catch (_) {}
+    const indexed = await readIndexedSlots();
+    let persistent = null;
+    try {
+      if (navigator.storage?.persisted) persistent = await navigator.storage.persisted();
+    } catch (_) {}
+    const describe = raw => {
+      const parsed = tryUnwrap(raw);
+      return parsed ? { valid: true, savedAt: Number(parsed._saveMeta?.savedAt || 0), zone: parsed.zone || '' } : { valid: false, savedAt: 0, zone: '' };
+    };
+    return {
+      version: VERSION,
+      local: { main: describe(localMain), backup: describe(localBackup) },
+      indexedDB: { main: describe(indexed.main), backup: describe(indexed.backup) },
+      persistent,
+      lastWrite: { ...lastPersistResult }
+    };
   }
 
   function installBindings() {
@@ -542,7 +668,8 @@
     applyState,
     openCenter,
     closeCenter,
-    refreshCenter
+    refreshCenter,
+    storageStatus
   };
 
   window.addEventListener('pagehide', () => {
@@ -559,7 +686,7 @@
     closeCenter();
   }, true);
   setInterval(() => {
-    if (inWorld() && getState()?.team?.length) persistLocal({ silent: true });
+    if (inWorld() && getState()?.zone) persistLocal({ silent: true });
   }, AUTOSAVE_DELAY);
 
   installBindings();
