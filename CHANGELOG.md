@@ -1,5 +1,13 @@
 # Historique des versions
 
+## V118 — Musique réelle et sauvegarde Fichiers
+
+- Ajout d’une véritable piste audio moderne, lue par le lecteur multimédia natif sur iPhone et Android.
+- Démarrage musical direct au premier geste tactile et reprise après retour dans le jeu.
+- Le bouton de sauvegarde manuelle ouvre maintenant la feuille native du téléphone pour choisir Fichiers, iCloud Drive ou un autre emplacement.
+- Nom de fichier `.valdora.json` compatible avec le partage de fichiers iOS, sans perte de compatibilité avec les anciennes copies `.valdora`.
+- Conservation parallèle d’une copie locale et d’une copie IndexedDB pour la reprise rapide sur le même appareil.
+
 ## V118 — Musique et sauvegardes smartphone
 
 - Déverrouillage de la musique Web Audio au premier geste tactile autorisé par iOS et Android.

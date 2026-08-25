@@ -17,6 +17,7 @@ game/APER+#U03c4U_PNJ_EXACTS_V102L.jpg
 game/APER+#U03c4U_PNJ_V102B.png
 game/APER+#U03c4U_PNJ_V102C_EXACTS.png
 game/APER├çU_11_LEGENDAIRES_V107C.png
+game/assets/audio/valdora_mobile_theme_v118.wav
 game/assets/creatures/001_Florin/back.png
 game/assets/creatures/001_Florin/front.png
 game/assets/creatures/001_Florin/left.png
@@ -1861,6 +1862,7 @@ game/V109W_CORRECTIFS_GAMEPLAY.js
 game/VALDORA_BIOMES_AUDIO_V115.js
 game/VALDORA_BIOMES_V112.js
 game/VALDORA_LIVING_WORLD_V118.js
+game/VALDORA_MOBILE_AUDIO_V118.js
 game/VALDORA_MOBILE_UI_V118.js
 game/VALDORA_POLISH_V113.js
 game/VALDORA_PRO_V111.js
@@ -1878,6 +1880,7 @@ LIRE_MOI_V117.txt
 LIRE_MOI_V118.txt
 LIVRET_SECRET_VALDORA.pdf
 outils/generer_manifestes.py
+outils/generer_theme_mobile.py
 outils/verifier_depot.py
 PROMPTS_IMAGES_V114.md
 PROMPTS_IMAGES_V115.md

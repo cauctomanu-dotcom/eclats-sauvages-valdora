@@ -25,7 +25,9 @@ REQUIRED = [
     GAME / "pwa.js",
     GAME / "sw.js",
     GAME / "VALDORA_SAVE_V118.js",
+    GAME / "VALDORA_MOBILE_AUDIO_V118.js",
     GAME / "VALDORA_MOBILE_UI_V118.js",
+    GAME / "assets" / "audio" / "valdora_mobile_theme_v118.wav",
     GAME / "VALDORA_LIVING_WORLD_V118.js",
     GAME / "VALDORA_SANCTUARIES_V117.js",
 ]

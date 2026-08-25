@@ -1,16 +1,17 @@
 (() => {
   'use strict';
 
-  const VERSION = 'V118-MOBILE-4';
+  const VERSION = 'V118-MOBILE-5';
   const RELEASE_KEY = 'valdora_last_seen_update';
   const RELEASE = {
-    id: 'v118-mobile-4',
-    title: 'Mise à jour — Musique et sauvegardes',
-    intro: 'Cette mise à jour fiabilise deux fonctions essentielles de Valdora sur smartphone.',
+    id: 'v118-mobile-5',
+    title: 'Mise à jour — Musique réelle et sauvegarde Fichiers',
+    intro: 'La musique et la sauvegarde smartphone utilisent maintenant les fonctions natives du téléphone.',
     notes: [
-      'La musique démarre après le premier toucher autorisé par le téléphone et reprend au retour dans le jeu.',
-      'Chaque sauvegarde est vérifiée et conservée dans deux stockages locaux indépendants.',
-      'Continuer choisit automatiquement la copie valide la plus récente.',
+      'Une vraie piste audio remplace le synthétiseur du navigateur sur smartphone et démarre au premier toucher.',
+      'Le bouton SAUVER DANS FICHIERS ouvre le choix natif : sélectionne Enregistrer dans Fichiers, puis iCloud Drive ou Sur mon iPhone.',
+      'Chaque sauvegarde manuelle crée aussi une copie locale de secours vérifiée.',
+      'Importer depuis Fichiers permet de reprendre la partie sur ce téléphone ou sur un autre appareil.',
       'Un bouton FERMER apparaît sous MENU et ACTION pendant les dialogues.',
       'Le joystick et les écrans adaptés au mode paysage restent disponibles.'
     ]

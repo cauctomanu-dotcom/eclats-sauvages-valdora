@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = 'V118-SAVE-2';
+  const VERSION = 'V118-SAVE-3';
   const FORMAT = 'ECLATS_SAUVAGES_VALDORA_SAVE';
   const DB_NAME = 'ValdoraSaveDB';
   const DB_STORE = 'saves';
@@ -9,6 +9,7 @@
   const DB_BACKUP = 'backup';
   const AUTOSAVE_DELAY = 20000;
   const WRITE_THROTTLE = 4000;
+  const EXTERNAL_SAVE_KEY = 'valdora_external_save_v118';
   let lastWrite = 0;
   let fileInput = null;
   let lastPersistResult = { localOk: false, idbOk: false, savedAt: 0 };
@@ -46,11 +47,46 @@
     }
   }
 
-  function fileName() {
+  function fileName(jsonCompatible = false) {
     const date = new Date();
     const part = value => String(value).padStart(2, '0');
     const stamp = `${date.getFullYear()}${part(date.getMonth() + 1)}${part(date.getDate())}_${part(date.getHours())}${part(date.getMinutes())}`;
-    return `Valdora_${playerName()}_${stamp}.valdora`;
+    return `Valdora_${playerName()}_${stamp}.${jsonCompatible ? 'valdora.json' : 'valdora'}`;
+  }
+
+  function isPhoneOrTablet() {
+    try {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || Number(navigator.maxTouchPoints || 0) > 1
+        || window.matchMedia?.('(pointer: coarse)')?.matches;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function rememberExternalSave(method) {
+    try { localStorage.setItem(EXTERNAL_SAVE_KEY, JSON.stringify({ method, savedAt: Date.now() })); } catch (_) {}
+  }
+
+  function externalSaveCapability() {
+    const mobile = isPhoneOrTablet();
+    let sharedFiles = false;
+    try {
+      const probe = new File(['{}'], 'Valdora_test.valdora.json', { type: 'application/json' });
+      sharedFiles = Boolean(navigator.share && navigator.canShare?.({ files: [probe] }));
+    } catch (_) {}
+    return {
+      mobile,
+      method: mobile && sharedFiles
+        ? 'partage-natif-fichiers'
+        : typeof window.showSaveFilePicker === 'function'
+          ? 'selecteur-emplacement'
+          : sharedFiles
+            ? 'partage-natif-fichiers'
+            : 'telechargement',
+      sharedFiles,
+      filePicker: typeof window.showSaveFilePicker === 'function'
+    };
   }
 
   function parseLoose(value) {
@@ -222,18 +258,28 @@
   async function exportSave() {
     try {
       const text = buildExportText();
-      const name = fileName();
       const blob = new Blob([text], { type: 'application/json' });
-      const file = new File([blob], name, { type: 'application/json', lastModified: Date.now() });
+      const capability = externalSaveCapability();
+      const shareName = fileName(true);
+      const nativeName = fileName(false);
+      const file = new File([blob], shareName, { type: 'application/json', lastModified: Date.now() });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      // Sur iPhone et Android, cette branche doit rester le premier appel asynchrone :
+      // elle conserve le geste de l'utilisateur et ouvre la feuille native, où
+      // « Enregistrer dans Fichiers » permet de choisir iCloud Drive ou un dossier.
+      if (capability.mobile && capability.sharedFiles) {
         try {
-          await navigator.share({ files: [file], title: 'Sauvegarde Valdora', text: 'Copie de ma partie Éclats Sauvages — Valdora' });
-          notify('Copie de sauvegarde partagée ✓');
-          centerMessage('La copie peut être placée dans Fichiers, iCloud Drive ou envoyée par AirDrop.', 'success');
+          await navigator.share({ files: [file], title: 'Sauvegarde Valdora' });
+          rememberExternalSave('fichiers-mobile');
+          notify('Sauvegarde envoyée vers Fichiers ✓');
+          centerMessage('Sauvegarde locale créée. Dans la feuille iPhone, utilise « Enregistrer dans Fichiers » et choisis ton dossier.', 'success');
+          refreshCenter();
           return true;
         } catch (error) {
-          if (error?.name === 'AbortError') return false;
+          if (error?.name === 'AbortError') {
+            centerMessage('La partie reste sauvegardée sur cet appareil. Le choix dans Fichiers a été annulé.', '');
+            return false;
+          }
           console.warn('Partage de fichier indisponible', error);
         }
       }
@@ -241,32 +287,53 @@
       if (typeof window.showSaveFilePicker === 'function') {
         try {
           const handle = await window.showSaveFilePicker({
-            suggestedName: name,
+            suggestedName: nativeName,
             types: [{ description: 'Sauvegarde Éclats Sauvages — Valdora', accept: { 'application/json': ['.valdora'] } }],
             excludeAcceptAllOption: false
           });
           const writable = await handle.createWritable();
           await writable.write(text);
           await writable.close();
+          rememberExternalSave('fichier-choisi');
           notify('Copie .valdora exportée ✓');
-          centerMessage('La copie de sauvegarde a bien été créée.', 'success');
+          centerMessage('Sauvegarde locale créée et fichier enregistré à l’emplacement choisi ✓', 'success');
+          refreshCenter();
+          return true;
+        } catch (error) {
+          if (error?.name === 'AbortError') {
+            centerMessage('La partie reste sauvegardée sur cet appareil. Le choix du fichier a été annulé.', '');
+            return false;
+          }
+          console.warn('Enregistrement natif indisponible', error);
+        }
+      }
+
+      if (capability.sharedFiles) {
+        try {
+          await navigator.share({ files: [file], title: 'Sauvegarde Valdora' });
+          rememberExternalSave('partage-fichier');
+          notify('Copie de sauvegarde partagée ✓');
+          centerMessage('La copie peut être placée dans Fichiers, iCloud Drive ou envoyée vers un autre appareil.', 'success');
+          refreshCenter();
           return true;
         } catch (error) {
           if (error?.name === 'AbortError') return false;
-          console.warn('Enregistrement natif indisponible', error);
+          console.warn('Partage de fichier indisponible', error);
         }
       }
 
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = name;
+      anchor.download = shareName;
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
+      rememberExternalSave('telechargement');
       notify('Copie .valdora téléchargée ✓');
-      centerMessage('Sur iPhone, ouvre le fichier téléchargé puis utilise Partager → Enregistrer dans Fichiers.', 'success');
+      centerMessage('La sauvegarde a été téléchargée. Ouvre-la puis choisis Partager → Enregistrer dans Fichiers.', 'success');
+      refreshCenter();
       return true;
     } catch (error) {
       console.error('V118 export', error);
@@ -489,7 +556,7 @@
     center.innerHTML = `
       <div class="valdoraSaveCard">
         <div class="valdoraSaveHead">
-          <div><h2 id="valdoraSaveTitle">Mes sauvegardes</h2><p>Ta partie reste disponible sur cet appareil et tu peux en garder une copie où tu veux.</p></div>
+          <div><h2 id="valdoraSaveTitle">Mes sauvegardes</h2><p>Choisis toi-même le dossier de ta copie dans Fichiers ou iCloud Drive.</p></div>
           <button type="button" class="valdoraSaveClose" data-save-action="close" aria-label="Fermer">×</button>
         </div>
         <div class="valdoraSaveStatus">
@@ -498,13 +565,13 @@
         </div>
         <div class="valdoraSaveAuto"><i aria-hidden="true"></i>Sauvegarde automatique active</div>
         <div class="valdoraSaveActions">
-          <button type="button" class="primary" data-save-action="save"><b>Sauvegarder maintenant</b><small>Enregistre immédiatement sur cet appareil.</small></button>
-          <button type="button" data-save-action="export"><b>Exporter vers Fichiers / iCloud</b><small>Crée une copie .valdora à conserver ou transférer.</small></button>
+          <button type="button" class="primary" data-save-action="native"><b>Sauvegarder dans Fichiers / iCloud</b><small>Ouvre le choix d’emplacement natif à chaque sauvegarde manuelle.</small></button>
+          <button type="button" data-save-action="save"><b>Copie de secours sur cet appareil</b><small>Enregistre sans ouvrir Fichiers. La sauvegarde automatique fait déjà cette copie.</small></button>
           <button type="button" data-save-action="import"><b>Importer depuis Fichiers</b><small>Récupère une copie .valdora, même sur un nouvel appareil.</small></button>
           <button type="button" id="valdoraRestoreBackup" data-save-action="restore"><b>Restaurer la copie précédente</b><small>Revient à l’enregistrement antérieur disponible.</small></button>
         </div>
         <div id="valdoraSaveMessage" role="status" aria-live="polite"></div>
-        <p class="valdoraSaveTip"><b>Conseil iPhone :</b> après « Exporter », choisis <b>Enregistrer dans Fichiers</b> puis <b>iCloud Drive</b>. L’import utilise ensuite le sélecteur Fichiers d’iOS.</p>
+        <p class="valdoraSaveTip"><b>Sur iPhone :</b> touche le premier bouton, puis <b>Enregistrer dans Fichiers</b> et choisis <b>iCloud Drive</b> ou <b>Sur mon iPhone</b>. iOS redemande l’emplacement à chaque nouvelle copie ; le jeu ne peut pas modifier un fichier sans ton autorisation.</p>
       </div>`;
     document.body.appendChild(center);
 
@@ -512,8 +579,8 @@
       if (event.target === center) return closeCenter();
       const action = event.target.closest('[data-save-action]')?.dataset.saveAction;
       if (action === 'close') closeCenter();
+      if (action === 'native') exportSave();
       if (action === 'save') saveGame(true);
-      if (action === 'export') exportSave();
       if (action === 'import') importSave();
       if (action === 'restore') restoreBackup();
     });
@@ -613,9 +680,9 @@
 
     const quick = document.getElementById('save');
     if (quick) {
-      quick.textContent = 'Sauver maintenant';
-      quick.title = 'Enregistrer immédiatement sur cet appareil';
-      quick.onclick = () => saveGame(true);
+      quick.textContent = 'Sauver dans Fichiers';
+      quick.title = 'Choisir où enregistrer une copie de la partie';
+      quick.onclick = exportSave;
     }
     const continueButton = document.getElementById('continue');
     if (continueButton) {
@@ -669,7 +736,8 @@
     openCenter,
     closeCenter,
     refreshCenter,
-    storageStatus
+    storageStatus,
+    externalSaveCapability
   };
 
   window.addEventListener('pagehide', () => {
