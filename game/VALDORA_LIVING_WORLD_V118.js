@@ -188,7 +188,7 @@ function placeTownCitizens(zone,force=false){
   const sc=sceneFor(zone);if(!sc||sc.kind!=='town')return;const nodes=roadNodes(sc);if(!nodes.list.length)return;
   const target=sc.megacity?18:12;sc.v118Citizens=Array.isArray(sc.v118Citizens)?sc.v118Citizens:[];
   let people=baseCitizens(sc,zone,false);for(let i=people.length;i<target;i++){const id=npcIdentity(zone,i);sc.v118Citizens.push({id:`v118_${zone}_${i}`,zone,x:0,y:0,homeX:0,homeY:0,look:id.look,name:id.name,v118Role:id.role,dir:i%4,moving:false,v118Generated:true})}
-  people=baseCitizens(sc,zone,false);if(sc._v118PopulationReady&&!force){let stable=people.every(n=>!movable(n)||n._v118Placed);for(let i=0;stable&&i<people.length;i++)for(let j=i+1;j<people.length;j++)if(distance(people[i],people[j])<46){stable=false;break}if(stable)return}
+  people=baseCitizens(sc,zone,false);if(sc._v118PopulationReady&&!force){const stable=people.every(n=>!movable(n)||n._v118Placed);if(stable)return}
   const slots=roadSpawnSlots(sc,nodes),occupied=people.filter(n=>!movable(n)&&Number.isFinite(n.x)&&Number.isFinite(n.y)).map(n=>({x:n.x,y:n.y}));
   for(const [i,n] of people.entries()){
     if(!movable(n))continue;let choice=null;const start=hash(`${zone}|${n.id||n.name}|spawn`)%Math.max(1,slots.length);
@@ -204,9 +204,7 @@ function chooseTarget(n,sc,slots,reserved,all,now){
   let options=slots.filter(q=>!reserved.has(q.key)).filter(q=>{const d=Math.hypot(q.x-n.x,q.y-n.y);return d>=70&&d<=310&&all.every(o=>o===n||Math.hypot(q.x-o.x,q.y-o.y)>=50)});if(!options.length)options=slots.filter(q=>!reserved.has(q.key)&&all.every(o=>o===n||Math.hypot(q.x-o.x,q.y-o.y)>=48));
   if(!options.length){n._v118FreeTarget=null;n._v118Wait=now+420+(hash(n.id+now)%500);return false}const q=options[hash(`${n.id}|${Math.floor(now/700)}|${n._v118Talk||0}`)%options.length];n._v118FreeTarget={x:q.x,y:q.y,key:q.key};reserved.add(q.key);return true
 }
-function relocateOverlap(n,nodes,all){
-  const sc=current(),slots=roadSpawnSlots(sc,nodes),start=hash(n.id+'relocate')%Math.max(1,slots.length);for(let i=0;i<slots.length;i++){const q=slots[(start+i)%slots.length];if(all.every(o=>o===n||distance(q,o)>=54)){n.x=q.x;n.y=q.y;n._v118Node=q.nodeKey||nearestNode(nodes,q.x,q.y)?.key;n._v118Target=null;n.moving=false;return true}}return false
-}
+function relocateOverlap(n,nodes,all){const sc=current();if(!sc||!n)return false;let vx=0,vy=0,nearest=Infinity;for(const o of all){if(o===n)continue;const dx=n.x-o.x,dy=n.y-o.y,d=Math.hypot(dx,dy);if(d>=43)continue;nearest=Math.min(nearest,d);if(d<.01){const a=(hash(`${n.id}|${o.id||o.name}`)%628)/100;vx+=Math.cos(a);vy+=Math.sin(a)}else{vx+=dx/d;vy+=dy/d}}const len=Math.hypot(vx,vy);if(!len||!Number.isFinite(nearest))return false;const step=Math.min(2.4,Math.max(.8,(43-nearest)*.16)),nx=n.x+vx/len*step,ny=n.y+vy/len*step;const free=nx>=26&&ny>=26&&nx<=(sc.width||1800)-26&&ny<=(sc.height||1100)-26&&!(sc.buildings||[]).some(b=>nx>b.x-24&&nx<b.x+b.w+24&&ny>b.y-20&&ny<b.y+b.h+30)&&!(sc.v105dTrees||[]).some(t=>Math.hypot(nx-t.x,ny-t.y)<43*(t.s||1));if(!free){n.moving=false;n._v118FreeTarget=null;n._v118Wait=performance.now()+160;return false}n.dir=Math.abs(vx)>Math.abs(vy)?(vx<0?1:2):(vy>0?0:3);n.x=nx;n.y=ny;n.moving=true;n._v118FreeTarget=null;n._v118Wait=performance.now()+18;return true}
 let worldLast=performance.now();
 function updateWorldCitizens(){
   const sc=current();if(!sc||sc.kind!=='town')return;placeTownCitizens(state.zone);const all=allWorldCitizens(sc,state.zone),nodes=roadNodes(sc),now=performance.now(),dt=Math.min(.05,Math.max(.001,(now-worldLast)/1000));worldLast=now;
@@ -246,6 +244,7 @@ function worldInteractV118(){
   }
   return typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false
 }
+worldInteractV118.__v107dInteract=true;worldInteractV118.__v118StableInteract=true;
 // Les anciens modules d'ambiance se réinstallent encore à intervalles fixes.
 // Ces marqueurs leur indiquent que V118 contient déjà leurs interactions et
 // évitent qu'ils réenveloppent ce moteur en formant une boucle récursive.
@@ -377,7 +376,7 @@ function configureCurrent(force=false){if(TOWNS.includes(state?.zone))placeTownC
 function configureAll(force=false){for(const zone of TOWNS)placeTownCitizens(zone,force);ensureInteriorPopulation(false)}
 function scheduleTownPopulation(force=false,delay=260){TOWNS.forEach((zone,i)=>setTimeout(()=>{try{placeTownCitizens(zone,force);if(i===TOWNS.length-1)publishAudit()}catch(e){console.warn('V118 population '+zone,e)}},delay+i*95))}
 let lastBuildingRepair=Date.now();
-function refreshBuildings(){const now=Date.now();if(now-lastBuildingRepair<9000)return 0;lastBuildingRepair=now;const moved=repairAllBuildings();if(moved)scheduleTownPopulation(true,80);return moved}
+function refreshBuildings(){const now=Date.now();if(now-lastBuildingRepair<9000)return 0;lastBuildingRepair=now;const moved=repairAllBuildings();if(moved)scheduleTownPopulation(false,80);return moved}
 function install(){configureCurrent(false);installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}
 
 const api={version:VERSION,active:true,dialogues:DIALOGUE_BANK,contracts:CONTRACTS,install,installHooks,configure:configureAll,stabilizeSidebar,enforceIdentity,openPanel,previewHouse,publishAudit,audit,allWorldCitizens,nearWorldNpc,ensureInteriorPopulation,repairAllBuildings};
