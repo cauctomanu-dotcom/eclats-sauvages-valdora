@@ -1,0 +1,25 @@
+name: Temporary V121 diagnostics
+on:
+  push:
+    paths:
+      - '.github/workflows/ai-diagnostic-v121.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build diagnostic report
+        run: python tools/ai_diag_v121.py
+      - name: Commit diagnostic report
+        run: |
+          set -euo pipefail
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add _AI_DIAG_V121.txt
+          git commit -m "chore: capture V121 diagnostics"
+          git push origin HEAD:main
