@@ -239,7 +239,7 @@
   if(document.getElementById('valdoraV101GameplayFixesLoader'))return;
   const script=document.createElement('script');
   script.id='valdoraV101GameplayFixesLoader';
-  script.src='VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-1';
+  script.src='VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-2';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
