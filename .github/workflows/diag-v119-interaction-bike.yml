@@ -15,9 +15,19 @@ jobs:
         shell: bash
         run: |
           set -e
-          echo '=== BIKE MATCHES ==='
-          grep -RniE "state\.bike|bike|bicyc|vélo|velo|cyclable" game --include='*.js' --include='*.html' | head -n 160 || true
-          echo '=== INTERIOR TARGETING ==='
-          grep -nE "nearestInteractionTarget|nearestFurnitureWithDistance|nearestNpcWithDistance|function interact\(|serviceNpcInteract|interactInteriorV118" game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js || true
-          echo '=== SCENE KEYS / PATHS ==='
-          grep -nE "route[0-9]+|v104Path|v76Path" game/V109W_CORRECTIFS_GAMEPLAY.js | head -n 120 || true
+          echo '=== BIKE UNLOCK CONTEXT ==='
+          sed -n '1858,1892p' game/index.html
+          echo '=== BASE MOVE CONTEXT ==='
+          sed -n '5828,5872p' game/index.html
+          echo '=== V109W MOVE ==='
+          sed -n '35,72p' game/V109W_CORRECTIFS_GAMEPLAY.js
+          echo '=== V114 MOVE ==='
+          sed -n '270,310p' game/VALDORA_ROUTES_BIOMES_V114.js
+          echo '=== V117 MOVE ==='
+          sed -n '105,132p' game/VALDORA_SANCTUARIES_V117.js
+          echo '=== V109V TARGETING ==='
+          sed -n '145,172p' game/V109V_INTERIEUR_REWRITE.js
+          sed -n '238,252p' game/V109V_INTERIEUR_REWRITE.js
+          echo '=== V118 INTERIOR / HOOKS ==='
+          sed -n '286,305p' game/VALDORA_LIVING_WORLD_V118.js
+          sed -n '388,403p' game/VALDORA_LIVING_WORLD_V118.js
