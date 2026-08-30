@@ -61,15 +61,11 @@ jobs:
               start,brace,end=function_span(text,anchor)
               return text[:start]+replacement+text[end:]
 
-          # The bed rule is intentionally 15 seconds. Keep the existing implementation,
-          # but fail the repair if the canonical sleepAt() no longer enforces 15,000 ms.
           sstart,sbrace,send=function_span(index,'function sleepAt(m)')
           sleep_block=index[sstart:send]
           if 'Date.now()+15000' not in sleep_block or '},15000)' not in sleep_block:
               raise SystemExit('Bed rest is no longer exactly 15 seconds')
 
-          # Expose the existing V107E chest generation/drawing/reward logic to V118.
-          # This does not recreate chests: it reuses townObjects/routeObjects/drawObject/interactFind.
           if 'window.ValdoraChestV118Bridge=' not in index:
               marker='window.ValdoraBusV118Bridge={'
               start=index.find(marker)
@@ -79,19 +75,16 @@ jobs:
               semi=index.find(';',end)
               if semi<0: raise SystemExit('Bus bridge terminator not found')
               chest_bridge=r'''
-
-window.ValdoraChestV118Bridge={
-  ownedByV118:false,
-  list:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return[];const all=sc.kind==='town'?townObjects(sc,state?.zone):sc.kind==='route'?routeObjects(sc,state?.zone):[];return all.filter(o=>o?.type==='chest')},
-  nearest:function(range=110){let best=null,bd=Number(range)||110;for(const o of this.list()){const d=Math.hypot(Number(state?.x||0)-o.x,Number(state?.y||0)-o.y);if(d<=bd){bd=d;best=o}}return best},
-  drawNow:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return false;const c=camera(sc)||{};const list=this.list();for(const o of list)drawObject(o,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return list.length>0},
-  interact:function(range=110){const o=this.nearest(range);if(!o)return false;return !!interactFind(o)}
-};
-'''
+          window.ValdoraChestV118Bridge={
+            ownedByV118:false,
+            list:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return[];const all=sc.kind==='town'?townObjects(sc,state?.zone):sc.kind==='route'?routeObjects(sc,state?.zone):[];return all.filter(o=>o?.type==='chest')},
+            nearest:function(range=110){let best=null,bd=Number(range)||110;for(const o of this.list()){const d=Math.hypot(Number(state?.x||0)-o.x,Number(state?.y||0)-o.y);if(d<=bd){bd=d;best=o}}return best},
+            drawNow:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return false;const c=camera(sc)||{};const list=this.list();for(const o of list)drawObject(o,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return list.length>0},
+            interact:function(range=110){const o=this.nearest(range);if(!o)return false;return !!interactFind(o)}
+          };
+          '''
               index=index[:semi+1]+chest_bridge+index[semi+1:]
 
-          # Once V118 owns chest drawing, the legacy overlay must skip only chests to
-          # avoid double rendering; all bushes/crates/signs/fences/flowers stay unchanged.
           dstart,dbrace,dend=function_span(index,'function drawOverlay()')
           dblock=index[dstart:dend]
           old_town="if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}"
@@ -99,13 +92,11 @@ window.ValdoraChestV118Bridge={
           old_route="else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy)}"
           new_route="else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy)}"
           if old_town in dblock:dblock=dblock.replace(old_town,new_town,1)
-          if old_route in dblock:dblock=dblock.replace(old_route,new_route,1)
+          if old_route in dblock:dblock.replace(old_route,new_route,1)
           if 'ValdoraChestV118Bridge?.ownedByV118' not in dblock:
               raise SystemExit('Could not guard legacy chest draw')
           index=index[:dstart]+dblock+index[dend:]
 
-          # V118 owns the final chest draw + interaction. It also prevents an ordinary
-          # Centre de soins resident from reusing the official nurse sprite.
           version_marker="window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;"
           version_replacement="window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;if(window.ValdoraChestV118Bridge)window.ValdoraChestV118Bridge.ownedByV118=true;"
           if version_marker in living:
