@@ -1,0 +1,89 @@
+EXACT V122 — V109W_CORRECTIFS_GAMEPLAY.js
+
+===== TERM guide =====
+444:   return true;
+445: }
+446: const V109W_LATE_NPCS=[
+447:   {id:'eva',zone:'town12',x:720,y:560,look:8,dir:0,name:'Éva',text:'Sylvaris est idéal pour observer les espèces Nature.'},
+448:   {id:'mathis',zone:'town12',x:1070,y:690,look:24,dir:1,name:'Mathis',text:'Je guide les voyageurs qui veulent explorer les bois.'},
+449:   {id:'zoe',zone:'town13',x:720,y:570,look:5,dir:0,name:'Zoé',text:'À Taronis, tout le monde parle des opérations de la Team Taron.'},
+450:   {id:'alexis',zone:'town13',x:1070,y:690,look:27,dir:1,name:'Alexis',text:'Seule une équipe d’élite peut tenir la distance jusque-là.'},
+451:   {id:'manon',zone:'town14',x:720,y:560,look:10,dir:0,name:'Manon',text:'Aubeval marque souvent la dernière étape avant de grands départs.'},
+452:   {id:'victor',zone:'town14',x:1070,y:690,look:37,dir:1,name:'Victor',text:'Je collectionne les récits des dresseurs qui ont parcouru Valdora.'},
+453:   {id:'helene',zone:'town14',x:900,y:620,look:12,dir:0,name:'Hélène',text:'J’aide les voyageurs à préparer leur dernière étape à Aubeval.'},
+454:   {id:'solene_aubeval',zone:'town14',x:1240,y:555,look:40,dir:1,name:'Solène',text:'Je dirige les expéditions vers les sanctuaires légendaires.'}
+
+===== TERM Rappel =====
+219:   };
+220: }catch(e){console.warn('V109W EXP grant',e)}
+221: 
+222: // ------------------------------------------------------------------
+223: // 6) BOUTIQUES : vrais paliers + Rappel/Élixir plus tôt + aucun objet perdu.
+224: // ------------------------------------------------------------------
+225: function highestTown(){
+226:   const vals=(state.discovered||[]).map(z=>{const m=String(z).match(/^town(\d+)$/);return m?+m[1]:-1}).filter(n=>n>=0);
+227:   const cur=String(state.zone||'').match(/^town(\d+)$/);if(cur)vals.push(+cur[1]);return Math.max(0,...vals)
+228: }
+229: function shopTier(){
+---
+232: }
+233: window.pShopTierV101P=shopTier;
+234: window.pNormalShopIdsV101P=function(){
+235:   const t=shopTier(),ids=['Potion','Orbe','Antidote','Baie'];
+236:   if(t>=1)ids.push('SuperPotion','FioleAttaque','FioleDefense','Rappel');
+237:   if(t>=2)ids.push('SuperOrbe','FioleGuerison','ElixirVital','Artefact1');
+238:   if(t>=3)ids.push('Artefact2');
+239:   if(t>=4)ids.push('MegaOrbe','Artefact3');
+240:   if(t>=5)ids.push('Artefact4');
+241:   if(t>=6)ids.push('Artefact5');
+242:   return uniq(ids.filter(id=>typeof SHOP_ITEMS==='undefined'||SHOP_ITEMS[id]));
+---
+485:     const issues=[];
+486:     const temple=SCENES?.temple_final,ids=new Set((temple?.trainers||[]).map(t=>t.id));for(let i=1;i<=10;i++)if(!ids.has('temple_guard_'+i))issues.push('Citadelle : gardien '+i+' absent');
+487:     const pairs=[['route_simdor','route_m1'],['route_m1','town8']];for(const [a,b] of pairs){if(!(SCENES?.[a]?.exits||[]).some(e=>dest(e)===b)||!(SCENES?.[b]?.exits||[]).some(e=>dest(e)===a))issues.push(`${a} <-> ${b} non réciproque`)}
+488:     if(!(SCENES?.route3?.trainers||[]).some(t=>t.id===VOL_AGENT_ID))issues.push('Route 4 : agent Vol absent');
+489:     const tiers={rappel:window.pNormalShopIdsV101P().includes('Rappel'),elixir:shopTier()>=2?window.pNormalShopIdsV101P().includes('ElixirVital'):true};if(!tiers.rappel&&shopTier()>=1)issues.push('Rappel absent du palier attendu');if(!tiers.elixir)issues.push('Élixir Vital absent du palier attendu');
+490:     if(typeof NPCDATA!=='undefined'){for(const npc of V109W_LATE_NPCS)if(!NPCDATA.some(n=>n?.id===npc.id))issues.push('PNJ final absent : '+npc.id)}
+491:     if(!(SCENES?.town12?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Sylvaris -> Route de Taronis absent');
+492:     if(!(SCENES?.route12?.exits||[]).some(e=>dest(e)==='town13'))issues.push('Route de Taronis -> Taronis absent');
+493:     if(!(SCENES?.town13?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Taronis -> Route de Taronis absent');
+494:     return{ok:issues.length===0,issues,templeGuards:(temple?.trainers||[]).filter(t=>t.templeGuard).length,simdorToBrumes:(SCENES?.route_simdor?.exits||[]).some(e=>dest(e)==='route_m1'),brumesToCimes:(SCENES?.route_m1?.exits||[]).some(e=>dest(e)==='town8'),mustHealAfterKO:!!state?.flags?.v109xForceHeal,totalCreatures:totalCreaturesV109W()};
+495:   }
+
+===== TERM ElixirVital =====
+233: window.pShopTierV101P=shopTier;
+234: window.pNormalShopIdsV101P=function(){
+235:   const t=shopTier(),ids=['Potion','Orbe','Antidote','Baie'];
+236:   if(t>=1)ids.push('SuperPotion','FioleAttaque','FioleDefense','Rappel');
+237:   if(t>=2)ids.push('SuperOrbe','FioleGuerison','ElixirVital','Artefact1');
+238:   if(t>=3)ids.push('Artefact2');
+239:   if(t>=4)ids.push('MegaOrbe','Artefact3');
+240:   if(t>=5)ids.push('Artefact4');
+241:   if(t>=6)ids.push('Artefact5');
+242:   return uniq(ids.filter(id=>typeof SHOP_ITEMS==='undefined'||SHOP_ITEMS[id]));
+243: };
+---
+485:     const issues=[];
+486:     const temple=SCENES?.temple_final,ids=new Set((temple?.trainers||[]).map(t=>t.id));for(let i=1;i<=10;i++)if(!ids.has('temple_guard_'+i))issues.push('Citadelle : gardien '+i+' absent');
+487:     const pairs=[['route_simdor','route_m1'],['route_m1','town8']];for(const [a,b] of pairs){if(!(SCENES?.[a]?.exits||[]).some(e=>dest(e)===b)||!(SCENES?.[b]?.exits||[]).some(e=>dest(e)===a))issues.push(`${a} <-> ${b} non réciproque`)}
+488:     if(!(SCENES?.route3?.trainers||[]).some(t=>t.id===VOL_AGENT_ID))issues.push('Route 4 : agent Vol absent');
+489:     const tiers={rappel:window.pNormalShopIdsV101P().includes('Rappel'),elixir:shopTier()>=2?window.pNormalShopIdsV101P().includes('ElixirVital'):true};if(!tiers.rappel&&shopTier()>=1)issues.push('Rappel absent du palier attendu');if(!tiers.elixir)issues.push('Élixir Vital absent du palier attendu');
+490:     if(typeof NPCDATA!=='undefined'){for(const npc of V109W_LATE_NPCS)if(!NPCDATA.some(n=>n?.id===npc.id))issues.push('PNJ final absent : '+npc.id)}
+491:     if(!(SCENES?.town12?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Sylvaris -> Route de Taronis absent');
+492:     if(!(SCENES?.route12?.exits||[]).some(e=>dest(e)==='town13'))issues.push('Route de Taronis -> Taronis absent');
+493:     if(!(SCENES?.town13?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Taronis -> Route de Taronis absent');
+494:     return{ok:issues.length===0,issues,templeGuards:(temple?.trainers||[]).filter(t=>t.templeGuard).length,simdorToBrumes:(SCENES?.route_simdor?.exits||[]).some(e=>dest(e)==='route_m1'),brumesToCimes:(SCENES?.route_m1?.exits||[]).some(e=>dest(e)==='town8'),mustHealAfterKO:!!state?.flags?.v109xForceHeal,totalCreatures:totalCreaturesV109W()};
+495:   }
+
+===== TERM rematchV106Y =====
+105: //    mais ne bloque plus l'histoire principale.
+106: // ------------------------------------------------------------------
+107: function isMandatoryRoadTrainer(t){
+108:   if(!t||!t.id)return false;
+109:   if(t.taron||t.taronBossV102Z||t.v109wVolAgent||t.v106zOpId||t.guardian||t.finalBoss||t.templeGuard||t.rematchV106Y)return false;
+110:   if(t.buildingEventV66||t.buildingEventV67||t.buildingEventV68||t.buildingEventV70||t.optional||t.questOnly)return false;
+111:   return true;
+112: }
+113: function pendingRoadTrainers(route){return (SCENES?.[route]?.trainers||[]).filter(t=>isMandatoryRoadTrainer(t)&&!state.trainerWins?.[t.id])}
+114: try{
+115:   if(typeof V106C_QUESTS!=='undefined'){

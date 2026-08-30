@@ -1,0 +1,1092 @@
+EXACT V122 — index.html
+
+===== FUNCTION interactInterior =====
+function interactInterior(){
+  if(building?.type==='v70building'&&V70_INT){interactInteriorV70();return}
+  if(closeDialog())return;
+  const n=nearInteriorNPC();
+  if(!n){toast('Approche-toi d’un personnage pour interagir.');return}
+  window.ValdoraInteriorNPCV108R?.beginInteraction?.(n);
+  if(building.type==='home'){dialog('<b>'+n.name+'</b><br>'+houseResidentDialogue(n));return}
+  if(building.type==='lab'&&n.id==='prof'){
+    if(!state.team.length)dialog('<b>Professeur Aurine</b><br>Choisis ton premier compagnon.',()=>showStarters());
+    else dialog('<b>Professeur Aurine</b><br>Continue ton enquête sur Valdora.');
+    return
+  }
+  if(building.type==='healer'&&n.id==='healer'){
+    if(healingSeq){toast('Le soin est déjà en cours.');return}
+    const needs=state.team.some(m=>m.hp<maxHP(m)||m.status);
+    if(!needs){dialog('<b>Soigneuse Élise</b><br>Ton équipe est déjà en pleine forme.');return}
+    startHealingSequence();return
+  }
+  if(building.type==='shop'&&n.id==='seller'){dialog('<b>Marchand</b><br>Bienvenue !',()=>openShop());return}
+  if(building.type==='station'&&n.id==='agent'){window.ValdoraTrainV109D.open();return}
+  if(building.type==='arena'&&n.id==='guard'){arenaChallenge(+state.zone.replace('town',''));return}
+  dialog('<b>'+n.name+'</b><br>'+npcDialogue(n))
+}
+
+===== FUNCTION interactInteriorNew =====
+function interactInteriorNew(){
+  if(closeDialog())return;
+  const n=nearNpc();if(n)return serviceInteract(n);
+  try{const m=v109jTargetFurniture();if(m){triggerFurniture(m);return}}catch(e){console.warn('V109I mobilier',e)}
+  toast('Approche-toi d’un personnage ou d’un élément interactif.');
+}
+
+===== FUNCTION nearNpc =====
+function nearNpc(){
+  let best=null,bd=Infinity;
+  for(const n of current().npcs||[]){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}
+  return best&&bd<=105?best:null;
+}
+
+===== FUNCTION openShop =====
+function openShop(){
+  ensureInventoryV81();
+  const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+  const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+  const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+
+  let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+    Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+    <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="openShop()">Acheter</button>
+      <button onclick="openSellShopV101D()">Revendre</button>
+    </div><div class="baggrid">`;
+
+  for(const id of ids){
+    const it=SHOP_ITEMS[id];if(!it)continue;
+    const qty=state.inventory[id]||0;
+    h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+      <b>${it.label}</b><br>${it.price} Voltrons<br>
+      <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+    </button>`
+  }
+
+  h+='</div>';
+  openSimpleMenu('Boutique — '+city,h)
+}
+
+===== FUNCTION interactTaronOpV106Z =====
+function interactTaronOpV106Z(){const op=zActiveOp();if(!op||state.zone!==op.zone)return false;const p=zOpPoint(op);if(!p||Math.hypot(state.x-p.x,state.y-p.y)>135)return false;const st=zOpState(op.id);if(!st.intel){st.intel=true;zSave();dialog(`<b>Dossier Taron — ${op.title}</b><br>${op.text}<br><br>Tu récupères des données chiffrées. Elles révèlent <b>${op.waves} groupe${op.waves>1?'s':''} d'agents</b> à neutraliser dans cette zone.`);return true}if(st.waves<op.waves){dialog(`<b>${op.title}</b><br>Groupe Taron ${st.waves+1}/${op.waves}. Prépare ton équipe.`,()=>startTaronWaveV106Z(op));return true}return false}
+
+===== FUNCTION activateTaronOpV106Z =====
+function activateTaronOpV106Z(id){const op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return;if(!zOpUnlocked(op)){toast('Cette opération n’est pas encore accessible.');return}zState().activeTaronOp=id;zSave();document.getElementById('menuov').style.display='none';toast(`Opération suivie : ${op.title} — ${zCityName(op.zone)}.`)}
+
+===== FUNCTION openTaronDossierV106Z =====
+function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+ for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+ openSimpleMenu('Dossier Team Taron',h)}
+
+===== FUNCTION openContractsV106Z =====
+function openContractsV106Z(){let h='<div class="quest"><b>Bureau des contrats</b><br>Les contrats suivent tes accomplissements globaux et constituent une progression parallèle à l’histoire.</div>';for(const c of V106Z_CONTRACTS){if(c.seal>(state.seals||[]).length)continue;const st=zState().contracts[c.id]||{},p=st.accepted?Math.min(c.goal,zContractProgress(c,st)):0;h+=`<div class="quest"><b>${c.title}</b><br>${zContractText(c)}${st.accepted?` : <b>${p}/${c.goal}</b>`:''}<br><small>Récompense : ${c.reward} V + ${c.qty} ${c.item}</small>${st.claimed?'<br><b>✓ Contrat soldé</b>':!st.accepted?`<br><button onclick="acceptContractV106Z('${c.id}')">Accepter</button>`:p>=c.goal?`<br><button onclick="claimContractV106Z('${c.id}')">Réclamer</button>`:''}</div>`}openSimpleMenu('Contrats de Valdora',h)}
+
+===== FUNCTION drawHero =====
+function drawHero(x,y,dir,moving){
+  const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+  const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+  if(v102eDrawGrounded(im,x,y,62,.22))return;
+  // Secours uniquement pendant le chargement de l'image.
+  v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+}
+
+===== FUNCTION move =====
+function move(dx,dy,dir){
+  state.dir=dir;
+  if(scene!=='world'||trainerEvent)return;
+  if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast('Position rétablie dans la Citadelle.')}catch(_){}}
+  const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+  if(collision(nx,ny,state.x,state.y)){
+    lastMove=Date.now();
+    const n=npcCollision(nx,ny);if(n&&Math.random()<.12)toast('E / Entrée pour parler à '+n.name);
+    return
+  }
+  recordFollowerStep();state.x=nx;state.y=ny;lastMove=Date.now();checkPortal();
+
+  // Les rencontres sauvages de Clairval font partie du déplacement normal de la ville.
+  const kind=currentScene().kind;
+  if(state.team.length){
+    if((kind==='route'||kind==='temple')&&!trainerEvent)checkTrainerDetection();
+    if((kind==='route'||state.zone==='town0')&&!trainerEvent&&typeof v104EncounterStep==='function')v104EncounterStep();
+  }
+}
+
+===== TERM guide =====
+1703:   if(v102eSc&&v102eSc.kind==='route'&&Array.isArray(v102eSc.trainers)){
+1704:     v102eSc.trainers.forEach((t,i)=>{t.look=V102F_ROUTE_LOOKS[(i+(parseInt(v102eKey.replace(/\D/g,''))||0))%V102F_ROUTE_LOOKS.length]})
+1705:   }
+1706: }
+1707: const ROOMS={"home":{"image":"assets/room_home_v416.jpg","obstacles":[{"x":120,"y":190,"w":240,"h":120},{"x":820,"y":180,"w":250,"h":175},{"x":150,"y":430,"w":330,"h":135},{"x":650,"y":420,"w":300,"h":165}],"npcs":[]},"lab":{"image":"assets/room_lab_v416.jpg","obstacles":[{"x":90,"y":190,"w":150,"h":120},{"x":270,"y":190,"w":150,"h":120},{"x":880,"y":175,"w":220,"h":165},{"x":430,"y":385,"w":340,"h":130}],"npcs":[{"id":"prof","x":600,"y":315,"look":40,"name":"Professeur Aurine"}]},"healer":{"image":"assets/room_healer_v416.jpg","obstacles":[{"x":125,"y":185,"w":950,"h":105},{"x":160,"y":430,"w":250,"h":120},{"x":790,"y":430,"w":250,"h":120},{"x":515,"y":400,"w":170,"h":135}],"npcs":[{"id":"healer","x":600,"y":340,"look":21,"name":"Infirmière Élise"}]},"shop":{"image":"assets/room_shop_v416.jpg","obstacles":[{"x":100,"y":185,"w":260,"h":175},{"x":840,"y":185,"w":260,"h":175},{"x":420,"y":390,"w":360,"h":105}],"npcs":[{"id":"seller","x":600,"y":330,"look":26,"name":"Marchand"}]},"station":{"image":"assets/room_station_v416.jpg","obstacles":[{"x":120,"y":180,"w":960,"h":95},{"x":170,"y":388,"w":300,"h":147},{"x":730,"y":388,"w":300,"h":147}],"npcs":[{"id":"agent","x":600,"y":320,"look":24,"name":"Agent de gare"}]},"museum":{"image":"assets/room_museum_v416.jpg","obstacles":[{"x":85,"y":210,"w":180,"h":125},{"x":380,"y":210,"w":180,"h":125},{"x":675,"y":210,"w":180,"h":125},{"x":970,"y":210,"w":180,"h":125},{"x":450,"y":478,"w":300,"h":147}],"npcs":[{"id":"guide","x":600,"y":430,"look":9,"name":"Conservatrice Léa"}]},"school":{"image":"assets/room_school_v416.jpg","obstacles":[
+1708: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1709: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"},"17":{"body":"tortue","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"18"
+1710: 
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+---
+2917: {id:'yanis',zone:'town10',x:1070,y:690,look:26,dir:1,name:'Yanis',text:'Je compare les styles de combat des visiteurs.'},
+2918: {id:'margot',zone:'town11',x:720,y:570,look:2,dir:0,name:'Margot',text:'Brumelac semble calme, mais ses alentours sont riches en Éclats.'},
+2919: {id:'paul',zone:'town11',x:1080,y:690,look:17,dir:2,name:'Paul',text:'Je note les passages de la Team Taron dans mon carnet.'},
+2920: {id:'eva',zone:'town12',x:720,y:560,look:8,dir:0,name:'Éva',text:'Sylvaris est idéal pour observer les espèces Nature.'},
+2921: {id:'mathis',zone:'town12',x:1070,y:690,look:24,dir:1,name:'Mathis',text:'Je guide les voyageurs qui veulent explorer les bois.'},
+2922: {id:'zoe',zone:'town13',x:720,y:570,look:5,dir:0,name:'Zoé',text:'À Taronis, tout le monde parle des opérations de la Team Taron.'},
+2923: {id:'alexis',zone:'town13',x:1080,y:690,look:33,dir:2,name:'Alexis',text:'La métropole ne dort jamais, et les dresseurs non plus.'},
+2924: {id:'manon',zone:'town14',x:720,y:560,look:10,dir:0,name:'Manon',text:'Aubeval marque souvent la dernière étape avant de grands départs.'},
+2925: {id:'victor',zone:'town14',x:1070,y:690,look:37,dir:1,name:'Victor',text:'Je collectionne les récits des dresseurs qui ont parcouru Valdora.'},
+2926: {id:'helene',zone:'town14',x:900,y:620,look:12,dir:0,name:'Hélène',text:'J’aide les voyageurs à préparer leur dernière étape à Aubeval.'}
+2927: ];
+---
+11962:     // Architecture volontairement distincte : village-carrefour de montagne.
+11963:     buildings:[
+11964:       {x:170,y:170,w:310,h:210,doorX:325,doorY:370,type:'inn',label:'Auberge du Col'},
+11965:       {x:870,y:120,w:420,h:245,doorX:1080,doorY:355,type:'shop',label:'Comptoir de Simdor'},
+11966:       {x:1680,y:190,w:300,h:205,doorX:1830,doorY:385,type:'home',label:'Maison des Guides'},
+11967:       {x:230,y:1040,w:330,h:215,doorX:395,doorY:1245,type:'home',label:'Refuge des Voyageurs'},
+11968:       {x:1510,y:1030,w:390,h:220,doorX:1705,doorY:1240,type:'healer',label:'Poste de soins'}
+11969:     ],
+11970: 
+11971:     // Quatre sorties : Simdor est un carrefour et non un clone de ville de départ.
+11972:     exits:[
+---
+12108:     v101dSimdor:true,
+12109:     buildings:[
+12110:       {x:180,y:170,w:340,h:220,doorX:350,doorY:382,type:'inn',label:'Auberge du Col'},
+12111:       {x:880,y:120,w:430,h:250,doorX:1095,doorY:360,type:'shop',label:'Marché des Hauts'},
+12112:       {x:1810,y:180,w:330,h:220,doorX:1975,doorY:390,type:'home',label:'Maison des Guides'},
+12113:       {x:240,y:1110,w:350,h:225,doorX:415,doorY:1325,type:'home',label:'Refuge des Voyageurs'},
+12114:       {x:1570,y:1080,w:420,h:235,doorX:1780,doorY:1305,type:'healer',label:'Dispensaire de Simdor'},
+12115:       {x:980,y:1080,w:350,h:225,doorX:1155,doorY:1295,type:'arena',label:'Sanctuaire du Carrefour'}
+12116:     ],
+12117:     exits:[
+12118:       {x:1090,y:0,w:200,h:90,side:'north',to:'route_m2'},
+---
+12974:    Le mobilier, les positions, tailles, rotations, flips, collisions et fonctions
+12975:    proviennent tous de l'export V102X fourni par l'utilisateur. */
+12976: (()=>{
+12977: 'use strict';
+12978: const MOBREF = {"schema":"valdora-mobilier-reference-v1","project":"Éclats Sauvages — Valdora","baseGame":"V102Z_AMELIORATIONS_GAMEPLAY_TEAM_TARON","editor":"V102X","coordinateSystem":{"width":1200,"height":800,"previewScale":0.8},"exportedAt":"2026-08-13T23:42:53.908Z","rooms":{"home":[{"instanceId":"home_lit_simple_1786664003541_1","id":"lit_simple","x":11,"y":55,"w":116,"h":169,"rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","collision":{"x":11,"y":55,"w":116,"h":169}},{"instanceId":"home_console_salon_1786664020291_2","id":"console_salon","x":864,"y":55,"w":204,"h":155,"rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"ouvrir_stockage","description":"Un terminal domestique relié à la télévision et au stockage des créatures.","collision":{"x":864,"y":55,"w":204,"h":155}},{"instanceId":"home_bibliotheque_1786664039281_3","id":"bibliotheque","x":376,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":4,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":376,"y":55,"w":135,"h":210}},{"instanceId":"home_bibliotheque_1786664046064_4","id":"bibliotheque","x":520,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":5,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":520,"y
+12979: window.MOBILIER_REFERENCE_VALDORA = MOBREF;
+12980: const MOBREF_CATALOG = Object.fromEntries((MOBREF.catalog||[]).map(x=>[x.id,x]));
+12981: window.MOBREF_CATALOG_V105J=MOBREF_CATALOG;window.MOBREF_DATA_V105J=MOBREF;
+12982: const MOBREF_IMAGES = {};
+12983: for(const item of MOBREF.catalog||[]){
+12984:   const im=new Image(); im.decoding='async'; im.src=item.asset; MOBREF_IMAGES[item.id]=im;
+
+===== TERM directeur =====
+17653: }
+17654: window.v109aState=v109aState;
+17655: 
+17656: // V109H — MUSÉES : RÉÉCRITURE COMPLÈTE
+17657: // Une seule architecture, un seul intérieur et un seul directeur pour tous les musées.
+17658: // Le modèle fonctionnel de Taronis devient la référence logique et visuelle.
+17659: const V109H_MUSEUM={
+17660:   version:'V109H',
+17661:   names:{town5:'Directrice Léa',town7:'Directeur Maël',town9:'Directrice Nora',town10:'Directeur Élias',town13:'Directrice Cassandre'},
+17662:   isMuseum(b){
+17663:     if(!b)return false;
+---
+17657: // Une seule architecture, un seul intérieur et un seul directeur pour tous les musées.
+17658: // Le modèle fonctionnel de Taronis devient la référence logique et visuelle.
+17659: const V109H_MUSEUM={
+17660:   version:'V109H',
+17661:   names:{town5:'Directrice Léa',town7:'Directeur Maël',town9:'Directrice Nora',town10:'Directeur Élias',town13:'Directrice Cassandre'},
+17662:   isMuseum(b){
+17663:     if(!b)return false;
+17664:     const fields=[b.type,b.urbanType,b.id,b.label,b.role,b.kind].map(v=>String(v||'').toLowerCase());
+17665:     return fields.some(v=>v==='museum'||v.includes('museum')||v.includes('musée')||v.includes('musee'));
+17666:   },
+17667:   directorName(){return this.names[state?.zone]||'Direction du musée'},
+---
+17697:     return true;
+17698:   },
+17699:   prepare(){
+17700:     // Aucune mutation périodique des cartes : on ne transforme plus les bâtiments en arrière-plan.
+17701:     // On ne fait que garantir que le modèle intérieur et son directeur existent.
+17702:     this.ensureRoom();
+17703:     return Object.entries(SCENES||{}).flatMap(([zone,sc])=>(sc?.buildings||[])
+17704:       .filter(b=>this.isMuseum(b)).map(b=>({zone,id:b.id||'',label:b.label||'Musée'})));
+17705:   }
+17706: };
+17707: window.ValdoraMuseumV109H=V109H_MUSEUM;
+---
+17823:   const owned=v109aOwnedForMuseum();
+17824:   let h=`<div class="quest"><b>${mode==='refused'?'Attaques refusées':'Réapprendre une ancienne attaque'}</b><br><b>Choisis d’abord la créature</b> à laquelle tu veux proposer un apprentissage. Les créatures de l’équipe et du PC sont toutes disponibles.</div><div class="baggrid">`;
+17825:   if(!owned.length)h+='<div class="quest">Tu ne possèdes encore aucune créature.</div>';
+17826:   for(const entry of owned)h+=v109aMuseumCreatureCard(entry,mode);
+17827:   h+='</div><button onclick="openMuseumDirectorV109A()">Retour au directeur</button>';
+17828:   openSimpleMenu(mode==='refused'?'Choisir une créature — attaques refusées':'Choisir une créature — réapprentissage',h)
+17829: }
+17830: window.v109aOpenRelearn=v109aOpenRelearn;
+17831: function v109aOpenRelearnCreature(mode,where,index){
+17832:   const list=where==='team'?(state.team||[]):where==='pc'?(state.pc||[]):(state.box||[]),m=list[Number(index)];
+17833:   if(!m){toast('Créature introuvable.');v109aOpenRelearn(mode);return}
+---
+17835:   let src='';try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+17836:   let h=`<div class="quest" style="display:flex;gap:12px;align-items:center">${src?`<img src="${src}" style="width:86px;height:86px;object-fit:contain;border-radius:14px;background:#eef6f8;border:1px solid #c8d8dd">`:''}<div><b>${name} — N.${m.level}</b><br>Type ${type}<br><small>${where==='team'?'Équipe':'PC'}</small></div></div>`;
+17837:   if(!cand.length)h+=`<div class="quest">${mode==='refused'?'Aucune attaque refusée n’est disponible pour cette créature.':'Aucune ancienne attaque réapprenable n’est disponible pour cette créature.'}</div>`;
+17838:   for(const mid of cand)h+=`<div class="quest">${v109aMoveCard(mid)}<br><button onclick="v109aTeachFromMuseum('${where}',${Number(index)},'${mid}')">${mode==='refused'?'Apprendre':'Réapprendre'} ${v109aEsc(MOVE_DB[mid].name)}</button></div>`;
+17839:   h+=`<button onclick="v109aOpenRelearn('${mode}')">Choisir une autre créature</button> <button onclick="openMuseumDirectorV109A()">Retour au directeur</button>`;
+17840:   openSimpleMenu(mode==='refused'?'Attaques refusées — '+name:'Réapprentissage — '+name,h)
+17841: }
+17842: window.v109aOpenRelearnCreature=v109aOpenRelearnCreature;
+17843: 
+17844: function v109aStartEgg(){const s=v109aState();if(s.egg.status!=='hidden')return;s.egg={status:'active',zones:[],startedAt:Date.now()};save(false);dialog('<b>L’œuf inconnu</b><br>Le directeur te confie un œuf acquis par le musée. Apporte-le au Professeur Aurine à Clairval : ses relevés devraient permettre d’identifier les environnements auxquels il réagit.');}
+17845: window.v109aStartEgg=v109aStartEgg;
+
+===== TERM museum =====
+404: function cityFloorsV60(cityId){const c=VALDORA_CITIES_V60.find(c=>c.id===cityId);return c?c.floors:1}
+405: 
+406: 'use strict';
+407: const PLAYER_PROGRESSION_LOCK=true;
+408: const SCENES={"town0":{"kind":"town","name":"Clairval","image":"assets/town_0_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"lab","label":"Laboratoire"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"healer","label":"Centre soins"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"shop","label":"Boutique"},{"x":1210,"y":690,"w":260,"h":175,"doorX":1340,"doorY":856,"type":"station","label":"Gare"}],"biome":"prairie","exits":[{"x":835,"y":1030,"w":130,"h":70,"side":"south","target":"route_next"}]},"town1":{"kind":"town","name":"Bois-Murmure","image":"assets/town_1_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"healer","label":"Centre soins"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"shop","label":"Boutique"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"arena","label":"Arène"},{"x":760,"y":680,"w":260,"h":175,"doorX":890,"doorY":846,"type":"inn","label":"Auberge"}],"biome":"forest","exits":[{"x":835,"y":0,"w":130,"h":70,"side":"north","target":"route_prev"},{"x":1730,"y":485,"w":70,"h":130,"side":"east","target":"route_next"}]},"town2":{"kind":"town","name":"Lac Azur","image":"assets/town_2_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"d
+409: 
+410: const TOWN_THEMES={
+411:   prairie:{ground:'#8fcf78',road:'#e5d2a2',tree:'#4c9453',roof:'#d86855'},
+412:   forest:{ground:'#76b86e',road:'#d2c295',tree:'#357b49',roof:'#7d5f46'},
+413:   lake:{ground:'#86c987',road:'#ddd1a7',tree:'#4d9258',roof:'#5ea7d8'},
+414:   autumn:{ground:'#b6b06b',road:'#d8c495',tree:'#b36d3b',roof:'#a85542'},
+---
+488:  },
+489:  town5:{
+490:   fountain:{x:900,y:565},
+491:   buildings:[
+492:    {x:115,y:110,w:270,h:180,type:'museum',label:'Musée'},
+493:    {x:1415,y:110,w:270,h:180,type:'healer',label:'Centre de soins'},
+494:    {x:115,y:720,w:270,h:180,type:'shop',label:'Boutique'},
+495:    {x:1415,y:720,w:270,h:180,type:'arena',label:'Arène'},
+496:    {x:455,y:110,w:220,h:150,type:'home',label:'Maison'},
+497:    {x:1125,y:110,w:220,h:150,type:'home',label:'Maison'},
+498:    {x:455,y:720,w:220,h:150,type:'inn',label:'Hôtel'}
+---
+515:   buildings:[
+516:    {x:105,y:105,w:310,h:195,type:'station',label:'Gare centrale'},
+517:    {x:1385,y:105,w:310,h:195,type:'healer',label:'Centre de soins'},
+518:    {x:105,y:705,w:310,h:195,type:'shop',label:'Grande boutique'},
+519:    {x:1385,y:705,w:310,h:195,type:'museum',label:'Musée'},
+520:    {x:500,y:105,w:235,h:160,type:'home',label:'Maison'},
+521:    {x:1065,y:105,w:235,h:160,type:'home',label:'Maison'},
+522:    {x:500,y:720,w:235,h:160,type:'inn',label:'Hôtel'},
+523:    {x:1065,y:720,w:235,h:160,type:'home',label:'Maison'}
+524:   ],
+525:   railY:350,platform:{x:95,y:300,w:340,h:42},stationRoad:{x:250,y:300,w:115,h:245}
+---
+536: }
+537: normalizeTownLayouts();
+538: 
+539: function townSymbol(type){
+540:   return {healer:'✚',care:'✚',lab:'⚗',station:'🚉',shop:'◆',arena:'★',museum:'◉',school:'✎',inn:'☾'}[type]||''
+541: }
+542: function roofColor(type,theme){
+543:   if(type==='healer'||type==='care')return '#d95b62';
+544:   if(type==='lab')return '#7b7fd8';
+545:   if(type==='station')return '#536f8c';
+546:   if(type==='shop')return '#d6a849';
+---
+544:   if(type==='lab')return '#7b7fd8';
+545:   if(type==='station')return '#536f8c';
+546:   if(type==='shop')return '#d6a849';
+547:   if(type==='arena')return '#d07549';
+548:   if(type==='museum')return '#9b7a64';
+549:   if(type==='school')return '#5d8bb8';
+550:   if(type==='inn')return '#6e8a63';
+551:   return theme.roof
+552: }
+553: 
+554: const TOWN_TREE_CANDIDATES=[
+
+===== TERM musee =====
+1524:   boutique:v102eLoadImage('ASSETS_BATIMENTS_V103C/boutique_face.png'),
+1525:   restaurant:v102eLoadImage('ASSETS_BATIMENTS_V103C/restaurant_face.png'),
+1526:   gare:v102eLoadImage('ASSETS_BATIMENTS_V103C/gare_face.png'),
+1527:   hotel:v102eLoadImage('ASSETS_BATIMENTS_V103C/hotel_face.png'),
+1528:   musee:v102eLoadImage('ASSETS_BATIMENTS_V103C/musee_face.png'),
+1529:   petit_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/petit_immeuble_face.png'),
+1530:   moyen_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/moyen_immeuble_face.png'),
+1531:   grand_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/grand_immeuble_face.png'),
+1532:   sceau_aube:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_aube_face.png'),
+1533:   sceau_roche:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_roche_face.png'),
+1534:   sceau_brumes:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_brumes_face.png'),
+---
+1551:   if(type==='lab')return 'laboratoire';
+1552:   if(type==='shop')return 'boutique';
+1553:   if(type==='station')return 'gare';
+1554:   if(type==='inn')return 'hotel';
+1555:   if(type==='museum')return 'musee';
+1556:   if(type==='school')return (Number(b?.floors||0)>=4?'moyen_immeuble':'petit_immeuble');
+1557:   if(type==='arena'){
+1558:     const seals=['sceau_aube','sceau_roche','sceau_brumes','sceau_vent','sceau_marees','sceau_eclat','sceau_coeur'];
+1559:     const sealIndex=Math.max(1,Math.min(7,v103cTownNumber()));
+1560:     return seals[sealIndex-1]
+1561:   }
+---
+1573:   if(t==='station')return 'gare';
+1574:   if(t==='hotel')return 'hotel';
+1575:   if(t==='clinic')return 'centre_soins';
+1576:   if(t==='shop')return 'boutique';
+1577:   if(t==='museum')return 'musee';
+1578:   if(t==='cafe'||t==='restaurant')return 'restaurant';
+1579:   const f=Number(b?.floors||3);
+1580:   if(f>=7)return 'grand_immeuble';
+1581:   if(f>=4)return 'moyen_immeuble';
+1582:   return 'petit_immeuble'
+1583: }
+---
+1594:   const dw=im.naturalWidth*scale,dh=im.naturalHeight*scale;
+1595:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1596:   const doorAnchors={
+1597:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1598:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1599:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1600:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+1601:     sceau_marees:[.50,.95],sceau_eclat:[.50,.95],sceau_coeur:[.50,.95]
+1602:   };
+1603:   const a=doorAnchors[key]||[.50,.95];
+1604:   const targetDoorX=((Number.isFinite(b.doorX)?b.doorX:b.x+b.w/2)-camX)*sx;
+---
+12974:    Le mobilier, les positions, tailles, rotations, flips, collisions et fonctions
+12975:    proviennent tous de l'export V102X fourni par l'utilisateur. */
+12976: (()=>{
+12977: 'use strict';
+12978: const MOBREF = {"schema":"valdora-mobilier-reference-v1","project":"Éclats Sauvages — Valdora","baseGame":"V102Z_AMELIORATIONS_GAMEPLAY_TEAM_TARON","editor":"V102X","coordinateSystem":{"width":1200,"height":800,"previewScale":0.8},"exportedAt":"2026-08-13T23:42:53.908Z","rooms":{"home":[{"instanceId":"home_lit_simple_1786664003541_1","id":"lit_simple","x":11,"y":55,"w":116,"h":169,"rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","collision":{"x":11,"y":55,"w":116,"h":169}},{"instanceId":"home_console_salon_1786664020291_2","id":"console_salon","x":864,"y":55,"w":204,"h":155,"rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"ouvrir_stockage","description":"Un terminal domestique relié à la télévision et au stockage des créatures.","collision":{"x":864,"y":55,"w":204,"h":155}},{"instanceId":"home_bibliotheque_1786664039281_3","id":"bibliotheque","x":376,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":4,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":376,"y":55,"w":135,"h":210}},{"instanceId":"home_bibliotheque_1786664046064_4","id":"bibliotheque","x":520,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":5,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":520,"y
+12979: window.MOBILIER_REFERENCE_VALDORA = MOBREF;
+12980: const MOBREF_CATALOG = Object.fromEntries((MOBREF.catalog||[]).map(x=>[x.id,x]));
+12981: window.MOBREF_CATALOG_V105J=MOBREF_CATALOG;window.MOBREF_DATA_V105J=MOBREF;
+12982: const MOBREF_IMAGES = {};
+12983: for(const item of MOBREF.catalog||[]){
+12984:   const im=new Image(); im.decoding='async'; im.src=item.asset; MOBREF_IMAGES[item.id]=im;
+
+===== TERM oeuf =====
+12974:    Le mobilier, les positions, tailles, rotations, flips, collisions et fonctions
+12975:    proviennent tous de l'export V102X fourni par l'utilisateur. */
+12976: (()=>{
+12977: 'use strict';
+12978: const MOBREF = {"schema":"valdora-mobilier-reference-v1","project":"Éclats Sauvages — Valdora","baseGame":"V102Z_AMELIORATIONS_GAMEPLAY_TEAM_TARON","editor":"V102X","coordinateSystem":{"width":1200,"height":800,"previewScale":0.8},"exportedAt":"2026-08-13T23:42:53.908Z","rooms":{"home":[{"instanceId":"home_lit_simple_1786664003541_1","id":"lit_simple","x":11,"y":55,"w":116,"h":169,"rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","collision":{"x":11,"y":55,"w":116,"h":169}},{"instanceId":"home_console_salon_1786664020291_2","id":"console_salon","x":864,"y":55,"w":204,"h":155,"rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"ouvrir_stockage","description":"Un terminal domestique relié à la télévision et au stockage des créatures.","collision":{"x":864,"y":55,"w":204,"h":155}},{"instanceId":"home_bibliotheque_1786664039281_3","id":"bibliotheque","x":376,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":4,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":376,"y":55,"w":135,"h":210}},{"instanceId":"home_bibliotheque_1786664046064_4","id":"bibliotheque","x":520,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":5,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":520,"y
+12979: window.MOBILIER_REFERENCE_VALDORA = MOBREF;
+12980: const MOBREF_CATALOG = Object.fromEntries((MOBREF.catalog||[]).map(x=>[x.id,x]));
+12981: window.MOBREF_CATALOG_V105J=MOBREF_CATALOG;window.MOBREF_DATA_V105J=MOBREF;
+12982: const MOBREF_IMAGES = {};
+12983: for(const item of MOBREF.catalog||[]){
+12984:   const im=new Image(); im.decoding='async'; im.src=item.asset; MOBREF_IMAGES[item.id]=im;
+---
+13198:     case 'distributeur_boissons': vending();break;
+13199:     case 'choix_starters': if(!state.team.length)dialog('<b>Table des Starters</b><br>Quatre capsules t’attendent…',()=>showStarters());else dialog('<b>Table des Starters</b><br>Ton premier compagnon est déjà avec toi.');break;
+13200:     case 'recherche_codex': superComputer();break;
+13201:     case 'lore_recherche': dialog('<b>Tableau de recherche</b><br>'+pick(['Les croquis comparent plusieurs stades d’évolution.','Une note indique : « environnement + expérience = évolution parfois imprévisible ».','Un schéma relie les types Feu, Plante et Eau dans un cycle d’avantages.','Des coordonnées sont entourées près des montagnes du nord.']));break;
+13202:     case 'infos_oeuf': dialog('<b>Incubateur</b><br>'+pick(['L’œuf réagit légèrement à ta présence.','Les capteurs indiquent une activité stable. Impossible encore d’identifier l’espèce.','Une étiquette indique : « origine inconnue — trouvé près d’anciennes ruines ».']));break;
+13203:     case 'lore_musee': dialog('<b>'+((m.nom)||'Exposition')+'</b><br>'+pick(MUSEUM));break;
+13204:     case 'decor': if(m.description)dialog('<b>'+(m.nom||'Objet')+'</b><br>'+m.description);break;
+13205:     default: if(m.description)dialog('<b>'+(m.nom||'Mobilier')+'</b><br>'+m.description);break;
+13206:   }
+13207: }
+13208: window.declencherInteraction=triggerFurniture;
+---
+18099: 'use strict';
+18100: const VERSION='V109U';
+18101: let session=null;
+18102: const npcClock={last:performance.now()};
+18103: const V109J_LAYOUTS={"home":[{"instanceId":"v109j_lit_simple_1","id":"lit_simple","label":"Lit simple","x":80,"y":95,"w":150,"h":175,"view":"front","rotation":0,"flipX":false,"flipY":false,"z":1,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","asset":"assets/mobilier/maison/lit_simple/front.png","assets":{"front":"assets/mobilier/maison/lit_simple/front.png","left":"assets/mobilier/maison/lit_simple/left.png","back":"assets/mobilier/maison/lit_simple/back.png"},"collision":{"x":80,"y":95,"w":150,"h":175}},{"instanceId":"v109j_bibliotheque_2","id":"bibliotheque","label":"Bibliothèque domestique","x":300,"y":80,"w":120,"h":180,"view":"front","rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Des livres d’aventures, des guides et des indices.","asset":"assets/mobilier/maison/bibliotheque/front.png","assets":{"front":"assets/mobilier/maison/bibliotheque/front.png","left":"assets/mobilier/maison/bibliotheque/left.png","back":"assets/mobilier/maison/bibliotheque/back.png"},"collision":{"x":300,"y":80,"w":120,"h":180}},{"instanceId":"v109j_bibliotheque_3","id":"bibliotheque","label":"Bibliothèque domestique","x":430,"y":80,"w":120,"h":180,"view":"front","rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Des livres d’aventures, des guides et des indices.","asset":"assets/mobilier/maison/bibliotheque/front.png","assets":{"front":"assets/mobilier/maison/bibliothequ
+18104: const V109J_NPC_POS={"lab":[600,345,0],"healer":[600,115,0],"shop":[600,110,0],"station":[600,285,0],"museum":[600,300,0],"school":[600,320,0],"arena":[600,110,0],"inn":[600,80,0],"home":[600,350,0],"playerhome":[600,350,0]};
+18105: const V109J_ASSETS={"autel_sceau":{"front":"assets/mobilier/gardien/autel_sceau/front.png","left":"assets/mobilier/gardien/autel_sceau/left.png","back":"assets/mobilier/gardien/autel_sceau/back.png"},"banc_defi":{"front":"assets/mobilier/gardien/banc_defi/front.png","left":"assets/mobilier/gardien/banc_defi/left.png","back":"assets/mobilier/gardien/banc_defi/back.png"},"banc_quai":{"front":"assets/mobilier/gare/banc_quai/front.png","left":"assets/mobilier/gare/banc_quai/left.png","back":"assets/mobilier/gare/banc_quai/back.png"},"banniere_gardien":{"front":"assets/mobilier/gardien/banniere_gardien/front.png","left":"assets/mobilier/gardien/banniere_gardien/left.png","back":"assets/mobilier/gardien/banniere_gardien/back.png"},"bibliotheque":{"front":"assets/mobilier/maison/bibliotheque/front.png","left":"assets/mobilier/maison/bibliotheque/left.png","back":"assets/mobilier/maison/bibliotheque/back.png"},"bureau_conservateur":{"front":"assets/mobilier/musee/bureau_conservateur/front.png","left":"assets/mobilier/musee/bureau_conservateur/left.png","back":"assets/mobilier/musee/bureau_conservateur/back.png"},"bureau_professeur":{"front":"assets/mobilier/ecole/bureau_professeur/front.png","left":"assets/mobilier/ecole/bureau_professeur/left.png","back":"assets/mobilier/ecole/bureau_professeur/back.png"},"caisse_enregistreuse":{"front":"assets/mobilier/boutique/caisse_enregistreuse/front.png","left":"assets/mobilier/boutique/caisse_enregistreuse/left.png","back":"assets/mobilier/boutique/caisse_enregistreuse/back.png"},"canape_attente":{"front":"assets/mobilier/centre_soins/canap
+18106: const V109J_IMAGES={};
+18107: for(const [id,paths] of Object.entries(V109J_ASSETS)){const im=new Image();im.decoding='async';im.src=paths.front;V109J_IMAGES[id]=im;}
+18108: function v109jHash(s){let h=2166136261>>>0;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+18109: function v109jVariant(){return v109jHash(String(session?.zone||'')+'|'+String(session?.source?.id||session?.source?.label||''))%2}
+---
+18529:     case 'horaires_train': if(typeof stationBoard==='function')stationBoard();else dlog('Horaires','Consulte le chef de gare pour voyager.');break;
+18530:     case 'distributeur_boissons': if(typeof vending==='function')vending();else dlog('Distributeur','Des boissons fraîches sont disponibles.');break;
+18531:     case 'choix_starters': if(!state.team?.length&&typeof showStarters==='function')showStarters();else dlog('Capsules de départ','Ton premier Éclat a déjà été choisi.');break;
+18532:     case 'recherche_codex': if(typeof superComputer==='function')superComputer();else dlog('Recherche Codex','Les données du Codex sont synchronisées.');break;
+18533:     case 'infos_oeuf': dlog('Incubateur','Les capteurs détectent une activité faible mais régulière.');break;
+18534:     case 'passage_piece_sol': case 'passage_etage': roomJump(m);break;
+18535:     case 'ascenseur_etages': elevator();break;
+18536:     case 'ouvrir_casier': case 'ouvrir_rangement': storageBox(m);break;
+18537:     case 'etudier': case 'lecon': study(m);break;
+18538:     case 'parler_professeur': if(typeof window.v109aProfessorEgg==='function'&&window.v109aProfessorEgg()){} else dlog('Professeur','Le professeur examine les données de ton aventure.');break;
+18539:     case 'lancer_defi_gardien': if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));else dlog('Défi','Le Gardien se prépare au combat.');break;
+
+===== TERM œuf =====
+12974:    Le mobilier, les positions, tailles, rotations, flips, collisions et fonctions
+12975:    proviennent tous de l'export V102X fourni par l'utilisateur. */
+12976: (()=>{
+12977: 'use strict';
+12978: const MOBREF = {"schema":"valdora-mobilier-reference-v1","project":"Éclats Sauvages — Valdora","baseGame":"V102Z_AMELIORATIONS_GAMEPLAY_TEAM_TARON","editor":"V102X","coordinateSystem":{"width":1200,"height":800,"previewScale":0.8},"exportedAt":"2026-08-13T23:42:53.908Z","rooms":{"home":[{"instanceId":"home_lit_simple_1786664003541_1","id":"lit_simple","x":11,"y":55,"w":116,"h":169,"rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","collision":{"x":11,"y":55,"w":116,"h":169}},{"instanceId":"home_console_salon_1786664020291_2","id":"console_salon","x":864,"y":55,"w":204,"h":155,"rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"ouvrir_stockage","description":"Un terminal domestique relié à la télévision et au stockage des créatures.","collision":{"x":864,"y":55,"w":204,"h":155}},{"instanceId":"home_bibliotheque_1786664039281_3","id":"bibliotheque","x":376,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":4,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":376,"y":55,"w":135,"h":210}},{"instanceId":"home_bibliotheque_1786664046064_4","id":"bibliotheque","x":520,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":5,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":520,"y
+12979: window.MOBILIER_REFERENCE_VALDORA = MOBREF;
+12980: const MOBREF_CATALOG = Object.fromEntries((MOBREF.catalog||[]).map(x=>[x.id,x]));
+12981: window.MOBREF_CATALOG_V105J=MOBREF_CATALOG;window.MOBREF_DATA_V105J=MOBREF;
+12982: const MOBREF_IMAGES = {};
+12983: for(const item of MOBREF.catalog||[]){
+12984:   const im=new Image(); im.decoding='async'; im.src=item.asset; MOBREF_IMAGES[item.id]=im;
+---
+13198:     case 'distributeur_boissons': vending();break;
+13199:     case 'choix_starters': if(!state.team.length)dialog('<b>Table des Starters</b><br>Quatre capsules t’attendent…',()=>showStarters());else dialog('<b>Table des Starters</b><br>Ton premier compagnon est déjà avec toi.');break;
+13200:     case 'recherche_codex': superComputer();break;
+13201:     case 'lore_recherche': dialog('<b>Tableau de recherche</b><br>'+pick(['Les croquis comparent plusieurs stades d’évolution.','Une note indique : « environnement + expérience = évolution parfois imprévisible ».','Un schéma relie les types Feu, Plante et Eau dans un cycle d’avantages.','Des coordonnées sont entourées près des montagnes du nord.']));break;
+13202:     case 'infos_oeuf': dialog('<b>Incubateur</b><br>'+pick(['L’œuf réagit légèrement à ta présence.','Les capteurs indiquent une activité stable. Impossible encore d’identifier l’espèce.','Une étiquette indique : « origine inconnue — trouvé près d’anciennes ruines ».']));break;
+13203:     case 'lore_musee': dialog('<b>'+((m.nom)||'Exposition')+'</b><br>'+pick(MUSEUM));break;
+13204:     case 'decor': if(m.description)dialog('<b>'+(m.nom||'Objet')+'</b><br>'+m.description);break;
+13205:     default: if(m.description)dialog('<b>'+(m.nom||'Mobilier')+'</b><br>'+m.description);break;
+13206:   }
+13207: }
+13208: window.declencherInteraction=triggerFurniture;
+---
+17840:   openSimpleMenu(mode==='refused'?'Attaques refusées — '+name:'Réapprentissage — '+name,h)
+17841: }
+17842: window.v109aOpenRelearnCreature=v109aOpenRelearnCreature;
+17843: 
+17844: function v109aStartEgg(){const s=v109aState();if(s.egg.status!=='hidden')return;s.egg={status:'active',zones:[],startedAt:Date.now()};save(false);dialog('<b>L’œuf inconnu</b><br>Le directeur te confie un œuf acquis par le musée. Apporte-le au Professeur Aurine à Clairval : ses relevés devraient permettre d’identifier les environnements auxquels il réagit.');}
+17845: window.v109aStartEgg=v109aStartEgg;
+17846: function v109aStartArchives(){const s=v109aState();if(s.archives.status!=='hidden')return;s.archives={status:'active',witnesses:[],startedAt:Date.now()};save(false);dialog('<b>Les archives disparues</b><br>Une page manque au dossier Résonance. Interroge un habitant à Bois-Murmure, un à Cendrebourg et un à Dunes d’Or, puis reviens au musée.');}
+17847: window.v109aStartArchives=v109aStartArchives;
+17848: function v109aZoneLabelV109G(zone){return ({town1:'Bois-Murmure',town2:'Lac Azur',town3:'Cendrebourg',town4:'Hautes-Roches',town5:"Dunes d'Or",town6:'Nivéa',town7:'Valdoria',town10:'Luminor',route4bis:'Route 4 bis — Lac des Reflets',route5:'Route 6'})[zone]||SCENES?.[zone]?.name||zone}
+17849: function v109aRemainingV109G(all,done){const got=new Set(done||[]);return all.filter(z=>!got.has(z)).map(v109aZoneLabelV109G)}
+17850: function v109aEggText(s){const e=s.egg;if(e.status==='hidden')return 'Le musée vient de recevoir un œuf d’origine inconnue.';if(e.status==='active')return 'Étape 1 : apporte l’œuf au Professeur Aurine, dans le laboratoire de Clairval.';if(e.status==='field'){const left=v109aRemainingV109G(V109A_EGG_ZONES,e.zones);return `Réactions observées : ${e.zones.length}/3. Lieux restants : ${left.length?left.join(' • '):'aucun'}. Une réaction est enregistrée automatiquement lorsque tu arrives dans la ville.`}if(e.status==='return')return 'Les trois réactions ont été observées. Retourne parler au directeur ou à la directrice de n’importe quel musée.';return '✓ Chaîne de l’œuf terminée : l’œuf réagit à la Résonance.'}
+---
+17846: function v109aStartArchives(){const s=v109aState();if(s.archives.status!=='hidden')return;s.archives={status:'active',witnesses:[],startedAt:Date.now()};save(false);dialog('<b>Les archives disparues</b><br>Une page manque au dossier Résonance. Interroge un habitant à Bois-Murmure, un à Cendrebourg et un à Dunes d’Or, puis reviens au musée.');}
+17847: window.v109aStartArchives=v109aStartArchives;
+17848: function v109aZoneLabelV109G(zone){return ({town1:'Bois-Murmure',town2:'Lac Azur',town3:'Cendrebourg',town4:'Hautes-Roches',town5:"Dunes d'Or",town6:'Nivéa',town7:'Valdoria',town10:'Luminor',route4bis:'Route 4 bis — Lac des Reflets',route5:'Route 6'})[zone]||SCENES?.[zone]?.name||zone}
+17849: function v109aRemainingV109G(all,done){const got=new Set(done||[]);return all.filter(z=>!got.has(z)).map(v109aZoneLabelV109G)}
+17850: function v109aEggText(s){const e=s.egg;if(e.status==='hidden')return 'Le musée vient de recevoir un œuf d’origine inconnue.';if(e.status==='active')return 'Étape 1 : apporte l’œuf au Professeur Aurine, dans le laboratoire de Clairval.';if(e.status==='field'){const left=v109aRemainingV109G(V109A_EGG_ZONES,e.zones);return `Réactions observées : ${e.zones.length}/3. Lieux restants : ${left.length?left.join(' • '):'aucun'}. Une réaction est enregistrée automatiquement lorsque tu arrives dans la ville.`}if(e.status==='return')return 'Les trois réactions ont été observées. Retourne parler au directeur ou à la directrice de n’importe quel musée.';return '✓ Chaîne de l’œuf terminée : l’œuf réagit à la Résonance.'}
+17851: function v109aArchiveText(s){const a=s.archives;if(a.status==='hidden')return 'Une page d’archives semble avoir disparu après l’étude de l’œuf.';if(a.status==='active'){const left=v109aRemainingV109G(V109A_WITNESS_ZONES,a.witnesses);return `Témoignages : ${a.witnesses.length}/3. Va dans une maison et parle à un habitant dans : ${left.length?left.join(' • '):'aucune ville restante'}.`}if(a.status==='return')return 'Les trois témoignages concordent. Retourne parler au directeur ou à la directrice d’un musée.';return '✓ Archives disparues retrouvées et classées.'}
+17852: function openMuseumMissionsV109A(){const s=v109aState();let h='<div class="quest"><b>Dossiers du musée</b><br>Les affaires importantes évoluent avec tes découvertes.</div>';
+17853:   h+=`<div class="quest"><b>L’œuf inconnu</b><br>${v109aEggText(s)}${s.egg.status==='hidden'?'<br><button onclick="v109aStartEgg()">Accepter la mission</button>':''}</div>`;
+17854:   if(s.egg.status==='done')h+=`<div class="quest"><b>Les archives disparues</b><br>${v109aArchiveText(s)}${s.archives.status==='hidden'?'<br><button onclick="v109aStartArchives()">Accepter la mission</button>':''}</div>`;
+17855:   h+='<button onclick="openMuseumDirectorV109A()">Retour</button>';openSimpleMenu('Missions du directeur',h);
+17856: }
+---
+17847: window.v109aStartArchives=v109aStartArchives;
+17848: function v109aZoneLabelV109G(zone){return ({town1:'Bois-Murmure',town2:'Lac Azur',town3:'Cendrebourg',town4:'Hautes-Roches',town5:"Dunes d'Or",town6:'Nivéa',town7:'Valdoria',town10:'Luminor',route4bis:'Route 4 bis — Lac des Reflets',route5:'Route 6'})[zone]||SCENES?.[zone]?.name||zone}
+17849: function v109aRemainingV109G(all,done){const got=new Set(done||[]);return all.filter(z=>!got.has(z)).map(v109aZoneLabelV109G)}
+17850: function v109aEggText(s){const e=s.egg;if(e.status==='hidden')return 'Le musée vient de recevoir un œuf d’origine inconnue.';if(e.status==='active')return 'Étape 1 : apporte l’œuf au Professeur Aurine, dans le laboratoire de Clairval.';if(e.status==='field'){const left=v109aRemainingV109G(V109A_EGG_ZONES,e.zones);return `Réactions observées : ${e.zones.length}/3. Lieux restants : ${left.length?left.join(' • '):'aucun'}. Une réaction est enregistrée automatiquement lorsque tu arrives dans la ville.`}if(e.status==='return')return 'Les trois réactions ont été observées. Retourne parler au directeur ou à la directrice de n’importe quel musée.';return '✓ Chaîne de l’œuf terminée : l’œuf réagit à la Résonance.'}
+17851: function v109aArchiveText(s){const a=s.archives;if(a.status==='hidden')return 'Une page d’archives semble avoir disparu après l’étude de l’œuf.';if(a.status==='active'){const left=v109aRemainingV109G(V109A_WITNESS_ZONES,a.witnesses);return `Témoignages : ${a.witnesses.length}/3. Va dans une maison et parle à un habitant dans : ${left.length?left.join(' • '):'aucune ville restante'}.`}if(a.status==='return')return 'Les trois témoignages concordent. Retourne parler au directeur ou à la directrice d’un musée.';return '✓ Archives disparues retrouvées et classées.'}
+17852: function openMuseumMissionsV109A(){const s=v109aState();let h='<div class="quest"><b>Dossiers du musée</b><br>Les affaires importantes évoluent avec tes découvertes.</div>';
+17853:   h+=`<div class="quest"><b>L’œuf inconnu</b><br>${v109aEggText(s)}${s.egg.status==='hidden'?'<br><button onclick="v109aStartEgg()">Accepter la mission</button>':''}</div>`;
+17854:   if(s.egg.status==='done')h+=`<div class="quest"><b>Les archives disparues</b><br>${v109aArchiveText(s)}${s.archives.status==='hidden'?'<br><button onclick="v109aStartArchives()">Accepter la mission</button>':''}</div>`;
+17855:   h+='<button onclick="openMuseumDirectorV109A()">Retour</button>';openSimpleMenu('Missions du directeur',h);
+17856: }
+17857: window.openMuseumMissionsV109A=openMuseumMissionsV109A;
+
+===== TERM relearn =====
+17765:     }
+17766:   }catch(_){ }
+17767:   return out;
+17768: }
+17769: function v109aRelearnCandidates(m,mode){
+17770:   const h=v109aMoveHistory(m),cur=new Set(m.moves||[]),out=[];
+17771:   const source=mode==='refused'?h.refused:[...h.forgotten,...v109aNaturalCandidates(m)];
+17772:   for(const mid of source)if(MOVE_DB[mid]&&!cur.has(mid)&&!out.includes(mid))out.push(mid);
+17773:   return out;
+17774: }
+17775: function v109aMoveCard(mid){
+---
+17815:   const m=entry.m,data=BY[m.id]||{},name=v109aEsc(data.name||m.id),type=v109aEsc(data.type||'Neutre');
+17816:   let src='';try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+17817:   const loc=entry.where==='team'?'Équipe':'PC';
+17818:   const portrait=src?`<img src="${src}" alt="${name}" style="width:72px;height:72px;object-fit:contain;border-radius:12px;background:#eef6f8;border:1px solid #c8d8dd">`:'<div style="width:72px;height:72px;display:grid;place-items:center;background:#eef6f8;border-radius:12px">?</div>';
+17819:   return `<button class="bagitem" style="text-align:left;display:flex;gap:10px;align-items:center" onclick="v109aOpenRelearnCreature('${mode}','${entry.where}',${entry.index})">${portrait}<span><b>${name}</b><br>N.${m.level} • ${type}<br><small>${loc}</small></span></button>`
+17820: }
+17821: function v109aOpenRelearn(mode){
+17822:   v109aSeedHistory();
+17823:   const owned=v109aOwnedForMuseum();
+17824:   let h=`<div class="quest"><b>${mode==='refused'?'Attaques refusées':'Réapprendre une ancienne attaque'}</b><br><b>Choisis d’abord la créature</b> à laquelle tu veux proposer un apprentissage. Les créatures de l’équipe et du PC sont toutes disponibles.</div><div class="baggrid">`;
+17825:   if(!owned.length)h+='<div class="quest">Tu ne possèdes encore aucune créature.</div>';
+---
+17817:   const loc=entry.where==='team'?'Équipe':'PC';
+17818:   const portrait=src?`<img src="${src}" alt="${name}" style="width:72px;height:72px;object-fit:contain;border-radius:12px;background:#eef6f8;border:1px solid #c8d8dd">`:'<div style="width:72px;height:72px;display:grid;place-items:center;background:#eef6f8;border-radius:12px">?</div>';
+17819:   return `<button class="bagitem" style="text-align:left;display:flex;gap:10px;align-items:center" onclick="v109aOpenRelearnCreature('${mode}','${entry.where}',${entry.index})">${portrait}<span><b>${name}</b><br>N.${m.level} • ${type}<br><small>${loc}</small></span></button>`
+17820: }
+17821: function v109aOpenRelearn(mode){
+17822:   v109aSeedHistory();
+17823:   const owned=v109aOwnedForMuseum();
+17824:   let h=`<div class="quest"><b>${mode==='refused'?'Attaques refusées':'Réapprendre une ancienne attaque'}</b><br><b>Choisis d’abord la créature</b> à laquelle tu veux proposer un apprentissage. Les créatures de l’équipe et du PC sont toutes disponibles.</div><div class="baggrid">`;
+17825:   if(!owned.length)h+='<div class="quest">Tu ne possèdes encore aucune créature.</div>';
+17826:   for(const entry of owned)h+=v109aMuseumCreatureCard(entry,mode);
+17827:   h+='</div><button onclick="openMuseumDirectorV109A()">Retour au directeur</button>';
+---
+17826:   for(const entry of owned)h+=v109aMuseumCreatureCard(entry,mode);
+17827:   h+='</div><button onclick="openMuseumDirectorV109A()">Retour au directeur</button>';
+17828:   openSimpleMenu(mode==='refused'?'Choisir une créature — attaques refusées':'Choisir une créature — réapprentissage',h)
+17829: }
+17830: window.v109aOpenRelearn=v109aOpenRelearn;
+17831: function v109aOpenRelearnCreature(mode,where,index){
+17832:   const list=where==='team'?(state.team||[]):where==='pc'?(state.pc||[]):(state.box||[]),m=list[Number(index)];
+17833:   if(!m){toast('Créature introuvable.');v109aOpenRelearn(mode);return}
+17834:   const cand=v109aRelearnCandidates(m,mode),data=BY[m.id]||{},name=v109aEsc(data.name||m.id),type=v109aEsc(data.type||'Neutre');
+17835:   let src='';try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+17836:   let h=`<div class="quest" style="display:flex;gap:12px;align-items:center">${src?`<img src="${src}" style="width:86px;height:86px;object-fit:contain;border-radius:14px;background:#eef6f8;border:1px solid #c8d8dd">`:''}<div><b>${name} — N.${m.level}</b><br>Type ${type}<br><small>${where==='team'?'Équipe':'PC'}</small></div></div>`;
+---
+17827:   h+='</div><button onclick="openMuseumDirectorV109A()">Retour au directeur</button>';
+17828:   openSimpleMenu(mode==='refused'?'Choisir une créature — attaques refusées':'Choisir une créature — réapprentissage',h)
+17829: }
+17830: window.v109aOpenRelearn=v109aOpenRelearn;
+17831: function v109aOpenRelearnCreature(mode,where,index){
+17832:   const list=where==='team'?(state.team||[]):where==='pc'?(state.pc||[]):(state.box||[]),m=list[Number(index)];
+17833:   if(!m){toast('Créature introuvable.');v109aOpenRelearn(mode);return}
+17834:   const cand=v109aRelearnCandidates(m,mode),data=BY[m.id]||{},name=v109aEsc(data.name||m.id),type=v109aEsc(data.type||'Neutre');
+17835:   let src='';try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+17836:   let h=`<div class="quest" style="display:flex;gap:12px;align-items:center">${src?`<img src="${src}" style="width:86px;height:86px;object-fit:contain;border-radius:14px;background:#eef6f8;border:1px solid #c8d8dd">`:''}<div><b>${name} — N.${m.level}</b><br>Type ${type}<br><small>${where==='team'?'Équipe':'PC'}</small></div></div>`;
+17837:   if(!cand.length)h+=`<div class="quest">${mode==='refused'?'Aucune attaque refusée n’est disponible pour cette créature.':'Aucune ancienne attaque réapprenable n’est disponible pour cette créature.'}</div>`;
+
+===== TERM réapprendre =====
+17820: }
+17821: function v109aOpenRelearn(mode){
+17822:   v109aSeedHistory();
+17823:   const owned=v109aOwnedForMuseum();
+17824:   let h=`<div class="quest"><b>${mode==='refused'?'Attaques refusées':'Réapprendre une ancienne attaque'}</b><br><b>Choisis d’abord la créature</b> à laquelle tu veux proposer un apprentissage. Les créatures de l’équipe et du PC sont toutes disponibles.</div><div class="baggrid">`;
+17825:   if(!owned.length)h+='<div class="quest">Tu ne possèdes encore aucune créature.</div>';
+17826:   for(const entry of owned)h+=v109aMuseumCreatureCard(entry,mode);
+17827:   h+='</div><button onclick="openMuseumDirectorV109A()">Retour au directeur</button>';
+17828:   openSimpleMenu(mode==='refused'?'Choisir une créature — attaques refusées':'Choisir une créature — réapprentissage',h)
+17829: }
+17830: window.v109aOpenRelearn=v109aOpenRelearn;
+---
+17834:   const cand=v109aRelearnCandidates(m,mode),data=BY[m.id]||{},name=v109aEsc(data.name||m.id),type=v109aEsc(data.type||'Neutre');
+17835:   let src='';try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+17836:   let h=`<div class="quest" style="display:flex;gap:12px;align-items:center">${src?`<img src="${src}" style="width:86px;height:86px;object-fit:contain;border-radius:14px;background:#eef6f8;border:1px solid #c8d8dd">`:''}<div><b>${name} — N.${m.level}</b><br>Type ${type}<br><small>${where==='team'?'Équipe':'PC'}</small></div></div>`;
+17837:   if(!cand.length)h+=`<div class="quest">${mode==='refused'?'Aucune attaque refusée n’est disponible pour cette créature.':'Aucune ancienne attaque réapprenable n’est disponible pour cette créature.'}</div>`;
+17838:   for(const mid of cand)h+=`<div class="quest">${v109aMoveCard(mid)}<br><button onclick="v109aTeachFromMuseum('${where}',${Number(index)},'${mid}')">${mode==='refused'?'Apprendre':'Réapprendre'} ${v109aEsc(MOVE_DB[mid].name)}</button></div>`;
+17839:   h+=`<button onclick="v109aOpenRelearn('${mode}')">Choisir une autre créature</button> <button onclick="openMuseumDirectorV109A()">Retour au directeur</button>`;
+17840:   openSimpleMenu(mode==='refused'?'Attaques refusées — '+name:'Réapprentissage — '+name,h)
+17841: }
+17842: window.v109aOpenRelearnCreature=v109aOpenRelearnCreature;
+17843: 
+17844: function v109aStartEgg(){const s=v109aState();if(s.egg.status!=='hidden')return;s.egg={status:'active',zones:[],startedAt:Date.now()};save(false);dialog('<b>L’œuf inconnu</b><br>Le directeur te confie un œuf acquis par le musée. Apporte-le au Professeur Aurine à Clairval : ses relevés devraient permettre d’identifier les environnements auxquels il réagit.');}
+---
+17868:   }
+17869:   const name=v109aMuseumDirector()?.name||'Direction du musée';
+17870:   let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+17871:   h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+17872:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+17873:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+17874:   if(s.livret.unlocked&&v109aHasSeal3())h+='<button class="bagitem" onclick="v109aOpenLivret()"><b>Livret des Éclats</b><br>Ouvrir le dossier secret</button>';
+17875:   h+='</div>';openSimpleMenu('Direction du musée',h);
+17876: }
+17877: window.openMuseumDirectorV109A=openMuseumDirectorV109A;
+17878: 
+
+===== TERM Rappel =====
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1717: 
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+---
+2298: 
+2299: 
+2300: function ensureInventoryV81(st=state){
+2301:   st.inventory=st.inventory||{};
+2302:   for(const k of ['Potion','SuperPotion','Orbe','SuperOrbe','MegaOrbe','Antidote','Baie','Repas','FioleAttaque','FioleDefense','Rappel']){
+2303:     if(st.inventory[k]==null)st.inventory[k]=0
+2304:   }
+2305:   return st
+2306: }
+2307: 
+2308: 
+---
+6986: function battleHealingTargetsV86(item){
+6987:   const heal=item==='Potion'?30:item==='SuperPotion'?80:item==='Repas'?50:0;
+6988:   return state.team.map((m,i)=>({m,i})).filter(x=>{
+6989:     if(!x.m)return false;
+6990:     if(item==='Rappel')return x.m.hp<=0;
+6991:     if(x.m.hp<=0)return false;
+6992:     if(heal>0)return x.m.hp<maxHP(x.m);
+6993:     if(item==='Antidote')return x.m.status==='empoisonné';
+6994:     if(item==='Baie')return !!x.m.status && x.m.status!=='empoisonné';
+6995:     return true
+6996:   })
+---
+7022:   if(!m||(state.inventory[item]||0)<=0)return;
+7023: 
+7024:   let used=false,msg='';
+7025: 
+7026:   if(item==='Rappel'){
+7027:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+7028:     state.inventory.Rappel--;
+7029:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+7030:     m.status=null;
+7031:     used=true;
+7032:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+---
+7024:   let used=false,msg='';
+7025: 
+7026:   if(item==='Rappel'){
+7027:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+7028:     state.inventory.Rappel--;
+7029:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+7030:     m.status=null;
+7031:     used=true;
+7032:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7033:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7034:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+
+===== TERM ElixirVital =====
+13277: function zPick(a){return a[Math.floor(Math.random()*a.length)]}
+13278: function zHash(s){let h=2166136261>>>0;for(const c of String(s||'')){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+13279: function zEnsure(){
+13280:   state.inventory=state.inventory||{};
+13281:   for(const k of ['FioleGuerison','ElixirVital','Artefact1','Artefact2','Artefact3','Artefact4','Artefact5'])
+13282:     if(!Number.isFinite(state.inventory[k]))state.inventory[k]=0;
+13283:   state.v102z=state.v102z||{story:{},taronBossWins:{},combatWins:0};
+13284:   state.v102z.story=state.v102z.story||{};
+13285:   state.v102z.taronBossWins=state.v102z.taronBossWins||{};
+13286:   return state.v102z;
+13287: }
+---
+13723: // 10. NOUVEAUX OBJETS : FIOLE DE GUÉRISON + ARTEFACTS + STOCK ÉVOLUTIF
+13724: // ----------------------------------------------------------------------
+13725: Object.assign(SHOP_ITEMS,{
+13726:   FioleGuerison:{label:'Fiole de Guérison',price:180,desc:'Restaure 120 PV et soigne le statut d’un Éclat.'},
+13727:   ElixirVital:{label:'Élixir Vital',price:360,desc:'Restaure totalement les PV et le statut, hors combat.'},
+13728:   Artefact1:{label:'Artefact de Résonance I',price:420,desc:'Fait gagner immédiatement 1 niveau à une créature.'},
+13729:   Artefact2:{label:'Artefact de Résonance II',price:850,desc:'Fait gagner immédiatement 2 niveaux à une créature.'},
+13730:   Artefact3:{label:'Artefact de Résonance III',price:1450,desc:'Fait gagner immédiatement 3 niveaux à une créature.'},
+13731:   Artefact4:{label:'Artefact de Résonance IV',price:2250,desc:'Fait gagner immédiatement 4 niveaux à une créature.'},
+13732:   Artefact5:{label:'Artefact de Résonance V',price:3400,desc:'Fait gagner immédiatement 5 niveaux à une créature.'}
+13733: });
+---
+13737: window.pNormalShopIdsV101P=function(){
+13738:   const ids=Z_NORMAL_SHOP?Z_NORMAL_SHOP():['Potion','Orbe','Antidote','Baie'];const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+13739:   if(tier>=2)ids.push('FioleGuerison','Artefact1');
+13740:   if(tier>=3)ids.push('Artefact2');
+13741:   if(tier>=4)ids.push('ElixirVital','Artefact3');
+13742:   if(tier>=5)ids.push('Artefact4');
+13743:   if(tier>=6)ids.push('Artefact5');
+13744:   return [...new Set(ids)]
+13745: };
+13746: const Z_MARKET_IDS=window.pMarketItemIdsV101P;
+13747: if(Z_MARKET_IDS)window.pMarketItemIdsV101P=function(){
+---
+13745: };
+13746: const Z_MARKET_IDS=window.pMarketItemIdsV101P;
+13747: if(Z_MARKET_IDS)window.pMarketItemIdsV101P=function(){
+13748:   const ids=Z_MARKET_IDS();const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+13749:   if(tier>=2)ids.push('FioleGuerison','Artefact1');if(tier>=3)ids.push('Artefact2');if(tier>=4)ids.push('ElixirVital','Artefact3');if(tier>=5)ids.push('Artefact4');if(tier>=6)ids.push('Artefact5');return [...new Set(ids)]
+13750: };
+13751: function zRaiseLevels(m,n){
+13752:   const events=[];if(!m||m.hp<=0)return events;
+13753:   for(let k=0;k<n&&m.level<100;k++){
+13754:     const oldMax=maxHP(m);m.level++;const newMax=maxHP(m);m.hp=Math.min(newMax,m.hp+(newMax-oldMax)+6);
+13755:     for(const mv of defaultMoves(m.id,m.level))if(!m.moves.includes(mv))v106pLearnNaturalMove(m,mv)
+---
+13759: }
+13760: const Z_APPLY_BAG=applyBagItem;
+13761: applyBagItem=function(index){
+13762:   const item=pendingBagItem,m=state.team[index];zEnsure();if(!item||!m)return;
+13763:   if(item==='FioleGuerison'||item==='ElixirVital'){
+13764:     if((state.inventory[item]||0)<=0)return toast('Tu n’en as plus.');if(m.hp<=0)return toast('Utilise d’abord un Rappel.');
+13765:     if(m.hp>=maxHP(m)&&!m.status)return toast(BY[m.id].name+' est déjà en pleine forme.');
+13766:     state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;save(false);hud();toast(BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut est soigné.');openBag();return
+13767:   }
+13768:   if(/^Artefact[1-5]$/.test(item)){
+13769:     if((state.inventory[item]||0)<=0)return toast('Tu n’en as plus.');if(m.hp<=0)return toast('Un Éclat K.O. ne peut pas utiliser un Artefact.');
+
+===== TERM gares découvertes =====
+7721:   let h=q.map(x=>`<div class="quest"><b>${x.title}</b><br><b>${x.progress}</b><br>${x.txt}</div>`).join('');
+7722:   h+='<div class="quest"><b>Progression générale</b><br>'+
+7723:     'Espèces capturées : '+v83CaughtCount()+'/150<br>'+
+7724:     'Sceaux : '+(state.seals||[]).length+'/7<br>'+
+7725:     'Gares découvertes : '+v84UnlockedStationCities().length+'/8</div>';
+7726:   openSimpleMenu('Objectifs',h)
+7727: }
+7728: function installObjectivesButtonV84(){
+7729:   const grid=document.querySelector('aside .panel .grid');
+7730:   if(!grid||document.getElementById('objectivesBtnV84'))return;
+7731:   const b=document.createElement('button');
+---
+10386:   'Les Gardiens deviennent progressivement plus puissants.',
+10387:   'Certaines routes cachent davantage de ressources que d’autres.',
+10388:   'Pense à soigner ton équipe avant une longue traversée.',
+10389:   'Pour accéder à la Citadelle : 75 espèces capturées, les 7 Sceaux et la maîtrise de Vol sont nécessaires.',
+10390:   'Les gares découvertes permettent de traverser Valdora plus rapidement.',
+10391:   'La Team Taron laisse parfois des traces derrière elle.',
+10392:   'Les panneaux anciens racontent l’histoire de Valdora.'
+10393: ];
+10394: 
+10395: function ensureRouteFindsV93(){state.routeFindsV93=state.routeFindsV93||{}}
+10396: 
+
+===== TERM masteries =====
+15951:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15952:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+15958: ];
+15959: const V106Z_CODEX_MILESTONES=[20,40,60,80,100,120,140,150];
+15960: const V106Z_CACHE_ZONES=[...Array.from({length:15},(_,i)=>'town'+i),...Array.from({length:14},(_,i)=>'route'+i),'route4bis'];
+15961: const V106Z_ROUTE_TYPES={
+---
+15973: function zCaught(){return Object.values(state.dex||{}).filter(v=>v?.caught).length}
+15974: function zTypeCaught(type){let n=0;for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught&&BY?.[id]?.type===type)n++;return n}
+15975: function zTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+15976: function zMaxLevel(){return Math.max(0,...[...(state.team||[]),...(state.box||[])].map(m=>Number(m?.level)||0))}
+15977: function zMasteries(){return Number(window.ValdoraGameplayV106Y?.marks?.())||0}
+15978: function zTaronDone(){return V106Z_TARON_OPS.filter(o=>zState().taronOps[o.id]?.done).length}
+15979: function zMainTaronDone(){return V106Z_TARON_OPS.filter(o=>o.main&&zState().taronOps[o.id]?.done).length}
+15980: function zPaidTrips(){return (Number(state.v106y?.busTrips)||0)+zState().trainTrips}
+15981: function zCachesFound(){return Object.values(zState().caches).filter(Boolean).length}
+15982: function zMetrics(){return {caught:zCaught(),trainers:zTrainerWins(),paidTrips:zPaidTrips(),caches:zCachesFound(),waterCaught:zTypeCaught('Eau'),taronOps:zTaronDone(),maxLevel:zMaxLevel(),masteries:zMasteries()}}
+15983: function zDiscovered(zone){return zCreator()||(state.discovered||[]).includes(zone)}
+---
+15978: function zTaronDone(){return V106Z_TARON_OPS.filter(o=>zState().taronOps[o.id]?.done).length}
+15979: function zMainTaronDone(){return V106Z_TARON_OPS.filter(o=>o.main&&zState().taronOps[o.id]?.done).length}
+15980: function zPaidTrips(){return (Number(state.v106y?.busTrips)||0)+zState().trainTrips}
+15981: function zCachesFound(){return Object.values(zState().caches).filter(Boolean).length}
+15982: function zMetrics(){return {caught:zCaught(),trainers:zTrainerWins(),paidTrips:zPaidTrips(),caches:zCachesFound(),waterCaught:zTypeCaught('Eau'),taronOps:zTaronDone(),maxLevel:zMaxLevel(),masteries:zMasteries()}}
+15983: function zDiscovered(zone){return zCreator()||(state.discovered||[]).includes(zone)}
+15984: function zSave(){try{save(false)}catch(_){}try{hud()}catch(_){}}
+15985: 
+15986: // -------- TEAM TARON : campagne multi-vagues --------
+15987: function zOpState(id){const s=zState();return s.taronOps[id]||(s.taronOps[id]={intel:false,waves:0,done:false})}
+15988: function zOpUnlocked(op){return (state.seals||[]).length>=op.seal&&zDiscovered(op.zone)}
+---
+16012: function zContractProgress(c,st){const m=zMetrics();return Math.max(0,Number(m[c.kind])||0)}
+16013: function acceptContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id);if(!c||c.seal>(state.seals||[]).length)return;const st=zState().contracts[id]||(zState().contracts[id]={});if(st.claimed||st.accepted)return;st.accepted=true;st.acceptedAt=Date.now();zSave();openContractsV106Z()}
+16014: function claimContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id),st=zState().contracts[id];if(!c||!st?.accepted||st.claimed||zContractProgress(c,st)<c.goal)return;st.claimed=true;state.money=(Number(state.money)||0)+c.reward;state.inventory=state.inventory||{};state.inventory[c.item]=(Number(state.inventory[c.item])||0)+c.qty;zSave();toast(`Contrat terminé : ${c.title}`);openContractsV106Z()}
+16015: window.acceptContractV106Z=acceptContractV106Z;window.claimContractV106Z=claimContractV106Z;
+16016: function zContractText(c){return {caught:`Capturer ${c.goal} espèces différentes`,trainers:`Atteindre ${c.goal} victoires de dresseurs`,paidTrips:`Effectuer ${c.goal} trajets payants (bus ou train)`,caches:`Découvrir ${c.goal} caches d'exploration`,waterCaught:`Capturer ${c.goal} espèces de type Eau`,taronOps:`Démanteler ${c.goal} opération${c.goal>1?'s':''} Taron`,maxLevel:`Atteindre le niveau ${c.goal} avec au moins un Éclat`,masteries:`Valider ${c.goal} maîtrises de ville`}[c.kind]||c.kind}
+16017: function openContractsV106Z(){let h='<div class="quest"><b>Bureau des contrats</b><br>Les contrats suivent tes accomplissements globaux et constituent une progression parallèle à l’histoire.</div>';for(const c of V106Z_CONTRACTS){if(c.seal>(state.seals||[]).length)continue;const st=zState().contracts[c.id]||{},p=st.accepted?Math.min(c.goal,zContractProgress(c,st)):0;h+=`<div class="quest"><b>${c.title}</b><br>${zContractText(c)}${st.accepted?` : <b>${p}/${c.goal}</b>`:''}<br><small>Récompense : ${c.reward} V + ${c.qty} ${c.item}</small>${st.claimed?'<br><b>✓ Contrat soldé</b>':!st.accepted?`<br><button onclick="acceptContractV106Z('${c.id}')">Accepter</button>`:p>=c.goal?`<br><button onclick="claimContractV106Z('${c.id}')">Réclamer</button>`:''}</div>`}openSimpleMenu('Contrats de Valdora',h)}
+16018: window.openContractsV106Z=openContractsV106Z;
+16019: 
+16020: // -------- CACHES D'EXPLORATION --------
+16021: function zHash(s){let h=2166136261;for(const ch of String(s)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+16022: function zCachePoint(zone=state.zone){const sc=SCENES?.[zone];if(!sc)return null;if(sc._v106zCachePoint)return sc._v106zCachePoint;const h=zHash(zone);let x=(sc.width||1800)*(.22+((h%47)/100)),y=(sc.height||1100)*(.24+(((h>>>8)%43)/100));const ts=sc.trainers||[];if(sc.kind==='route'&&ts.length){const t=ts[h%ts.length];x=t.x+((h&1)?150:-150);y=t.y+((h&2)?90:-90)}const ox=state.zone;try{state.zone=zone;const cands=[[x,y],[x+120,y],[x-120,y],[x,y+120],[x,y-120]];for(const [cx,cy] of cands){if(cx>70&&cy>70&&cx<(sc.width||1800)-70&&cy<(sc.height||1100)-70&&(!window.collision||!collision(cx,cy,cx,cy))){x=cx;y=cy;break}}}catch(_){}finally{state.zone=ox}return sc._v106zCachePoint={x,y}}
+---
+16086: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if(r.taron<6)m.push(`démanteler le Projet Résonance (${r.taron}/6)`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16087: 
+16088: // -------- OBJECTIFS + MENU --------
+16089: const BASE_OBJECTIVES_V106Z=typeof objectivesV84==='function'?objectivesV84:null;
+16090: if(BASE_OBJECTIVES_V106Z){objectivesV84=function(){const q=BASE_OBJECTIVES_V106Z(),r=window.v106pCitadelRequirements();q.push({title:'Enquête principale — Projet Résonance',progress:`${zMainTaronDone()}/6 opérations`,txt:zMainTaronDone()>=6?'Le cœur du réseau Taron est identifié.':'Poursuis le Dossier Team Taron : les six opérations principales sont nécessaires avant la Citadelle.'});q.push({title:'Exploration de Valdora',progress:`${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches`,txt:'Des caches discrètes brillent lorsque tu t’en approches. Fouille villes et routes.'});q.push({title:'Progression longue durée',progress:`${zTaronDone()}/8 Taron • ${zMasteries()}/15 maîtrises`,txt:'Contrats, revanche des Gardiens, dresseurs vétérans et paliers du Codex prolongent l’aventure.'});return q};window.objectivesV84=objectivesV84}
+16091: function installV106ZButton(){const grid=document.querySelector('aside .panel:nth-of-type(3) .grid')||document.querySelector('aside .grid');if(grid&&!document.getElementById('adventurePlusV106Z')){const b=document.createElement('button');b.id='adventurePlusV106Z';b.textContent='Aventure +';b.onclick=openAdventureHubV106Z;grid.appendChild(b)}}
+16092: 
+16093: // Bus V106Y : l'économie est volontairement plus exigeante dans V106Z (la formule source est également remplacée lors du build).
+16094: function brandV106Z(){document.title='Éclats Sauvages — Valdora V107A';const b=document.querySelector('.brand b');if(b)b.textContent=`VALDORA V107A — ${zCreator()?'CRÉATEUR':'JOUEUR'}`}
+16095: installV106ZButton();brandV106Z();zState();setTimeout(()=>{installV106ZButton();brandV106Z()},1200);setInterval(()=>{try{zState()}catch(_){}},3000);
+16096: window.ValdoraGameplayV106Z={version:V106Z_VERSION,taronOps:V106Z_TARON_OPS,contracts:V106Z_CONTRACTS,caches:V106Z_CACHE_ZONES,mainTaronDone:zMainTaronDone,openHub:openAdventureHubV106Z};document.documentElement.dataset.gameplayExpansion='V106Z';
+
+===== TERM Maîtrise urbaine =====
+15951:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15952:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+15958: ];
+15959: const V106Z_CODEX_MILESTONES=[20,40,60,80,100,120,140,150];
+15960: const V106Z_CACHE_ZONES=[...Array.from({length:15},(_,i)=>'town'+i),...Array.from({length:14},(_,i)=>'route'+i),'route4bis'];
+15961: const V106Z_ROUTE_TYPES={
+
+===== TERM contre-espionnage =====
+15947:  {id:'c02',seal:1,title:'Dresseurs de terrain',kind:'trainers',goal:10,reward:850,item:'Potion',qty:3},
+15948:  {id:'c03',seal:1,title:'Mobilité régionale',kind:'paidTrips',goal:5,reward:600,item:'SuperPotion',qty:1},
+15949:  {id:'c04',seal:2,title:'Cartographe curieux',kind:'caches',goal:5,reward:900,item:'SuperOrbe',qty:1},
+15950:  {id:'c05',seal:2,title:'Faune lacustre',kind:'waterCaught',goal:6,reward:950,item:'SuperOrbe',qty:1},
+15951:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15952:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+
+===== TERM taronOps =====
+7700:   if(/Aubeval|Horizons/i.test(title))return discovered.has('town14')||!!state.flags?.aubevalExpeditionLicense;
+7701:   if(/Légendaires/i.test(title))return !!state.flags?.aubevalExpeditionLicense||[151,152,153,154,155,156,157,158,159,160,161].some(id=>state.dex?.[id]?.seen||state.dex?.[id]?.caught);
+7702:   if(/Citadelle/i.test(title))return seals>=4||caught>=50||discovered.has('town7')||discovered.has('town14');
+7703:   if(/Capacité Vol/i.test(title))return seals>=3||discovered.has('route3')||discovered.has('route4');
+7704:   if(/Projet Résonance|Team Taron/i.test(title))return !!state.v106z?.activeTaronOp||Object.values(state.v106z?.taronOps||{}).some(v=>v?.done||v?.waves>0)||(state.taron?.wins||0)>0;
+7705:   if(title==='Exploration de Valdora'&&/caches/i.test(String(x?.progress||'')+' '+String(x?.txt||'')))return Object.keys(state.v106z?.caches||{}).length>0;
+7706:   if(title==='Les Sept Sceaux')return seals>0||Number(state.story||0)>=2||discovered.has('town1');
+7707:   if(/Progression longue durée|Maîtrise de Valdora/i.test(title))return seals>=2||[...discovered].filter(z=>/^town\d+$/.test(z)).length>=3;
+7708:   if(/Réseau ferroviaire/i.test(title))return (state.visitedCities||[]).length>1||[...discovered].filter(z=>/^town\d+$/.test(z)).length>1||Number(state.v106y?.trainTrips||0)>0;
+7709:   return true
+7710: }
+---
+15947:  {id:'c02',seal:1,title:'Dresseurs de terrain',kind:'trainers',goal:10,reward:850,item:'Potion',qty:3},
+15948:  {id:'c03',seal:1,title:'Mobilité régionale',kind:'paidTrips',goal:5,reward:600,item:'SuperPotion',qty:1},
+15949:  {id:'c04',seal:2,title:'Cartographe curieux',kind:'caches',goal:5,reward:900,item:'SuperOrbe',qty:1},
+15950:  {id:'c05',seal:2,title:'Faune lacustre',kind:'waterCaught',goal:6,reward:950,item:'SuperOrbe',qty:1},
+15951:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15952:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+---
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+15958: ];
+15959: const V106Z_CODEX_MILESTONES=[20,40,60,80,100,120,140,150];
+15960: const V106Z_CACHE_ZONES=[...Array.from({length:15},(_,i)=>'town'+i),...Array.from({length:14},(_,i)=>'route'+i),'route4bis'];
+15961: const V106Z_ROUTE_TYPES={
+15962:  town0:['Nature','Neutre','Roche'],
+15963:  route0:['Nature','Neutre'],route1:['Nature','Spore','Roche'],route2:['Eau','Nature','Foudre'],route3:['Roche','Air','Nature'],
+---
+15965:  route7:['Ombre','Air','Neutre'],route8:['Roche','Air','Foudre'],route9:['Eau','Glace','Ombre'],route10:['Eau','Lumière','Air'],
+15966:  route11:['Eau','Air','Roche'],route12:['Ombre','Foudre','Feu'],route13:['Lumière','Air','Nature']
+15967: };
+15968: function zState(){
+15969:  state.v106z=state.v106z||{};const s=state.v106z;s.version=V106Z_VERSION;s.taronOps=s.taronOps||{};s.contracts=s.contracts||{};s.caches=s.caches||{};s.codexClaims=s.codexClaims||{};s.trainTrips=Number(s.trainTrips)||0;s.activeTaronOp=s.activeTaronOp||null;return s
+15970: }
+15971: function zCreator(){return typeof v61CreatorMode==='function'&&v61CreatorMode()}
+15972: function zCityName(zone){return SCENES?.[zone]?.name||zone}
+15973: function zCaught(){return Object.values(state.dex||{}).filter(v=>v?.caught).length}
+15974: function zTypeCaught(type){let n=0;for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught&&BY?.[id]?.type===type)n++;return n}
+15975: function zTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+---
+15974: function zTypeCaught(type){let n=0;for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught&&BY?.[id]?.type===type)n++;return n}
+15975: function zTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+15976: function zMaxLevel(){return Math.max(0,...[...(state.team||[]),...(state.box||[])].map(m=>Number(m?.level)||0))}
+15977: function zMasteries(){return Number(window.ValdoraGameplayV106Y?.marks?.())||0}
+15978: function zTaronDone(){return V106Z_TARON_OPS.filter(o=>zState().taronOps[o.id]?.done).length}
+15979: function zMainTaronDone(){return V106Z_TARON_OPS.filter(o=>o.main&&zState().taronOps[o.id]?.done).length}
+15980: function zPaidTrips(){return (Number(state.v106y?.busTrips)||0)+zState().trainTrips}
+15981: function zCachesFound(){return Object.values(zState().caches).filter(Boolean).length}
+15982: function zMetrics(){return {caught:zCaught(),trainers:zTrainerWins(),paidTrips:zPaidTrips(),caches:zCachesFound(),waterCaught:zTypeCaught('Eau'),taronOps:zTaronDone(),maxLevel:zMaxLevel(),masteries:zMasteries()}}
+15983: function zDiscovered(zone){return zCreator()||(state.discovered||[]).includes(zone)}
+15984: function zSave(){try{save(false)}catch(_){}try{hud()}catch(_){}}
+
+===== TERM guardianCircuit =====
+16025: 
+16026: // -------- CIRCUIT DES GARDIENS --------
+16027: function zGuardianTierUnlocked(t){return (state.seals||[]).length>=[3,5,7][t-1]}
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+16033: 
+16034: // -------- CODEX : paliers de recherche --------
+16035: function claimCodexMilestoneV106Z(n){
+---
+16026: // -------- CIRCUIT DES GARDIENS --------
+16027: function zGuardianTierUnlocked(t){return (state.seals||[]).length>=[3,5,7][t-1]}
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+16033: 
+16034: // -------- CODEX : paliers de recherche --------
+16035: function claimCodexMilestoneV106Z(n){
+16036:  if(zCaught()<n){toast('Ce palier du Codex n’est pas encore atteint.');return}if(zState().codexClaims[n]){toast('Cette récompense a déjà été récupérée.');return}
+---
+16027: function zGuardianTierUnlocked(t){return (state.seals||[]).length>=[3,5,7][t-1]}
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+16033: 
+16034: // -------- CODEX : paliers de recherche --------
+16035: function claimCodexMilestoneV106Z(n){
+16036:  if(zCaught()<n){toast('Ce palier du Codex n’est pas encore atteint.');return}if(zState().codexClaims[n]){toast('Cette récompense a déjà été récupérée.');return}
+16037:  const money=500+n*18,item=n>=100?'MegaOrbe':n>=60?'SuperOrbe':'Orbe',qty=n>=120?2:1,labels={Orbe:"Orbe d'Éclat",SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'};zState().codexClaims[n]=true;state.money=(Number(state.money)||0)+money;state.inventory=state.inventory||{};state.inventory[item]=(Number(state.inventory[item])||0)+qty;zSave();
+---
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+16033: 
+16034: // -------- CODEX : paliers de recherche --------
+16035: function claimCodexMilestoneV106Z(n){
+16036:  if(zCaught()<n){toast('Ce palier du Codex n’est pas encore atteint.');return}if(zState().codexClaims[n]){toast('Cette récompense a déjà été récupérée.');return}
+16037:  const money=500+n*18,item=n>=100?'MegaOrbe':n>=60?'SuperOrbe':'Orbe',qty=n>=120?2:1,labels={Orbe:"Orbe d'Éclat",SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'};zState().codexClaims[n]=true;state.money=(Number(state.money)||0)+money;state.inventory=state.inventory||{};state.inventory[item]=(Number(state.inventory[item])||0)+qty;zSave();
+16038:  dialog('<b>Récompense du Codex — palier '+n+'</b><br><br>Tu reçois :<br>• <b>'+money+' Voltrons</b><br>• <b>'+qty+' × '+(labels[item]||item)+'</b><br><br>La récompense a été ajoutée à ton inventaire.',()=>openCodexMilestonesV106Z())
+---
+16040: window.claimCodexMilestoneV106Z=claimCodexMilestoneV106Z;
+16041: function openCodexMilestonesV106Z(){let h=`<div class="quest"><b>Programme de recherche du Codex</b><br>${zCaught()}/150 espèces capturées.</div>`;for(const n of V106Z_CODEX_MILESTONES){const done=!!zState().codexClaims[n],ready=zCaught()>=n;h+=`<div class="quest"><b>Palier ${n} espèces</b><br>${done?'✓ Récompense récupérée':ready?`Recherche validée<br><button onclick="claimCodexMilestoneV106Z(${n})">Récupérer la récompense</button>`:`Progression : ${Math.min(zCaught(),n)}/${n}`}</div>`}openSimpleMenu('Recherche du Codex',h)}
+16042: window.openCodexMilestonesV106Z=openCodexMilestonesV106Z;
+16043: 
+16044: function openAdventureHubV106Z(){openSimpleMenu('Aventure +',`<div class="quest"><b>Contenu longue durée</b><br>Enquête Taron, contrats, exploration, Circuit des Gardiens et recherche du Codex.</div><div class="baggrid"><button class="bagitem" onclick="openTaronDossierV106Z()"><b>◆ Dossier Team Taron</b><br>${zMainTaronDone()}/6 opérations principales</button><button class="bagitem" onclick="openContractsV106Z()"><b>📋 Contrats</b><br>Objectifs de terrain à progression propre</button><button class="bagitem" onclick="openGuardianCircuitV106Z()"><b>⚔ Circuit des Gardiens</b><br>Revanche à 3, 5 et 7 Sceaux</button><button class="bagitem" onclick="openCodexMilestonesV106Z()"><b>📖 Recherche Codex</b><br>${zCaught()}/150 espèces</button><button class="bagitem" onclick="document.getElementById('menuov').style.display='none';toast('Caches découvertes : ${zCachesFound()}/${V106Z_CACHE_ZONES.length}')"><b>🧭 Exploration</b><br>${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches</button></div>`)}
+16045: window.openAdventureHubV106Z=openAdventureHubV106Z;
+16046: 
+16047: // -------- TRANSPORTS PAYANTS --------
+16048: function trainFareV106Z(cityId){const from=typeof railCurrentCityV94==='function'?railCurrentCityV94():state.currentCityId,a=typeof railCityRecordV94==='function'?railCityRecordV94(from):null,b=typeof railCityRecordV94==='function'?railCityRecordV94(cityId):null;if(zCreator())return 0;const dist=a&&b?Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0)):30,disc=Number(window.ValdoraGameplayV106Y?.rank?.()?.discount)||0;return Math.max(180,Math.min(950,Math.round((140+dist*7)*(1-disc*.5)/10)*10))}
+16049: window.trainFareV106Z=trainFareV106Z;
+16050: window.v106zBoardTrain=function(cityId,fare){fare=Number(fare)||0;if(!railCanDepartV94(cityId)){toast('Cette gare n’est pas encore accessible.');return}if(!zCreator()&&(Number(state.money)||0)<fare){toast(`Billet de train : ${fare} V requis.`);return}if(!zCreator())state.money-=fare;zState().trainTrips++;zSave();document.querySelector('.stationTravelV62')?.remove();const city=railCityRecordV94(cityId);toast(`Billet validé : ${fare} V — ${city?.name||'destination'}.`);setTimeout(()=>playTrainTravelV622(cityId),300)};
+
+===== TERM circuit =====
+8561:   return v83TeachMove(teamIndex,mid)
+8562: }
+8563: 
+8564: 
+8565: const V108T_MOVE_DESCRIPTIONS={"v108e_nature_fouet_de_liane":"Le lanceur fouette vivement la cible en renforçant son mouvement avec l’énergie Nature. C’est une attaque offensive de type Nature dont l’impact dépend de sa puissance, du niveau, des statistiques et des affinités de type.","v108e_nature_feuille_tranchante":"Le lanceur projette un flot de feuilles acérées vers la cible. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_racines_vives":"Le lanceur fait jaillir des végétaux autour de la cible pour la frapper ou entraver ses mouvements. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_ronces":"Le lanceur fait jaillir des végétaux autour de la cible pour la frapper ou entraver ses mouvements. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_epine_venimeuse":"Le lanceur projette ou enfonce une épine chargée de substances irritantes dans la cible. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_charge_sylvestre":"Le lanceur prend de l’élan et percute directement la cible. C’est une attaque offensive de type Nature dont l’impact dépend de sa puissance, du niveau, des statistiques et des affinités de type.","v108e_nature_fouet_sauvage":"Le lanc
+8566: function moveDescriptionV108T(mid,mv=MOVE_DB[mid]||{}){
+8567:   if(mv.description)return String(mv.description);
+8568:   if(V108T_MOVE_DESCRIPTIONS[mid])return V108T_MOVE_DESCRIPTIONS[mid];
+8569:   const name=String(mv.name||mid||'Cette attaque'),type=String(mv.type||'Neutre'),power=typeof moveDisplayPowerV106U==='function'?Number(moveDisplayPowerV106U(mid)||0):Number(mv.displayPower||0);
+8570:   if(mid==='rugissement'||name==='Rugissement')return 'Le lanceur pousse un rugissement intimidant qui déstabilise l’adversaire. Cette capacité ne provoque pas de dégâts directs et sert à diminuer sa puissance offensive.';
+8571:   if(mid==='nage'||name==='Nage')return 'Le lanceur utilise l’élan de l’eau pour agir sur la cible. Hors combat, cette capacité permet aussi de franchir les passages aquatiques lorsque son utilisation est débloquée.';
+---
+15049: function v108mRoll(ch,u,t){if(ch>=1)return true;const f=clamp(1+((Number(u?.level)||1)-(Number(t?.level)||1))*.0075,.85,1.15);return Math.random()<clamp(ch*f,.04,.95)}
+15050: function v108mTempStage(m,k,n,turns){m[k]=clamp(v108mStage(m,k)+n,-3,3);m._v108mTempStages=Array.isArray(m._v108mTempStages)?m._v108mTempStages:[];m._v108mTempStages.push({k,n,turns:Math.max(1,Number(turns)||1)+1})}
+15051: function v108mTickTempStages(m){if(!Array.isArray(m?._v108mTempStages))return;const keep=[];for(const e of m._v108mTempStages){e.turns--;if(e.turns<=0)m[e.k]=clamp(v108mStage(m,e.k)-e.n,-3,3);else keep.push(e)}m._v108mTempStages=keep}
+15052: function v108mMovePower(user,target,mv){let p=Math.max(0,Number(mv?.displayPower??((Number(mv?.power)||0)*5))||0);if(String(mv?.name||'')==='Double Frappe')p=35;if(!p)return 0;const nm=String(mv.name||''),txt=String(mv.effectText||''),uh=user.hp/Math.max(1,maxHP(user)),th=target.hp/Math.max(1,maxHP(target));
+15053:  if(nm==='Colère Forestière'&&uh<.5)p+=20;if(nm==='Brasier'&&uh<.5)p+=20;if(nm==='Torrent'&&uh<.5)p+=25;if(nm==='Traque Nocturne'&&th<.5)p+=30;if(nm==='Combustion'&&target.status==='brûlé')p*=2;if(nm==='Court-Circuit'&&target.status==='paralysé')p+=30;if(nm==='Infection'&&target.status==='empoisonné')p+=30;if(nm==='Épidémie'&&target.status)p+=25;if(nm==='Glace Brisée'&&(target.status==='gelé'||v108mStage(target,'spdBuff')<0))p+=30;if(nm==='Châtiment Lumineux'&&(target.status||v108mStage(target,'atkBuff')<0||v108mStage(target,'defBuff')<0))p+=20;
+15054:  if(nm==='Exécution Nocturne'&&th<.25)p=140;if(nm==='Dernier Effort')p=60+Math.round((1-uh)*60);if(nm==='Contre'&&user._v108mWasHit)p*=2;if(nm==='Avalanche'&&user._v108mWasHit)p*=1.5;
+15055:  if(user._v108mNextTypeBoost?.type===mv.type){p*=user._v108mNextTypeBoost.mult||2;user._v108mNextTypeBoost=null}if(user._v108mTypeBoost?.turns>0&&user._v108mTypeBoost.type===mv.type)p*=user._v108mTypeBoost.mult||1.3;if(target._v108mMark?.turns>0&&target._v108mMark.type===mv.type)p*=target._v108mMark.mult||1.3;return p}
+15056: 
+15057: function canAct(m){
+15058:   if(m?._v108mFlinch){m._v108mFlinch=false;return `${nameOf(m)} hésite et ne peut pas agir !`}
+15059:   if(m?.status==='endormi'){m._sleepTurns=Number(m._sleepTurns||2)-1;if(m._sleepTurns<=0){m.status=null;return `${nameOf(m)} se réveille !`}return `${nameOf(m)} dort et ne peut pas agir !`}
+---
+15093:   if(nm==='Assaut'){const n=Math.max(1,Math.round(maxHP(user)*.05));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} perd ${n} PV.`)}if(nm==='Néant Absolu'){const n=Math.max(1,Math.round(maxHP(user)*.10));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} perd ${n} PV.`)}
+15094:   if(nm==='Nuage Nocif'){status('empoisonné',1,`${nameOf(target)} est empoisonné.`);foe('atkBuff',-1,`L'Attaque de ${nameOf(target)} baisse.`,Number(mv.debuffChance)||.30)}
+15095:   else if(nm!=='Infection'&&/(?:empoison|poison|toxique|mycotox)/i.test(txt)&&!/(?:supprime|retire)/i.test(txt))status('empoisonné',v108mChance(txt,.25),`${nameOf(target)} est empoisonné.`);
+15096:   if(!['Combustion'].includes(nm)&&/brûl/i.test(txt)&&!/supprime/i.test(txt))status('brûlé',v108mChance(txt,/Brûle la cible/i.test(txt)?1:.20),`${nameOf(target)} est brûlé.`);
+15097:   if(!['Court-Circuit','Champ Statique'].includes(nm)&&/paralys/i.test(txt)&&!/Vitesse/i.test(txt))status('paralysé',v108mChance(txt,.25),`${nameOf(target)} est paralysé.`);
+15098:   if((/gèle|geler|gel\.|% de gel/i.test(txt)||nm==='Zéro Absolu')&&!['Armure Gelée','Glace Brisée'].includes(nm))status('gelé',nm==='Zéro Absolu'?1:v108mChance(txt,.18),`${nameOf(target)} est gelé.`);
+15099:   if(nm==='Spore Somnolente')status('endormi',1,`${nameOf(target)} s'endort.`);else if(/endort|sommeil|somnol/i.test(txt))status('endormi',v108mChance(txt,.80),`${nameOf(target)} s'endort.`);
+15100:   if(nm==='Peste des Spores'&&v108mRoll(.45,user,target)&&!target.status){const a=['empoisonné','paralysé','endormi'];target.status=a[Math.floor(Math.random()*a.length)];if(target.status==='endormi')target._sleepTurns=2;out.push(`${nameOf(target)} subit une altération due aux spores.`)}
+15101:   const cond=/peut|parfois|possible|chance|risque/i.test(txt),hasPct=/\d+\s*%/.test(txt),ch=hasPct?v108mPct(txt,.25):(cond?v108mChance(txt,.25):1),strong=/fortement|forte baisse/i.test(txt)?-2:-1;
+15102:   if(!skipFoe&&/rédui(?:t|re)[^.]*Défense|réduction[^.]*Défense|baisse[^.]*Défense/i.test(txt))foe('defBuff',strong,`La Défense de ${nameOf(target)} baisse.`,ch);
+15103:   if(!skipFoe&&/rédui(?:t|re)[^.]*Attaque|réduction[^.]*Attaque|baisse[^.]*Attaque/i.test(txt))foe('atkBuff',strong,`L'Attaque de ${nameOf(target)} baisse.`,ch);
+---
+15949:  {id:'c04',seal:2,title:'Cartographe curieux',kind:'caches',goal:5,reward:900,item:'SuperOrbe',qty:1},
+15950:  {id:'c05',seal:2,title:'Faune lacustre',kind:'waterCaught',goal:6,reward:950,item:'SuperOrbe',qty:1},
+15951:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15952:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+15958: ];
+15959: const V106Z_CODEX_MILESTONES=[20,40,60,80,100,120,140,150];
+---
+16022: function zCachePoint(zone=state.zone){const sc=SCENES?.[zone];if(!sc)return null;if(sc._v106zCachePoint)return sc._v106zCachePoint;const h=zHash(zone);let x=(sc.width||1800)*(.22+((h%47)/100)),y=(sc.height||1100)*(.24+(((h>>>8)%43)/100));const ts=sc.trainers||[];if(sc.kind==='route'&&ts.length){const t=ts[h%ts.length];x=t.x+((h&1)?150:-150);y=t.y+((h&2)?90:-90)}const ox=state.zone;try{state.zone=zone;const cands=[[x,y],[x+120,y],[x-120,y],[x,y+120],[x,y-120]];for(const [cx,cy] of cands){if(cx>70&&cy>70&&cx<(sc.width||1800)-70&&cy<(sc.height||1100)-70&&(!window.collision||!collision(cx,cy,cx,cy))){x=cx;y=cy;break}}}catch(_){}finally{state.zone=ox}return sc._v106zCachePoint={x,y}}
+16023: function collectCacheV106Z(zone=state.zone){if(!V106Z_CACHE_ZONES.includes(zone)||zState().caches[zone])return false;const p=zCachePoint(zone);if(!p||Math.hypot(state.x-p.x,state.y-p.y)>105)return false;zState().caches[zone]=Date.now();const n=zCachesFound(),money=120+(n%6)*45;state.money=(Number(state.money)||0)+money;state.inventory=state.inventory||{};const item=n%5===0?'SuperOrbe':n%3===0?'SuperPotion':'Orbe';state.inventory[item]=(Number(state.inventory[item])||0)+1;zSave();dialog(`<b>Cache d'exploration ${n}/${V106Z_CACHE_ZONES.length}</b><br>Tu trouves <b>${money} V</b> et <b>1 ${item}</b> dans une cache dissimulée.`);return true}
+16024: window.collectCacheV106Z=collectCacheV106Z;
+16025: 
+16026: // -------- CIRCUIT DES GARDIENS --------
+16027: function zGuardianTierUnlocked(t){return (state.seals||[]).length>=[3,5,7][t-1]}
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+
+===== TERM rematchV106Y =====
+15896: 
+15897: function rematchId(t){return `v106y_rematch_${t.id}_s${(state.seals||[]).length}`}
+15898: function rematchAvailable(t){return !!(t&&state.trainerWins?.[t.id]&&(state.seals||[]).length>0&&!state.trainerWins?.[rematchId(t)])}
+15899: function rematchPoolTypes(){const z=Number(String(state.zone).replace(/\D/g,''))||0;return [['Nature','Neutre','Roche'],['Nature','Spore','Neutre'],['Eau','Foudre','Nature'],['Roche','Air','Feu'],['Eau','Nature','Roche'],['Feu','Roche','Lumière'],['Foudre','Air','Glace'],['Ombre','Nature','Neutre'],['Air','Roche','Foudre'],['Eau','Air','Roche'],['Lumière','Air','Foudre'],['Eau','Glace','Ombre'],['Nature','Spore','Air'],['Ombre','Foudre','Feu'],['Lumière','Air','Roche']][Math.min(14,z)]}
+15900: function startRematchV106Y(t){
+15901:   const seals=(state.seals||[]).length,avg=Math.max(5,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(75,Math.max(Number(t.level)||5,avg+1+Math.min(4,seals))),count=Math.min(5,1+Math.ceil(seals/2)),types=rematchPoolTypes(),party=[];
+15902:   const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15903:   for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+15904:   const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+15905: }
+15906: window.startRematchV106Y=startRematchV106Y;
+---
+15900: function startRematchV106Y(t){
+15901:   const seals=(state.seals||[]).length,avg=Math.max(5,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(75,Math.max(Number(t.level)||5,avg+1+Math.min(4,seals))),count=Math.min(5,1+Math.ceil(seals/2)),types=rematchPoolTypes(),party=[];
+15902:   const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15903:   for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+15904:   const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+15905: }
+15906: window.startRematchV106Y=startRematchV106Y;
+15907: function rematchMenu(t){openSimpleMenu('Dresseur vétéran',`<div class="quest"><b>${t.dialog||'Dresseur'}</b><br>Depuis ton dernier Sceau, ce dresseur s'est entraîné. Tu peux l'affronter de nouveau une fois pour ce palier.</div><button onclick="startRematchV106Y(currentRematchTrainerV106Y)">Accepter la revanche</button><button onclick="document.getElementById('menuov').style.display='none';dialog('<b>${String(t.dialog||'Dresseur').replace(/'/g,"\\'")}</b><br>'+trainerAfterBattleTextV88(currentRematchTrainerV106Y))">Demander un conseil</button>`);window.currentRematchTrainerV106Y=t}
+15908: const BASE_INTERACT_V106Y=window.interact;
+15909: window.interact=function(){
+15910:   if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+---
+15902:   const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15903:   for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+15904:   const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+15905: }
+15906: window.startRematchV106Y=startRematchV106Y;
+15907: function rematchMenu(t){openSimpleMenu('Dresseur vétéran',`<div class="quest"><b>${t.dialog||'Dresseur'}</b><br>Depuis ton dernier Sceau, ce dresseur s'est entraîné. Tu peux l'affronter de nouveau une fois pour ce palier.</div><button onclick="startRematchV106Y(currentRematchTrainerV106Y)">Accepter la revanche</button><button onclick="document.getElementById('menuov').style.display='none';dialog('<b>${String(t.dialog||'Dresseur').replace(/'/g,"\\'")}</b><br>'+trainerAfterBattleTextV88(currentRematchTrainerV106Y))">Demander un conseil</button>`);window.currentRematchTrainerV106Y=t}
+15908: const BASE_INTERACT_V106Y=window.interact;
+15909: window.interact=function(){
+15910:   if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+15911:   if(scene==='world'&&currentScene()?.kind==='route'&&!trainerEvent){try{const t=nearTrainer();if(t&&rematchAvailable(t)){rematchMenu(t);return}}catch(_){} }
+15912:   return BASE_INTERACT_V106Y()
+---
+15903:   for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+15904:   const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+15905: }
+15906: window.startRematchV106Y=startRematchV106Y;
+15907: function rematchMenu(t){openSimpleMenu('Dresseur vétéran',`<div class="quest"><b>${t.dialog||'Dresseur'}</b><br>Depuis ton dernier Sceau, ce dresseur s'est entraîné. Tu peux l'affronter de nouveau une fois pour ce palier.</div><button onclick="startRematchV106Y(currentRematchTrainerV106Y)">Accepter la revanche</button><button onclick="document.getElementById('menuov').style.display='none';dialog('<b>${String(t.dialog||'Dresseur').replace(/'/g,"\\'")}</b><br>'+trainerAfterBattleTextV88(currentRematchTrainerV106Y))">Demander un conseil</button>`);window.currentRematchTrainerV106Y=t}
+15908: const BASE_INTERACT_V106Y=window.interact;
+15909: window.interact=function(){
+15910:   if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+15911:   if(scene==='world'&&currentScene()?.kind==='route'&&!trainerEvent){try{const t=nearTrainer();if(t&&rematchAvailable(t)){rematchMenu(t);return}}catch(_){} }
+15912:   return BASE_INTERACT_V106Y()
+15913: };try{interact=window.interact}catch(_){}
+
+===== TERM revanche =====
+15900: function startRematchV106Y(t){
+15901:   const seals=(state.seals||[]).length,avg=Math.max(5,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(75,Math.max(Number(t.level)||5,avg+1+Math.min(4,seals))),count=Math.min(5,1+Math.ceil(seals/2)),types=rematchPoolTypes(),party=[];
+15902:   const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15903:   for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+15904:   const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+15905: }
+15906: window.startRematchV106Y=startRematchV106Y;
+15907: function rematchMenu(t){openSimpleMenu('Dresseur vétéran',`<div class="quest"><b>${t.dialog||'Dresseur'}</b><br>Depuis ton dernier Sceau, ce dresseur s'est entraîné. Tu peux l'affronter de nouveau une fois pour ce palier.</div><button onclick="startRematchV106Y(currentRematchTrainerV106Y)">Accepter la revanche</button><button onclick="document.getElementById('menuov').style.display='none';dialog('<b>${String(t.dialog||'Dresseur').replace(/'/g,"\\'")}</b><br>'+trainerAfterBattleTextV88(currentRematchTrainerV106Y))">Demander un conseil</button>`);window.currentRematchTrainerV106Y=t}
+15908: const BASE_INTERACT_V106Y=window.interact;
+15909: window.interact=function(){
+15910:   if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+---
+15903:   for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+15904:   const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+15905: }
+15906: window.startRematchV106Y=startRematchV106Y;
+15907: function rematchMenu(t){openSimpleMenu('Dresseur vétéran',`<div class="quest"><b>${t.dialog||'Dresseur'}</b><br>Depuis ton dernier Sceau, ce dresseur s'est entraîné. Tu peux l'affronter de nouveau une fois pour ce palier.</div><button onclick="startRematchV106Y(currentRematchTrainerV106Y)">Accepter la revanche</button><button onclick="document.getElementById('menuov').style.display='none';dialog('<b>${String(t.dialog||'Dresseur').replace(/'/g,"\\'")}</b><br>'+trainerAfterBattleTextV88(currentRematchTrainerV106Y))">Demander un conseil</button>`);window.currentRematchTrainerV106Y=t}
+15908: const BASE_INTERACT_V106Y=window.interact;
+15909: window.interact=function(){
+15910:   if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+15911:   if(scene==='world'&&currentScene()?.kind==='route'&&!trainerEvent){try{const t=nearTrainer();if(t&&rematchAvailable(t)){rematchMenu(t);return}}catch(_){} }
+15912:   return BASE_INTERACT_V106Y()
+15913: };try{interact=window.interact}catch(_){}
+---
+15913: };try{interact=window.interact}catch(_){}
+15914: 
+15915: function installMenuButtons(){const grid=document.querySelector('aside .panel:nth-of-type(3) .grid')||document.querySelector('aside .grid');if(!grid)return;if(!document.getElementById('flyBtnV106Y')){const b=document.createElement('button');b.id='flyBtnV106Y';b.textContent='Vol';b.onclick=openFlyMenuV106Y;grid.appendChild(b)}if(!document.getElementById('challengeBtnV106Y')){const b=document.createElement('button');b.id='challengeBtnV106Y';b.textContent='Défis';b.onclick=openAdventureChallengesV106Y;grid.appendChild(b)}}
+15916: const BASE_OBJECTIVES_V106Y=typeof objectivesV84==='function'?objectivesV84:null;
+15917: if(BASE_OBJECTIVES_V106Y){objectivesV84=function(){const q=BASE_OBJECTIVES_V106Y();ensureDiscoveredChallenges();const r=rank(),active=Object.entries(yState().cityChallenges).filter(([z,c])=>!c.claimed&&challengeDone(z,c)).length;q.push({title:'Maîtrise de Valdora',progress:`${marks()}/15 • ${r.name}`,txt:(active?active+' défi(s) prêt(s) à valider. ':'')+'Les défis de ville, les revanche et les transports enrichissent l’aventure.'});return q};window.objectivesV84=objectivesV84}
+15918: 
+15919: const css=document.createElement('style');css.textContent=`
+15920: .travelV106Y{position:fixed;inset:0;z-index:1000050;background:#07131f;opacity:0;transition:opacity .25s;pointer-events:none;overflow:hidden}.travelV106Y.show{opacity:1}.travelSkyV106Y{position:absolute;inset:0;background:linear-gradient(180deg,#5ea6d8,#d9edf5 55%,#4c8053 56%,#274c32)}.travelV106Y.fly .travelSkyV106Y{background:linear-gradient(180deg,#4d8fd0,#b9e1f5 62%,#eef7fb)}.travelSpeedV107H{position:absolute;inset:0;opacity:.16;background:repeating-linear-gradient(170deg,transparent 0 55px,#fff 57px 60px,transparent 62px 118px);animation:speedShiftV107H .45s linear infinite}.travelVehicleV106Y{position:absolute;left:-46%;top:44%;width:520px;filter:drop-shadow(0 16px 12px #0006);animation:travelMoveV106Y 2.3s linear forwards;will-change:left,transform}.travelV106Y.fly .travelVehicleV106Y{top:23%;width:220px;animation-duration:1.4s}.travelSpriteV107H{display:block;width:100%;height:auto;object-fit:contain;pointer-events:none}.busSpriteV107H{transform:scaleX(1);animation:busBounceV107H .42s ease-in-out infinite alternate}.flyCreatureWrapV107H{position:relative;width:100%;animation:flyBobV107H .34s ease-in-out infinite alternate}.flySpriteV107H{position:relative;z-index:2;transform:scaleX(1);filter:drop-shadow(0 12px 8px #17567a66)}.windTrailV107H{position:absolute;z-index:1;right:72%;top:42%;width:170px;height:28px;border-radius:50%;background:linear-gradient(90deg,transparent,#e8fbffbb 40%,#fff0);filter:blur(3px);transform:skewX(-18deg)}@keyframes travelMoveV106Y{from{left:-46%}to{left:108%}}@keyframes busBounceV107H{from{transform:translateY(0) scaleX(1)}to{transform:t
+15921: `;document.head.appendChild(css);
+15922: 
+15923: installMenuButtons();ensureDiscoveredChallenges();setInterval(ensureDiscoveredChallenges,1800);window.ValdoraGameplayV106Y={version:V106Y_VERSION,busLines:BUS_LINES_V106Y,openBus:openBusMenuV106Y,openFly:openFlyMenuV106Y,openChallenges:openAdventureChallengesV106Y,rank:()=>rank(),marks:()=>marks()};
+---
+16025: 
+16026: // -------- CIRCUIT DES GARDIENS --------
+16027: function zGuardianTierUnlocked(t){return (state.seals||[]).length>=[3,5,7][t-1]}
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+16033: 
+16034: // -------- CODEX : paliers de recherche --------
+16035: function claimCodexMilestoneV106Z(n){
+---
+16027: function zGuardianTierUnlocked(t){return (state.seals||[]).length>=[3,5,7][t-1]}
+16028: function zGuardianParty(seal,tier){const type=V101D_SEAL_TYPES?.[seal]||'Neutre',avg=Math.max(10,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),orig=typeof v83GuardianBaseLevel==='function'?v83GuardianBaseLevel(seal):10+seal*7,base=Math.min(78,Math.max(orig+tier*7,avg-2+tier*2)),count=Math.min(6,3+tier+Math.floor(seal/3)),minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1,party=[];for(let i=0;i<count;i++){const lvl=Math.min(80,base+i),valid=CREATURES.filter(c=>c.type===type&&minLegal(c.id)<=lvl),maxStage=valid.length?Math.max(...valid.map(c=>Number(c.stage)||0)):0,pool=valid.filter(c=>(Number(c.stage)||0)===maxStage),c=(pool.length?pool:valid)[(seal*31+tier*19+i*13)%Math.max(1,(pool.length?pool:valid).length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+16029: function startGuardianCircuitV106Z(seal,tier){if(scene!=='world'||battle){toast('Sors d’abord dans la ville ou sur une route pour lancer une revanche.');return}if(!(state.seals||[]).includes(seal)||!zGuardianTierUnlocked(tier))return;const id=`v106z_guardian_s${seal}_t${tier}`;if(state.trainerWins?.[id]){toast('Cette revanche est déjà gagnée.');return}const party=zGuardianParty(seal,tier),tr={id,level:party[0].level,look:15,dialog:`Circuit Gardien — Sceau ${seal} • Palier ${tier}`,party,partyIndex:0,guardian:false,guardianRematchV106Z:true,zone:state.zone};document.getElementById('menuov').style.display='none';window.startBattle(party[0],tr)}
+16030: window.startGuardianCircuitV106Z=startGuardianCircuitV106Z;
+16031: function openGuardianCircuitV106Z(){if((state.seals||[]).length<3){toast('Le Circuit des Gardiens s’ouvre après 3 Sceaux.');return}let h='<div class="quest"><b>Circuit des Gardiens</b><br>Trois paliers de revanche se débloquent à 3, 5 et 7 Sceaux. Chaque défi ne peut être remporté qu’une fois.</div>';for(const seal of state.seals||[]){for(let tier=1;tier<=3;tier++){if(!zGuardianTierUnlocked(tier))continue;const id=`v106z_guardian_s${seal}_t${tier}`,done=!!state.trainerWins?.[id];h+=`<div class="quest"><b>Sceau ${seal} — Palier ${tier}</b><br>${done?'✓ Revanche gagnée':`Équipe renforcée • ${zGuardianParty(seal,tier).length} Éclats`} ${done?'':`<br><button onclick="startGuardianCircuitV106Z(${seal},${tier})">Défier le Gardien</button>`}</div>`}}openSimpleMenu('Circuit des Gardiens',h)}
+16032: window.openGuardianCircuitV106Z=openGuardianCircuitV106Z;
+16033: 
+16034: // -------- CODEX : paliers de recherche --------
+16035: function claimCodexMilestoneV106Z(n){
+16036:  if(zCaught()<n){toast('Ce palier du Codex n’est pas encore atteint.');return}if(zState().codexClaims[n]){toast('Cette récompense a déjà été récupérée.');return}
+16037:  const money=500+n*18,item=n>=100?'MegaOrbe':n>=60?'SuperOrbe':'Orbe',qty=n>=120?2:1,labels={Orbe:"Orbe d'Éclat",SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'};zState().codexClaims[n]=true;state.money=(Number(state.money)||0)+money;state.inventory=state.inventory||{};state.inventory[item]=(Number(state.inventory[item])||0)+qty;zSave();
