@@ -1,0 +1,23 @@
+name: Extract exact remaining V122 systems
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-exact-v122.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract exact functions
+        run: python tools/extract_exact_v122.py
+      - name: Commit exact reports
+        run: |
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add _AI_V122_exact_*.txt
+          git commit -m "chore: add exact V122 system reports" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
