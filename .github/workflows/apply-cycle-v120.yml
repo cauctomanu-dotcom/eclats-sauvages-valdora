@@ -1,0 +1,45 @@
+name: Apply Valdora V120 cycle network fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-cycle-v120.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply cycle network patch
+        run: python tools/apply_cycle_v120.py
+
+      - name: Verify cycle network
+        run: |
+          set -euo pipefail
+          grep -q "cycleTownBackboneV120" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "V120-CYCLE" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "const passes=riding?2:1" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "ctx.clip('evenodd')" game/VALDORA_LIVING_WORLD_V118.js
+          ! grep -q "for(const n of g.list||[])for(const k of n.neighbors||[])" game/VALDORA_LIVING_WORLD_V118.js
+          node --check game/VALDORA_LIVING_WORLD_V118.js
+          git diff --check
+
+      - name: Commit cycle network fix
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- game/VALDORA_LIVING_WORLD_V118.js; then
+            echo 'No source changes needed'
+            exit 0
+          fi
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add game/VALDORA_LIVING_WORLD_V118.js
+          git commit -m "fix: rebuild useful cycle network and render below actors"
+          git push origin HEAD:main
