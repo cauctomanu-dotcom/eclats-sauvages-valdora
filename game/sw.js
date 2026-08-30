@@ -1,4 +1,4 @@
-const VERSION = 'v126-pwa-1';
+const VERSION = 'v1.0.1-pwa-1';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
