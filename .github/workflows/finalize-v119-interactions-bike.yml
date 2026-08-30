@@ -1,0 +1,148 @@
+name: Finalize Valdora V119 interactions and bicycle
+on:
+  push:
+    paths:
+      - '.github/workflows/finalize-v119-interactions-bike.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tighten interior targeting and 3-Seal bicycle unlock
+        shell: python
+        run: |
+          from pathlib import Path
+
+          index_path=Path('game/index.html')
+          interior_path=Path('game/V109V_INTERIEUR_REWRITE.js')
+          living_path=Path('game/VALDORA_LIVING_WORLD_V118.js')
+          index=index_path.read_text(encoding='utf-8')
+          interior=interior_path.read_text(encoding='utf-8')
+          living=living_path.read_text(encoding='utf-8')
+
+          def block_end(text, open_brace):
+              depth=0; quote=None; escape=False; template=False; i=open_brace
+              while i<len(text):
+                  ch=text[i]
+                  if escape:
+                      escape=False; i+=1; continue
+                  if quote:
+                      if ch=='\\': escape=True
+                      elif ch==quote: quote=None
+                      i+=1; continue
+                  if ch in ('"',"'"):
+                      quote=ch; i+=1; continue
+                  if ch=='`': template=not template; i+=1; continue
+                  if template: i+=1; continue
+                  if ch=='{': depth+=1
+                  elif ch=='}':
+                      depth-=1
+                      if depth==0:return i+1
+                  i+=1
+              raise SystemExit('Unbalanced block')
+
+          def replace_function(text, anchor, replacement):
+              start=text.find(anchor)
+              if start<0: raise SystemExit('Missing anchor: '+anchor)
+              brace=text.find('{',start+len(anchor))
+              if brace<0: raise SystemExit('Missing opening brace: '+anchor)
+              end=block_end(text,brace)
+              return text[:start]+replacement+text[end:]
+
+          # Strict facing cone: E acts on what the player is actually facing.
+          interior=replace_function(interior,'function targetMetrics(x,y,maxDistance)',r'''function targetMetrics(x,y,maxDistance){
+            const dx=Number(x)-Number(state.roomX),dy=Number(y)-Number(state.roomY),dist=Math.hypot(dx,dy);
+            if(!Number.isFinite(dist)||dist>maxDistance)return null;
+            if(dist<=20)return{distance:dist,forward:0,side:0,score:dist};
+            const f=facingVector(),forward=dx*f.x+dy*f.y,side=Math.abs(dx*f.y-dy*f.x);
+            if(forward<2||side>Math.max(24,forward*.55+8))return null;
+            return{distance:dist,forward,side,score:dist+side*.72-Math.max(0,forward)*.05}
+          }''')
+
+          interior=replace_function(interior,'function nearestNpcWithDistance()',r'''function nearestNpcWithDistance(){
+            let best=null,bm=null;for(const n of session?.npcs||[]){const m=targetMetrics(n.x,n.y,68);if(!m)continue;if(!bm||m.score<bm.score){best=n;bm=m}}
+            return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
+          }''')
+
+          interior=replace_function(interior,'function nearestFurnitureWithDistance(max=96)',r'''function nearestFurnitureWithDistance(max=72){
+            let best=null,bm=null;for(const m of furn()){
+              if(!userInteractable(m))continue;const d=pointRectDistance(state.roomX,state.roomY,rectOf(m));if(d>max)continue;
+              const p=furnitureAimPoint(m),metrics=targetMetrics(p.x,p.y,max+4);if(!metrics)continue;
+              const fn=String(m.fonction||'decor'),functional=fn!=='decor'&&fn!=='collision_mur',score=metrics.score+(functional?-3:8);
+              if(!bm||score<bm.score){best=m;bm={...metrics,score}}
+            }
+            return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
+          }''')
+
+          interior=replace_function(interior,'function nearFurniture(max=96)',r'''function nearFurniture(max=72){return nearestFurnitureWithDistance(max).target}''')
+
+          interior=replace_function(interior,'function nearestInteractionTarget()',r'''function nearestInteractionTarget(){
+            const fq=nearestFurnitureWithDistance(72);if(fq.target)return{kind:'furniture',target:fq.target,score:fq.score};
+            const nq=nearestNpcWithDistance();if(nq.target)return{kind:'npc',target:nq.target,score:nq.score};
+            return null
+          }''')
+
+          # Only an actual service NPC is allowed to trigger the building service.
+          # Ordinary residents can only talk, even inside a care centre/shop/station.
+          interior=replace_function(interior,'function serviceNpcInteract(n)',r'''function serviceNpcInteract(n){
+            faceNpc(n);
+            if(!n?.service){dialogSafe(n?.name||'Habitant','Bonjour !');return true}
+            switch(session?.key){case 'centre_soins':return interactFurniture(furn().find(m=>m.fonction==='soins_centre')||{fonction:'soins_centre',label:'Centre de soins'});case 'laboratoire':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe('Professeur Aurine','Continue ton enquête sur Valdora.');return true;case 'boutique':if(typeof openShop==='function')openShop();return true;case 'gare':window.ValdoraTrainV109D?.open?.();return true;case 'musee':if(typeof window.openMuseumDirectorV109A==='function')window.openMuseumDirectorV109A();else dialogSafe(n.name,'Bienvenue au musée.');return true;case 'gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));return true;default:dialogSafe(n.name,'Bonjour !');return true}
+          }''')
+
+          # Bike ownership unlocks after the 3rd Seal, but riding remains track-only.
+          if 'state.seals.length>=4' in index:
+              index=index.replace('state.seals.length>=4','state.seals.length>=3')
+          elif 'state.seals.length>=3' not in index:
+              raise SystemExit('Guardian bicycle unlock anchor missing')
+
+          living=living.replace('V119 — Réseau cyclable. La bicyclette est débloquée après 4 Sceaux,','V119 — Réseau cyclable. La bicyclette est débloquée après 3 Sceaux,')
+          living=living.replace('state.seals.length>=4','state.seals.length>=3')
+          living=living.replace('state.seals.length>=4','state.seals.length>=3')
+          living=living.replace('après 4 Sceaux','après 3 Sceaux')
+          living=living.replace('Bicyclette — 4 Sceaux','Bicyclette — 3 Sceaux')
+          living=living.replace('après le 4e Sceau','après le 3e Sceau')
+
+          # Explicitly dismount whenever an interior is entered or changed.
+          living=replace_function(living,'function enterInteriorV118(b)',r'''function enterInteriorV118(b){state.bike=false;const ok=typeof BASE.interiorEnter==='function'?BASE.interiorEnter(b):false;if(ok)ensureInteriorPopulation(true);return ok}''')
+          living=replace_function(living,'function moveInteriorRoomV118()',r'''function moveInteriorRoomV118(){state.bike=false;const ok=typeof BASE.interiorMoveToRoom==='function'?BASE.interiorMoveToRoom(...arguments):false;if(ok)ensureInteriorPopulation(true);return ok}''')
+
+          index_path.write_text(index,encoding='utf-8')
+          interior_path.write_text(interior,encoding='utf-8')
+          living_path.write_text(living,encoding='utf-8')
+
+      - name: Verify final rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "state.seals.length>=3" game/index.html
+          ! grep -q "state.seals.length>=4" game/index.html
+          grep -q "Bicyclette — 3 Sceaux" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "state.seals.length>=3" game/VALDORA_LIVING_WORLD_V118.js
+          ! grep -q "state.seals.length>=4" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "nearestFurnitureWithDistance(72)" game/V109V_INTERIEUR_REWRITE.js
+          grep -q "if(!n?.service)" game/V109V_INTERIEUR_REWRITE.js
+          grep -q "ValdoraCycleV119" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "drawCycleTracksV119" game/VALDORA_LIVING_WORLD_V118.js
+          node --check game/V109V_INTERIEUR_REWRITE.js
+          node --check game/VALDORA_LIVING_WORLD_V118.js
+          git diff --check
+
+      - name: Commit final V119 rules
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- game/index.html game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js; then
+            echo 'No source changes needed'
+            exit 0
+          fi
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add game/index.html game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js
+          git commit -m "fix: tighten interactions and unlock bike at third Seal"
+          git push origin HEAD:main
