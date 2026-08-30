@@ -185,7 +185,7 @@
   if(document.getElementById('valdoraV123ParityLoader'))return;
   const script=document.createElement('script');
   script.id='valdoraV123ParityLoader';
-  script.src='V123_CREATOR_PARITY_NPC_FIXES.js?v=123-parity-1';
+  script.src='V123_CREATOR_PARITY_NPC_FIXES.js?v=123-parity-2';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
