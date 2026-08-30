@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-GAMEPLAY-FIXES-1';
+const VERSION='V1.0.1-GAMEPLAY-FIXES-2';
 let lastFrame=performance.now();
 let lastZone='';
 
@@ -38,23 +38,74 @@ function clairvalGateMessage(){
   if(!p.secondReady)missing.push(`une deuxième créature niveau 7 minimum (deuxième : ${p.second})`);
   return missing.length?`Sortie de Clairval verrouillée : ${missing.join(' et ')}. Entraîne-toi dans les hautes herbes de Clairval.`:null;
 }
+function exitTarget(ex){return String(ex?.to||ex?.target||'')}
+function insideRect(x,y,r){
+  try{if(typeof pointIn==='function')return pointIn(x,y,r)}catch(_){}
+  return !!r&&x>Number(r.x)&&x<Number(r.x)+Number(r.w)&&y>Number(r.y)&&y<Number(r.y)+Number(r.h)
+}
+function touchingClairvalExit(){
+  const s=gameState(),sc=currentSceneSafe();if(!s||s.zone!=='town0'||!sc)return null;
+  return (sc.exits||[]).find(ex=>exitTarget(ex)==='route0'&&insideRect(Number(s.x),Number(s.y),ex))||null
+}
+function pushBack(ex){
+  const s=gameState();if(!s||!ex)return;const d=62;
+  if(ex.side==='north')s.y+=d;else if(ex.side==='south')s.y-=d;else if(ex.side==='west')s.x+=d;else if(ex.side==='east')s.x-=d;
+}
+function showClairvalGate(msg,ex){
+  const s=gameState();pushBack(ex);const now=Date.now();if(!s||now-Number(s._v101ClairvalGateShown||0)<850)return;
+  s._v101ClairvalGateShown=now;try{toast(msg)}catch(_){}try{dialog('<b>Préparation avant le départ</b><br><br>'+msg)}catch(_){}
+}
+function withLegacyClairvalBypass(run){
+  const s=gameState();if(!s||!clairvalProgress().ready)return run();
+  const original=s.team;
+  // Le verrou historique est enfermé dans une ancienne couche et exige encore 3 niveau 10.
+  // On lui présente uniquement pendant cet appel une équipe temporairement compatible,
+  // puis on restaure immédiatement la vraie équipe. Le gameplay et la sauvegarde restent inchangés.
+  const promoted=(original||[]).map((m,i)=>i<2?{...m,level:Math.max(10,Number(m?.level)||1)}:m);
+  while(promoted.length<3&&promoted.length){promoted.push({...promoted[0],level:10,_v101GateGhost:true})}
+  s.team=promoted;
+  try{return run()}
+  finally{
+    s.team=original;
+    try{if(typeof hud==='function')hud()}catch(_){}
+    try{if(typeof save==='function')save(false)}catch(_){}
+  }
+}
 function installClairvalGate(){
-  let base=null;try{base=window.v107kTownGate||(typeof v107kTownGate==='function'?v107kTownGate:null)}catch(_){base=window.v107kTownGate}
-  if(typeof base!=='function'||base.__valdoraV101Clairval)return false;
-  const wrapped=function(from,to){
-    if(!creator()&&String(from)==='town0'&&String(to)==='route0')return clairvalGateMessage();
-    return base.apply(this,arguments);
-  };
-  wrapped.__valdoraV101Clairval=true;wrapped.__base=base;
-  window.v107kTownGate=wrapped;try{v107kTownGate=wrapped}catch(_){}
+  const portal=window.checkPortal;
+  if(typeof portal==='function'&&!portal.__valdoraV101Clairval){
+    const wrapped=function(){
+      if(!creator()){
+        const ex=touchingClairvalExit();
+        if(ex){const msg=clairvalGateMessage();if(msg){showClairvalGate(msg,ex);return false}return withLegacyClairvalBypass(()=>portal.apply(this,arguments))}
+      }
+      return portal.apply(this,arguments);
+    };
+    wrapped.__valdoraV101Clairval=true;wrapped.__base=portal;window.checkPortal=wrapped;try{checkPortal=wrapped}catch(_){}
+  }
+  const enter=window.enterZone;
+  if(typeof enter==='function'&&!enter.__valdoraV101Clairval){
+    const wrapped=function(to,entry){
+      const s=gameState();
+      if(!creator()&&s?.zone==='town0'&&String(to)==='route0'){
+        const msg=clairvalGateMessage();if(msg){try{toast(msg)}catch(_){}try{dialog('<b>Préparation avant le départ</b><br><br>'+msg)}catch(_){}return false}
+        return withLegacyClairvalBypass(()=>enter.apply(this,arguments));
+      }
+      return enter.apply(this,arguments);
+    };
+    wrapped.__valdoraV101Clairval=true;wrapped.__base=enter;window.enterZone=wrapped;try{enterZone=wrapped}catch(_){}
+  }
   try{
     if(window.ValdoraProgressionV107K){
       window.ValdoraProgressionV107K.clairvalReady=clairvalReadyTeam;
-      const oldGate=window.ValdoraProgressionV107K.gate;
-      window.ValdoraProgressionV107K.gate=function(from,to){
-        if(!creator()&&String(from)==='town0'&&String(to)==='route0')return clairvalGateMessage();
-        return typeof oldGate==='function'?oldGate(from,to):null;
-      };
+      if(!window.ValdoraProgressionV107K.gate?.__valdoraV101Clairval){
+        const oldGate=window.ValdoraProgressionV107K.gate;
+        const gate=function(from,to){
+          if(!creator()&&String(from)==='town0'&&String(to)==='route0')return clairvalGateMessage();
+          return typeof oldGate==='function'?oldGate(from,to):null;
+        };
+        gate.__valdoraV101Clairval=true;window.ValdoraProgressionV107K.gate=gate;
+      }
     }
   }catch(_){}
   return true;
@@ -76,7 +127,6 @@ function patchObjectiveText(){
     });
   };
   wrapped.__valdoraV101ClairvalObjectives=true;
-  // V125 vérifie ce marqueur pour ne pas remballer indéfiniment la fonction.
   wrapped.__v125Outer=true;
   wrapped.__base=base;
   window.objectivesV84=wrapped;try{objectivesV84=wrapped}catch(_){}
@@ -128,26 +178,25 @@ function prepareNpc(n,slots){
     if(nearest&&nearest.d>42){n.x=nearest.x;n.y=nearest.y}
     n.homeX=Number(n.x);n.homeY=Number(n.y);n._v101RoadWalker=true;n._v101Target=null;n._v101Trips=0;n._v101WaitUntil=performance.now()+180+(hash(n.id)%700);
   }
-  // Empêche les anciens moteurs de déplacer ce PNJ en parallèle : le moteur V1.0.1 le possède désormais.
   n.stationaryV118=true;
 }
+function dialogOpen(){const d=document.getElementById('dialog');return !!(d&&(d.classList.contains('show')||getComputedStyle(d).display!=='none'))}
 function moveLegacyNpcs(now,dt){
   let sceneMode='';try{sceneMode=typeof scene==='string'?scene:''}catch(_){}
   const s=gameState(),sc=currentSceneSafe();if(sceneMode!=='world'||!s||!sc||sc.kind!=='town')return;
   const slots=roadSlots(sc);if(!slots.length)return;
-  const people=eligibleTownNpcs(sc,s.zone);
+  const people=eligibleTownNpcs(sc,s.zone),pauseAll=dialogOpen();
   for(const n of people){
     prepareNpc(n,slots);
-    if(Date.now()<Number(n._v118PauseUntil||0)||n._v104Paused||now<Number(n._v101WaitUntil||0)){n.moving=false;continue}
+    if(pauseAll||Date.now()<Number(n._v118PauseUntil||0)||n._v104Paused||now<Number(n._v101WaitUntil||0)){n.moving=false;continue}
     if(Math.hypot(Number(n.x)-Number(s.x),Number(n.y)-Number(s.y))<52){n.moving=false;n._v101WaitUntil=now+240;continue}
     if(!n._v101Target){n._v101Target=nextSlot(n,slots);if(!n._v101Target){n.moving=false;n._v101WaitUntil=now+600;continue}}
     const t=n._v101Target,dx=t.x-Number(n.x),dy=t.y-Number(n.y),d=Math.hypot(dx,dy);
     if(d<2){
       n.x=t.x;n.y=t.y;n.moving=false;n._v101PrevTarget=`${Math.round(t.x)},${Math.round(t.y)}`;n._v101Target=null;n._v101Trips=(n._v101Trips||0)+1;n._v101WaitUntil=now+300+(hash(`${n.id}|wait|${n._v101Trips}`)%900);continue
     }
-    const speed=28+(hash(n.id)%17),step=Math.min(d,speed*dt),nx=Number(n.x)+dx/d*step,ny=Number(n.y)+dy/d*step;
-    // Le choix des cibles est aligné avec les cellules de chemin : le segment reste sur le réseau urbain.
-    n.x=nx;n.y=ny;n.moving=true;
+    const speed=28+(hash(n.id)%17),step=Math.min(d,speed*dt);
+    n.x=Number(n.x)+dx/d*step;n.y=Number(n.y)+dy/d*step;n.moving=true;
     if(Math.abs(dx)>=Math.abs(dy))n.dir=dx>=0?2:1;else n.dir=dy>=0?0:3;
   }
 }
