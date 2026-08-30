@@ -1,4 +1,4 @@
-const VERSION = 'v1.0.1-pwa-1';
+const VERSION = 'v1.0.1-pwa-2';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -27,7 +27,8 @@ const SHELL = [
   './V123_CREATOR_PARITY_NPC_FIXES.js?v=123-parity-1',
   './V124_TOUCH_DIRECT.js?v=124-touch-1',
   './V125_STORY_FIRST_HOURS.js?v=125-story-1',
-  './V126_UPDATE_NOTES.js?v=126-notes-1'
+  './V126_UPDATE_NOTES.js?v=126-notes-1',
+  './VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-1'
 ];
 
 self.addEventListener('install', event => {
