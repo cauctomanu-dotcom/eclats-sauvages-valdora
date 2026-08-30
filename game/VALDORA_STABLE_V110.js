@@ -2,6 +2,7 @@
   'use strict';
 
   const VERSION = 'V110-STABLE';
+  const PUBLIC_VERSION = 'V1.0.1';
   const LEGEND_ZONES = [
     'legend_nature', 'legend_feu', 'legend_eau', 'legend_foudre',
     'legend_ombre', 'legend_roche', 'legend_air', 'legend_spore',
@@ -152,23 +153,29 @@
       ids.add(creature.id);
       if (!creature.name || !creature.type) issues.push(`Créature ${creature.id}: données incomplètes`);
     }
-    return { version: VERSION, ok: issues.length === 0, issues, scenes: Object.keys(SCENES).length, creatures: creatures.length };
+    return { version: VERSION, publicVersion: PUBLIC_VERSION, ok: issues.length === 0, issues, scenes: Object.keys(SCENES).length, creatures: creatures.length };
+  }
+
+  function applyPublicBranding() {
+    document.documentElement.dataset.valdoraPublicVersion = PUBLIC_VERSION;
+    document.title = `Éclats Sauvages — Valdora ${PUBLIC_VERSION}`;
+    const brand = document.querySelector('.brand b');
+    if (brand) brand.textContent = `VALDORA ${PUBLIC_VERSION} — ${/CREATEUR/i.test(location.pathname) ? 'CRÉATEUR' : 'JOUEUR'}`;
   }
 
   function install() {
     normalizeWorldCollections();
     ensureLegendaryNetwork();
     ensureReciprocalLinks();
-    window.ValdoraStableV110 = { version: VERSION, audit, repair: install, legendaryZones: [...LEGEND_ZONES] };
+    window.ValdoraStableV110 = { version: VERSION, publicVersion: PUBLIC_VERSION, audit, repair: install, applyPublicBranding, legendaryZones: [...LEGEND_ZONES] };
     document.documentElement.dataset.valdoraStable = VERSION;
-    document.title = 'Éclats Sauvages — Valdora V110 Stable';
-    const brand = document.querySelector('.brand b');
-    if (brand) brand.textContent = `VALDORA V110 STABLE — ${/CREATEUR/i.test(location.pathname) ? 'CRÉATEUR' : 'JOUEUR'}`;
+    applyPublicBranding();
   }
 
   install();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
   [2200, 7200, 10200, 11800].forEach(delay => setTimeout(install, delay));
+  setInterval(() => { try { applyPublicBranding(); } catch (_) {} }, 3000);
 })();
 
 // V123 est volontairement chargé depuis un module déjà commun aux versions
