@@ -1,4 +1,4 @@
-name: Diagnose Valdora NPC and bus regressions
+name: Repair Valdora NPCs and Fluo bus stops
 
 on:
   push:
@@ -7,60 +7,212 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  diagnose:
+  repair:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect bus stop ownership and draw hooks
+        with:
+          fetch-depth: 0
+
+      - name: Patch NPC lifecycle and Fluo bus ownership
         shell: python
         run: |
           from pathlib import Path
-          import re
-          s=Path('game/index.html').read_text(encoding='utf-8')
 
-          def show_function(name):
-            anchor='function '+name+'('
-            start=s.find(anchor)
-            print('\n===== FUNCTION',name,'@',start,'=====')
-            if start<0:return
-            brace=s.find('{',start)
-            depth=0; quote=None; esc=False; template=False; i=brace
-            while i<len(s):
-              ch=s[i]
-              if esc: esc=False; i+=1; continue
-              if quote:
-                if ch=='\\': esc=True
-                elif ch==quote: quote=None
-                i+=1; continue
-              if ch in ('"',"'"): quote=ch; i+=1; continue
-              if ch=='`': template=not template; i+=1; continue
-              if template: i+=1; continue
-              if ch=='{': depth+=1
-              elif ch=='}':
-                depth-=1
-                if depth==0:
-                  print(s[start:i+1]);return
-              i+=1
-          for fn in ['healer','v107dBusStop','drawBus','installDraw','installInteract','setupNPCs','activate']:
-            show_function(fn)
+          index_path=Path('game/index.html')
+          living_path=Path('game/VALDORA_LIVING_WORLD_V118.js')
+          index=index_path.read_text(encoding='utf-8')
+          living=living_path.read_text(encoding='utf-8')
 
-          for needle in ["bus_stop","ASSET_TYPES","type==='healer'",'urbanType===\'clinic\'','drawWorld=','window.drawWorld=','drawWorld =','window.drawWorld =']:
-            print('\n===== NEEDLE',repr(needle),'=====')
-            pos=[m.start() for m in re.finditer(re.escape(needle),s)]
-            print('COUNT',len(pos))
-            for i in pos[:25]: print(s[max(0,i-500):min(len(s),i+900)].replace('\r',''))
+          def block_end(text, open_brace):
+              depth=0; quote=None; escape=False; template=False; i=open_brace
+              while i<len(text):
+                  ch=text[i]
+                  if escape:
+                      escape=False; i+=1; continue
+                  if quote:
+                      if ch=='\\': escape=True
+                      elif ch==quote: quote=None
+                      i+=1; continue
+                  if ch in ('"',"'"):
+                      quote=ch; i+=1; continue
+                  if ch=='`':
+                      template=not template; i+=1; continue
+                  if template:
+                      i+=1; continue
+                  if ch=='{': depth+=1
+                  elif ch=='}':
+                      depth-=1
+                      if depth==0:return i+1
+                  i+=1
+              raise SystemExit('Unbalanced block')
 
-          print('\n===== EXTERNAL DRAW/HEALER REFERENCES =====')
-          for p in sorted(Path('game').glob('*.js')):
-            txt=p.read_text(encoding='utf-8',errors='ignore')
-            hits=[]
-            for needle in ['drawWorld=','window.drawWorld','healer','urbanType','type=\'healer\'','type:\'healer\'']:
-              if needle in txt:hits.append(needle)
-            if hits:
-              print('\n---',p.name,hits,'---')
-              for needle in hits:
-                for m in list(re.finditer(re.escape(needle),txt))[:8]:
-                  i=m.start();print(txt[max(0,i-350):min(len(txt),i+800)])
+          def function_span(text, anchor):
+              start=text.find(anchor)
+              if start<0: raise SystemExit('Missing anchor: '+anchor)
+              brace=text.find('{',start+len(anchor))
+              if brace<0: raise SystemExit('Missing opening brace: '+anchor)
+              return start,brace,block_end(text,brace)
+
+          def replace_function(text, anchor, replacement):
+              start,brace,end=function_span(text,anchor)
+              return text[:start]+replacement+text[end:]
+
+          # 1) V105D must initialize each town population only once. Repeated activate()
+          # calls used to erase and recreate v105dStreetNPCs, visibly respawning people.
+          setup_replacement=r'''function setupNPCs(sc,zone){
+            sc.v105dGraph=graph(sc);
+            sc.v105dStreetNPCs=Array.isArray(sc.v105dStreetNPCs)?sc.v105dStreetNPCs:[];
+            const existing=[];
+            if(typeof NPCDATA!=='undefined')existing.push(...NPCDATA.filter(n=>n.zone===zone));
+            if(Array.isArray(sc.megaNPCs))existing.push(...sc.megaNPCs);
+            const target=Math.max(0,(sc.megacity?15:7)-existing.length),cells=[...sc.v105dRoad];
+            const generated=new Map(sc.v105dStreetNPCs.map(n=>[n.id,n]));
+            for(let i=0;i<target&&cells.length;i++){
+              const id='d105_'+zone+'_'+i;
+              if(generated.has(id))continue;
+              const p=pkey(cells[(i*11+5)%cells.length]),x=cc(p.x,sc.v105dCell),y=cc(p.y,sc.v105dCell);
+              const n={id,zone,x,y,homeX:x,homeY:y,look:(i*7+zone.length)%41,dir:i%4,moving:false,name:['Lina','Milo','Zoé','Noah','Anna','Yanis','Léo'][i%7],text:'Les rues de '+sc.name+' sont animées aujourd’hui.'};
+              sc.v105dStreetNPCs.push(n);generated.set(id,n)
+            }
+            for(const n of [...existing,...sc.v105dStreetNPCs]){
+              if(n._v105dWorldPlaced)continue;
+              const q=nearestRoad(sc,n.x,n.y);
+              if(q){n.x=q.x;n.y=q.y;n.homeX=q.x;n.homeY=q.y}
+              n._v105dInit='';n._v105dWorldPlaced=true
+            }
+            sc._v105dNPCSetup=true
+          }'''
+          index=replace_function(index,'function setupNPCs(sc,zone)',setup_replacement)
+
+          # Once V118 is alive, old delayed V105D activate() calls must never reclaim
+          # draw/update hooks or rebuild the population.
+          astart,abrace,aend=function_span(index,'function activate()')
+          activate_body=index[abrace+1:aend]
+          guard='if(window.__VALDORA_V118_LIVING_ACTIVE__)return;'
+          if guard not in activate_body:
+              index=index[:abrace+1]+guard+index[abrace+1:]
+
+          # V105M performs a later megacity alignment. Do not snap already-live people.
+          actors_anchor="const actors=[...(sc.megaNPCs||[]),...(sc.v105dStreetNPCs||[])];"
+          apos=index.find(actors_anchor)
+          if apos>=0:
+              loop=index.find('for(const n of actors){',apos)
+              if loop>=0:
+                  brace=index.find('{',loop)
+                  late_guard='if(window.__VALDORA_V118_LIVING_ACTIVE__&&n._v105dWorldPlaced)continue;'
+                  if late_guard not in index[brace+1:brace+1+180]:
+                      index=index[:brace+1]+late_guard+index[brace+1:]
+
+          # 2) Restore the V107E Fluo stop as an explicit bridge. The old overlay can
+          # still draw all other V107E decor; V118 becomes the sole owner of the bus stop.
+          healer_replacement=r'''function healer(sc){return (sc?.buildings||[]).find(b=>b&&(b.type==='healer'||b.type==='care'||b.urbanType==='clinic'||/centre\s*(de\s*)?soins|soins|clinique|dispensaire/i.test(String(b.label||b.name||''))))||null}'''
+          index=replace_function(index,'function healer(sc)',healer_replacement)
+
+          bridge_marker='window.ValdoraBusV118Bridge='
+          if bridge_marker not in index:
+              cstart,cbrace,cend=function_span(index,'function camera(sc)')
+              bridge=r'''
+          window.ValdoraBusV118Bridge={
+            ownedByV118:false,
+            stop:function(){const sc=scNow();return v107dBusStop(sc,state?.zone)},
+            near:function(range=125){const b=this.stop();if(!b)return null;return Math.hypot(Number(state?.x||0)-b.x,Number(state?.y||0)-b.y)<=range?b:null},
+            drawNow:function(){const sc=scNow();if(!sc||sc.kind!=='town')return false;const c=camera(sc)||{};drawBus(sc,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return !!v107dBusStop(sc,state?.zone)},
+            open:function(){if(typeof window.ValdoraGameplayV106Y?.openBus==='function'){window.ValdoraGameplayV106Y.openBus();return true}return false}
+          };
+          '''
+              index=index[:cend]+bridge+index[cend:]
+
+          # Prevent a double stop if the captured legacy draw chain still contains V107E.
+          dstart,dbrace,dend=function_span(index,'function drawOverlay()')
+          dblock=index[dstart:dend]
+          old_draw='drawBus(sc,camX,camY,sx,sy)'
+          guarded_draw="if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)"
+          if guarded_draw not in dblock:
+              if old_draw not in dblock: raise SystemExit('Bus draw call not found in drawOverlay')
+              dblock=dblock.replace(old_draw,guarded_draw,1)
+              index=index[:dstart]+dblock+index[dend:]
+
+          # 3) V118 explicitly owns the bus stop render and interaction. This avoids the
+          # __v107dDraw/__v107dInteract compatibility markers silently suppressing them.
+          version_anchor="const VERSION='V118-MONDE-VIVANT';"
+          living_marker="window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;"
+          if living_marker not in living:
+              if version_anchor not in living: raise SystemExit('V118 version anchor not found')
+              living=living.replace(version_anchor,version_anchor+'\n'+living_marker,1)
+
+          draw_replacement=r'''function drawWorldV118(){
+            const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;
+            if(typeof scene!=='undefined'&&scene==='world'&&current()?.kind==='town'){
+              try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
+              drawTownAmbience()
+            }
+            return result
+          }'''
+          living=replace_function(living,'function drawWorldV118()',draw_replacement)
+
+          interact_replacement=r'''function worldInteractV118(){
+            if(typeof scene!=='undefined'&&scene==='world'){
+              try{
+                const bus=window.ValdoraBusV118Bridge;
+                if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}
+              }catch(e){console.warn('V118 interaction arrêt Fluo Valdora',e)}
+              const n=nearWorldNpc();if(n&&distance(n,state)<=88)return talkWorldNpc(n);
+              const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;
+              if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);
+              return result
+            }
+            return typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false
+          }'''
+          living=replace_function(living,'function worldInteractV118()',interact_replacement)
+
+          index_path.write_text(index,encoding='utf-8')
+          living_path.write_text(living,encoding='utf-8')
+
+      - name: Verify repair source
+        shell: python
+        run: |
+          from pathlib import Path
+          index=Path('game/index.html').read_text(encoding='utf-8')
+          living=Path('game/VALDORA_LIVING_WORLD_V118.js').read_text(encoding='utf-8')
+          checks={
+            'persistent V105D population':'sc.v105dStreetNPCs=Array.isArray(sc.v105dStreetNPCs)?sc.v105dStreetNPCs:[];',
+            'first placement marker':'n._v105dInit=\'\';n._v105dWorldPlaced=true',
+            'old activation guard':'if(window.__VALDORA_V118_LIVING_ACTIVE__)return;',
+            'late megacity snap guard':'if(window.__VALDORA_V118_LIVING_ACTIVE__&&n._v105dWorldPlaced)continue;',
+            'Fluo bridge':'window.ValdoraBusV118Bridge={',
+            'legacy bus double draw guard':'if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)',
+            'V118 ownership marker':'window.__VALDORA_V118_LIVING_ACTIVE__=true;',
+            'V118 stop drawing':'window.ValdoraBusV118Bridge.drawNow?.()',
+            'V118 stop interaction':'if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}',
+          }
+          missing=[name for name,needle in checks.items() if needle not in (index+'\n'+living)]
+          if missing: raise SystemExit('Missing repair checks: '+', '.join(missing))
+          # Old destructive reset must no longer exist in setupNPCs.
+          start=index.find('function setupNPCs(sc,zone)'); end=index.find('function ',start+10)
+          if 'sc.v105dStreetNPCs=[]' in index[start:end]: raise SystemExit('Destructive V105D street NPC reset remains')
+          assets=Path('game/ASSETS_DECOR_V107D/bus_stop')
+          required=['front.png','back.png','left.png','right.png']
+          absent=[x for x in required if not (assets/x).exists()]
+          if absent: raise SystemExit('Missing Fluo stop sprites: '+', '.join(absent))
+          if 'bus_fluo_val_d_ora_officiel_v107i.png' not in index: raise SystemExit('Fluo Valdora travel sprite reference missing')
+          if 'BUS_LINES_V106Y' not in index or 'openBus' not in index: raise SystemExit('Bus network/menu source missing')
+          print('NPC lifecycle and Fluo Valdora bus source checks passed')
+
+      - name: Check V118 JavaScript syntax
+        run: node --check game/VALDORA_LIVING_WORLD_V118.js
+
+      - name: Commit permanent repair
+        run: |
+          if git diff --quiet -- game/index.html game/VALDORA_LIVING_WORLD_V118.js; then
+            echo "No game changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add game/index.html game/VALDORA_LIVING_WORLD_V118.js
+          git commit -m "fix: stabilize NPCs and restore Fluo Valdora stops"
+          git push origin HEAD:main
