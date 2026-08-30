@@ -178,7 +178,22 @@ function installHooks(){
 function patchNotes(){
   if(notesPatched)return;try{const notes=window.ValdoraUpdateNotesV126?.release?.notes;if(!Array.isArray(notes))return;const line='Le système des PNJ extérieurs a été entièrement réécrit : une seule population, un seul moteur de déplacement sur les chemins et un rendu de secours empêchent désormais les habitants invisibles.';if(!notes.includes(line))notes.push(line);notesPatched=true}catch(_){}
 }
-function audit(){const s=stateSafe(),sc=sceneSafe(),z=sc?.kind==='town'?activeZone():null;return {version:VERSION,zone:s?.zone||null,active:!!z,roadNodes:z?.graph?.nodes?.length||0,walkers:z?.walkers?.length||0,moving:z?.walkers?.filter(n=>n._v101Walk?.moving).length||0,generated:z?.walkers?.filter(n=>n._v101TownGenerated).length||0,legacyRemaining:Array.isArray(sc?.v118Citizens)?sc.v118Citizens.filter(legacyAmbient).length:0,invalid:z?.walkers?.filter(n=>!Number.isFinite(Number(n.x))||!Number.isFinite(Number(n.y))).map(n=>n.id):[]}}
+function audit(){
+  const s=stateSafe();
+  const sc=sceneSafe();
+  const z=sc?.kind==='town'?activeZone():null;
+  return {
+    version:VERSION,
+    zone:s?.zone||null,
+    active:!!z,
+    roadNodes:z?.graph?.nodes?.length||0,
+    walkers:z?.walkers?.length||0,
+    moving:z?.walkers?.filter(n=>n._v101Walk?.moving).length||0,
+    generated:z?.walkers?.filter(n=>n._v101TownGenerated).length||0,
+    legacyRemaining:Array.isArray(sc?.v118Citizens)?sc.v118Citizens.filter(legacyAmbient).length:0,
+    invalid:z?.walkers?.filter(n=>!Number.isFinite(Number(n.x))||!Number.isFinite(Number(n.y))).map(n=>n.id)||[]
+  };
+}
 function rebuild(){const s=stateSafe(),sc=sceneSafe();if(!s||!sc||sc.kind!=='town')return null;zones.delete(s.zone);return buildZone(sc,s.zone,true)}
 
 function frame(now){

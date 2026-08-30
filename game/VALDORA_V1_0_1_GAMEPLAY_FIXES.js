@@ -57,7 +57,8 @@ function installClairvalGate(){
 function patchObjectiveText(){
   let current=null;try{current=window.objectivesV84||(typeof objectivesV84==='function'?objectivesV84:null)}catch(_){current=window.objectivesV84}
   if(typeof current!=='function'||current.__valdoraV101ClairvalObjectives)return false;const base=current;
-  const wrapped=function(){let list=[];try{list=base.apply(this,arguments)||[]}catch(_){list=[]}return list.map(item=>{if(!item||typeof item!=='object')return item;const txt=String(item.txt||''),oldRule=/((trois|3)\s+(Éclats?|créatures?)[^.!]{0,55}niveau\s*10)|(niveau\s*10[^.!]{0,55}(trois|3)\s+(Éclats?|créatures?))/i.test(txt);return oldRule?{...item,txt:'Prépare deux créatures : une au niveau 9 minimum et une deuxième au niveau 7 minimum, puis poursuis l’enquête vers la Route 1.'}:item)};
+  const wrapped=function(){let list=[];try{list=base.apply(this,arguments)||[]}catch(_){list=[]}return list.map(item=>{if(!item||typeof item!=='object')return item;const txt=String(item.txt||''),oldRule=/((trois|3)\s+(Éclats?|créatures?)[^.!]{0,55}niveau\s*10)|(niveau\s*10[^.!]{0,55}(trois|3)\s+(Éclats?|créatures?))/i.test(txt);return oldRule?{...item,txt:'Prépare deux créatures : une au niveau 9 minimum et une deuxième au niveau 7 minimum, puis poursuis l’enquête vers la Route 1.'}:item});
+  };
   wrapped.__valdoraV101ClairvalObjectives=true;wrapped.__v125Outer=true;wrapped.__base=base;window.objectivesV84=wrapped;try{objectivesV84=wrapped}catch(_){}return true
 }
 

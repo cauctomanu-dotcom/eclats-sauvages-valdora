@@ -172,9 +172,16 @@
     applyPublicBranding();
   }
 
-  install();
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
-  [2200, 7200, 10200, 11800].forEach(delay => setTimeout(install, delay));
+  function safeInstall() {
+    try { install(); }
+    catch (error) { console.error('V110 : initialisation stable incomplète', error); }
+  }
+
+  // Une réparation historique ne doit jamais interrompre le chargement des couches
+  // plus récentes placées après cette IIFE (tactile, histoire, V1.0.1, PNJ, etc.).
+  safeInstall();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', safeInstall);
+  [2200, 7200, 10200, 11800].forEach(delay => setTimeout(safeInstall, delay));
   setInterval(() => { try { applyPublicBranding(); } catch (_) {} }, 3000);
 })();
 
@@ -232,7 +239,7 @@
   if(document.getElementById('valdoraV101GameplayFixesLoader'))return;
   const script=document.createElement('script');
   script.id='valdoraV101GameplayFixesLoader';
-  script.src='VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-5';
+  script.src='VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-6';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
@@ -243,7 +250,7 @@
   if(document.getElementById('valdoraTownNpcRewriteLoader'))return;
   const script=document.createElement('script');
   script.id='valdoraTownNpcRewriteLoader';
-  script.src='VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-2';
+  script.src='VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-3';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();

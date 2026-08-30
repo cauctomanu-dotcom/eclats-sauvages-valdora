@@ -22,5 +22,13 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Installer Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
       - name: Vérifier les fichiers et chemins du jeu
         run: python outils/verifier_depot.py
+
+      - name: Vérifier la syntaxe JavaScript
+        run: node outils/verifier_javascript.mjs
