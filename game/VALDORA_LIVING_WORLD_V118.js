@@ -324,7 +324,11 @@ function updateWorldCitizens(){
 function facingVector(){return state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1}}
 function nearWorldNpc(){
   const sc=current();if(!sc||sc.kind!=='town')return null;const v=facingVector(),people=allWorldCitizens(sc,state.zone);let best=null,score=Infinity;
-  for(const n of people){const dx=n.x-state.x,dy=n.y-state.y,d=Math.hypot(dx,dy);if(d>72)continue;const dot=d?((dx/d)*v.x+(dy/d)*v.y):1,side=1-dot,rank=d+side*34;if(rank<score){score=rank;best=n}}
+  for(const n of people){
+    const dx=n.x-state.x,dy=n.y-state.y,d=Math.hypot(dx,dy);if(d>58)continue;
+    const dot=d?((dx/d)*v.x+(dy/d)*v.y):1;if(d>22&&dot<.05)continue;
+    const rank=d+(1-dot)*16;if(rank<score){score=rank;best=n}
+  }
   return best
 }
 function faceWorldNpc(n){const dx=state.x-n.x,dy=state.y-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.moving=false;n._v118PauseUntil=Date.now()+3600;n._v118Wait=performance.now()+3800}
@@ -345,7 +349,7 @@ function worldInteractV118(){
     try{
       const taron=typeof currentTaronNPC==='function'?currentTaronNPC():null;
       const d=taron?Math.hypot(Number(state?.x||0)-Number(taron.x||0),Number(state?.y||0)-Number(taron.y||0)):Infinity;
-      if(taron&&d<=72){
+      if(taron&&d<=58){
         try{if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(taron)}catch(_){}
         if(typeof interactTaron==='function'){interactTaron(taron);return true}
       }
@@ -358,7 +362,7 @@ function worldInteractV118(){
       const chest=window.ValdoraChestV118Bridge;
       if(chest){chest.ownedByV118=true;if(chest.interact?.(110))return true}
     }catch(e){console.warn('V118 interaction coffre Valdora',e)}
-    const n=nearWorldNpc();if(n&&distance(n,state)<=94)return talkWorldNpc(n);
+    const n=nearWorldNpc();if(n&&distance(n,state)<=60)return talkWorldNpc(n);
     const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;
     if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);
     return result

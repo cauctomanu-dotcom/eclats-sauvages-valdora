@@ -366,12 +366,28 @@
   }
 
   function targetFurniture(){
-    const reach=42,v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
-    const px=state.roomX+v.x*reach,py=state.roomY+v.y*reach;let best=null,bd=Infinity;
-    for(const m of roomFurniture()){if(!m.interactif)continue;const r=transformedBounds(m),d=distanceRect(px,py,r);if(d<bd){bd=d;best=m}}
-    return best&&bd<40?best:null;
+    const v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
+    let best=null,score=Infinity;
+    for(const m of roomFurniture()){
+      if(!m.interactif)continue;
+      const r=transformedBounds(m),tx=Math.max(r.x,Math.min(r.x+r.w,state.roomX)),ty=Math.max(r.y,Math.min(r.y+r.h,state.roomY));
+      const dx=tx-state.roomX,dy=ty-state.roomY,d=Math.hypot(dx,dy);if(d>54)continue;
+      const forward=dx*v.x+dy*v.y,side=Math.abs(dx*v.y-dy*v.x);
+      if(d>18&&(forward<0||side>Math.max(24,forward*.72+9)))continue;
+      const rank=d+side*.18;if(rank<score){score=rank;best=m}
+    }
+    return best;
   }
-  function targetNpc(){let best=null,bd=Infinity;for(const n of standardNpcs()){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}return best&&bd<68?best:null}
+  function targetNpc(){
+    const people=standardNpcs(),v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
+    let best=null,score=Infinity;
+    for(const n of people){
+      const dx=n.x-state.roomX,dy=n.y-state.roomY,d=Math.hypot(dx,dy);if(d>56)continue;
+      const dot=d?((dx/d)*v.x+(dy/d)*v.y):1;if(d>22&&dot<.05)continue;
+      const rank=d+(1-dot)*12;if(rank<score){score=rank;best=n}
+    }
+    return best;
+  }
   function healTeam(){
     for(const m of state.team||[]){try{m.hp=maxHP(m);m.status=null}catch(_){ }}call('hud');call('save',false);
   }

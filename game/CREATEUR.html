@@ -1892,6 +1892,8 @@ function v106pHasVolMastery(){
   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
 }
 function v106pCitadelRequirements(){
+  const creator=(()=>{try{return typeof v61CreatorMode==='function'?!!v61CreatorMode():/CREATEUR/i.test(location.pathname)}catch(_){return false}})();
+  if(creator)return {caught:169,seals:7,vol:true,ready:true,creator:true};
   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
 }
@@ -3216,7 +3218,7 @@ function faceNPCToPlayer(n){
   else n.dir=dy<0?3:0;
 }
 function playerInteractionPoint(){
-  const dist=52;
+  const dist=34;
   if(state.dir===0)return {x:state.x,y:state.y+dist};
   if(state.dir===1)return {x:state.x-dist,y:state.y};
   if(state.dir===2)return {x:state.x+dist,y:state.y};
@@ -5711,19 +5713,11 @@ function nearNPC(){
   if(!list.length)return null;
   const p=playerInteractionPoint();
   let best=null,bd=Infinity;
-  // Interaction volontaire : priorité au PNJ devant le joueur.
-  for(const n of list){
-    const d=Math.hypot(p.x-n.x,p.y-n.y);
-    if(d<bd){bd=d;best=n}
-  }
-  if(best&&bd<46)return best;
-  // Petite tolérance seulement à très courte distance, pour les PNJ en mouvement.
+  for(const n of list){const d=Math.hypot(p.x-n.x,p.y-n.y);if(d<bd){bd=d;best=n}}
+  if(best&&bd<34)return best;
   best=null;bd=Infinity;
-  for(const n of list){
-    const d=Math.hypot(state.x-n.x,state.y-n.y);
-    if(d<bd){bd=d;best=n}
-  }
-  return best&&bd<66?best:null
+  for(const n of list){const d=Math.hypot(state.x-n.x,state.y-n.y);if(d<bd){bd=d;best=n}}
+  return best&&bd<44?best:null
 }
 function inGrass(){
   const sc=currentScene();
@@ -6601,17 +6595,17 @@ function interiorBlocked(x,y){
 function nearInteriorNPC(){
   const list=currentRoom().npcs||[];
   if(!list.length)return null;
-  const dist=56;
-  const p=state.dir===0?{x:state.roomX,y:state.roomY+dist}:
-          state.dir===1?{x:state.roomX-dist,y:state.roomY}:
-          state.dir===2?{x:state.roomX+dist,y:state.roomY}:
-                        {x:state.roomX,y:state.roomY-dist};
+  const reach=30;
+  const p=state.dir===0?{x:state.roomX,y:state.roomY+reach}:
+          state.dir===1?{x:state.roomX-reach,y:state.roomY}:
+          state.dir===2?{x:state.roomX+reach,y:state.roomY}:
+                        {x:state.roomX,y:state.roomY-reach};
   let best=null,bd=Infinity;
   for(const n of list){const d=Math.hypot(p.x-n.x,p.y-n.y);if(d<bd){bd=d;best=n}}
-  if(best&&bd<46)return best;
+  if(best&&bd<30)return best;
   best=null;bd=Infinity;
   for(const n of list){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}
-  return best&&bd<66?best:null
+  return best&&bd<42?best:null
 }
 
 
@@ -13023,12 +13017,12 @@ function distanceRect(px,py,r){const dx=Math.max(r.x-px,0,px-(r.x+r.w));const dy
 function dirVector(dir){return dir===0?{x:0,y:1}:dir===1?{x:-1,y:0}:dir===2?{x:1,y:0}:{x:0,y:-1}}
 function facesFurniture(m){
   if(!m.interactif)return false;
-  const v=dirVector(state.dir), reach=52;
+  const v=dirVector(state.dir),reach=30;
   const px=state.roomX+v.x*reach,py=state.roomY+v.y*reach;
-  const r=interactionRect(m), d=distanceRect(px,py,r);
+  const r=interactionRect(m),d=distanceRect(px,py,r);
   const cx=r.x+r.w/2,cy=r.y+r.h/2;
   const dot=(cx-state.roomX)*v.x+(cy-state.roomY)*v.y;
-  return d<=82 && dot>-15;
+  return d<=32&&dot>-8;
 }
 function targetFurniture(){
   return updateFurnitureList().filter(facesFurniture).sort((a,b)=>{
@@ -16785,22 +16779,50 @@ const VERSION='V107G-TUTORIEL-CLAIRVAL';
 function creatorMode(){try{return (typeof v61CreatorMode==='function'&&v61CreatorMode())||/CREATEUR/i.test(location.pathname)}catch(_){return /CREATEUR/i.test(location.pathname)}}
 function creatorLegends(){
   if(!creatorMode()||typeof state==='undefined'||typeof mon!=='function'||typeof BY==='undefined')return;
-  state.box=Array.isArray(state.box)?state.box:[]; state.dex=state.dex||{};
-  const levels={151:60,152:64,153:61,154:63,155:66,156:62,157:65,158:60,159:64,160:67,161:68};
-  const owned=new Set([...(state.team||[]),...state.box].map(m=>m&&m.id));
+  state.team=Array.isArray(state.team)?state.team:[];
+  state.box=Array.isArray(state.box)?state.box:[];
+  state.dex=state.dex||{};
+  state.flags=state.flags||{};
+
+  const ids=Array.from({length:169},(_,i)=>i+1);
+  const available=ids.filter(id=>!!BY[id]);
+  const firstFullSeed=!state.flags.creatorFullCollectionV122;
+  const boxIds=new Set(state.box.map(m=>Number(m?.id)).filter(Boolean));
+  const ownedIds=new Set([...state.team,...state.box].map(m=>Number(m?.id)).filter(Boolean));
+  const legendLevels={151:60,152:64,153:61,154:63,155:66,156:62,157:65,158:60,159:64,160:67,161:68};
   let changed=false;
-  for(let id=151;id<=161;id++){
-    if(!BY[id]||owned.has(id))continue;
-    const m=mon(id,levels[id]||60); if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
-    state.box.push(m); state.dex[id]={...(state.dex[id]||{}),seen:true,caught:true}; changed=true; owned.add(id);
+
+  for(const id of ids){
+    const previous=state.dex[id]||{};
+    if(!previous.seen||!previous.caught){state.dex[id]={...previous,seen:true,caught:true};changed=true}
+    if(!BY[id]||boxIds.has(id))continue;
+    // Première activation : les 169 espèces sont réellement disponibles dans le PC,
+    // même si le joueur a déjà un exemplaire dans son équipe. Ensuite, retirer un
+    // Éclat du PC ne crée pas de clone tant qu'il reste possédé dans l'équipe.
+    if(!firstFullSeed&&ownedIds.has(id))continue;
+    const level=legendLevels[id]||(id>=162?30:30);
+    const m=mon(id,level);
+    if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
+    state.box.push(m);boxIds.add(id);ownedIds.add(id);changed=true;
   }
-  // V108L : les huit mascottes Phantasialand sont disponibles dans le PC Créateur uniquement.
-  // Elles ne sont jamais injectées automatiquement dans l'équipe.
-  const mascotLevels={162:30,163:30,164:30,165:30,166:30,167:30,168:30,169:30};
-  for(const id of Object.keys(mascotLevels).map(Number)){
-    if(!BY[id]||owned.has(id))continue;
-    const m=mon(id,mascotLevels[id]); if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
-    state.box.push(m); state.dex[id]={...(state.dex[id]||{}),seen:true,caught:true}; changed=true; owned.add(id);
+
+  if(available.length===169&&!state.flags.creatorFullCollectionV122){state.flags.creatorFullCollectionV122=true;changed=true}
+
+  // Le mode Créateur représente un dossier de progression complet pour les
+  // prérequis de la Citadelle, sans modifier le comportement du mode Joueur.
+  const seals=new Set((Array.isArray(state.seals)?state.seals:[]).map(Number).filter(Number.isFinite));
+  for(let i=1;i<=7;i++)if(!seals.has(i)){seals.add(i);changed=true}
+  state.seals=[...seals].sort((a,b)=>a-b);
+  if(state.fly!==true){state.fly=true;changed=true}
+
+  const flyer=[...state.team,...state.box].find(m=>BY?.[m?.id]?.type==='Air');
+  if(flyer){
+    flyer.moves=Array.isArray(flyer.moves)?flyer.moves:[];
+    if(!flyer.moves.includes('vol')){
+      if(flyer.moves.length>=4)flyer.moves[flyer.moves.length-1]='vol';else flyer.moves.push('vol');
+      try{if(typeof ensureMovePPV106U==='function')ensureMovePPV106U(flyer,true)}catch(_){}
+      changed=true;
+    }
   }
   if(changed){try{save(false)}catch(_){}}
 }
@@ -18110,7 +18132,19 @@ function v109jDrawFurniture(m){
   const g=v109sRoomGeometry(),cx=g.ox+(m.x+m.w/2)*g.scale,cy=g.oy+(m.y+m.h/2)*g.scale;ctx.save();ctx.translate(cx,cy);ctx.rotate((Number(m.rotation)||0)*Math.PI/180);ctx.scale(m.flipX?-1:1,m.flipY?-1:1);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(im,-m.w*g.scale/2,-m.h*g.scale/2,m.w*g.scale,m.h*g.scale);ctx.restore();
 }
 function v109jRect(m){return m?.collision||{x:m.x,y:m.y,w:m.w,h:m.h}}
-function v109jTargetFurniture(){const v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};let best=null,bd=1e9;for(const m of furniture()){if(!m.interactif)continue;const r=v109jRect(m),cx=r.x+r.w/2,cy=r.y+r.h/2,dx=cx-state.roomX,dy=cy-state.roomY,d=Math.hypot(dx,dy),dot=dx*v.x+dy*v.y;if(dot>=-8&&d<118&&d<bd){best=m;bd=d}}return best}
+function v109jTargetFurniture(){
+  const v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
+  let best=null,score=Infinity;
+  for(const m of furniture()){
+    if(!m.interactif)continue;
+    const r=v109jRect(m),tx=Math.max(r.x,Math.min(r.x+r.w,state.roomX)),ty=Math.max(r.y,Math.min(r.y+r.h,state.roomY));
+    const dx=tx-state.roomX,dy=ty-state.roomY,d=Math.hypot(dx,dy);if(d>56)continue;
+    const forward=dx*v.x+dy*v.y,side=Math.abs(dx*v.y-dy*v.x);
+    if(d>18&&(forward<0||side>Math.max(24,forward*.7+10)))continue;
+    const rank=d+side*.18;if(rank<score){score=rank;best=m}
+  }
+  return best;
+}
 
 function txt(v){return String(v??'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
 function fields(b){return [b?.type,b?.urbanType,b?.role,b?.kind,b?.id,b?.label,b?.name].map(txt).join(' | ')}
@@ -18215,9 +18249,14 @@ function facePlayer(n){
   n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.moving=false;n.interactionUntil=Date.now()+3200;n.nextDecision=performance.now()+3600;
 }
 function nearNpc(){
-  let best=null,bd=Infinity;
-  for(const n of current().npcs||[]){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}
-  return best&&bd<=105?best:null;
+  const list=current().npcs||[];let best=null,score=Infinity;
+  const v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
+  for(const n of list){
+    const dx=n.x-state.roomX,dy=n.y-state.roomY,d=Math.hypot(dx,dy);if(d>56)continue;
+    const dot=d?((dx/d)*v.x+(dy/d)*v.y):1;if(d>22&&dot<.05)continue;
+    const rank=d+(1-dot)*12;if(rank<score){score=rank;best=n}
+  }
+  return best;
 }
 function v109uDrawExactRoomBase(){
   const g=v109sRoomGeometry();
