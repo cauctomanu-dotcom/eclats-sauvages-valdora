@@ -1,7 +1,7 @@
 // VALDORA V123 — parité Créateur + implantation cohérente des PNJ
 (function(){
 'use strict';
-const VERSION='V123-CREATOR-PARITY-NPC-1';
+const VERSION='V123-CREATOR-PARITY-NPC-2';
 const HERO_SENTINEL='v123_hero_home_population_guard';
 let lastTownKey='';
 let creatorParityReady=false;
@@ -78,6 +78,10 @@ function normalizeTownNpcs(sc,zone){
   for(const n of npcs){
     if(n?.taron||n?.guardian)continue;
     const x=Number(n.x),y=Number(n.y);if(!Number.isFinite(x)||!Number.isFinite(y)){toMove.push(n);continue}
+    // V1.0.1 possède le déplacement de ces PNJ. Ils ont déjà été initialement
+    // placés sur le réseau routier ; ne pas les recaler pendant qu'ils marchent
+    // entre deux cellules, sinon ils sauteraient au point le plus proche.
+    if(n._v101RoadWalker){occupied.push({x,y});continue}
     const roadDistance=distanceToSlots(slots,x,y,9999),bad=inBuilding(sc,x,y,8)||nearTree(sc,x,y)||roadDistance>Math.max(38,(Number(sc.v105dCore)||90)*.50);
     if(bad)toMove.push(n);else occupied.push({x,y});
   }
