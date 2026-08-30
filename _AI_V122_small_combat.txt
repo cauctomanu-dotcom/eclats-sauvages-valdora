@@ -1,0 +1,1688 @@
+V122 SMALL REPORT: COMBAT
+================================================================================================
+## game/VALDORA_LIVING_WORLD_V118.js
+### line 336: interactTaron
+328:   return best
+329: }
+330: function faceWorldNpc(n){const dx=state.x-n.x,dy=state.y-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.moving=false;n._v118PauseUntil=Date.now()+3600;n._v118Wait=performance.now()+3800}
+331: function questStillActive(n){
+332:   try{const q=typeof V106C_QUEST_BY_GIVER!=='undefined'?V106C_QUEST_BY_GIVER[n?.id]:null;if(!q)return false;const e=typeof v106cQuestState==='function'?v106cQuestState()?.[q.id]:null;return !e||e.status==='active'}catch(_){return false}
+333: }
+334: function talkWorldNpc(n){
+335:   if(!n)return false;faceWorldNpc(n);recordTalk(n,state.zone);
+336:   if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}
+337:   try{if(questStillActive(n)&&typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}
+338:   try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}
+339:   n._v118Talk=Number(n._v118Talk||0)+1;const bank=DIALOGUE_BANK[state.zone]||DIALOGUE_BANK.town0,index=(hash(`${state.zone}|${n.id||n.name}`)+n._v118Talk*37+(state.seals||[]).length*19)%bank.length,role=n.v118Role?`<small>${n.v118Role}</small><br>`:'';
+340:   if(typeof dialog==='function')dialog(`<b>${n.name||n.dialog||'Habitant'}</b><br>${role}${bank[index]}`);return true
+341: }
+342: function worldInteractV118(){
+343:   if(typeof scene!=='undefined'&&scene==='world'){
+344:     try{
+345:       const bus=window.ValdoraBusV118Bridge;
+346:       if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}
+347:     }catch(e){console.warn('V118 interaction arrêt Fluo Valdora',e)}
+348:     try{
+349:       const chest=window.ValdoraChestV118Bridge;
+## game/index.html
+### line 1087: interactTaron
+1079:  if(scene!=='world'||trainerEvent)return;
+1080:  const b=nearBuilding();
+1081:  if(b){
+1082:    if(currentScene().megacity && b.megaInterior && b.urbanType!=='hotel'){enterMegaBuildingV66(b);return}
+1083:    if(b.type==='inn'||b.urbanType==='hotel'){enterHotelV66(b);return}
+1084:    building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+1085:  }
+1086:  const n=nearNPC();
+1087:  if(n){faceNPCToPlayer(n);if(n.taron){interactTaron(n);return}dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return}
+1088:  if(currentScene().kind==='route'){
+1089:    const t=nearTrainer();if(t){faceNPCToPlayer(t);if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));return}
+1090:  }
+1091: }
+1092: 
+1093: // Bataille Team Taron d’immeuble : retour au même étage après victoire.
+1094: function resolveBuildingBattleV66(){
+1095:  const c=window._buildingBattleContextV66;if(!c)return;
+1096:  window._buildingBattleContextV66=null;
+1097:  state.zone=c.zone;megaReturnZoneV66=c.zone;megaBuildingV66=c.building;megaFloorV66=c.floor;building={...c.building,type:'megabuilding66'};
+1098:  scene='interior';state.roomX=600;state.roomY=400;
+1099:  megaEventV66=c.event;megaEventV66.handled=true;state.flags=state.flags||{};state.flags[megaEventV66.doneKey]=true;
+1100:  state.money=(state.money||0)+700;save(false);
+### line 2851: interactTaron
+2843:   toast('Quelque chose se passe sur cette route...')
+2844: }
+2845: function currentTaronNPC(){
+2846:   const ts=ensureTaronState(),a=ts.active;
+2847:   if(!a||a.zone!==state.zone)return null;
+2848:   const m=TARON_MISSIONS[a.missionIndex];
+2849:   return {id:'taron_agent',zone:a.zone,x:a.x,y:a.y,look:a.look,dir:a.dir,name:'Agent Taron',text:m.text,taron:true}
+2850: }
+2851: function interactTaron(n){
+2852:   const ts=ensureTaronState(),a=ts.active;if(!a)return;
+2853:   const m=TARON_MISSIONS[a.missionIndex];
+2854:   dialog('<b>Team Taron — '+m.title+'</b><br>'+m.text+'<br><br><i>« Tu arrives trop tard. Cette route est à nous maintenant ! »</i>',
+2855:     ()=>startTaronBattle())
+2856: }
+2857: function startTaronBattle(){
+2858:   const ts=ensureTaronState(),a=ts.active;if(!a)return;
+2859:   const ri=Math.max(0,+state.zone.replace('route','')||0);
+2860:   const level=7+ri*4+Math.floor(Math.random()*3);
+2861:   const idx=Math.min(CREATURES.length-1,8+ri*11+Math.floor(Math.random()*8));
+2862:   const c=CREATURES[idx]||CREATURES[8];
+2863:   startBattle(mon(c.id,level),{id:'taron_'+Date.now(),level,dialog:'Un agent de la Team Taron',taron:true})
+2864: }
+### line 3125: trainerParty
+3117:     'Excellent combat ! Certaines capacités changent complètement l’issue d’un duel.',
+3118:     'Tu progresses vite. Pense à retourner au Centre de soins avant un gros défi.',
+3119:     'Joli ! On raconte que la Team Taron rôde parfois quand personne ne s’y attend.'
+3120:   ];
+3121:   let h=0;for(const c of t.id)h=(h*37+c.charCodeAt(0))>>>0;
+3122:   return hints[h%hints.length]
+3123: }
+3124: 
+3125: function trainerPartySize(t){
+3126:   if(t?.finalBoss)return 7;
+3127:   if(t?.templeGuard)return 3+((Number(t.id.match(/\d+/)?.[0]||1)-1)%3);
+3128:   return Math.min(4,1+Math.floor((t.level-1)/12))
+3129: }
+3130: 
+3131: 
+3132: 
+3133: function buildTrainerParty(t){
+3134:   if(t?.guardian)return v83BuildGuardianParty(t);
+3135:   const count=trainerPartySize(t),party=[];
+3136:   const zoneBase=Math.max(v83AreaLevelBase(),Number(t.level)||1);
+3137:   for(let i=0;i<count;i++){
+3138:     const lvl=Math.min(82,zoneBase+i);
+### line 3188: trainerParty
+3180:     const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+3181:     if(d>72){
+3182:       const step=Math.min(5,d-68);
+3183:       t.x+=dx/d*step;t.y+=dy/d*step;
+3184:       t.moving=true;faceNPCToPlayer(t);
+3185:       return
+3186:     }
+3187:     t.moving=false;e.stage='dialog';
+3188:     dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t)+'<br><br><small>Équipe adverse : '+trainerPartySize(t)+' créature'+(trainerPartySize(t)>1?'s':'')+'.</small>',()=>{
+3189:       const target=t;trainerEvent=null;startTrainer413(target)
+3190:     })
+3191:   }
+3192: }
+3193: function drawTrainerAlert(t,x,y){
+3194:   if(!trainerEvent||trainerEvent.trainer!==t)return;
+3195:   const pulse=1+Math.sin(performance.now()/110)*.08;
+3196:   ctx.save();ctx.translate(x,y-104);ctx.scale(pulse,pulse);
+3197:   ctx.fillStyle='#fff';ctx.strokeStyle='#233d4b';ctx.lineWidth=3;
+3198:   ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill();ctx.stroke();
+3199:   ctx.fillStyle='#e44f4f';ctx.font='900 25px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!',0,1);
+3200:   ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic'
+3201: }
+### line 5967: interactTaron
+5959:       enterBuildingV70(b);return
+5960:     }
+5961:     building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+5962:   }
+5963: 
+5964:   const n=nearNPC();
+5965:   if(n){
+5966:     faceNPCToPlayer(n);
+5967:     if(n.taron){interactTaron(n);return}
+5968:     if(questInteractionV106C(n))return;
+5969:     dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return
+5970:   }
+5971: 
+5972:   if(['route','temple'].includes(currentScene().kind)){
+5973:     const t=nearTrainer();
+5974:     if(t){
+5975:       faceNPCToPlayer(t);
+5976:       if(t.finalBoss&&!templeGuardsClearedV77()){
+5977:         dialog('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');
+5978:         return
+5979:       }
+5980:       if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));
+### line 6888: trainerParty, trainerIndex
+6880: function startBattle(enemy,trainer=null){
+6881:   const a=active();if(!a){toast('Toute ton équipe est K.O. Va la faire soigner avant de pouvoir combattre.');return}
+6882:   battleToken++;
+6883:   enemy.atkBuff=enemy.atkBuff||0;enemy.defBuff=enemy.defBuff||0;enemy.status=enemy.status||null;
+6884:   battle={
+6885:     token:battleToken,enemy,trainer,busy:true,activePlayer:a,
+6886:     message:trainer?trainer.dialog+' te défie !':'Un Éclat sauvage apparaît !',
+6887:     anim:null,playerHit:0,enemyHit:0,orb:null,result:null,reward:0,eventQueue:[],
+6888:     trainerParty:trainer?.party||null,trainerIndex:trainer?.partyIndex||0
+6889:   };
+6890:   scene='battle';
+6891:   $('battleUI').style.display='flex';
+6892:   ensureBattleMessageV84();
+6893:   syncBattleMessageV84();
+6894:   startBattleMusic();battleCry(enemy.id);buildBattleButtons();
+6895:   v84Schedule(700,()=>setBattleBusy(false,'À toi de jouer.'))
+6896: }
+6897: 
+6898: function startTrainer413(t){
+6899:   const opponent={...t,party:buildTrainerParty(t),partyIndex:0};
+6900:   startBattle(opponent.party[0],opponent)
+6901: }
+### line 7451: trainerParty
+7443:       const t=Math.min(1,dt/450);enemyScale=.2+.8*t;enemyAlpha=t;ex=650+(475-650)*t;ey=325+(115-325)*t
+7444:     }
+7445:   }
+7446:   if(enemyVisible&&e)drawCreature(e.id,ex,ey,es*enemyScale,false,battle.enemyHit?.45:enemyAlpha,1);
+7447: 
+7448:   battleCard(14,356,242,150,a,false);
+7449:   battleCard(700,26,246,118,e,true);
+7450: 
+7451:   if(battle.trainer&&battle.trainerParty){
+7452:     const total=battle.trainerParty.length,remaining=total-battle.trainerIndex;
+7453:     roundedRect(714,153,218,44,14,'rgba(15,35,49,.92)','rgba(255,255,255,.28)');
+7454:     ctx.fillStyle='#fff';ctx.font='800 11px Segoe UI';ctx.fillText('Équipe adverse',729,170);
+7455:     for(let i=0;i<total;i++){
+7456:       ctx.fillStyle=i<battle.trainerIndex?'#596b74':i===battle.trainerIndex?'#f0c94a':'#9ed9e8';
+7457:       ctx.beginPath();ctx.arc(730+i*22,185,6,0,Math.PI*2);ctx.fill()
+7458:     }
+7459:     ctx.fillStyle='#d9e7ec';ctx.font='700 10px Segoe UI';
+7460:     ctx.fillText(remaining+' restante'+(remaining>1?'s':''),826,188)
+7461:   }
+7462: 
+7463:   // V84 : le message n'est plus dessiné derrière les boutons.
+7464:   // Il est rendu dans #battleMessageV84 au-dessus de la barre d'actions.
+### line 7824: trainerParty, trainerIndex
+7816: 
+7817: function enemyKO(){
+7818:   if(!battleAlive())return;
+7819:   const a=active(),e=battle.enemy;
+7820:   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
+7821:   const ev=gainXP(a,xp);
+7822:   battle.eventQueue.push(BY[a.id].name+' gagne '+xp+' EXP.',...ev);
+7823: 
+7824:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+7825:     battle.trainerIndex++;
+7826:     battle.enemy=battle.trainerParty[battle.trainerIndex];
+7827:     battle.message='Le dresseur envoie '+BY[battle.enemy.id].name+' !';
+7828:     battle.enemyHit=0;battle.playerHit=0;battle.anim=null;
+7829:     hud();syncBattleMessageV84();
+7830:     v84Schedule(750,()=>setBattleBusy(false,'À toi de jouer.'));
+7831:     return
+7832:   }
+7833: 
+7834:   if(battle.trainer){
+7835:     battle.reward=Math.max(40,Math.floor((battle.trainer.level||e.level)*16));
+7836:     state.money+=battle.reward;
+7837:     battle.eventQueue.push('Récompense : '+voltronLabelV85(battle.reward)+'.');
+### line 8075: completeTaronMission, taronMission
+8067:       const c=window._v67Battle;if(!c)return;
+8068:       window._v67Battle=null;state.zone=c.zone;v67ReturnZone=c.zone;v67Building=c.building;v67Floor=c.floor;
+8069:       building={...c.building,type:'v67building'};scene='interior';state.roomX=600;state.roomY=420;
+8070:       c.event.done=true;state.flags=state.flags||{};state.flags[c.event.key]=true;
+8071:       state.money=(state.money||0)+700;save(false);
+8072:       dialog('<b>Immeuble libéré</b><br>La Team Taron est repoussée. +700 Voltrons.');
+8073:     },150);return
+8074:   }
+8075:   if(taronWon){setTimeout(completeTaronMission,150);return}
+8076: 
+8077:   if(normalTrainerWon){
+8078:     setTimeout(()=>dialog(
+8079:       '<b>'+b.trainer.dialog+'</b><br>'+
+8080:       trainerAfterBattleTextV88(b.trainer)+
+8081:       (events.length?'<br><br>'+events.join('<br>'):'')
+8082:     ),150);
+8083:     return
+8084:   }
+8085: 
+8086:   if(events.length)dialog('<b>Résultats</b><br>'+events.join('<br>'));
+8087:   else toast(res==='capture'?('Éclat capturé !'+(b.captureXP?' +'+b.captureXP+' EXP':''))
+8088:     :res==='win'?('Victoire ! +'+voltronLabelV85(b.reward||0))
+### line 11108: trainerParty
+11100:   const playerCeiling=Math.floor(avg)+3+Math.min(3,seals);
+11101: 
+11102:   // Mais si le joueur sur-nivelle volontairement, le monde ne monte pas
+11103:   // intégralement avec lui : la route conserve son identité.
+11104:   const routeCeiling=storyBase+4;
+11105: 
+11106:   return Math.max(3,Math.min(65,storyBase,playerCeiling,routeCeiling))
+11107: }
+11108: function v98RoadTrainerPartySize(t){
+11109:   const lvl=v98RoadTrainerLevel(t);
+11110:   const route=v98RouteIndex();
+11111:   if(route<=1&&lvl<10)return 1;
+11112:   if(lvl<13)return 1;
+11113:   if(lvl<22)return 2;
+11114:   if(lvl<34)return 3;
+11115:   return 4
+11116: }
+11117: 
+11118: // Dresseurs spéciaux inchangés ; seuls les dresseurs de route sont recalibrés.
+11119: const _v98TrainerPartySize=trainerPartySize;
+11120: trainerPartySize=function(t){
+11121:   if(t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70){
+### line 11128: buildTrainerParty, trainerParty
+11120: trainerPartySize=function(t){
+11121:   if(t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70){
+11122:     return _v98TrainerPartySize(t)
+11123:   }
+11124:   if(currentScene()?.kind==='route')return v98RoadTrainerPartySize(t);
+11125:   return _v98TrainerPartySize(t)
+11126: };
+11127: 
+11128: const _v98BuildTrainerParty=buildTrainerParty;
+11129: buildTrainerParty=function(t){
+11130:   if(t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70){
+11131:     return _v98BuildTrainerParty(t)
+11132:   }
+11133:   if(currentScene()?.kind!=='route')return _v98BuildTrainerParty(t);
+11134: 
+11135:   const count=v98RoadTrainerPartySize(t);
+11136:   const base=v98RoadTrainerLevel(t);
+11137:   const party=[];
+11138:   const hash=v98Hash(t?.id||'trainer');
+11139: 
+11140:   for(let i=0;i<count;i++){
+11141:     // Maximum +1 par membre, sans saut brutal.
+### line 13385: trainerParty, trainerIndex
+13377:   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
+13378:   const participants=(battle.v102zParticipants&&battle.v102zParticipants.length)?[...battle.v102zParticipants]:[a];
+13379:   for(const m of participants){
+13380:     if(!m)continue;const wasKO=m.hp<=0;const amount=Math.max(6,Math.floor(xp*(m===a?1:.75)));
+13381:     const ev=gainXP(m,amount);if(wasKO)m.hp=0;
+13382:     battle.eventQueue.push(BY[m.id].name+' gagne '+amount+' EXP pour sa participation.',...ev)
+13383:   }
+13384: 
+13385:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+13386:     battle.trainerIndex++;battle.enemy=battle.trainerParty[battle.trainerIndex];
+13387:     battle.message='Le dresseur envoie '+BY[battle.enemy.id].name+' !';
+13388:     battle.enemyHit=0;battle.playerHit=0;battle.anim=null;
+13389:     battle.v102zParticipants=[];const nextActive=active();if(nextActive)battle.v102zParticipants.push(nextActive);
+13390:     hud();syncBattleMessageV84();v84Schedule(750,()=>setBattleBusy(false,'À toi de jouer.'));return
+13391:   }
+13392: 
+13393:   if(battle.trainer){
+13394:     battle.reward=Math.max(50,Math.floor((battle.trainer.level||e.level)*18));state.money+=battle.reward;
+13395:     battle.eventQueue.push('Récompense : '+voltronLabelV85(battle.reward)+'.')
+13396:   }else{
+13397:     battle.reward=Math.floor(wildRewardV85(e)*1.10);state.money+=battle.reward;
+13398:     battle.eventQueue.push('Combat sauvage : +'+voltronLabelV85(battle.reward)+'.')
+### line 13407: buildTrainerParty, trainerParty
+13399:   }
+13400:   battle.eventQueue.push(...zCombatLoot(battle,e));
+13401:   battle.result='win';battle.message='Victoire !';hud();syncBattleMessageV84();scheduleBattleEnd('win',950)
+13402: };
+13403: 
+13404: // ----------------------------------------------------------------------
+13405: // 3. NIVEAUX DES DRESSEURS CALÉS SUR LA ZONE + FAUNE SAUVAGE
+13406: // ----------------------------------------------------------------------
+13407: const Z_BUILD_TRAINER_PARTY=buildTrainerParty;
+13408: const Z_TRAINER_PARTY_SIZE=trainerPartySize;
+13409: function zAvgLevel(){const t=(state.team||[]).filter(m=>m?.level);return t.length?t.reduce((s,m)=>s+m.level,0)/t.length:5}
+13410: function zRouteTrainerLevel(t){
+13411:   const wild=v83AreaLevelBase(),avg=zAvgLevel(),seals=(state.seals||[]).length,variation=(zHash(t?.id||'x')%3)-1;
+13412:   const target=wild+variation;
+13413:   const ceiling=Math.floor(avg)+3+Math.min(2,seals);
+13414:   return Math.max(3,Math.min(70,target,Math.max(wild-1,ceiling)))
+13415: }
+13416: trainerPartySize=function(t){
+13417:   if(t?.taronBossV102Z)return Math.min(5,2+Math.floor((Number(String(t.zone||state.zone).replace(/\D/g,''))||0)/3));
+13418:   if(currentScene()?.kind==='route'&&!t?.guardian&&!t?.taron&&!t?.finalBoss&&!t?.templeGuard){const l=zRouteTrainerLevel(t);return l<12?1:l<22?2:l<34?3:4}
+13419:   return Z_TRAINER_PARTY_SIZE(t)
+13420: };
+### line 13430: trainerParty
+13422:   if(t?.taronBossV102Z){
+13423:     const count=trainerPartySize(t),route=Number(String(t.zone||state.zone).replace(/\D/g,''))||0;
+13424:     const wild=v83AreaLevelBase(),base=Math.min(72,Math.max(wild+2,Math.floor(zAvgLevel())+1));
+13425:     const types=['Ombre','Foudre','Feu','Roche'];
+13426:     const pool=CREATURES.filter(c=>types.includes(c.type)&&minLevelForSpeciesV81(c.id)<=base+2);
+13427:     return Array.from({length:count},(_,i)=>{const c=pool[(zHash(t.id)+i*37)%Math.max(1,pool.length)]||CREATURES[0];const m=mon(c.id,Math.min(72,base+Math.floor(i/2)));m.moves=defaultMoves(m.id,m.level);return m})
+13428:   }
+13429:   if(currentScene()?.kind==='route'&&!t?.guardian&&!t?.taron&&!t?.finalBoss&&!t?.templeGuard){
+13430:     const count=trainerPartySize(t),base=zRouteTrainerLevel(t),party=[],hash=zHash(t?.id||'trainer');
+13431:     for(let i=0;i<count;i++){
+13432:       const lvl=Math.min(70,base+Math.floor(i/2));const pool=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+13433:       const c=pool[(hash+i*31)%Math.max(1,pool.length)]||CREATURES[0];const m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)
+13434:     }
+13435:     return party
+13436:   }
+13437:   return Z_BUILD_TRAINER_PARTY(t)
+13438: };
+13439: 
+13440: // ----------------------------------------------------------------------
+13441: // 4. SYMBOLE SI L'ESPÈCE SAUVAGE A DÉJÀ ÉTÉ CAPTURÉE
+13442: // ----------------------------------------------------------------------
+13443: battleCard=function(x,y,w,h,m,enemy=false){
+### line 13500: completeTaronMission, taronMission
+13492:     sc.trainers.push({id:b.id,zone,x:Math.max(100,Math.min(sc.width-100,ref.x+105)),y:Math.max(100,Math.min(sc.height-100,ref.y+70)),look:39,dir:0,level:8+route*3,dialog:b.dialog,name:b.name,taron:true,taronBossV102Z:true,guardian:false})
+13493:   }
+13494: }
+13495: const Z_START_TRAINER=startTrainer413;
+13496: startTrainer413=function(t){
+13497:   if(t?.taronBossV102Z){window._v102zTaronBossContext=t;dialog('<b>'+t.dialog+'</b><br>'+Z_TARON_BOSSES[t.zone]?.story,()=>Z_START_TRAINER(t));return}
+13498:   return Z_START_TRAINER(t)
+13499: };
+13500: const Z_COMPLETE_TARON=completeTaronMission;
+13501: completeTaronMission=function(){
+13502:   const t=window._v102zTaronBossContext;
+13503:   if(!t)return Z_COMPLETE_TARON();
+13504:   window._v102zTaronBossContext=null;zEnsure();state.trainerWins=state.trainerWins||{};state.trainerWins[t.id]=true;state.v102z.taronBossWins[t.id]=true;
+13505:   state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+13506:   const route=Number(String(t.zone).replace('route',''))||0;
+13507:   const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+13508:   const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+13509:   logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+13510:   dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+13511: };
+13512: 
+13513: // ----------------------------------------------------------------------
+### line 14329: buildTrainerParty, trainerParty
+14321:  ],exits:[{x:0,y:800,w:120,h:200,side:'west',to:'town4',label:'Belrive'},{x:3480,y:800,w:120,h:200,side:'east',to:'town5',label:'Soléria'}]};sc.v105dGraph=lakeGraph(sc);
+14322:  const a=SCENES.town4,b=SCENES.town5;if(a&&!a.exits.some(e=>e.to==='route4bis'))a.exits.push({x:a.width-120,y:a.height*.72,w:120,h:190,side:'east',to:'route4bis',label:'Route 4 bis — Lac'});if(b&&!b.exits.some(e=>e.to==='route4bis'))b.exits.push({x:0,y:b.height*.70,w:125,h:200,side:'west',to:'route4bis',label:'Route 4 bis — Lac'})}
+14323: 
+14324: const DRAW_OBJECTS_BASE=typeof window.drawRouteObjectsV93==='function'?window.drawRouteObjectsV93:function(){};
+14325: drawRouteObjectsV93=function(sc,camX,camY,sx,sy){if(state.zone!=='route4bis')return DRAW_OBJECTS_BASE(sc,camX,camY,sx,sy);const g=ctx.createLinearGradient(0,0,0,600);g.addColorStop(0,'#52b9dc');g.addColorStop(1,'#247cae');ctx.fillStyle=g;ctx.fillRect(0,0,960,600);ctx.save();ctx.strokeStyle='rgba(220,250,255,.38)';ctx.lineWidth=2;for(let wy=Math.floor(camY/90)*90;wy<camY+1100;wy+=90)for(let wx=Math.floor(camX/180)*180;wx<camX+1800;wx+=180){const x=(wx-camX)*sx,y=(wy-camY)*sy;ctx.beginPath();ctx.arc(x,y,22,Math.PI*.15,Math.PI*.85);ctx.stroke()}ctx.fillStyle='#9b7146';for(const d of[[0,760,300,280],[3300,760,300,280]]){ctx.fillRect((d[0]-camX)*sx,(d[1]-camY)*sy,d[2]*sx,d[3]*sy);ctx.fillStyle='#c89b61';for(let x=d[0]+20;x<d[0]+d[2];x+=44)ctx.fillRect((x-camX)*sx,(d[1]-camY)*sy,8*sx,d[3]*sy);ctx.fillStyle='#9b7146'}for(let wx=430;wx<3300;wx+=260){const x=(wx-camX)*sx,y=(900+Math.sin(wx/310)*120-camY)*sy;ctx.fillStyle='#f3d35c';ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff';ctx.stroke()}const hx=(state.x-camX)*sx,hy=(state.y-camY)*sy;ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(hx,hy+8,25,8,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='rgba(12,61,91,.86)';ctx.fillRect(12,12,275,36);ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.fillText('ROUTE 4 BIS — LAC DES REFLETS',24,36);ctx.restore()};
+14326: 
+14327: const WILD_BASE=startWild;
+14328: startWild=function(){if(state.zone!=='route4bis')return WILD_BASE();const base=15+Math.min(3,(state.seals||[]).length),pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=base+4),c=pool[Math.floor(Math.random()*Math.max(1,pool.length))]||CREATURES.find(c=>c.type==='Eau')||CREATURES[0],e=mon(c.id,Math.max(minLevelForSpeciesV81(c.id),base-2+Math.floor(Math.random()*5)));e.moves=defaultMoves(e.id,e.level);state.dex[c.id]=state.dex[c.id]||{seen:true,caught:false};startBattle(e,null)};
+14329: const PARTY_BASE=buildTrainerParty;
+14330: buildTrainerParty=function(t){if(!t?.swimmer)return PARTY_BASE(t);const count=2+((t.level||20)>=25?1:0),pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=t.level+3);return Array.from({length:count},(_,i)=>{const c=pool[(i*7+(t.level||20))%Math.max(1,pool.length)]||CREATURES.find(c=>c.type==='Eau')||CREATURES[0],m=mon(c.id,Math.max(minLevelForSpeciesV81(c.id),(t.level||20)+i));m.moves=defaultMoves(m.id,m.level);return m})};
+14331: const ENCOUNTER_BASE=window.v104EncounterStep;
+14332: window.v104EncounterStep=function(){
+14333:  if(state.zone!=='route4bis')return ENCOUNTER_BASE&&ENCOUNTER_BASE();
+14334:  if(scene!=='world'||battle||trainerEvent)return;
+14335:  state.v105nLakeSteps=(Number(state.v105nLakeSteps)||0)+1;
+14336:  // V106S : le lac doit respirer. Aucun combat pendant les 74 premiers déplacements,
+14337:  // puis une probabilité progressive, avec garde-fou à 145 déplacements maximum.
+14338:  if(state.v105nLakeSteps<75)return;
+14339:  const chance=Math.min(.10,.025+(state.v105nLakeSteps-75)*.0012);
+14340:  if(state.v105nLakeSteps>=145||Math.random()<chance){state.v105nLakeSteps=0;startWild()}
+14341: };
+14342: 
+### line 14924: trainerParty, trainerIndex
+14916:       incomingEnemy=mon(water.id,lvl);incomingEnemy.moves=defaultMoves(incomingEnemy.id,lvl)
+14917:     }
+14918:   }
+14919:   const rawEnemy=!trainer?legalizeWildCreatureV106J(incomingEnemy):incomingEnemy;
+14920:   const foe=normalizeCreature(rawEnemy,trainer?.level||player.level||5);
+14921:   battleToken++;
+14922:   battle={
+14923:     engine:VERSION,token:battleToken,enemy:foe,trainer:trainer||null,
+14924:     trainerParty:Array.isArray(trainer?.party)?trainer.party:null,trainerIndex:Number(trainer?.partyIndex)||0,
+14925:     trainerHealUses:0,trainerHealByIndex:{},
+14926:     player,participants:[player],busy:true,phase:'intro',menu:'actions',message:'',anim:null,orb:null,
+14927:     result:null,reward:0,eventQueue:[],returnScene:priorScene,returnBuilding:priorBuilding,originZone:state.zone
+14928:   };
+14929:   scene='battle';installInterface();
+14930:   const ui=el('battleUI');if(ui){ui.dataset.combatActive='false';ui.style.setProperty('display','none','important')}
+14931:   const menu=el('menuov');if(menu)menu.style.display='none';
+14932:   const dlg=el('dialog');if(dlg){dlg.classList.remove('show');dlg.style.display='none'}
+14933:   const alreadyCaught=!trainer&&!!state.dex?.[foe.id]?.caught;setMessage(trainer?`${trainer.dialog||trainer.name||'Un dresseur'} te défie !`:(state.zone==='town0'?`Un Éclat sauvage apparaît : ${nameOf(foe)} !${alreadyCaught?' — Déjà capturée.':''}`:`Un ${nameOf(foe)} sauvage apparaît !${alreadyCaught?' — Déjà capturée.':''}`));
+14934:   playBattleTransitionV106S(trainer,foe,()=>{
+14935:     if(!battle||battle.token!==battleToken)return;
+14936:     if(ui){ui.dataset.combatActive='true';ui.style.setProperty('display','flex','important')}
+14937:     safeCall(startBattleMusic);safeCall(battleCry,foe.id);safeCall(hud);buildButtons();
+### line 14953: buildTrainerParty, trainerParty
+14945:   let t={...rawTrainer};
+14946:   const special=t.guardian||t.taron||t.finalBoss||t.templeGuard||t.buildingEventV66||t.buildingEventV67||t.buildingEventV68||t.buildingEventV70;
+14947:   if(!special&&safeCall(currentScene)?.kind==='route'&&typeof v98RoadTrainerLevel==='function'){
+14948:     t.level=v98RoadTrainerLevel(t);t.zone=state.zone
+14949:   }
+14950:   if(!t.guardian&&typeof trainerDefeatedV88==='function'&&trainerDefeatedV88(t)){
+14951:     safeCall(dialog,`<b>${t.dialog||'Dresseur'}</b><br>Ce combat a déjà été remporté.`);return false
+14952:   }
+14953:   let party=Array.isArray(t.party)&&t.party.length?t.party:safeCall(buildTrainerParty,t);
+14954:   if(!Array.isArray(party)||!party.length)party=[mon(CREATURES[0].id,Math.max(3,Number(t.level)||5))];
+14955:   party=party.map(m=>normalizeCreature(m,t.level||5));
+14956:   t.party=party;t.partyIndex=0;
+14957:   return beginBattle(party[0],t)
+14958: }
+14959: 
+14960: function legalizeWildCreatureV106J(candidate){
+14961:   if(!candidate)return candidate;
+14962:   const level=Math.max(1,Number(candidate.level)||1),original=BY[Number(candidate.id)];
+14963:   if(!original)return candidate;
+14964:   if(minimumLegalLevel(original.id)<=level)return candidate;
+14965:   const family=CREATURES.filter(c=>c.family===original.family&&minimumLegalLevel(c.id)<=level).sort((a,b)=>(b.stage||0)-(a.stage||0));
+14966:   const legal=family[0]||CREATURES.find(c=>(c.stage||0)===0&&c.family===original.family)||CREATURES[0];
+### line 15066: trainerIndex
+15058:   const critical=Math.random()<critChance,crit=critical?1.35:1,variance=.92+Math.random()*.09,shield=target._v108mShield?.turns>0?(1-(target._v108mShield.amount||.3)):1;let damage=Math.max(1,Math.round(base*mult*stab*rel*crit*variance*shield));
+15059:   if(target._v108mSurviveOnce&&damage>=target.hp&&target.hp>0){damage=Math.max(0,target.hp-1);target._v108mSurviveOnce=false}return {damage,mult,critical,power:Math.round(power)}
+15060: }
+15061: 
+15062: function applyEffect(user,target,mv){
+15063:   const mid=String(mv?._id||mv?.id||''),nm=String(mv?.name||''),txt=String(mv?.effectText||''),isNew=v108mIsMove(mv);
+15064:   if(mid==='rugissement'||nm==='Rugissement'){target.atkBuff=clamp(v108mStage(target,'atkBuff')-1,-3,3);return `L'Attaque de ${nameOf(target)} baisse.`}
+15065:   if(!isNew){
+15066:     if(mv.kind==='heal'){const n=Math.min(maxHP(user)-user.hp,Math.max(12,Math.round(maxHP(user)*.28)));user.hp+=n;if(battle?.trainer&&user===battle.enemy){battle.trainerHealUses=(Number(battle.trainerHealUses)||0)+1;const k=String(Number(battle.trainerIndex)||0);battle.trainerHealByIndex=battle.trainerHealByIndex||{};battle.trainerHealByIndex[k]=(Number(battle.trainerHealByIndex[k])||0)+1}return `${nameOf(user)} récupère ${n} PV.`}
+15067:     if(mv.kind==='buff'){user.atkBuff=clamp(v108mStage(user,'atkBuff')+1,-3,3);user.defBuff=clamp(v108mStage(user,'defBuff')+1,-3,3);return `Les capacités de ${nameOf(user)} augmentent.`}
+15068:     if(mv.kind==='debuff'){target.atkBuff=clamp(v108mStage(target,'atkBuff')-1,-3,3);return `L'attaque de ${nameOf(target)} baisse.`}
+15069:     if(!target.status){if(mv.kind==='poison'&&Math.random()<.30){target.status='empoisonné';return `${nameOf(target)} est empoisonné.`}if(mv.kind==='paralyze'&&Math.random()<.30){target.status='paralysé';return `${nameOf(target)} est paralysé.`}if(mv.kind==='freeze'&&Math.random()<.24){target.status='gelé';return `${nameOf(target)} est gelé.`}if(mv.kind==='blind'&&Math.random()<.30){target.status='aveuglé';return `${nameOf(target)} est aveuglé.`}}
+15070:     return ''
+15071:   }
+15072:   const out=[],damaging=(Number(mv.displayPower)||0)>0,last=Math.max(0,Number(user._v108mLastDamage)||0),skipSelf=['Forteresse','Survoltage','Œil du Cyclone','Poing de Granite'].includes(nm),skipFoe=['Forteresse','Hibernation','Colosse','Moisissure','Nuage Nocif'].includes(nm);
+15073:   const self=(k,n,label)=>{user[k]=clamp(v108mStage(user,k)+n,-3,3);out.push(label)},foe=(k,n,label,ch=1)=>{if(v108mRoll(ch,user,target)){target[k]=clamp(v108mStage(target,k)+n,-3,3);out.push(label)}},status=(s,ch,label)=>{if(!target.status&&v108mRoll(ch,user,target)){target.status=s;if(s==='endormi')target._sleepTurns=2;out.push(label)}};
+15074:   let mm=txt.match(/Rend\s+(\d+)%\s+(?:des\s+)?PV/i);if(mm&&!/progressivement|dégâts/i.test(txt)){const n=Math.round(maxHP(user)*Number(mm[1])/100),g=Math.min(n,maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} récupère ${g} PV.`)}
+15075:   if(nm==='Halo'){const g=Math.min(Math.round(maxHP(user)*.10),maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} récupère ${g} PV.`)}
+15076:   mm=txt.match(/Rend\s+(\d+)%\s+des dégâts/i);if(mm&&damaging&&last){const g=Math.min(Math.max(1,Math.round(last*Number(mm[1])/100)),maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} absorbe ${g} PV.`)}
+15077:   if(nm==='Colonie Fongique'&&last){const g=Math.min(Math.max(1,Math.round(last*(Number(mv.drainPct)||.40))),maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} draine ${g} PV.`)}
+15078:   mm=txt.match(/(?:subit|perd)\s+(\d+)%\s+des dégâts/i);if(mm&&damaging&&last){const n=Math.max(1,Math.round(last*Number(mm[1])/100));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} subit ${n} PV de contrecoup.`)}
+15079:   if(nm==='Assaut'){const n=Math.max(1,Math.round(maxHP(user)*.05));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} perd ${n} PV.`)}if(nm==='Néant Absolu'){const n=Math.max(1,Math.round(maxHP(user)*.10));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} perd ${n} PV.`)}
+### line 15115: enemyDefeated
+15107: 
+15108: function resolveMove(playerTurn,mv){
+15109:   if(!combatReady())return;const user=playerTurn?currentPlayer():battle.enemy,target=playerTurn?battle.enemy:currentPlayer();if(!user||!target){finishV105R('error');return}
+15110:   const accStage=mv.name==='Rayon Pur'?Math.max(0,v108mStage(user,'accBuff')):v108mStage(user,'accBuff'),evaRaw=v108mStage(target,'evaBuff'),evaStage=mv.name==='Rafale Sonique'?(evaRaw>0?evaRaw*.25:evaRaw):evaRaw;let accuracy=(Number(mv.accuracy)||100)*clamp(1+accStage*.06-evaStage*.06,.65,1.25);if(user.status==='aveuglé')accuracy-=18;accuracy=clamp(accuracy,20,100);let text='';
+15111:   if(target._v108mEvadeNext){target._v108mEvadeNext=false;text=`${nameOf(target)} esquive complètement ${mv.name} !`}
+15112:   else if(Math.random()*100>accuracy){text=`${nameOf(user)} manque ${mv.name} !`}
+15113:   else if(v108mMovePower(user,target,mv)<=0){text=applyEffect(user,target,mv)||'La capacité agit.'}
+15114:   else{const hits=Math.max(1,Number(mv.hits)||1);let total=0,mult=1,critical=false;for(let i=0;i<hits;i++){if(target.hp-total<=0)break;const d=damageFor(user,target,mv);total+=d.damage;mult=d.mult;critical=critical||d.critical}target.hp=Math.max(0,target.hp-total);target._v108mWasHit=true;user._v108mLastDamage=total;let extra='';if(target._v108mReflect){const r=Math.max(1,Math.round(total*target._v108mReflect));target._v108mReflect=0;user.hp=Math.max(1,user.hp-r);extra+=` ${nameOf(user)} subit ${r} PV renvoyés.`}if(target._v108mStatic?.turns>0&&!user.status&&v108mRoll(.25,target,user)){user.status='paralysé';extra+=` ${nameOf(user)} est paralysé par le champ statique.`}const effect=applyEffect(user,target,mv);text=`${nameOf(target)} perd ${total} PV.${hits>1?' '+hits+' coups.':''}${effectivenessTextV81(mult)}`;if(critical)text='Coup critique ! '+text;if(effect)text+=' '+effect;if(extra)text+=extra;battle.anim={...battle.anim,impact:true}}
+15115:   user._v108mPreviousMove=String(mv.name||'');safeCall(hud);setMessage(text);schedule(TURN_DELAY,()=>{battle.anim=null;if(target.hp<=0){playerTurn?enemyDefeated():playerDefeated();return}if(user.hp<=0){playerTurn?playerDefeated():enemyDefeated();return}poisonAfterAction(user,playerTurn)})
+15116: }
+15117: 
+15118: function v108mNextTurn(playerTurn){if(!playerTurn&&battle?._v108mPendingPlayerMove){const pending=battle._v108mPendingPlayerMove;battle._v108mPendingPlayerMove=null;battle.busy=false;schedule(60,()=>useMove(true,pending));return}if(playerTurn&&battle?._v108mEnemyAlreadyActed){battle._v108mEnemyAlreadyActed=false;returnToPlayer();return}playerTurn?enemyTurnV105R():returnToPlayer()}
+15119: function poisonAfterAction(actor,playerTurn){
+15120:   if(!actor)return v108mNextTurn(playerTurn);let loss=0,gain=0,parts=[];
+15121:   if(actor.status==='empoisonné'&&actor.hp>0){const n=Math.max(1,Math.floor(maxHP(actor)*.08));loss+=n;parts.push(`poison : -${n} PV`)}if(actor.status==='brûlé'&&actor.hp>0){const n=Math.max(1,Math.floor(maxHP(actor)*.05));loss+=n;parts.push(`brûlure : -${n} PV`)}
+15122:   if(actor._v108mDot?.turns>0&&actor.hp>0){const d=actor._v108mDot,n=Math.max(1,Math.floor(maxHP(actor)*d.pct));loss+=n;parts.push(`${d.label||'effet'} : -${n} PV`);if(d.drainTo&&d.drainTo.hp>0){const g=Math.min(n,maxHP(d.drainTo)-d.drainTo.hp);d.drainTo.hp+=g}d.turns--;if(d.turns<=0)actor._v108mDot=null}
+15123:   if(actor._v108mRegen?.turns>0&&actor.hp>0){const r=actor._v108mRegen,n=Math.max(1,Math.round(maxHP(actor)*r.pct)),g=Math.min(n,maxHP(actor)-actor.hp);gain+=g;if(g)parts.push(`régénération : +${g} PV`);r.turns--;if(r.turns<=0)actor._v108mRegen=null}
+15124:   if(actor._v108mProgressiveDef?.turns>0){actor.defBuff=clamp(v108mStage(actor,'defBuff')-1,-3,3);actor._v108mProgressiveDef.turns--;parts.push('moisissure : Défense diminuée');if(actor._v108mProgressiveDef.turns<=0)actor._v108mProgressiveDef=null}
+15125:   v108mTickTempStages(actor);actor.hp=clamp(actor.hp-loss+gain,0,maxHP(actor));for(const k of ['_v108mShield','_v108mTypeBoost','_v108mMark','_v108mStatic'])if(actor[k]?.turns>0){actor[k].turns--;if(actor[k].turns<=0)actor[k]=null}if(actor._v108mTrapped>0)actor._v108mTrapped--;actor._v108mWasHit=false;
+15126:   if(parts.length){setMessage(`${nameOf(actor)} — ${parts.join(' • ')}`);safeCall(hud);schedule(500,()=>{if(actor.hp<=0){playerTurn?playerDefeated():enemyDefeated();return}v108mNextTurn(playerTurn)});return}v108mNextTurn(playerTurn)
+15127: }
+15128: 
+### line 15149: trainerIndex
+15141: function enemyTurnV105R(){
+15142:   if(!combatReady())return;
+15143:   const enemy=v109bPrepareCombatant(battle.enemy);
+15144:   const pool=(enemy.moves||[]).map(id=>({id:v109bCanonicalMoveId(id),mv:MOVE_DB[v109bCanonicalMoveId(id)]})).filter(x=>x.mv&&currentMovePPV106U(enemy,x.id)>0);
+15145:   if(!pool.length){battle.busy=false;return useMove(false,{...MOVE_DB.lutte,_id:'lutte'})}
+15146:   const damaging=pool.filter(x=>(Number(x.mv.displayPower??x.mv.power)||0)>0),nonHeal=pool.filter(x=>x.mv.kind!=='heal'),heals=pool.filter(x=>x.mv.kind==='heal');
+15147:   let pick=null;
+15148:   if(battle.trainer&&heals.length){
+15149:     const hpRatio=enemy.hp/Math.max(1,maxHP(enemy)),idx=String(Number(battle.trainerIndex)||0),usedHere=Number(battle.trainerHealByIndex?.[idx])||0,total=Number(battle.trainerHealUses)||0;
+15150:     const partySize=Math.max(1,battle.trainerParty?.length||1),maxTotal=partySize>=4?2:1;
+15151:     if(hpRatio<=.42&&usedHere<1&&total<maxTotal&&Math.random()<.38)pick=heals[Math.floor(Math.random()*heals.length)]
+15152:   }
+15153:   if(!pick){const candidates=nonHeal.length?nonHeal:(damaging.length?damaging:pool);pick=candidates[Math.floor(Math.random()*candidates.length)]}
+15154:   battle.busy=false;useMove(false,{...pick.mv,_id:pick.id})
+15155: }
+15156: 
+15157: function returnToPlayer(message='À toi de jouer.'){
+15158:   if(!combatReady())return;
+15159:   battle.busy=false;battle.phase='player';battle.menu='actions';setMessage(message);buildButtons()
+15160: }
+15161: 
+15162: function grantEnemyXP(enemy){
+### line 15174: enemyDefeated
+15166:     const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+15167:     const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+15168:     const line=`${nameOf(m)} : +${amount} EXP`;
+15169:     xpLines.push(line);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+15170:   }
+15171:   battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+15172: }
+15173: 
+15174: function enemyDefeated(){
+15175:   if(!combatReady())return;
+15176:   const defeated=battle.enemy;grantEnemyXP(defeated);
+15177:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+15178:     battle.trainerIndex++;battle.enemy=normalizeCreature(battle.trainerParty[battle.trainerIndex],battle.trainer.level||defeated.level);
+15179:     battle.busy=true;battle.phase='trainer-send';battle.menu='actions';setMessage(`Le dresseur envoie ${nameOf(battle.enemy)} !`);safeCall(battleCry,battle.enemy.id);buildButtons();
+15180:     schedule(720,()=>{battle.busy=false;battle.phase='trainer-switch';battle.menu='trainer-switch';setMessage(`Le dresseur envoie ${nameOf(battle.enemy)}. Veux-tu garder ${nameOf(currentPlayer())} ou changer de créature ?`);buildButtons()});return
+15181:   }
+15182:   if(battle.trainer){
+15183:     battle.reward=Math.max(50,Math.floor((Number(battle.trainer.level)||defeated.level)*18));
+15184:     state.money=(state.money||0)+battle.reward;battle.eventQueue.push(`Récompense : ${voltronLabelV85(battle.reward)}.`)
+15185:   }else{
+15186:     battle.reward=Math.floor((safeCall(wildRewardV85,defeated)||20)*1.10);
+15187:     state.money=(state.money||0)+battle.reward;battle.eventQueue.push(`Combat sauvage : +${voltronLabelV85(battle.reward)}.`)
+### line 15397: completeTaronMission, taronMission
+15389:   if(result==='lose'){
+15390:     scheduleOutside(420,()=>{if((state.team||[]).length&&(state.team||[]).every(m=>m.hp<=0))transferAfterDefeat()});return
+15391:   }
+15392:   if(result==='flee'){safeCall(toast,'Tu as quitté le combat.');return}
+15393:   if(won&&b.trainer.guardian){
+15394:     scheduleOutside(150,()=>safeCall(dialog,`<b>Gardien vaincu !</b><br>${sealObtained?`Tu remportes le <b>Sceau ${b.trainer.sealIndex}</b>.`:'Tu avais déjà remporté ce Sceau.'}<br><br>Récompense : ${voltronLabelV85(b.reward||0)}.${typeof window.v104GuardianRewardHtml==='function'?window.v104GuardianRewardHtml(b.trainer):''}`));return
+15395:   }
+15396:   if(won&&resolveSpecialReturn(b))return;
+15397:   if(won&&b.trainer.taron){scheduleOutside(150,()=>safeCall(completeTaronMission));return}
+15398:   if(won){
+15399:     scheduleOutside(150,()=>safeCall(dialog,`<b>${b.trainer.dialog||'Dresseur vaincu'}</b><br>${safeCall(trainerAfterBattleTextV88,b.trainer)||'Combat remporté.'}${events.length?'<br><br>'+events.join('<br>'):''}`));return
+15400:   }
+15401:   if(result==='capture'){
+15402:     const destination=b.capturedTo==='équipe'?'dans ton équipe':'dans ta Boîte';
+15403:     safeCall(dialog,`<b>Capture réussie !</b><br>${nameOf(enemy)} rejoint ${destination}.${b.captureXP?`<br>${b.captureXP} EXP gagnés.`:''}${events.length?'<br><br>'+events.join('<br>'):''}`);return
+15404:   }
+15405:   if(events.length)safeCall(dialog,'<b>Résultats</b><br>'+events.join('<br>'))
+15406: }
+15407: 
+15408: function roundRectPath(g,x,y,w,h,r){
+15409:   r=Math.min(r,w/2,h/2);g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()
+15410: }
+### line 15429: trainerParty
+15421:     const expX=bx+94,expY=y+86,expW=Math.max(60,bw-94);roundRectPath(ctx,expX,expY,expW,9,4.5);ctx.fillStyle='#d8e3e8';ctx.fill();
+15422:     if(xpRatio>0){roundRectPath(ctx,expX,expY,expW*xpRatio,9,4.5);ctx.fillStyle='#4ba7dc';ctx.fill()}
+15423:   }
+15424:   ctx.restore()
+15425: }
+15426: 
+15427: function drawTrainerTeamStatusV106G(){
+15428:   if(!battle?.trainer)return;
+15429:   const party=Array.isArray(battle.trainerParty)?battle.trainerParty:[];
+15430:   const total=Math.max(1,party.length||Number(safeCall(trainerPartySize,battle.trainer))||1);
+15431:   const current=Math.max(0,Math.min(total-1,Number(battle.trainerIndex)||0));
+15432:   const remaining=Math.max(1,total-current);
+15433:   const x=35,y=111,w=295,h=42;
+15434:   ctx.save();roundRectPath(ctx,x,y,w,h,12);ctx.fillStyle='rgba(18,50,68,.88)';ctx.fill();
+15435:   ctx.fillStyle='#fff';ctx.font='900 11px Segoe UI';ctx.fillText(`ADVERSAIRE : ${remaining}/${total} créature${remaining>1?'s':''} restante${remaining>1?'s':''}`,x+14,y+17);
+15436:   const maxDots=Math.min(total,8),startX=x+15;
+15437:   for(let i=0;i<maxDots;i++){
+15438:     ctx.beginPath();ctx.arc(startX+i*19,y+30,5.4,0,Math.PI*2);
+15439:     ctx.fillStyle=i<current?'#596b74':i===current?'#f0c94a':'#9ed9e8';ctx.fill();
+15440:     ctx.strokeStyle='rgba(255,255,255,.65)';ctx.lineWidth=1;ctx.stroke()
+15441:   }
+15442:   if(total>8){ctx.fillStyle='#dcecf2';ctx.font='800 10px Segoe UI';ctx.fillText(`+${total-8}`,startX+8*19,y+33)}
+### line 15638: trainerParty
+15630:   }
+15631:   const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+15632:   if(d>72&&now<(e.deadline||now)){
+15633:     const step=Math.min(7,Math.max(0,d-68));
+15634:     if(d>0){t.x+=dx/d*step;t.y+=dy/d*step}
+15635:     t.moving=true;safeCall(faceNPCToPlayer,t);return
+15636:   }
+15637:   t.moving=false;trainerEvent=null;
+15638:   const partySize=Math.max(1,Number(safeCall(trainerPartySize,t))||1);
+15639:   const challenge=safeCall(trainerChallengeLine,t)||'Prepare-toi au combat !';
+15640:   const title=t.dialog||t.name||'Un dresseur te defie !';
+15641:   safeCall(dialog,'<b>'+title+'</b><br>'+challenge+'<br><br><small>Equipe adverse : '+partySize+' creature'+(partySize>1?'s':'')+'.</small>',()=>beginTrainer(t))
+15642: }
+15643: 
+15644: function brandV105R(){
+15645:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+15646:   const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${VERSION} — ${creator?'CRÉATEUR':'JOUEUR'}`;
+15647:   document.title=`VALDORA ${VERSION} — combats réécrits`;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.combatEngine=VERSION
+15648: }
+15649: 
+15650: function installOrbEconomy(){
+15651:   ensureOrbInventory();preloadOrbImages();
+### line 15965: mainTaron
+15957: function zCreator(){return typeof v61CreatorMode==='function'&&v61CreatorMode()}
+15958: function zCityName(zone){return SCENES?.[zone]?.name||zone}
+15959: function zCaught(){return Object.values(state.dex||{}).filter(v=>v?.caught).length}
+15960: function zTypeCaught(type){let n=0;for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught&&BY?.[id]?.type===type)n++;return n}
+15961: function zTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+15962: function zMaxLevel(){return Math.max(0,...[...(state.team||[]),...(state.box||[])].map(m=>Number(m?.level)||0))}
+15963: function zMasteries(){return Number(window.ValdoraGameplayV106Y?.marks?.())||0}
+15964: function zTaronDone(){return V106Z_TARON_OPS.filter(o=>zState().taronOps[o.id]?.done).length}
+15965: function zMainTaronDone(){return V106Z_TARON_OPS.filter(o=>o.main&&zState().taronOps[o.id]?.done).length}
+15966: function zPaidTrips(){return (Number(state.v106y?.busTrips)||0)+zState().trainTrips}
+15967: function zCachesFound(){return Object.values(zState().caches).filter(Boolean).length}
+15968: function zMetrics(){return {caught:zCaught(),trainers:zTrainerWins(),paidTrips:zPaidTrips(),caches:zCachesFound(),waterCaught:zTypeCaught('Eau'),taronOps:zTaronDone(),maxLevel:zMaxLevel(),masteries:zMasteries()}}
+15969: function zDiscovered(zone){return zCreator()||(state.discovered||[]).includes(zone)}
+15970: function zSave(){try{save(false)}catch(_){}try{hud()}catch(_){}}
+15971: 
+15972: // -------- TEAM TARON : campagne multi-vagues --------
+15973: function zOpState(id){const s=zState();return s.taronOps[id]||(s.taronOps[id]={intel:false,waves:0,done:false})}
+15974: function zOpUnlocked(op){return (state.seals||[]).length>=op.seal&&zDiscovered(op.zone)}
+15975: function zActiveOp(){const id=zState().activeTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);return op&&!zOpState(id).done&&zOpUnlocked(op)?op:null}
+15976: function zOpPoint(op){const sc=SCENES?.[op.zone];if(!sc)return null;if(sc._v106zOpPoints?.[op.id])return sc._v106zOpPoints[op.id];sc._v106zOpPoints=sc._v106zOpPoints||{};let x=(sc.width||1800)*(.36+((op.id.length%3)*.13)),y=(sc.height||1100)*(.38+((op.title.length%3)*.13));
+15977:   const ts=sc.trainers||[];if(sc.kind==='route'&&ts.length){const t=ts[Math.min(ts.length-1,op.seal%ts.length)];x=t.x+110;y=t.y+70}
+15978:   const ox=state.zone;try{state.zone=op.zone;const cands=[[x,y],[x+150,y],[x-150,y],[x,y+150],[x,y-150]];for(const [cx,cy] of cands){if(cx>80&&cy>80&&cx<(sc.width||1800)-80&&cy<(sc.height||1100)-80&&(!window.collision||!collision(cx,cy,cx,cy))){x=cx;y=cy;break}}}catch(_){}finally{state.zone=ox}
+### line 15987: interactTaron
+15979:   return sc._v106zOpPoints[op.id]={x,y}
+15980: }
+15981: function activateTaronOpV106Z(id){const op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return;if(!zOpUnlocked(op)){toast('Cette opération n’est pas encore accessible.');return}zState().activeTaronOp=id;zSave();document.getElementById('menuov').style.display='none';toast(`Opération suivie : ${op.title} — ${zCityName(op.zone)}.`)}
+15982: window.activateTaronOpV106Z=activateTaronOpV106Z;
+15983: function zTaronParty(op,wave){const avg=Math.max(6,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(76,Math.max(8,avg+Math.min(5,op.seal)+Math.floor(wave/2))),count=Math.min(6,2+Math.ceil(op.seal/2)+Math.floor(wave/2)),party=[];const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15984:  for(let i=0;i<count;i++){const lvl=Math.min(78,base+i),pool=CREATURES.filter(c=>op.types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(op.seal*41+wave*23+i*17)%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+15985: function startTaronWaveV106Z(op){const st=zOpState(op.id),wave=st.waves+1,party=zTaronParty(op,wave),trainer={id:`v106z_taron_${op.id}_w${wave}`,level:party[0]?.level||10,look:12,dialog:`Team Taron — ${op.title} (${wave}/${op.waves})`,taron:true,v106zOpId:op.id,party,partyIndex:0,zone:op.zone};window._v106zActiveTaronOp=op.id;window._v106zActiveTaronWave=wave;window.startBattle(party[0],trainer)}
+15986: window.startTaronWaveV106Z=startTaronWaveV106Z;
+15987: function interactTaronOpV106Z(){const op=zActiveOp();if(!op||state.zone!==op.zone)return false;const p=zOpPoint(op);if(!p||Math.hypot(state.x-p.x,state.y-p.y)>135)return false;const st=zOpState(op.id);if(!st.intel){st.intel=true;zSave();dialog(`<b>Dossier Taron — ${op.title}</b><br>${op.text}<br><br>Tu récupères des données chiffrées. Elles révèlent <b>${op.waves} groupe${op.waves>1?'s':''} d'agents</b> à neutraliser dans cette zone.`);return true}if(st.waves<op.waves){dialog(`<b>${op.title}</b><br>Groupe Taron ${st.waves+1}/${op.waves}. Prépare ton équipe.`,()=>startTaronWaveV106Z(op));return true}return false}
+15988: const BASE_COMPLETE_TARON_V106Z=window.completeTaronMission||null;
+15989: window.completeTaronMission=function(){const id=window._v106zActiveTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return BASE_COMPLETE_TARON_V106Z?BASE_COMPLETE_TARON_V106Z():undefined;const st=zOpState(id);st.waves=Math.min(op.waves,(st.waves||0)+1);state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;window._v106zActiveTaronOp=null;window._v106zActiveTaronWave=null;
+15990:  if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} };
+15991: try{completeTaronMission=window.completeTaronMission}catch(_){}
+15992: function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+15993:  for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+15994:  openSimpleMenu('Dossier Team Taron',h)}
+15995: window.openTaronDossierV106Z=openTaronDossierV106Z;
+15996: 
+15997: // -------- CONTRATS DE TERRAIN --------
+15998: function zContractProgress(c,st){const m=zMetrics();return Math.max(0,Number(m[c.kind])||0)}
+15999: function acceptContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id);if(!c||c.seal>(state.seals||[]).length)return;const st=zState().contracts[id]||(zState().contracts[id]={});if(st.claimed||st.accepted)return;st.accepted=true;st.acceptedAt=Date.now();zSave();openContractsV106Z()}
+16000: function claimContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id),st=zState().contracts[id];if(!c||!st?.accepted||st.claimed||zContractProgress(c,st)<c.goal)return;st.claimed=true;state.money=(Number(state.money)||0)+c.reward;state.inventory=state.inventory||{};state.inventory[c.item]=(Number(state.inventory[c.item])||0)+c.qty;zSave();toast(`Contrat terminé : ${c.title}`);openContractsV106Z()}
+### line 16030: mainTaron
+16022:  if(zCaught()<n){toast('Ce palier du Codex n’est pas encore atteint.');return}if(zState().codexClaims[n]){toast('Cette récompense a déjà été récupérée.');return}
+16023:  const money=500+n*18,item=n>=100?'MegaOrbe':n>=60?'SuperOrbe':'Orbe',qty=n>=120?2:1,labels={Orbe:"Orbe d'Éclat",SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'};zState().codexClaims[n]=true;state.money=(Number(state.money)||0)+money;state.inventory=state.inventory||{};state.inventory[item]=(Number(state.inventory[item])||0)+qty;zSave();
+16024:  dialog('<b>Récompense du Codex — palier '+n+'</b><br><br>Tu reçois :<br>• <b>'+money+' Voltrons</b><br>• <b>'+qty+' × '+(labels[item]||item)+'</b><br><br>La récompense a été ajoutée à ton inventaire.',()=>openCodexMilestonesV106Z())
+16025: }
+16026: window.claimCodexMilestoneV106Z=claimCodexMilestoneV106Z;
+16027: function openCodexMilestonesV106Z(){let h=`<div class="quest"><b>Programme de recherche du Codex</b><br>${zCaught()}/150 espèces capturées.</div>`;for(const n of V106Z_CODEX_MILESTONES){const done=!!zState().codexClaims[n],ready=zCaught()>=n;h+=`<div class="quest"><b>Palier ${n} espèces</b><br>${done?'✓ Récompense récupérée':ready?`Recherche validée<br><button onclick="claimCodexMilestoneV106Z(${n})">Récupérer la récompense</button>`:`Progression : ${Math.min(zCaught(),n)}/${n}`}</div>`}openSimpleMenu('Recherche du Codex',h)}
+16028: window.openCodexMilestonesV106Z=openCodexMilestonesV106Z;
+16029: 
+16030: function openAdventureHubV106Z(){openSimpleMenu('Aventure +',`<div class="quest"><b>Contenu longue durée</b><br>Enquête Taron, contrats, exploration, Circuit des Gardiens et recherche du Codex.</div><div class="baggrid"><button class="bagitem" onclick="openTaronDossierV106Z()"><b>◆ Dossier Team Taron</b><br>${zMainTaronDone()}/6 opérations principales</button><button class="bagitem" onclick="openContractsV106Z()"><b>📋 Contrats</b><br>Objectifs de terrain à progression propre</button><button class="bagitem" onclick="openGuardianCircuitV106Z()"><b>⚔ Circuit des Gardiens</b><br>Revanche à 3, 5 et 7 Sceaux</button><button class="bagitem" onclick="openCodexMilestonesV106Z()"><b>📖 Recherche Codex</b><br>${zCaught()}/150 espèces</button><button class="bagitem" onclick="document.getElementById('menuov').style.display='none';toast('Caches découvertes : ${zCachesFound()}/${V106Z_CACHE_ZONES.length}')"><b>🧭 Exploration</b><br>${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches</button></div>`)}
+16031: window.openAdventureHubV106Z=openAdventureHubV106Z;
+16032: 
+16033: // -------- TRANSPORTS PAYANTS --------
+16034: function trainFareV106Z(cityId){const from=typeof railCurrentCityV94==='function'?railCurrentCityV94():state.currentCityId,a=typeof railCityRecordV94==='function'?railCityRecordV94(from):null,b=typeof railCityRecordV94==='function'?railCityRecordV94(cityId):null;if(zCreator())return 0;const dist=a&&b?Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0)):30,disc=Number(window.ValdoraGameplayV106Y?.rank?.()?.discount)||0;return Math.max(180,Math.min(950,Math.round((140+dist*7)*(1-disc*.5)/10)*10))}
+16035: window.trainFareV106Z=trainFareV106Z;
+16036: window.v106zBoardTrain=function(cityId,fare){fare=Number(fare)||0;if(!railCanDepartV94(cityId)){toast('Cette gare n’est pas encore accessible.');return}if(!zCreator()&&(Number(state.money)||0)<fare){toast(`Billet de train : ${fare} V requis.`);return}if(!zCreator())state.money-=fare;zState().trainTrips++;zSave();document.querySelector('.stationTravelV62')?.remove();const city=railCityRecordV94(cityId);toast(`Billet validé : ${fare} V — ${city?.name||'destination'}.`);setTimeout(()=>playTrainTravelV622(cityId),300)};
+16037: window.v62StationMasterDialog=function(){const here=railCurrentCityV94();if(!here||!railCityHasPhysicalStationV94(here)){toast('Il n’y a pas de gare ferroviaire dans cette ville.');return}const dest=railAvailableDestinationsV94();if(!dest.length){toast('Aucune autre gare découverte.');return}document.querySelector('.stationTravelV62')?.remove();const cards=dest.map(c=>{const fare=trainFareV106Z(c.id);return `<button class="stationDestV62" onclick="v106zBoardTrain('${c.id}',${fare})"><span>${c.kind==='metropole'?'◆':'●'}</span><b>${c.name}</b><small>${zCreator()?'Mode créateur':`Billet : ${fare} V`}</small></button>`}).join('');document.body.insertAdjacentHTML('beforeend',`<div class="stationTravelV62"><div class="stationPanelV62"><div class="stationMasterV62"><div class="stationHatV62">★</div><div><b>Chef de gare</b><p>Le train est un service payant. Le tarif dépend de la distance et de ton rang d'aventure.</p></div></div><div class="stationListV62">${cards}</div><button class="stationCancelV62" onclick="this.closest('.stationTravelV62').remove()">Finalement, je reste ici</button></div></div>`)};
+16038: try{v62StationMasterDialog=window.v62StationMasterDialog}catch(_){}
+16039: window.v62BoardTrain=function(cityId){window.v106zBoardTrain(cityId,trainFareV106Z(cityId))};try{v62BoardTrain=window.v62BoardTrain}catch(_){}
+16040: window.trainTravelV61=function(cityId){if(!canTrainV61(cityId)){toast('Destination ferroviaire non découverte.');return}const fare=trainFareV106Z(cityId),c=railCityRecordV94(cityId);openSimpleMenu('Billet de train',`<div class="quest"><b>${c?.name||cityId}</b><br>Tarif : <b>${fare} V</b><br><small>Les voyages ferroviaires sont payants. Vol reste gratuit une fois maîtrisé.</small></div><button onclick="document.getElementById('menuov').style.display='none';v106zBoardTrain('${cityId}',${fare})">Acheter le billet</button>`)};try{trainTravelV61=window.trainTravelV61}catch(_){}
+16041: 
+16042: // -------- BIOMES : identité visuelle et faune --------
+16043: if(typeof wildBiomeProfileV106Q==='function'){window.wildBiomeProfileV106Q=function(zone=state.zone){const allowed=V106Z_ROUTE_TYPES[zone];if(allowed)return {biome:zone==='route4bis'?'lake':'v106z',allowed:[...allowed]};return {biome:SCENES?.[zone]?.biome||'prairie',allowed:['Nature','Neutre']}};try{wildBiomeProfileV106Q=window.wildBiomeProfileV106Q}catch(_){}}
+### line 16066: interactTaron
+16058: if(typeof drawRouteBase==='function'){const BR=drawRouteBase;drawRouteBase=function(sc,camX,camY,sx,sy){BR(sc,camX,camY,sx,sy);drawBiomeRouteV106Z(sc,camX,camY,sx,sy)};window.drawRouteBase=drawRouteBase}
+16059: 
+16060: // -------- MARQUEURS WORLD : Taron + caches --------
+16061: function drawExtrasV106Z(sc,camX,camY,sx,sy){ctx.save();const op=zActiveOp();if(op&&op.zone===state.zone){const p=zOpPoint(op),x=(p.x-camX)*sx,y=(p.y-camY)*sy;if(x>-80&&x<1040&&y>-80&&y<680){ctx.fillStyle='#111';ctx.strokeStyle='#f0c62b';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#f0c62b';ctx.font='1000 23px system-ui';ctx.textAlign='center';ctx.fillText(zOpState(op.id).intel?'T':'?',x,y+8);ctx.textAlign='left'}}
+16062:  if(V106Z_CACHE_ZONES.includes(state.zone)&&!zState().caches[state.zone]){const p=zCachePoint(),d=Math.hypot(state.x-p.x,state.y-p.y);if(d<340){const x=(p.x-camX)*sx,y=(p.y-camY)*sy;ctx.globalAlpha=Math.max(.25,1-d/420);ctx.fillStyle='#ffd75a';ctx.font='900 20px system-ui';ctx.fillText('✦',x-8,y+7)}}ctx.restore()}
+16063: if(typeof drawEntities==='function'){const BE=drawEntities;drawEntities=function(sc,camX,camY,sx,sy){BE(sc,camX,camY,sx,sy);drawExtrasV106Z(sc,camX,camY,sx,sy)};window.drawEntities=drawEntities}
+16064: 
+16065: const BASE_INTERACT_V106Z=window.interact;
+16066: window.interact=function(){if(scene==='world'){if(interactTaronOpV106Z())return;if(collectCacheV106Z())return}return BASE_INTERACT_V106Z()};try{interact=window.interact}catch(_){}
+16067: 
+16068: // -------- CITADELLE : l'enquête principale Taron rejoint la trame --------
+16069: const BASE_REQ_V106Z=window.v106pCitadelRequirements;
+16070: window.v106pCitadelRequirements=function(){const r=BASE_REQ_V106Z?BASE_REQ_V106Z():{caught:zCaught(),seals:(state.seals||[]).length,vol:false,ready:false},taron=zMainTaronDone();return {...r,taron,taronRequired:6,ready:r.caught>=75&&r.seals>=7&&r.vol&&taron>=6}};try{v106pCitadelRequirements=window.v106pCitadelRequirements}catch(_){}
+16071: window.finalTempleAvailableV77=function(){return window.v106pCitadelRequirements().ready};try{finalTempleAvailableV77=window.finalTempleAvailableV77}catch(_){}
+16072: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if(r.taron<6)m.push(`démanteler le Projet Résonance (${r.taron}/6)`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16073: 
+16074: // -------- OBJECTIFS + MENU --------
+16075: const BASE_OBJECTIVES_V106Z=typeof objectivesV84==='function'?objectivesV84:null;
+16076: if(BASE_OBJECTIVES_V106Z){objectivesV84=function(){const q=BASE_OBJECTIVES_V106Z(),r=window.v106pCitadelRequirements();q.push({title:'Enquête principale — Projet Résonance',progress:`${zMainTaronDone()}/6 opérations`,txt:zMainTaronDone()>=6?'Le cœur du réseau Taron est identifié.':'Poursuis le Dossier Team Taron : les six opérations principales sont nécessaires avant la Citadelle.'});q.push({title:'Exploration de Valdora',progress:`${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches`,txt:'Des caches discrètes brillent lorsque tu t’en approches. Fouille villes et routes.'});q.push({title:'Progression longue durée',progress:`${zTaronDone()}/8 Taron • ${zMasteries()}/15 maîtrises`,txt:'Contrats, revanche des Gardiens, dresseurs vétérans et paliers du Codex prolongent l’aventure.'});return q};window.objectivesV84=objectivesV84}
+16077: function installV106ZButton(){const grid=document.querySelector('aside .panel:nth-of-type(3) .grid')||document.querySelector('aside .grid');if(grid&&!document.getElementById('adventurePlusV106Z')){const b=document.createElement('button');b.id='adventurePlusV106Z';b.textContent='Aventure +';b.onclick=openAdventureHubV106Z;grid.appendChild(b)}}
+16078: 
+16079: // Bus V106Y : l'économie est volontairement plus exigeante dans V106Z (la formule source est également remplacée lors du build).
+### line 16236: buildTrainerParty, trainerParty
+16228:   const level=band.wild[0]+Math.floor(Math.random()*(band.wild[1]-band.wild[0]+1));
+16229:   const pool=v107bPool(level,v107bAllowedTypes());const c=pool[Math.floor(Math.random()*Math.max(1,pool.length))]||CREATURES[0];
+16230:   const enemy=mon(c.id,level);enemy.moves=defaultMoves(enemy.id,enemy.level);state.dex=state.dex||{};state.dex[c.id]={...(state.dex[c.id]||{}),seen:true};
+16231:   return window.startBattle(enemy,null)
+16232: };
+16233: try{startWild=window.startWild}catch(_){}
+16234: 
+16235: // Dresseurs : 3 paliers par route, tous sous le Gardien suivant.
+16236: const V107B_BUILD_TRAINER_BASE=window.buildTrainerParty||buildTrainerParty;
+16237: const V107B_PARTY_SIZE_BASE=window.trainerPartySize||trainerPartySize;
+16238: window.v98RoadTrainerLevel=function(t){const ri=v107bRouteIndex();const b=V107B_ROUTE_BANDS[ri];if(!b)return Math.max(3,Number(t?.level)||5);let idx=-1;try{idx=(currentScene()?.trainers||[]).findIndex(x=>x?.id===t?.id)}catch(_){}if(idx<0){const raw=Number(String(t?.id||'').match(/_(\d+)$/)?.[1]);idx=Number.isFinite(raw)?raw:0;if(ri===0&&idx>0)idx--}idx=Math.max(0,Math.min(b.trainer.length-1,idx));return b.trainer[idx]};
+16239: try{v98RoadTrainerLevel=window.v98RoadTrainerLevel}catch(_){}
+16240: window.trainerPartySize=function(t){const ri=v107bRouteIndex();if(ri<0||t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70)return V107B_PARTY_SIZE_BASE(t);const lvl=window.v98RoadTrainerLevel(t);return lvl<13?1:lvl<24?2:lvl<38?3:lvl<55?4:5};
+16241: try{trainerPartySize=window.trainerPartySize}catch(_){}
+16242: window.buildTrainerParty=function(t){
+16243:   const ri=v107bRouteIndex();
+16244:   if(ri<0||t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70)return V107B_BUILD_TRAINER_BASE(t);
+16245:   const base=window.v98RoadTrainerLevel(t),count=window.trainerPartySize(t),allowed=v107bAllowedTypes(),party=[];
+16246:   for(let i=0;i<count;i++){const lvl=Math.min(75,base+Math.floor(i/2)),pool=v107bPool(lvl,allowed),c=pool[(Math.abs(String(t?.id||'').split('').reduce((a,ch)=>a+ch.charCodeAt(0),0))+i*17)%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+16247:   return party
+16248: };
+16249: try{buildTrainerParty=window.buildTrainerParty}catch(_){}
+### line 18354: interactTaron
+18346:   const useLocal=(seed%3)!==0,topic=useLocal?local[(seed>>>3)%local.length]:V109K_GENERAL_TOPICS[(seed>>>5)%V109K_GENERAL_TOPICS.length](n);
+18347:   const end=V109K_OUTDOOR_ENDINGS[(seed>>>9)%V109K_OUTDOOR_ENDINGS.length];
+18348:   return `${op} ${topic} ${end}`
+18349: }
+18350: window.v109kOutdoorDialogue=v109kOutdoorDialogue;
+18351: function v109kTalkToOutdoorNPC(n){
+18352:   if(!n)return false;
+18353:   try{if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(n)}catch(_){}
+18354:   if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}
+18355:   try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}
+18356:   // Certains PNJ ont une interaction narrative dédiée ; la laisser prioritaire si elle existe.
+18357:   try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}
+18358:   const name=n.name||n.dialog||'Habitant';dialog(`<b>${name}</b><br>${v109kOutdoorDialogue(n)}`);return true
+18359: }
+18360: function worldInteractNew(){
+18361:   if(scene==='world'&&!trainerEvent){
+18362:     const b=nearDoor();if(b)return enter(b);
+18363:     let n=null;try{n=typeof nearNPC==='function'?nearNPC():null}catch(_){}
+18364:     if(n&&v109kTalkToOutdoorNPC(n))return;
+18365:     // Les dresseurs de route restent interactifs eux aussi, avant ou après leur combat.
+18366:     try{const tr=typeof nearTrainer==='function'?nearTrainer():null;if(tr){if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(tr);if(state.trainerWins?.[tr.id])dialog(`<b>${tr.dialog||'Dresseur'}</b><br>${typeof trainerAfterLine==='function'?trainerAfterLine(tr):'Bien joué pour notre dernier combat.'}`);else dialog(`<b>${tr.dialog||'Dresseur'}</b><br>${typeof trainerChallengeLine==='function'?trainerChallengeLine(tr):'Tu veux te mesurer à moi ?'}`,()=>startTrainer413(tr));return}}
+18367:     catch(e){console.warn('V109K dresseur extérieur',e)}
+## game/V109W_CORRECTIFS_GAMEPLAY.js
+### line 171: completeTaronMission, taronMission
+163:   const patchedStart=function(t){
+164:     if(t?.v109wVolAgent){window._v109wVolAgentActive=true;window._v109wVolTrainer=t;try{dialog('<b>Agent Team Taron</b><br>Cette Capsule Vol appartient désormais à la Team Taron. Si tu la veux, viens la prendre !',()=>baseStart(t));return}catch(_){}}
+165:     else{window._v109wVolAgentActive=false;window._v109wVolTrainer=null}
+166:     return baseStart?.apply(this,arguments);
+167:   };
+168:   window.startTrainer413=patchedStart;startTrainer413=patchedStart;
+169: }catch(e){console.warn('V109W agent Vol start',e)}
+170: try{
+171:   const baseComplete=typeof completeTaronMission==='function'?completeTaronMission:window.completeTaronMission;
+172:   const patchedComplete=function(){
+173:     if(window._v109wVolAgentActive&&state.trainerWins?.[VOL_AGENT_ID]){
+174:       window._v109wVolAgentActive=false;window._v109wVolTrainer=null;
+175:       state.flags=state.flags||{};state.capsules=Array.isArray(state.capsules)?state.capsules:[];
+176:       const first=!state.flags.v109wVolReward;
+177:       if(!state.capsules.includes('vol')&&!state.flyLearned)state.capsules.push('vol');
+178:       state.flags.v109wVolReward=true;state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;
+179:       try{save(false);hud();logEvent('Route 4 : Capsule Vol récupérée après la victoire contre la Team Taron.')}catch(_){}
+180:       try{dialog(`<b>Agent Team Taron vaincu</b><br>${first?'Tu récupères la <b>Capsule Vol</b>.':'La Capsule Vol est déjà en ta possession.'}<br><br>Elle peut être enseignée à une créature de type <b>Air</b>. Son utilisation comme déplacement reste liée à ta progression dans les Sceaux.`)}catch(_){}
+181:       return true;
+182:     }
+183:     return baseComplete?.apply(this,arguments);
+184:   };
+### line 205: grantEnemyXP
+197:   const baseUseMove=window.useMove;
+198:   if(typeof baseUseMove==='function')window.useMove=function(playerTurn,mv){
+199:     // Un Éclat compte comme participant s'il agit OU s'il est la cible vivante de l'adversaire.
+200:     if(battle&&(playerTurn||(!playerTurn&&battle.enemy?.hp>0)))markCurrentParticipant();
+201:     return baseUseMove.apply(this,arguments);
+202:   };
+203: }catch(e){console.warn('V109W EXP useMove',e)}
+204: try{
+205:   if(typeof window.grantEnemyXP==='function')window.grantEnemyXP=function(enemy){
+206:     const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+207:     const members=uniq((battle?.v109wEnemyParticipants||[]).filter(m=>m&&m.hp>0)),xpLines=[];
+208:     battle.eventQueue=Array.isArray(battle.eventQueue)?battle.eventQueue:[];
+209:     for(const m of members){
+210:       if(m.hp<=0)continue;
+211:       const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+212:       const events=(typeof safeCall==='function'?safeCall(gainXP,m,amount):gainXP(m,amount))||[];
+213:       xpLines.push(`${nameOf(m)} : +${amount} EXP`);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events);
+214:     }
+215:     if(!members.length)battle.eventQueue.push('Aucun Éclat encore conscient n’a participé à cet affrontement : aucune EXP distribuée.');
+216:     battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+217:     // Le prochain Éclat du dresseur repart avec une liste de participants vide.
+218:     battle.v109wEnemyParticipants=[];
+## game/CREATEUR.html
+### line 1088: interactTaron
+1080:  if(scene!=='world'||trainerEvent)return;
+1081:  const b=nearBuilding();
+1082:  if(b){
+1083:    if(currentScene().megacity && b.megaInterior && b.urbanType!=='hotel'){enterMegaBuildingV66(b);return}
+1084:    if(b.type==='inn'||b.urbanType==='hotel'){enterHotelV66(b);return}
+1085:    building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+1086:  }
+1087:  const n=nearNPC();
+1088:  if(n){faceNPCToPlayer(n);if(n.taron){interactTaron(n);return}dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return}
+1089:  if(currentScene().kind==='route'){
+1090:    const t=nearTrainer();if(t){faceNPCToPlayer(t);if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));return}
+1091:  }
+1092: }
+1093: 
+1094: // Bataille Team Taron d’immeuble : retour au même étage après victoire.
+1095: function resolveBuildingBattleV66(){
+1096:  const c=window._buildingBattleContextV66;if(!c)return;
+1097:  window._buildingBattleContextV66=null;
+1098:  state.zone=c.zone;megaReturnZoneV66=c.zone;megaBuildingV66=c.building;megaFloorV66=c.floor;building={...c.building,type:'megabuilding66'};
+1099:  scene='interior';state.roomX=600;state.roomY=400;
+1100:  megaEventV66=c.event;megaEventV66.handled=true;state.flags=state.flags||{};state.flags[megaEventV66.doneKey]=true;
+1101:  state.money=(state.money||0)+700;save(false);
+### line 2852: interactTaron
+2844:   toast('Quelque chose se passe sur cette route...')
+2845: }
+2846: function currentTaronNPC(){
+2847:   const ts=ensureTaronState(),a=ts.active;
+2848:   if(!a||a.zone!==state.zone)return null;
+2849:   const m=TARON_MISSIONS[a.missionIndex];
+2850:   return {id:'taron_agent',zone:a.zone,x:a.x,y:a.y,look:a.look,dir:a.dir,name:'Agent Taron',text:m.text,taron:true}
+2851: }
+2852: function interactTaron(n){
+2853:   const ts=ensureTaronState(),a=ts.active;if(!a)return;
+2854:   const m=TARON_MISSIONS[a.missionIndex];
+2855:   dialog('<b>Team Taron — '+m.title+'</b><br>'+m.text+'<br><br><i>« Tu arrives trop tard. Cette route est à nous maintenant ! »</i>',
+2856:     ()=>startTaronBattle())
+2857: }
+2858: function startTaronBattle(){
+2859:   const ts=ensureTaronState(),a=ts.active;if(!a)return;
+2860:   const ri=Math.max(0,+state.zone.replace('route','')||0);
+2861:   const level=7+ri*4+Math.floor(Math.random()*3);
+2862:   const idx=Math.min(CREATURES.length-1,8+ri*11+Math.floor(Math.random()*8));
+2863:   const c=CREATURES[idx]||CREATURES[8];
+2864:   startBattle(mon(c.id,level),{id:'taron_'+Date.now(),level,dialog:'Un agent de la Team Taron',taron:true})
+2865: }
+### line 3126: trainerParty
+3118:     'Excellent combat ! Certaines capacités changent complètement l’issue d’un duel.',
+3119:     'Tu progresses vite. Pense à retourner au Centre de soins avant un gros défi.',
+3120:     'Joli ! On raconte que la Team Taron rôde parfois quand personne ne s’y attend.'
+3121:   ];
+3122:   let h=0;for(const c of t.id)h=(h*37+c.charCodeAt(0))>>>0;
+3123:   return hints[h%hints.length]
+3124: }
+3125: 
+3126: function trainerPartySize(t){
+3127:   if(t?.finalBoss)return 7;
+3128:   if(t?.templeGuard)return 3+((Number(t.id.match(/\d+/)?.[0]||1)-1)%3);
+3129:   return Math.min(4,1+Math.floor((t.level-1)/12))
+3130: }
+3131: 
+3132: 
+3133: 
+3134: function buildTrainerParty(t){
+3135:   if(t?.guardian)return v83BuildGuardianParty(t);
+3136:   const count=trainerPartySize(t),party=[];
+3137:   const zoneBase=Math.max(v83AreaLevelBase(),Number(t.level)||1);
+3138:   for(let i=0;i<count;i++){
+3139:     const lvl=Math.min(82,zoneBase+i);
+### line 3189: trainerParty
+3181:     const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+3182:     if(d>72){
+3183:       const step=Math.min(5,d-68);
+3184:       t.x+=dx/d*step;t.y+=dy/d*step;
+3185:       t.moving=true;faceNPCToPlayer(t);
+3186:       return
+3187:     }
+3188:     t.moving=false;e.stage='dialog';
+3189:     dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t)+'<br><br><small>Équipe adverse : '+trainerPartySize(t)+' créature'+(trainerPartySize(t)>1?'s':'')+'.</small>',()=>{
+3190:       const target=t;trainerEvent=null;startTrainer413(target)
+3191:     })
+3192:   }
+3193: }
+3194: function drawTrainerAlert(t,x,y){
+3195:   if(!trainerEvent||trainerEvent.trainer!==t)return;
+3196:   const pulse=1+Math.sin(performance.now()/110)*.08;
+3197:   ctx.save();ctx.translate(x,y-104);ctx.scale(pulse,pulse);
+3198:   ctx.fillStyle='#fff';ctx.strokeStyle='#233d4b';ctx.lineWidth=3;
+3199:   ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill();ctx.stroke();
+3200:   ctx.fillStyle='#e44f4f';ctx.font='900 25px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!',0,1);
+3201:   ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic'
+3202: }
+### line 5968: interactTaron
+5960:       enterBuildingV70(b);return
+5961:     }
+5962:     building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+5963:   }
+5964: 
+5965:   const n=nearNPC();
+5966:   if(n){
+5967:     faceNPCToPlayer(n);
+5968:     if(n.taron){interactTaron(n);return}
+5969:     if(questInteractionV106C(n))return;
+5970:     dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return
+5971:   }
+5972: 
+5973:   if(['route','temple'].includes(currentScene().kind)){
+5974:     const t=nearTrainer();
+5975:     if(t){
+5976:       faceNPCToPlayer(t);
+5977:       if(t.finalBoss&&!templeGuardsClearedV77()){
+5978:         dialog('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');
+5979:         return
+5980:       }
+5981:       if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));
+### line 6889: trainerParty, trainerIndex
+6881: function startBattle(enemy,trainer=null){
+6882:   const a=active();if(!a){toast('Toute ton équipe est K.O. Va la faire soigner avant de pouvoir combattre.');return}
+6883:   battleToken++;
+6884:   enemy.atkBuff=enemy.atkBuff||0;enemy.defBuff=enemy.defBuff||0;enemy.status=enemy.status||null;
+6885:   battle={
+6886:     token:battleToken,enemy,trainer,busy:true,activePlayer:a,
+6887:     message:trainer?trainer.dialog+' te défie !':'Un Éclat sauvage apparaît !',
+6888:     anim:null,playerHit:0,enemyHit:0,orb:null,result:null,reward:0,eventQueue:[],
+6889:     trainerParty:trainer?.party||null,trainerIndex:trainer?.partyIndex||0
+6890:   };
+6891:   scene='battle';
+6892:   $('battleUI').style.display='flex';
+6893:   ensureBattleMessageV84();
+6894:   syncBattleMessageV84();
+6895:   startBattleMusic();battleCry(enemy.id);buildBattleButtons();
+6896:   v84Schedule(700,()=>setBattleBusy(false,'À toi de jouer.'))
+6897: }
+6898: 
+6899: function startTrainer413(t){
+6900:   const opponent={...t,party:buildTrainerParty(t),partyIndex:0};
+6901:   startBattle(opponent.party[0],opponent)
+6902: }
+### line 7452: trainerParty
+7444:       const t=Math.min(1,dt/450);enemyScale=.2+.8*t;enemyAlpha=t;ex=650+(475-650)*t;ey=325+(115-325)*t
+7445:     }
+7446:   }
+7447:   if(enemyVisible&&e)drawCreature(e.id,ex,ey,es*enemyScale,false,battle.enemyHit?.45:enemyAlpha,1);
+7448: 
+7449:   battleCard(14,356,242,150,a,false);
+7450:   battleCard(700,26,246,118,e,true);
+7451: 
+7452:   if(battle.trainer&&battle.trainerParty){
+7453:     const total=battle.trainerParty.length,remaining=total-battle.trainerIndex;
+7454:     roundedRect(714,153,218,44,14,'rgba(15,35,49,.92)','rgba(255,255,255,.28)');
+7455:     ctx.fillStyle='#fff';ctx.font='800 11px Segoe UI';ctx.fillText('Équipe adverse',729,170);
+7456:     for(let i=0;i<total;i++){
+7457:       ctx.fillStyle=i<battle.trainerIndex?'#596b74':i===battle.trainerIndex?'#f0c94a':'#9ed9e8';
+7458:       ctx.beginPath();ctx.arc(730+i*22,185,6,0,Math.PI*2);ctx.fill()
+7459:     }
+7460:     ctx.fillStyle='#d9e7ec';ctx.font='700 10px Segoe UI';
+7461:     ctx.fillText(remaining+' restante'+(remaining>1?'s':''),826,188)
+7462:   }
+7463: 
+7464:   // V84 : le message n'est plus dessiné derrière les boutons.
+7465:   // Il est rendu dans #battleMessageV84 au-dessus de la barre d'actions.
+### line 7825: trainerParty, trainerIndex
+7817: 
+7818: function enemyKO(){
+7819:   if(!battleAlive())return;
+7820:   const a=active(),e=battle.enemy;
+7821:   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
+7822:   const ev=gainXP(a,xp);
+7823:   battle.eventQueue.push(BY[a.id].name+' gagne '+xp+' EXP.',...ev);
+7824: 
+7825:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+7826:     battle.trainerIndex++;
+7827:     battle.enemy=battle.trainerParty[battle.trainerIndex];
+7828:     battle.message='Le dresseur envoie '+BY[battle.enemy.id].name+' !';
+7829:     battle.enemyHit=0;battle.playerHit=0;battle.anim=null;
+7830:     hud();syncBattleMessageV84();
+7831:     v84Schedule(750,()=>setBattleBusy(false,'À toi de jouer.'));
+7832:     return
+7833:   }
+7834: 
+7835:   if(battle.trainer){
+7836:     battle.reward=Math.max(40,Math.floor((battle.trainer.level||e.level)*16));
+7837:     state.money+=battle.reward;
+7838:     battle.eventQueue.push('Récompense : '+voltronLabelV85(battle.reward)+'.');
+### line 8076: completeTaronMission, taronMission
+8068:       const c=window._v67Battle;if(!c)return;
+8069:       window._v67Battle=null;state.zone=c.zone;v67ReturnZone=c.zone;v67Building=c.building;v67Floor=c.floor;
+8070:       building={...c.building,type:'v67building'};scene='interior';state.roomX=600;state.roomY=420;
+8071:       c.event.done=true;state.flags=state.flags||{};state.flags[c.event.key]=true;
+8072:       state.money=(state.money||0)+700;save(false);
+8073:       dialog('<b>Immeuble libéré</b><br>La Team Taron est repoussée. +700 Voltrons.');
+8074:     },150);return
+8075:   }
+8076:   if(taronWon){setTimeout(completeTaronMission,150);return}
+8077: 
+8078:   if(normalTrainerWon){
+8079:     setTimeout(()=>dialog(
+8080:       '<b>'+b.trainer.dialog+'</b><br>'+
+8081:       trainerAfterBattleTextV88(b.trainer)+
+8082:       (events.length?'<br><br>'+events.join('<br>'):'')
+8083:     ),150);
+8084:     return
+8085:   }
+8086: 
+8087:   if(events.length)dialog('<b>Résultats</b><br>'+events.join('<br>'));
+8088:   else toast(res==='capture'?('Éclat capturé !'+(b.captureXP?' +'+b.captureXP+' EXP':''))
+8089:     :res==='win'?('Victoire ! +'+voltronLabelV85(b.reward||0))
+### line 11109: trainerParty
+11101:   const playerCeiling=Math.floor(avg)+3+Math.min(3,seals);
+11102: 
+11103:   // Mais si le joueur sur-nivelle volontairement, le monde ne monte pas
+11104:   // intégralement avec lui : la route conserve son identité.
+11105:   const routeCeiling=storyBase+4;
+11106: 
+11107:   return Math.max(3,Math.min(65,storyBase,playerCeiling,routeCeiling))
+11108: }
+11109: function v98RoadTrainerPartySize(t){
+11110:   const lvl=v98RoadTrainerLevel(t);
+11111:   const route=v98RouteIndex();
+11112:   if(route<=1&&lvl<10)return 1;
+11113:   if(lvl<13)return 1;
+11114:   if(lvl<22)return 2;
+11115:   if(lvl<34)return 3;
+11116:   return 4
+11117: }
+11118: 
+11119: // Dresseurs spéciaux inchangés ; seuls les dresseurs de route sont recalibrés.
+11120: const _v98TrainerPartySize=trainerPartySize;
+11121: trainerPartySize=function(t){
+11122:   if(t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70){
+### line 11129: buildTrainerParty, trainerParty
+11121: trainerPartySize=function(t){
+11122:   if(t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70){
+11123:     return _v98TrainerPartySize(t)
+11124:   }
+11125:   if(currentScene()?.kind==='route')return v98RoadTrainerPartySize(t);
+11126:   return _v98TrainerPartySize(t)
+11127: };
+11128: 
+11129: const _v98BuildTrainerParty=buildTrainerParty;
+11130: buildTrainerParty=function(t){
+11131:   if(t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70){
+11132:     return _v98BuildTrainerParty(t)
+11133:   }
+11134:   if(currentScene()?.kind!=='route')return _v98BuildTrainerParty(t);
+11135: 
+11136:   const count=v98RoadTrainerPartySize(t);
+11137:   const base=v98RoadTrainerLevel(t);
+11138:   const party=[];
+11139:   const hash=v98Hash(t?.id||'trainer');
+11140: 
+11141:   for(let i=0;i<count;i++){
+11142:     // Maximum +1 par membre, sans saut brutal.
+### line 13386: trainerParty, trainerIndex
+13378:   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
+13379:   const participants=(battle.v102zParticipants&&battle.v102zParticipants.length)?[...battle.v102zParticipants]:[a];
+13380:   for(const m of participants){
+13381:     if(!m)continue;const wasKO=m.hp<=0;const amount=Math.max(6,Math.floor(xp*(m===a?1:.75)));
+13382:     const ev=gainXP(m,amount);if(wasKO)m.hp=0;
+13383:     battle.eventQueue.push(BY[m.id].name+' gagne '+amount+' EXP pour sa participation.',...ev)
+13384:   }
+13385: 
+13386:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+13387:     battle.trainerIndex++;battle.enemy=battle.trainerParty[battle.trainerIndex];
+13388:     battle.message='Le dresseur envoie '+BY[battle.enemy.id].name+' !';
+13389:     battle.enemyHit=0;battle.playerHit=0;battle.anim=null;
+13390:     battle.v102zParticipants=[];const nextActive=active();if(nextActive)battle.v102zParticipants.push(nextActive);
+13391:     hud();syncBattleMessageV84();v84Schedule(750,()=>setBattleBusy(false,'À toi de jouer.'));return
+13392:   }
+13393: 
+13394:   if(battle.trainer){
+13395:     battle.reward=Math.max(50,Math.floor((battle.trainer.level||e.level)*18));state.money+=battle.reward;
+13396:     battle.eventQueue.push('Récompense : '+voltronLabelV85(battle.reward)+'.')
+13397:   }else{
+13398:     battle.reward=Math.floor(wildRewardV85(e)*1.10);state.money+=battle.reward;
+13399:     battle.eventQueue.push('Combat sauvage : +'+voltronLabelV85(battle.reward)+'.')
+### line 13408: buildTrainerParty, trainerParty
+13400:   }
+13401:   battle.eventQueue.push(...zCombatLoot(battle,e));
+13402:   battle.result='win';battle.message='Victoire !';hud();syncBattleMessageV84();scheduleBattleEnd('win',950)
+13403: };
+13404: 
+13405: // ----------------------------------------------------------------------
+13406: // 3. NIVEAUX DES DRESSEURS CALÉS SUR LA ZONE + FAUNE SAUVAGE
+13407: // ----------------------------------------------------------------------
+13408: const Z_BUILD_TRAINER_PARTY=buildTrainerParty;
+13409: const Z_TRAINER_PARTY_SIZE=trainerPartySize;
+13410: function zAvgLevel(){const t=(state.team||[]).filter(m=>m?.level);return t.length?t.reduce((s,m)=>s+m.level,0)/t.length:5}
+13411: function zRouteTrainerLevel(t){
+13412:   const wild=v83AreaLevelBase(),avg=zAvgLevel(),seals=(state.seals||[]).length,variation=(zHash(t?.id||'x')%3)-1;
+13413:   const target=wild+variation;
+13414:   const ceiling=Math.floor(avg)+3+Math.min(2,seals);
+13415:   return Math.max(3,Math.min(70,target,Math.max(wild-1,ceiling)))
+13416: }
+13417: trainerPartySize=function(t){
+13418:   if(t?.taronBossV102Z)return Math.min(5,2+Math.floor((Number(String(t.zone||state.zone).replace(/\D/g,''))||0)/3));
+13419:   if(currentScene()?.kind==='route'&&!t?.guardian&&!t?.taron&&!t?.finalBoss&&!t?.templeGuard){const l=zRouteTrainerLevel(t);return l<12?1:l<22?2:l<34?3:4}
+13420:   return Z_TRAINER_PARTY_SIZE(t)
+13421: };
+### line 13431: trainerParty
+13423:   if(t?.taronBossV102Z){
+13424:     const count=trainerPartySize(t),route=Number(String(t.zone||state.zone).replace(/\D/g,''))||0;
+13425:     const wild=v83AreaLevelBase(),base=Math.min(72,Math.max(wild+2,Math.floor(zAvgLevel())+1));
+13426:     const types=['Ombre','Foudre','Feu','Roche'];
+13427:     const pool=CREATURES.filter(c=>types.includes(c.type)&&minLevelForSpeciesV81(c.id)<=base+2);
+13428:     return Array.from({length:count},(_,i)=>{const c=pool[(zHash(t.id)+i*37)%Math.max(1,pool.length)]||CREATURES[0];const m=mon(c.id,Math.min(72,base+Math.floor(i/2)));m.moves=defaultMoves(m.id,m.level);return m})
+13429:   }
+13430:   if(currentScene()?.kind==='route'&&!t?.guardian&&!t?.taron&&!t?.finalBoss&&!t?.templeGuard){
+13431:     const count=trainerPartySize(t),base=zRouteTrainerLevel(t),party=[],hash=zHash(t?.id||'trainer');
+13432:     for(let i=0;i<count;i++){
+13433:       const lvl=Math.min(70,base+Math.floor(i/2));const pool=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+13434:       const c=pool[(hash+i*31)%Math.max(1,pool.length)]||CREATURES[0];const m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)
+13435:     }
+13436:     return party
+13437:   }
+13438:   return Z_BUILD_TRAINER_PARTY(t)
+13439: };
+13440: 
+13441: // ----------------------------------------------------------------------
+13442: // 4. SYMBOLE SI L'ESPÈCE SAUVAGE A DÉJÀ ÉTÉ CAPTURÉE
+13443: // ----------------------------------------------------------------------
+13444: battleCard=function(x,y,w,h,m,enemy=false){
+### line 13501: completeTaronMission, taronMission
+13493:     sc.trainers.push({id:b.id,zone,x:Math.max(100,Math.min(sc.width-100,ref.x+105)),y:Math.max(100,Math.min(sc.height-100,ref.y+70)),look:39,dir:0,level:8+route*3,dialog:b.dialog,name:b.name,taron:true,taronBossV102Z:true,guardian:false})
+13494:   }
+13495: }
+13496: const Z_START_TRAINER=startTrainer413;
+13497: startTrainer413=function(t){
+13498:   if(t?.taronBossV102Z){window._v102zTaronBossContext=t;dialog('<b>'+t.dialog+'</b><br>'+Z_TARON_BOSSES[t.zone]?.story,()=>Z_START_TRAINER(t));return}
+13499:   return Z_START_TRAINER(t)
+13500: };
+13501: const Z_COMPLETE_TARON=completeTaronMission;
+13502: completeTaronMission=function(){
+13503:   const t=window._v102zTaronBossContext;
+13504:   if(!t)return Z_COMPLETE_TARON();
+13505:   window._v102zTaronBossContext=null;zEnsure();state.trainerWins=state.trainerWins||{};state.trainerWins[t.id]=true;state.v102z.taronBossWins[t.id]=true;
+13506:   state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+13507:   const route=Number(String(t.zone).replace('route',''))||0;
+13508:   const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+13509:   const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+13510:   logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+13511:   dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+13512: };
+13513: 
+13514: // ----------------------------------------------------------------------
+### line 14308: buildTrainerParty, trainerParty
+14300:  ],exits:[{x:0,y:800,w:120,h:200,side:'west',to:'town4',label:'Belrive'},{x:3480,y:800,w:120,h:200,side:'east',to:'town5',label:'Soléria'}]};sc.v105dGraph=lakeGraph(sc);
+14301:  const a=SCENES.town4,b=SCENES.town5;if(a&&!a.exits.some(e=>e.to==='route4bis'))a.exits.push({x:a.width-120,y:a.height*.72,w:120,h:190,side:'east',to:'route4bis',label:'Route 4 bis — Lac'});if(b&&!b.exits.some(e=>e.to==='route4bis'))b.exits.push({x:0,y:b.height*.70,w:125,h:200,side:'west',to:'route4bis',label:'Route 4 bis — Lac'})}
+14302: 
+14303: const DRAW_OBJECTS_BASE=typeof window.drawRouteObjectsV93==='function'?window.drawRouteObjectsV93:function(){};
+14304: drawRouteObjectsV93=function(sc,camX,camY,sx,sy){if(state.zone!=='route4bis')return DRAW_OBJECTS_BASE(sc,camX,camY,sx,sy);const g=ctx.createLinearGradient(0,0,0,600);g.addColorStop(0,'#52b9dc');g.addColorStop(1,'#247cae');ctx.fillStyle=g;ctx.fillRect(0,0,960,600);ctx.save();ctx.strokeStyle='rgba(220,250,255,.38)';ctx.lineWidth=2;for(let wy=Math.floor(camY/90)*90;wy<camY+1100;wy+=90)for(let wx=Math.floor(camX/180)*180;wx<camX+1800;wx+=180){const x=(wx-camX)*sx,y=(wy-camY)*sy;ctx.beginPath();ctx.arc(x,y,22,Math.PI*.15,Math.PI*.85);ctx.stroke()}ctx.fillStyle='#9b7146';for(const d of[[0,760,300,280],[3300,760,300,280]]){ctx.fillRect((d[0]-camX)*sx,(d[1]-camY)*sy,d[2]*sx,d[3]*sy);ctx.fillStyle='#c89b61';for(let x=d[0]+20;x<d[0]+d[2];x+=44)ctx.fillRect((x-camX)*sx,(d[1]-camY)*sy,8*sx,d[3]*sy);ctx.fillStyle='#9b7146'}for(let wx=430;wx<3300;wx+=260){const x=(wx-camX)*sx,y=(900+Math.sin(wx/310)*120-camY)*sy;ctx.fillStyle='#f3d35c';ctx.beginPath();ctx.arc(x,y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff';ctx.stroke()}const hx=(state.x-camX)*sx,hy=(state.y-camY)*sy;ctx.strokeStyle='rgba(255,255,255,.72)';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(hx,hy+8,25,8,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='rgba(12,61,91,.86)';ctx.fillRect(12,12,275,36);ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.fillText('ROUTE 4 BIS — LAC DES REFLETS',24,36);ctx.restore()};
+14305: 
+14306: const WILD_BASE=startWild;
+14307: startWild=function(){if(state.zone!=='route4bis')return WILD_BASE();const base=15+Math.min(3,(state.seals||[]).length),pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=base+4),c=pool[Math.floor(Math.random()*Math.max(1,pool.length))]||CREATURES.find(c=>c.type==='Eau')||CREATURES[0],e=mon(c.id,Math.max(minLevelForSpeciesV81(c.id),base-2+Math.floor(Math.random()*5)));e.moves=defaultMoves(e.id,e.level);state.dex[c.id]=state.dex[c.id]||{seen:true,caught:false};startBattle(e,null)};
+14308: const PARTY_BASE=buildTrainerParty;
+14309: buildTrainerParty=function(t){if(!t?.swimmer)return PARTY_BASE(t);const count=2+((t.level||20)>=25?1:0),pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=t.level+3);return Array.from({length:count},(_,i)=>{const c=pool[(i*7+(t.level||20))%Math.max(1,pool.length)]||CREATURES.find(c=>c.type==='Eau')||CREATURES[0],m=mon(c.id,Math.max(minLevelForSpeciesV81(c.id),(t.level||20)+i));m.moves=defaultMoves(m.id,m.level);return m})};
+14310: const ENCOUNTER_BASE=window.v104EncounterStep;
+14311: window.v104EncounterStep=function(){
+14312:  if(state.zone!=='route4bis')return ENCOUNTER_BASE&&ENCOUNTER_BASE();
+14313:  if(scene!=='world'||battle||trainerEvent)return;
+14314:  state.v105nLakeSteps=(Number(state.v105nLakeSteps)||0)+1;
+14315:  // V106S : le lac doit respirer. Aucun combat pendant les 74 premiers déplacements,
+14316:  // puis une probabilité progressive, avec garde-fou à 145 déplacements maximum.
+14317:  if(state.v105nLakeSteps<75)return;
+14318:  const chance=Math.min(.10,.025+(state.v105nLakeSteps-75)*.0012);
+14319:  if(state.v105nLakeSteps>=145||Math.random()<chance){state.v105nLakeSteps=0;startWild()}
+14320: };
+14321: 
+### line 14903: trainerParty, trainerIndex
+14895:       incomingEnemy=mon(water.id,lvl);incomingEnemy.moves=defaultMoves(incomingEnemy.id,lvl)
+14896:     }
+14897:   }
+14898:   const rawEnemy=!trainer?legalizeWildCreatureV106J(incomingEnemy):incomingEnemy;
+14899:   const foe=normalizeCreature(rawEnemy,trainer?.level||player.level||5);
+14900:   battleToken++;
+14901:   battle={
+14902:     engine:VERSION,token:battleToken,enemy:foe,trainer:trainer||null,
+14903:     trainerParty:Array.isArray(trainer?.party)?trainer.party:null,trainerIndex:Number(trainer?.partyIndex)||0,
+14904:     trainerHealUses:0,trainerHealByIndex:{},
+14905:     player,participants:[player],busy:true,phase:'intro',menu:'actions',message:'',anim:null,orb:null,
+14906:     result:null,reward:0,eventQueue:[],returnScene:priorScene,returnBuilding:priorBuilding,originZone:state.zone
+14907:   };
+14908:   scene='battle';installInterface();
+14909:   const ui=el('battleUI');if(ui){ui.dataset.combatActive='false';ui.style.setProperty('display','none','important')}
+14910:   const menu=el('menuov');if(menu)menu.style.display='none';
+14911:   const dlg=el('dialog');if(dlg){dlg.classList.remove('show');dlg.style.display='none'}
+14912:   const alreadyCaught=!trainer&&!!state.dex?.[foe.id]?.caught;setMessage(trainer?`${trainer.dialog||trainer.name||'Un dresseur'} te défie !`:(state.zone==='town0'?`Un Éclat sauvage apparaît : ${nameOf(foe)} !${alreadyCaught?' — Déjà capturée.':''}`:`Un ${nameOf(foe)} sauvage apparaît !${alreadyCaught?' — Déjà capturée.':''}`));
+14913:   playBattleTransitionV106S(trainer,foe,()=>{
+14914:     if(!battle||battle.token!==battleToken)return;
+14915:     if(ui){ui.dataset.combatActive='true';ui.style.setProperty('display','flex','important')}
+14916:     safeCall(startBattleMusic);safeCall(battleCry,foe.id);safeCall(hud);buildButtons();
+### line 14932: buildTrainerParty, trainerParty
+14924:   let t={...rawTrainer};
+14925:   const special=t.guardian||t.taron||t.finalBoss||t.templeGuard||t.buildingEventV66||t.buildingEventV67||t.buildingEventV68||t.buildingEventV70;
+14926:   if(!special&&safeCall(currentScene)?.kind==='route'&&typeof v98RoadTrainerLevel==='function'){
+14927:     t.level=v98RoadTrainerLevel(t);t.zone=state.zone
+14928:   }
+14929:   if(!t.guardian&&typeof trainerDefeatedV88==='function'&&trainerDefeatedV88(t)){
+14930:     safeCall(dialog,`<b>${t.dialog||'Dresseur'}</b><br>Ce combat a déjà été remporté.`);return false
+14931:   }
+14932:   let party=Array.isArray(t.party)&&t.party.length?t.party:safeCall(buildTrainerParty,t);
+14933:   if(!Array.isArray(party)||!party.length)party=[mon(CREATURES[0].id,Math.max(3,Number(t.level)||5))];
+14934:   party=party.map(m=>normalizeCreature(m,t.level||5));
+14935:   t.party=party;t.partyIndex=0;
+14936:   return beginBattle(party[0],t)
+14937: }
+14938: 
+14939: function legalizeWildCreatureV106J(candidate){
+14940:   if(!candidate)return candidate;
+14941:   const level=Math.max(1,Number(candidate.level)||1),original=BY[Number(candidate.id)];
+14942:   if(!original)return candidate;
+14943:   if(minimumLegalLevel(original.id)<=level)return candidate;
+14944:   const family=CREATURES.filter(c=>c.family===original.family&&minimumLegalLevel(c.id)<=level).sort((a,b)=>(b.stage||0)-(a.stage||0));
+14945:   const legal=family[0]||CREATURES.find(c=>(c.stage||0)===0&&c.family===original.family)||CREATURES[0];
+### line 15045: trainerIndex
+15037:   const critical=Math.random()<critChance,crit=critical?1.35:1,variance=.92+Math.random()*.09,shield=target._v108mShield?.turns>0?(1-(target._v108mShield.amount||.3)):1;let damage=Math.max(1,Math.round(base*mult*stab*rel*crit*variance*shield));
+15038:   if(target._v108mSurviveOnce&&damage>=target.hp&&target.hp>0){damage=Math.max(0,target.hp-1);target._v108mSurviveOnce=false}return {damage,mult,critical,power:Math.round(power)}
+15039: }
+15040: 
+15041: function applyEffect(user,target,mv){
+15042:   const mid=String(mv?._id||mv?.id||''),nm=String(mv?.name||''),txt=String(mv?.effectText||''),isNew=v108mIsMove(mv);
+15043:   if(mid==='rugissement'||nm==='Rugissement'){target.atkBuff=clamp(v108mStage(target,'atkBuff')-1,-3,3);return `L'Attaque de ${nameOf(target)} baisse.`}
+15044:   if(!isNew){
+15045:     if(mv.kind==='heal'){const n=Math.min(maxHP(user)-user.hp,Math.max(12,Math.round(maxHP(user)*.28)));user.hp+=n;if(battle?.trainer&&user===battle.enemy){battle.trainerHealUses=(Number(battle.trainerHealUses)||0)+1;const k=String(Number(battle.trainerIndex)||0);battle.trainerHealByIndex=battle.trainerHealByIndex||{};battle.trainerHealByIndex[k]=(Number(battle.trainerHealByIndex[k])||0)+1}return `${nameOf(user)} récupère ${n} PV.`}
+15046:     if(mv.kind==='buff'){user.atkBuff=clamp(v108mStage(user,'atkBuff')+1,-3,3);user.defBuff=clamp(v108mStage(user,'defBuff')+1,-3,3);return `Les capacités de ${nameOf(user)} augmentent.`}
+15047:     if(mv.kind==='debuff'){target.atkBuff=clamp(v108mStage(target,'atkBuff')-1,-3,3);return `L'attaque de ${nameOf(target)} baisse.`}
+15048:     if(!target.status){if(mv.kind==='poison'&&Math.random()<.30){target.status='empoisonné';return `${nameOf(target)} est empoisonné.`}if(mv.kind==='paralyze'&&Math.random()<.30){target.status='paralysé';return `${nameOf(target)} est paralysé.`}if(mv.kind==='freeze'&&Math.random()<.24){target.status='gelé';return `${nameOf(target)} est gelé.`}if(mv.kind==='blind'&&Math.random()<.30){target.status='aveuglé';return `${nameOf(target)} est aveuglé.`}}
+15049:     return ''
+15050:   }
+15051:   const out=[],damaging=(Number(mv.displayPower)||0)>0,last=Math.max(0,Number(user._v108mLastDamage)||0),skipSelf=['Forteresse','Survoltage','Œil du Cyclone','Poing de Granite'].includes(nm),skipFoe=['Forteresse','Hibernation','Colosse','Moisissure','Nuage Nocif'].includes(nm);
+15052:   const self=(k,n,label)=>{user[k]=clamp(v108mStage(user,k)+n,-3,3);out.push(label)},foe=(k,n,label,ch=1)=>{if(v108mRoll(ch,user,target)){target[k]=clamp(v108mStage(target,k)+n,-3,3);out.push(label)}},status=(s,ch,label)=>{if(!target.status&&v108mRoll(ch,user,target)){target.status=s;if(s==='endormi')target._sleepTurns=2;out.push(label)}};
+15053:   let mm=txt.match(/Rend\s+(\d+)%\s+(?:des\s+)?PV/i);if(mm&&!/progressivement|dégâts/i.test(txt)){const n=Math.round(maxHP(user)*Number(mm[1])/100),g=Math.min(n,maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} récupère ${g} PV.`)}
+15054:   if(nm==='Halo'){const g=Math.min(Math.round(maxHP(user)*.10),maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} récupère ${g} PV.`)}
+15055:   mm=txt.match(/Rend\s+(\d+)%\s+des dégâts/i);if(mm&&damaging&&last){const g=Math.min(Math.max(1,Math.round(last*Number(mm[1])/100)),maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} absorbe ${g} PV.`)}
+15056:   if(nm==='Colonie Fongique'&&last){const g=Math.min(Math.max(1,Math.round(last*(Number(mv.drainPct)||.40))),maxHP(user)-user.hp);user.hp+=g;if(g)out.push(`${nameOf(user)} draine ${g} PV.`)}
+15057:   mm=txt.match(/(?:subit|perd)\s+(\d+)%\s+des dégâts/i);if(mm&&damaging&&last){const n=Math.max(1,Math.round(last*Number(mm[1])/100));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} subit ${n} PV de contrecoup.`)}
+15058:   if(nm==='Assaut'){const n=Math.max(1,Math.round(maxHP(user)*.05));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} perd ${n} PV.`)}if(nm==='Néant Absolu'){const n=Math.max(1,Math.round(maxHP(user)*.10));user.hp=Math.max(1,user.hp-n);out.push(`${nameOf(user)} perd ${n} PV.`)}
+### line 15094: enemyDefeated
+15086: 
+15087: function resolveMove(playerTurn,mv){
+15088:   if(!combatReady())return;const user=playerTurn?currentPlayer():battle.enemy,target=playerTurn?battle.enemy:currentPlayer();if(!user||!target){finishV105R('error');return}
+15089:   const accStage=mv.name==='Rayon Pur'?Math.max(0,v108mStage(user,'accBuff')):v108mStage(user,'accBuff'),evaRaw=v108mStage(target,'evaBuff'),evaStage=mv.name==='Rafale Sonique'?(evaRaw>0?evaRaw*.25:evaRaw):evaRaw;let accuracy=(Number(mv.accuracy)||100)*clamp(1+accStage*.06-evaStage*.06,.65,1.25);if(user.status==='aveuglé')accuracy-=18;accuracy=clamp(accuracy,20,100);let text='';
+15090:   if(target._v108mEvadeNext){target._v108mEvadeNext=false;text=`${nameOf(target)} esquive complètement ${mv.name} !`}
+15091:   else if(Math.random()*100>accuracy){text=`${nameOf(user)} manque ${mv.name} !`}
+15092:   else if(v108mMovePower(user,target,mv)<=0){text=applyEffect(user,target,mv)||'La capacité agit.'}
+15093:   else{const hits=Math.max(1,Number(mv.hits)||1);let total=0,mult=1,critical=false;for(let i=0;i<hits;i++){if(target.hp-total<=0)break;const d=damageFor(user,target,mv);total+=d.damage;mult=d.mult;critical=critical||d.critical}target.hp=Math.max(0,target.hp-total);target._v108mWasHit=true;user._v108mLastDamage=total;let extra='';if(target._v108mReflect){const r=Math.max(1,Math.round(total*target._v108mReflect));target._v108mReflect=0;user.hp=Math.max(1,user.hp-r);extra+=` ${nameOf(user)} subit ${r} PV renvoyés.`}if(target._v108mStatic?.turns>0&&!user.status&&v108mRoll(.25,target,user)){user.status='paralysé';extra+=` ${nameOf(user)} est paralysé par le champ statique.`}const effect=applyEffect(user,target,mv);text=`${nameOf(target)} perd ${total} PV.${hits>1?' '+hits+' coups.':''}${effectivenessTextV81(mult)}`;if(critical)text='Coup critique ! '+text;if(effect)text+=' '+effect;if(extra)text+=extra;battle.anim={...battle.anim,impact:true}}
+15094:   user._v108mPreviousMove=String(mv.name||'');safeCall(hud);setMessage(text);schedule(TURN_DELAY,()=>{battle.anim=null;if(target.hp<=0){playerTurn?enemyDefeated():playerDefeated();return}if(user.hp<=0){playerTurn?playerDefeated():enemyDefeated();return}poisonAfterAction(user,playerTurn)})
+15095: }
+15096: 
+15097: function v108mNextTurn(playerTurn){if(!playerTurn&&battle?._v108mPendingPlayerMove){const pending=battle._v108mPendingPlayerMove;battle._v108mPendingPlayerMove=null;battle.busy=false;schedule(60,()=>useMove(true,pending));return}if(playerTurn&&battle?._v108mEnemyAlreadyActed){battle._v108mEnemyAlreadyActed=false;returnToPlayer();return}playerTurn?enemyTurnV105R():returnToPlayer()}
+15098: function poisonAfterAction(actor,playerTurn){
+15099:   if(!actor)return v108mNextTurn(playerTurn);let loss=0,gain=0,parts=[];
+15100:   if(actor.status==='empoisonné'&&actor.hp>0){const n=Math.max(1,Math.floor(maxHP(actor)*.08));loss+=n;parts.push(`poison : -${n} PV`)}if(actor.status==='brûlé'&&actor.hp>0){const n=Math.max(1,Math.floor(maxHP(actor)*.05));loss+=n;parts.push(`brûlure : -${n} PV`)}
+15101:   if(actor._v108mDot?.turns>0&&actor.hp>0){const d=actor._v108mDot,n=Math.max(1,Math.floor(maxHP(actor)*d.pct));loss+=n;parts.push(`${d.label||'effet'} : -${n} PV`);if(d.drainTo&&d.drainTo.hp>0){const g=Math.min(n,maxHP(d.drainTo)-d.drainTo.hp);d.drainTo.hp+=g}d.turns--;if(d.turns<=0)actor._v108mDot=null}
+15102:   if(actor._v108mRegen?.turns>0&&actor.hp>0){const r=actor._v108mRegen,n=Math.max(1,Math.round(maxHP(actor)*r.pct)),g=Math.min(n,maxHP(actor)-actor.hp);gain+=g;if(g)parts.push(`régénération : +${g} PV`);r.turns--;if(r.turns<=0)actor._v108mRegen=null}
+15103:   if(actor._v108mProgressiveDef?.turns>0){actor.defBuff=clamp(v108mStage(actor,'defBuff')-1,-3,3);actor._v108mProgressiveDef.turns--;parts.push('moisissure : Défense diminuée');if(actor._v108mProgressiveDef.turns<=0)actor._v108mProgressiveDef=null}
+15104:   v108mTickTempStages(actor);actor.hp=clamp(actor.hp-loss+gain,0,maxHP(actor));for(const k of ['_v108mShield','_v108mTypeBoost','_v108mMark','_v108mStatic'])if(actor[k]?.turns>0){actor[k].turns--;if(actor[k].turns<=0)actor[k]=null}if(actor._v108mTrapped>0)actor._v108mTrapped--;actor._v108mWasHit=false;
+15105:   if(parts.length){setMessage(`${nameOf(actor)} — ${parts.join(' • ')}`);safeCall(hud);schedule(500,()=>{if(actor.hp<=0){playerTurn?playerDefeated():enemyDefeated();return}v108mNextTurn(playerTurn)});return}v108mNextTurn(playerTurn)
+15106: }
+15107: 
+### line 15128: trainerIndex
+15120: function enemyTurnV105R(){
+15121:   if(!combatReady())return;
+15122:   const enemy=v109bPrepareCombatant(battle.enemy);
+15123:   const pool=(enemy.moves||[]).map(id=>({id:v109bCanonicalMoveId(id),mv:MOVE_DB[v109bCanonicalMoveId(id)]})).filter(x=>x.mv&&currentMovePPV106U(enemy,x.id)>0);
+15124:   if(!pool.length){battle.busy=false;return useMove(false,{...MOVE_DB.lutte,_id:'lutte'})}
+15125:   const damaging=pool.filter(x=>(Number(x.mv.displayPower??x.mv.power)||0)>0),nonHeal=pool.filter(x=>x.mv.kind!=='heal'),heals=pool.filter(x=>x.mv.kind==='heal');
+15126:   let pick=null;
+15127:   if(battle.trainer&&heals.length){
+15128:     const hpRatio=enemy.hp/Math.max(1,maxHP(enemy)),idx=String(Number(battle.trainerIndex)||0),usedHere=Number(battle.trainerHealByIndex?.[idx])||0,total=Number(battle.trainerHealUses)||0;
+15129:     const partySize=Math.max(1,battle.trainerParty?.length||1),maxTotal=partySize>=4?2:1;
+15130:     if(hpRatio<=.42&&usedHere<1&&total<maxTotal&&Math.random()<.38)pick=heals[Math.floor(Math.random()*heals.length)]
+15131:   }
+15132:   if(!pick){const candidates=nonHeal.length?nonHeal:(damaging.length?damaging:pool);pick=candidates[Math.floor(Math.random()*candidates.length)]}
+15133:   battle.busy=false;useMove(false,{...pick.mv,_id:pick.id})
+15134: }
+15135: 
+15136: function returnToPlayer(message='À toi de jouer.'){
+15137:   if(!combatReady())return;
+15138:   battle.busy=false;battle.phase='player';battle.menu='actions';setMessage(message);buildButtons()
+15139: }
+15140: 
+15141: function grantEnemyXP(enemy){
+### line 15153: enemyDefeated
+15145:     const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+15146:     const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+15147:     const line=`${nameOf(m)} : +${amount} EXP`;
+15148:     xpLines.push(line);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+15149:   }
+15150:   battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+15151: }
+15152: 
+15153: function enemyDefeated(){
+15154:   if(!combatReady())return;
+15155:   const defeated=battle.enemy;grantEnemyXP(defeated);
+15156:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+15157:     battle.trainerIndex++;battle.enemy=normalizeCreature(battle.trainerParty[battle.trainerIndex],battle.trainer.level||defeated.level);
+15158:     battle.busy=true;battle.phase='trainer-send';battle.menu='actions';setMessage(`Le dresseur envoie ${nameOf(battle.enemy)} !`);safeCall(battleCry,battle.enemy.id);buildButtons();
+15159:     schedule(720,()=>{battle.busy=false;battle.phase='trainer-switch';battle.menu='trainer-switch';setMessage(`Le dresseur envoie ${nameOf(battle.enemy)}. Veux-tu garder ${nameOf(currentPlayer())} ou changer de créature ?`);buildButtons()});return
+15160:   }
+15161:   if(battle.trainer){
+15162:     battle.reward=Math.max(50,Math.floor((Number(battle.trainer.level)||defeated.level)*18));
+15163:     state.money=(state.money||0)+battle.reward;battle.eventQueue.push(`Récompense : ${voltronLabelV85(battle.reward)}.`)
+15164:   }else{
+15165:     battle.reward=Math.floor((safeCall(wildRewardV85,defeated)||20)*1.10);
+15166:     state.money=(state.money||0)+battle.reward;battle.eventQueue.push(`Combat sauvage : +${voltronLabelV85(battle.reward)}.`)
+### line 15376: completeTaronMission, taronMission
+15368:   if(result==='lose'){
+15369:     scheduleOutside(420,()=>{if((state.team||[]).length&&(state.team||[]).every(m=>m.hp<=0))transferAfterDefeat()});return
+15370:   }
+15371:   if(result==='flee'){safeCall(toast,'Tu as quitté le combat.');return}
+15372:   if(won&&b.trainer.guardian){
+15373:     scheduleOutside(150,()=>safeCall(dialog,`<b>Gardien vaincu !</b><br>${sealObtained?`Tu remportes le <b>Sceau ${b.trainer.sealIndex}</b>.`:'Tu avais déjà remporté ce Sceau.'}<br><br>Récompense : ${voltronLabelV85(b.reward||0)}.${typeof window.v104GuardianRewardHtml==='function'?window.v104GuardianRewardHtml(b.trainer):''}`));return
+15374:   }
+15375:   if(won&&resolveSpecialReturn(b))return;
+15376:   if(won&&b.trainer.taron){scheduleOutside(150,()=>safeCall(completeTaronMission));return}
+15377:   if(won){
+15378:     scheduleOutside(150,()=>safeCall(dialog,`<b>${b.trainer.dialog||'Dresseur vaincu'}</b><br>${safeCall(trainerAfterBattleTextV88,b.trainer)||'Combat remporté.'}${events.length?'<br><br>'+events.join('<br>'):''}`));return
+15379:   }
+15380:   if(result==='capture'){
+15381:     const destination=b.capturedTo==='équipe'?'dans ton équipe':'dans ta Boîte';
+15382:     safeCall(dialog,`<b>Capture réussie !</b><br>${nameOf(enemy)} rejoint ${destination}.${b.captureXP?`<br>${b.captureXP} EXP gagnés.`:''}${events.length?'<br><br>'+events.join('<br>'):''}`);return
+15383:   }
+15384:   if(events.length)safeCall(dialog,'<b>Résultats</b><br>'+events.join('<br>'))
+15385: }
+15386: 
+15387: function roundRectPath(g,x,y,w,h,r){
+15388:   r=Math.min(r,w/2,h/2);g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()
+15389: }
+### line 15408: trainerParty
+15400:     const expX=bx+94,expY=y+86,expW=Math.max(60,bw-94);roundRectPath(ctx,expX,expY,expW,9,4.5);ctx.fillStyle='#d8e3e8';ctx.fill();
+15401:     if(xpRatio>0){roundRectPath(ctx,expX,expY,expW*xpRatio,9,4.5);ctx.fillStyle='#4ba7dc';ctx.fill()}
+15402:   }
+15403:   ctx.restore()
+15404: }
+15405: 
+15406: function drawTrainerTeamStatusV106G(){
+15407:   if(!battle?.trainer)return;
+15408:   const party=Array.isArray(battle.trainerParty)?battle.trainerParty:[];
+15409:   const total=Math.max(1,party.length||Number(safeCall(trainerPartySize,battle.trainer))||1);
+15410:   const current=Math.max(0,Math.min(total-1,Number(battle.trainerIndex)||0));
+15411:   const remaining=Math.max(1,total-current);
+15412:   const x=35,y=111,w=295,h=42;
+15413:   ctx.save();roundRectPath(ctx,x,y,w,h,12);ctx.fillStyle='rgba(18,50,68,.88)';ctx.fill();
+15414:   ctx.fillStyle='#fff';ctx.font='900 11px Segoe UI';ctx.fillText(`ADVERSAIRE : ${remaining}/${total} créature${remaining>1?'s':''} restante${remaining>1?'s':''}`,x+14,y+17);
+15415:   const maxDots=Math.min(total,8),startX=x+15;
+15416:   for(let i=0;i<maxDots;i++){
+15417:     ctx.beginPath();ctx.arc(startX+i*19,y+30,5.4,0,Math.PI*2);
+15418:     ctx.fillStyle=i<current?'#596b74':i===current?'#f0c94a':'#9ed9e8';ctx.fill();
+15419:     ctx.strokeStyle='rgba(255,255,255,.65)';ctx.lineWidth=1;ctx.stroke()
+15420:   }
+15421:   if(total>8){ctx.fillStyle='#dcecf2';ctx.font='800 10px Segoe UI';ctx.fillText(`+${total-8}`,startX+8*19,y+33)}
+### line 15617: trainerParty
+15609:   }
+15610:   const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+15611:   if(d>72&&now<(e.deadline||now)){
+15612:     const step=Math.min(7,Math.max(0,d-68));
+15613:     if(d>0){t.x+=dx/d*step;t.y+=dy/d*step}
+15614:     t.moving=true;safeCall(faceNPCToPlayer,t);return
+15615:   }
+15616:   t.moving=false;trainerEvent=null;
+15617:   const partySize=Math.max(1,Number(safeCall(trainerPartySize,t))||1);
+15618:   const challenge=safeCall(trainerChallengeLine,t)||'Prepare-toi au combat !';
+15619:   const title=t.dialog||t.name||'Un dresseur te defie !';
+15620:   safeCall(dialog,'<b>'+title+'</b><br>'+challenge+'<br><br><small>Equipe adverse : '+partySize+' creature'+(partySize>1?'s':'')+'.</small>',()=>beginTrainer(t))
+15621: }
+15622: 
+15623: function brandV105R(){
+15624:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+15625:   const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${VERSION} — ${creator?'CRÉATEUR':'JOUEUR'}`;
+15626:   document.title=`VALDORA ${VERSION} — combats réécrits`;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.combatEngine=VERSION
+15627: }
+15628: 
+15629: function installOrbEconomy(){
+15630:   ensureOrbInventory();preloadOrbImages();
+### line 15944: mainTaron
+15936: function zCreator(){return typeof v61CreatorMode==='function'&&v61CreatorMode()}
+15937: function zCityName(zone){return SCENES?.[zone]?.name||zone}
+15938: function zCaught(){return Object.values(state.dex||{}).filter(v=>v?.caught).length}
+15939: function zTypeCaught(type){let n=0;for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught&&BY?.[id]?.type===type)n++;return n}
+15940: function zTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+15941: function zMaxLevel(){return Math.max(0,...[...(state.team||[]),...(state.box||[])].map(m=>Number(m?.level)||0))}
+15942: function zMasteries(){return Number(window.ValdoraGameplayV106Y?.marks?.())||0}
+15943: function zTaronDone(){return V106Z_TARON_OPS.filter(o=>zState().taronOps[o.id]?.done).length}
+15944: function zMainTaronDone(){return V106Z_TARON_OPS.filter(o=>o.main&&zState().taronOps[o.id]?.done).length}
+15945: function zPaidTrips(){return (Number(state.v106y?.busTrips)||0)+zState().trainTrips}
+15946: function zCachesFound(){return Object.values(zState().caches).filter(Boolean).length}
+15947: function zMetrics(){return {caught:zCaught(),trainers:zTrainerWins(),paidTrips:zPaidTrips(),caches:zCachesFound(),waterCaught:zTypeCaught('Eau'),taronOps:zTaronDone(),maxLevel:zMaxLevel(),masteries:zMasteries()}}
+15948: function zDiscovered(zone){return zCreator()||(state.discovered||[]).includes(zone)}
+15949: function zSave(){try{save(false)}catch(_){}try{hud()}catch(_){}}
+15950: 
+15951: // -------- TEAM TARON : campagne multi-vagues --------
+15952: function zOpState(id){const s=zState();return s.taronOps[id]||(s.taronOps[id]={intel:false,waves:0,done:false})}
+15953: function zOpUnlocked(op){return (state.seals||[]).length>=op.seal&&zDiscovered(op.zone)}
+15954: function zActiveOp(){const id=zState().activeTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);return op&&!zOpState(id).done&&zOpUnlocked(op)?op:null}
+15955: function zOpPoint(op){const sc=SCENES?.[op.zone];if(!sc)return null;if(sc._v106zOpPoints?.[op.id])return sc._v106zOpPoints[op.id];sc._v106zOpPoints=sc._v106zOpPoints||{};let x=(sc.width||1800)*(.36+((op.id.length%3)*.13)),y=(sc.height||1100)*(.38+((op.title.length%3)*.13));
+15956:   const ts=sc.trainers||[];if(sc.kind==='route'&&ts.length){const t=ts[Math.min(ts.length-1,op.seal%ts.length)];x=t.x+110;y=t.y+70}
+15957:   const ox=state.zone;try{state.zone=op.zone;const cands=[[x,y],[x+150,y],[x-150,y],[x,y+150],[x,y-150]];for(const [cx,cy] of cands){if(cx>80&&cy>80&&cx<(sc.width||1800)-80&&cy<(sc.height||1100)-80&&(!window.collision||!collision(cx,cy,cx,cy))){x=cx;y=cy;break}}}catch(_){}finally{state.zone=ox}
+### line 15966: interactTaron
+15958:   return sc._v106zOpPoints[op.id]={x,y}
+15959: }
+15960: function activateTaronOpV106Z(id){const op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return;if(!zOpUnlocked(op)){toast('Cette opération n’est pas encore accessible.');return}zState().activeTaronOp=id;zSave();document.getElementById('menuov').style.display='none';toast(`Opération suivie : ${op.title} — ${zCityName(op.zone)}.`)}
+15961: window.activateTaronOpV106Z=activateTaronOpV106Z;
+15962: function zTaronParty(op,wave){const avg=Math.max(6,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(76,Math.max(8,avg+Math.min(5,op.seal)+Math.floor(wave/2))),count=Math.min(6,2+Math.ceil(op.seal/2)+Math.floor(wave/2)),party=[];const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15963:  for(let i=0;i<count;i++){const lvl=Math.min(78,base+i),pool=CREATURES.filter(c=>op.types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(op.seal*41+wave*23+i*17)%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+15964: function startTaronWaveV106Z(op){const st=zOpState(op.id),wave=st.waves+1,party=zTaronParty(op,wave),trainer={id:`v106z_taron_${op.id}_w${wave}`,level:party[0]?.level||10,look:12,dialog:`Team Taron — ${op.title} (${wave}/${op.waves})`,taron:true,v106zOpId:op.id,party,partyIndex:0,zone:op.zone};window._v106zActiveTaronOp=op.id;window._v106zActiveTaronWave=wave;window.startBattle(party[0],trainer)}
+15965: window.startTaronWaveV106Z=startTaronWaveV106Z;
+15966: function interactTaronOpV106Z(){const op=zActiveOp();if(!op||state.zone!==op.zone)return false;const p=zOpPoint(op);if(!p||Math.hypot(state.x-p.x,state.y-p.y)>135)return false;const st=zOpState(op.id);if(!st.intel){st.intel=true;zSave();dialog(`<b>Dossier Taron — ${op.title}</b><br>${op.text}<br><br>Tu récupères des données chiffrées. Elles révèlent <b>${op.waves} groupe${op.waves>1?'s':''} d'agents</b> à neutraliser dans cette zone.`);return true}if(st.waves<op.waves){dialog(`<b>${op.title}</b><br>Groupe Taron ${st.waves+1}/${op.waves}. Prépare ton équipe.`,()=>startTaronWaveV106Z(op));return true}return false}
+15967: const BASE_COMPLETE_TARON_V106Z=window.completeTaronMission||null;
+15968: window.completeTaronMission=function(){const id=window._v106zActiveTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return BASE_COMPLETE_TARON_V106Z?BASE_COMPLETE_TARON_V106Z():undefined;const st=zOpState(id);st.waves=Math.min(op.waves,(st.waves||0)+1);state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;window._v106zActiveTaronOp=null;window._v106zActiveTaronWave=null;
+15969:  if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} };
+15970: try{completeTaronMission=window.completeTaronMission}catch(_){}
+15971: function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+15972:  for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+15973:  openSimpleMenu('Dossier Team Taron',h)}
+15974: window.openTaronDossierV106Z=openTaronDossierV106Z;
+15975: 
+15976: // -------- CONTRATS DE TERRAIN --------
+15977: function zContractProgress(c,st){const m=zMetrics();return Math.max(0,Number(m[c.kind])||0)}
+15978: function acceptContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id);if(!c||c.seal>(state.seals||[]).length)return;const st=zState().contracts[id]||(zState().contracts[id]={});if(st.claimed||st.accepted)return;st.accepted=true;st.acceptedAt=Date.now();zSave();openContractsV106Z()}
+15979: function claimContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id),st=zState().contracts[id];if(!c||!st?.accepted||st.claimed||zContractProgress(c,st)<c.goal)return;st.claimed=true;state.money=(Number(state.money)||0)+c.reward;state.inventory=state.inventory||{};state.inventory[c.item]=(Number(state.inventory[c.item])||0)+c.qty;zSave();toast(`Contrat terminé : ${c.title}`);openContractsV106Z()}
+### line 16009: mainTaron
+16001:  if(zCaught()<n){toast('Ce palier du Codex n’est pas encore atteint.');return}if(zState().codexClaims[n]){toast('Cette récompense a déjà été récupérée.');return}
+16002:  const money=500+n*18,item=n>=100?'MegaOrbe':n>=60?'SuperOrbe':'Orbe',qty=n>=120?2:1,labels={Orbe:"Orbe d'Éclat",SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'};zState().codexClaims[n]=true;state.money=(Number(state.money)||0)+money;state.inventory=state.inventory||{};state.inventory[item]=(Number(state.inventory[item])||0)+qty;zSave();
+16003:  dialog('<b>Récompense du Codex — palier '+n+'</b><br><br>Tu reçois :<br>• <b>'+money+' Voltrons</b><br>• <b>'+qty+' × '+(labels[item]||item)+'</b><br><br>La récompense a été ajoutée à ton inventaire.',()=>openCodexMilestonesV106Z())
+16004: }
+16005: window.claimCodexMilestoneV106Z=claimCodexMilestoneV106Z;
+16006: function openCodexMilestonesV106Z(){let h=`<div class="quest"><b>Programme de recherche du Codex</b><br>${zCaught()}/150 espèces capturées.</div>`;for(const n of V106Z_CODEX_MILESTONES){const done=!!zState().codexClaims[n],ready=zCaught()>=n;h+=`<div class="quest"><b>Palier ${n} espèces</b><br>${done?'✓ Récompense récupérée':ready?`Recherche validée<br><button onclick="claimCodexMilestoneV106Z(${n})">Récupérer la récompense</button>`:`Progression : ${Math.min(zCaught(),n)}/${n}`}</div>`}openSimpleMenu('Recherche du Codex',h)}
+16007: window.openCodexMilestonesV106Z=openCodexMilestonesV106Z;
+16008: 
+16009: function openAdventureHubV106Z(){openSimpleMenu('Aventure +',`<div class="quest"><b>Contenu longue durée</b><br>Enquête Taron, contrats, exploration, Circuit des Gardiens et recherche du Codex.</div><div class="baggrid"><button class="bagitem" onclick="openTaronDossierV106Z()"><b>◆ Dossier Team Taron</b><br>${zMainTaronDone()}/6 opérations principales</button><button class="bagitem" onclick="openContractsV106Z()"><b>📋 Contrats</b><br>Objectifs de terrain à progression propre</button><button class="bagitem" onclick="openGuardianCircuitV106Z()"><b>⚔ Circuit des Gardiens</b><br>Revanche à 3, 5 et 7 Sceaux</button><button class="bagitem" onclick="openCodexMilestonesV106Z()"><b>📖 Recherche Codex</b><br>${zCaught()}/150 espèces</button><button class="bagitem" onclick="document.getElementById('menuov').style.display='none';toast('Caches découvertes : ${zCachesFound()}/${V106Z_CACHE_ZONES.length}')"><b>🧭 Exploration</b><br>${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches</button></div>`)}
+16010: window.openAdventureHubV106Z=openAdventureHubV106Z;
+16011: 
+16012: // -------- TRANSPORTS PAYANTS --------
+16013: function trainFareV106Z(cityId){const from=typeof railCurrentCityV94==='function'?railCurrentCityV94():state.currentCityId,a=typeof railCityRecordV94==='function'?railCityRecordV94(from):null,b=typeof railCityRecordV94==='function'?railCityRecordV94(cityId):null;if(zCreator())return 0;const dist=a&&b?Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0)):30,disc=Number(window.ValdoraGameplayV106Y?.rank?.()?.discount)||0;return Math.max(180,Math.min(950,Math.round((140+dist*7)*(1-disc*.5)/10)*10))}
+16014: window.trainFareV106Z=trainFareV106Z;
+16015: window.v106zBoardTrain=function(cityId,fare){fare=Number(fare)||0;if(!railCanDepartV94(cityId)){toast('Cette gare n’est pas encore accessible.');return}if(!zCreator()&&(Number(state.money)||0)<fare){toast(`Billet de train : ${fare} V requis.`);return}if(!zCreator())state.money-=fare;zState().trainTrips++;zSave();document.querySelector('.stationTravelV62')?.remove();const city=railCityRecordV94(cityId);toast(`Billet validé : ${fare} V — ${city?.name||'destination'}.`);setTimeout(()=>playTrainTravelV622(cityId),300)};
+16016: window.v62StationMasterDialog=function(){const here=railCurrentCityV94();if(!here||!railCityHasPhysicalStationV94(here)){toast('Il n’y a pas de gare ferroviaire dans cette ville.');return}const dest=railAvailableDestinationsV94();if(!dest.length){toast('Aucune autre gare découverte.');return}document.querySelector('.stationTravelV62')?.remove();const cards=dest.map(c=>{const fare=trainFareV106Z(c.id);return `<button class="stationDestV62" onclick="v106zBoardTrain('${c.id}',${fare})"><span>${c.kind==='metropole'?'◆':'●'}</span><b>${c.name}</b><small>${zCreator()?'Mode créateur':`Billet : ${fare} V`}</small></button>`}).join('');document.body.insertAdjacentHTML('beforeend',`<div class="stationTravelV62"><div class="stationPanelV62"><div class="stationMasterV62"><div class="stationHatV62">★</div><div><b>Chef de gare</b><p>Le train est un service payant. Le tarif dépend de la distance et de ton rang d'aventure.</p></div></div><div class="stationListV62">${cards}</div><button class="stationCancelV62" onclick="this.closest('.stationTravelV62').remove()">Finalement, je reste ici</button></div></div>`)};
+16017: try{v62StationMasterDialog=window.v62StationMasterDialog}catch(_){}
+16018: window.v62BoardTrain=function(cityId){window.v106zBoardTrain(cityId,trainFareV106Z(cityId))};try{v62BoardTrain=window.v62BoardTrain}catch(_){}
+16019: window.trainTravelV61=function(cityId){if(!canTrainV61(cityId)){toast('Destination ferroviaire non découverte.');return}const fare=trainFareV106Z(cityId),c=railCityRecordV94(cityId);openSimpleMenu('Billet de train',`<div class="quest"><b>${c?.name||cityId}</b><br>Tarif : <b>${fare} V</b><br><small>Les voyages ferroviaires sont payants. Vol reste gratuit une fois maîtrisé.</small></div><button onclick="document.getElementById('menuov').style.display='none';v106zBoardTrain('${cityId}',${fare})">Acheter le billet</button>`)};try{trainTravelV61=window.trainTravelV61}catch(_){}
+16020: 
+16021: // -------- BIOMES : identité visuelle et faune --------
+16022: if(typeof wildBiomeProfileV106Q==='function'){window.wildBiomeProfileV106Q=function(zone=state.zone){const allowed=V106Z_ROUTE_TYPES[zone];if(allowed)return {biome:zone==='route4bis'?'lake':'v106z',allowed:[...allowed]};return {biome:SCENES?.[zone]?.biome||'prairie',allowed:['Nature','Neutre']}};try{wildBiomeProfileV106Q=window.wildBiomeProfileV106Q}catch(_){}}
+### line 16045: interactTaron
+16037: if(typeof drawRouteBase==='function'){const BR=drawRouteBase;drawRouteBase=function(sc,camX,camY,sx,sy){BR(sc,camX,camY,sx,sy);drawBiomeRouteV106Z(sc,camX,camY,sx,sy)};window.drawRouteBase=drawRouteBase}
+16038: 
+16039: // -------- MARQUEURS WORLD : Taron + caches --------
+16040: function drawExtrasV106Z(sc,camX,camY,sx,sy){ctx.save();const op=zActiveOp();if(op&&op.zone===state.zone){const p=zOpPoint(op),x=(p.x-camX)*sx,y=(p.y-camY)*sy;if(x>-80&&x<1040&&y>-80&&y<680){ctx.fillStyle='#111';ctx.strokeStyle='#f0c62b';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#f0c62b';ctx.font='1000 23px system-ui';ctx.textAlign='center';ctx.fillText(zOpState(op.id).intel?'T':'?',x,y+8);ctx.textAlign='left'}}
+16041:  if(V106Z_CACHE_ZONES.includes(state.zone)&&!zState().caches[state.zone]){const p=zCachePoint(),d=Math.hypot(state.x-p.x,state.y-p.y);if(d<340){const x=(p.x-camX)*sx,y=(p.y-camY)*sy;ctx.globalAlpha=Math.max(.25,1-d/420);ctx.fillStyle='#ffd75a';ctx.font='900 20px system-ui';ctx.fillText('✦',x-8,y+7)}}ctx.restore()}
+16042: if(typeof drawEntities==='function'){const BE=drawEntities;drawEntities=function(sc,camX,camY,sx,sy){BE(sc,camX,camY,sx,sy);drawExtrasV106Z(sc,camX,camY,sx,sy)};window.drawEntities=drawEntities}
+16043: 
+16044: const BASE_INTERACT_V106Z=window.interact;
+16045: window.interact=function(){if(scene==='world'){if(interactTaronOpV106Z())return;if(collectCacheV106Z())return}return BASE_INTERACT_V106Z()};try{interact=window.interact}catch(_){}
+16046: 
+16047: // -------- CITADELLE : l'enquête principale Taron rejoint la trame --------
+16048: const BASE_REQ_V106Z=window.v106pCitadelRequirements;
+16049: window.v106pCitadelRequirements=function(){const r=BASE_REQ_V106Z?BASE_REQ_V106Z():{caught:zCaught(),seals:(state.seals||[]).length,vol:false,ready:false},taron=zMainTaronDone();return {...r,taron,taronRequired:6,ready:r.caught>=75&&r.seals>=7&&r.vol&&taron>=6}};try{v106pCitadelRequirements=window.v106pCitadelRequirements}catch(_){}
+16050: window.finalTempleAvailableV77=function(){return window.v106pCitadelRequirements().ready};try{finalTempleAvailableV77=window.finalTempleAvailableV77}catch(_){}
+16051: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if(r.taron<6)m.push(`démanteler le Projet Résonance (${r.taron}/6)`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16052: 
+16053: // -------- OBJECTIFS + MENU --------
+16054: const BASE_OBJECTIVES_V106Z=typeof objectivesV84==='function'?objectivesV84:null;
+16055: if(BASE_OBJECTIVES_V106Z){objectivesV84=function(){const q=BASE_OBJECTIVES_V106Z(),r=window.v106pCitadelRequirements();q.push({title:'Enquête principale — Projet Résonance',progress:`${zMainTaronDone()}/6 opérations`,txt:zMainTaronDone()>=6?'Le cœur du réseau Taron est identifié.':'Poursuis le Dossier Team Taron : les six opérations principales sont nécessaires avant la Citadelle.'});q.push({title:'Exploration de Valdora',progress:`${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches`,txt:'Des caches discrètes brillent lorsque tu t’en approches. Fouille villes et routes.'});q.push({title:'Progression longue durée',progress:`${zTaronDone()}/8 Taron • ${zMasteries()}/15 maîtrises`,txt:'Contrats, revanche des Gardiens, dresseurs vétérans et paliers du Codex prolongent l’aventure.'});return q};window.objectivesV84=objectivesV84}
+16056: function installV106ZButton(){const grid=document.querySelector('aside .panel:nth-of-type(3) .grid')||document.querySelector('aside .grid');if(grid&&!document.getElementById('adventurePlusV106Z')){const b=document.createElement('button');b.id='adventurePlusV106Z';b.textContent='Aventure +';b.onclick=openAdventureHubV106Z;grid.appendChild(b)}}
+16057: 
+16058: // Bus V106Y : l'économie est volontairement plus exigeante dans V106Z (la formule source est également remplacée lors du build).
+### line 16215: buildTrainerParty, trainerParty
+16207:   const level=band.wild[0]+Math.floor(Math.random()*(band.wild[1]-band.wild[0]+1));
+16208:   const pool=v107bPool(level,v107bAllowedTypes());const c=pool[Math.floor(Math.random()*Math.max(1,pool.length))]||CREATURES[0];
+16209:   const enemy=mon(c.id,level);enemy.moves=defaultMoves(enemy.id,enemy.level);state.dex=state.dex||{};state.dex[c.id]={...(state.dex[c.id]||{}),seen:true};
+16210:   return window.startBattle(enemy,null)
+16211: };
+16212: try{startWild=window.startWild}catch(_){}
+16213: 
+16214: // Dresseurs : 3 paliers par route, tous sous le Gardien suivant.
+16215: const V107B_BUILD_TRAINER_BASE=window.buildTrainerParty||buildTrainerParty;
+16216: const V107B_PARTY_SIZE_BASE=window.trainerPartySize||trainerPartySize;
+16217: window.v98RoadTrainerLevel=function(t){const ri=v107bRouteIndex();const b=V107B_ROUTE_BANDS[ri];if(!b)return Math.max(3,Number(t?.level)||5);let idx=-1;try{idx=(currentScene()?.trainers||[]).findIndex(x=>x?.id===t?.id)}catch(_){}if(idx<0){const raw=Number(String(t?.id||'').match(/_(\d+)$/)?.[1]);idx=Number.isFinite(raw)?raw:0;if(ri===0&&idx>0)idx--}idx=Math.max(0,Math.min(b.trainer.length-1,idx));return b.trainer[idx]};
+16218: try{v98RoadTrainerLevel=window.v98RoadTrainerLevel}catch(_){}
+16219: window.trainerPartySize=function(t){const ri=v107bRouteIndex();if(ri<0||t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70)return V107B_PARTY_SIZE_BASE(t);const lvl=window.v98RoadTrainerLevel(t);return lvl<13?1:lvl<24?2:lvl<38?3:lvl<55?4:5};
+16220: try{trainerPartySize=window.trainerPartySize}catch(_){}
+16221: window.buildTrainerParty=function(t){
+16222:   const ri=v107bRouteIndex();
+16223:   if(ri<0||t?.guardian||t?.taron||t?.finalBoss||t?.templeGuard||t?.buildingEventV66||t?.buildingEventV67||t?.buildingEventV68||t?.buildingEventV70)return V107B_BUILD_TRAINER_BASE(t);
+16224:   const base=window.v98RoadTrainerLevel(t),count=window.trainerPartySize(t),allowed=v107bAllowedTypes(),party=[];
+16225:   for(let i=0;i<count;i++){const lvl=Math.min(75,base+Math.floor(i/2)),pool=v107bPool(lvl,allowed),c=pool[(Math.abs(String(t?.id||'').split('').reduce((a,ch)=>a+ch.charCodeAt(0),0))+i*17)%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+16226:   return party
+16227: };
+16228: try{buildTrainerParty=window.buildTrainerParty}catch(_){}
+### line 18315: interactTaron
+18307:   const useLocal=(seed%3)!==0,topic=useLocal?local[(seed>>>3)%local.length]:V109K_GENERAL_TOPICS[(seed>>>5)%V109K_GENERAL_TOPICS.length](n);
+18308:   const end=V109K_OUTDOOR_ENDINGS[(seed>>>9)%V109K_OUTDOOR_ENDINGS.length];
+18309:   return `${op} ${topic} ${end}`
+18310: }
+18311: window.v109kOutdoorDialogue=v109kOutdoorDialogue;
+18312: function v109kTalkToOutdoorNPC(n){
+18313:   if(!n)return false;
+18314:   try{if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(n)}catch(_){}
+18315:   if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}
+18316:   try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}
+18317:   // Certains PNJ ont une interaction narrative dédiée ; la laisser prioritaire si elle existe.
+18318:   try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}
+18319:   const name=n.name||n.dialog||'Habitant';dialog(`<b>${name}</b><br>${v109kOutdoorDialogue(n)}`);return true
+18320: }
+18321: function worldInteractNew(){
+18322:   if(scene==='world'&&!trainerEvent){
+18323:     const b=nearDoor();if(b)return enter(b);
+18324:     let n=null;try{n=typeof nearNPC==='function'?nearNPC():null}catch(_){}
+18325:     if(n&&v109kTalkToOutdoorNPC(n))return;
+18326:     // Les dresseurs de route restent interactifs eux aussi, avant ou après leur combat.
+18327:     try{const tr=typeof nearTrainer==='function'?nearTrainer():null;if(tr){if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(tr);if(state.trainerWins?.[tr.id])dialog(`<b>${tr.dialog||'Dresseur'}</b><br>${typeof trainerAfterLine==='function'?trainerAfterLine(tr):'Bien joué pour notre dernier combat.'}`);else dialog(`<b>${tr.dialog||'Dresseur'}</b><br>${typeof trainerChallengeLine==='function'?trainerChallengeLine(tr):'Tu veux te mesurer à moi ?'}`,()=>startTrainer413(tr));return}}
+18328:     catch(e){console.warn('V109K dresseur extérieur',e)}
+## game/V106A_QUETES_TARON_COMBATS_EQUIPE.js
+### line 189: completeTaronMission, taronMission
+181: 
+182: // Le moteur V105U avait écrasé le contexte des boss Taron. On le restaure au moment où le dresseur est marqué vaincu.
+183: try{
+184:   const BASE_MARK=markTrainerDefeatedV88;
+185:   markTrainerDefeatedV88=function(t){const r=BASE_MARK(t);if(t?.taron)window._v106aLastTaron=t;return r};
+186:   window.markTrainerDefeatedV88=markTrainerDefeatedV88;
+187: }catch(_){}
+188: try{
+189:   const BASE_COMPLETE_TARON=completeTaronMission;
+190:   completeTaronMission=function(){
+191:     const t=window._v106aLastTaron;window._v106aLastTaron=null;
+192:     if(t?.taronBossV102Z&&!window._v102zTaronBossContext)window._v102zTaronBossContext=t;
+193:     return BASE_COMPLETE_TARON();
+194:   };
+195:   window.completeTaronMission=completeTaronMission;
+196: }catch(_){}
+197: 
+198: // ---------------------------------------------------------------------------
+199: // 4) PETITES MIGRATIONS / RAFRAÎCHISSEMENT SANS TOUCHER AUX SAUVEGARDES EXISTANTES
+200: // ---------------------------------------------------------------------------
+201: function refreshV106A(){
+202:   try{questStateV106A();snapTaronBossesV106A();if(typeof hud==='function')hud()}catch(err){console.warn('V106A refresh',err)}
+## game/VALDORA_ROUTES_BIOMES_V114.js
+### line 252: interactTaron
+244:   }
+245:   if(typeof scene!=='undefined'&&scene==='world'){
+246:     const dialogBox=document.getElementById('dialog');if(dialogBox?.classList.contains('show'))return false;
+247:     try{if(typeof tryFinalAltarV77==='function'&&tryFinalAltarV77())return true}catch(_){}
+248:     const b=nearDoorV114();if(b)return enterBuildingV114(b);
+249:     const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];
+250:     try{if(sc?.kind==='town'&&typeof v107dBusStop==='function'){const stop=v107dBusStop(sc,state.zone);if(stop&&typeof near==='function'&&near(stop,125)&&window.ValdoraGameplayV106Y?.openBus){window.ValdoraGameplayV106Y.openBus();return true}}}catch(_){}
+251:     try{const o=sc?.kind==='town'&&typeof townNearest==='function'?townNearest():sc?.kind==='route'&&typeof routeNearest==='function'?routeNearest():null;if(o&&typeof interactFind==='function'){interactFind(o);return true}}catch(_){}
+252:     let n=null;try{n=typeof nearNPC==='function'?nearNPC():null}catch(_){}if(n){try{faceNPCToPlayer?.(n)}catch(_){}if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}try{if(typeof v109kTalkToOutdoorNPC==='function'&&v109kTalkToOutdoorNPC(n))return true}catch(_){}try{dialog?.('<b>'+(n.name||n.dialog||'Habitant')+'</b><br>'+(typeof npcDialogue==='function'?npcDialogue(n):'Bonjour !'));return true}catch(_){}}
+253:     if(sc&&['route','temple'].includes(sc.kind)){try{const t=typeof nearTrainer==='function'?nearTrainer():null;if(t){faceNPCToPlayer?.(t);if(t.finalBoss&&typeof templeGuardsClearedV77==='function'&&!templeGuardsClearedV77()){dialog?.('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');return true}if(state.trainerWins?.[t.id])dialog?.('<b>'+(t.dialog||'Dresseur')+'</b><br>'+(typeof trainerAfterLine==='function'?trainerAfterLine(t):'Bien joué pour notre dernier combat.'));else dialog?.('<b>'+(t.dialog||'Dresseur')+'</b><br>'+(typeof trainerChallengeLine==='function'?trainerChallengeLine(t):'Tu veux te mesurer à moi ?'),()=>startTrainer413?.(t));return true}}catch(_){}}
+254:   }
+255:   return false;
+256: }
+257: function collisionV114(x,y,ox,oy){
+258:   if(typeof scene!=='undefined'&&scene==='world'){
+259:     const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc)return false;Object.assign(motionDiagnostics,{zone:String(state?.zone||''),x:Math.round(x),y:Math.round(y),corridor:false,baseBlocked:false});
+260:     if(x<22||y<22||x>Number(sc.width||1800)-22||y>Number(sc.height||1100)-22)return true;
+261:     for(const ex of sc.exits||[])if(ex.v114Corridor&&pointInRect(x,y,ex.v114Corridor)){motionDiagnostics.corridor=true;return false}
+262:     if(sc.kind==='town')for(const b of sc.buildings||[])if(pointInRect(x,y,doorZone(b,sc)))return false;
+263:     if(sc.kind==='temple'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(x,y))return true;
+264:     if(sc.kind==='town'){
+265:       for(const b of sc.buildings||[]){const r={x:Number(b.x||0)-10,y:Number(b.y||0)-12,w:Number(b.w||0)+20,h:Number(b.h||0)+28};if(pointInRect(x,y,r))return true}
+## game/assets/v105r-combat.js
+### line 214: trainerParty, trainerIndex
+206:   const player=(state.team||[]).find(alive);
+207:   if(!player){safeCall(toast,'Toute ton équipe est K.O. Va la faire soigner avant de combattre.');return false}
+208:   const priorScene=scene;
+209:   const priorBuilding=building;
+210:   const foe=normalizeCreature(enemy,trainer?.level||player.level||5);
+211:   battleToken++;
+212:   battle={
+213:     engine:VERSION,token:battleToken,enemy:foe,trainer:trainer||null,
+214:     trainerParty:Array.isArray(trainer?.party)?trainer.party:null,trainerIndex:Number(trainer?.partyIndex)||0,
+215:     player,participants:[player],busy:true,phase:'intro',menu:'actions',message:'',anim:null,orb:null,
+216:     result:null,reward:0,eventQueue:[],returnScene:priorScene,returnBuilding:priorBuilding
+217:   };
+218:   scene='battle';
+219:   installInterface();
+220:   const ui=el('battleUI');if(ui){ui.dataset.combatActive='true';ui.style.setProperty('display','flex','important')}
+221:   const menu=el('menuov');if(menu)menu.style.display='none';
+222:   const dlg=el('dialog');if(dlg){dlg.classList.remove('show');dlg.style.display='none'}
+223:   setMessage(trainer?`${trainer.dialog||trainer.name||'Un dresseur'} te défie !`:`Un ${nameOf(foe)} sauvage apparaît !`);
+224:   safeCall(startBattleMusic);safeCall(battleCry,foe.id);safeCall(hud);buildButtons();
+225:   schedule(650,()=>{battle.busy=false;battle.phase='player';setMessage('À toi de jouer.');buildButtons()});
+226:   return true
+227: }
+### line 239: buildTrainerParty, trainerParty
+231:   let t={...rawTrainer};
+232:   const special=t.guardian||t.taron||t.finalBoss||t.templeGuard||t.buildingEventV66||t.buildingEventV67||t.buildingEventV68||t.buildingEventV70;
+233:   if(!special&&safeCall(currentScene)?.kind==='route'&&typeof v98RoadTrainerLevel==='function'){
+234:     t.level=v98RoadTrainerLevel(t);t.zone=state.zone
+235:   }
+236:   if(!t.guardian&&typeof trainerDefeatedV88==='function'&&trainerDefeatedV88(t)){
+237:     safeCall(dialog,`<b>${t.dialog||'Dresseur'}</b><br>Ce combat a déjà été remporté.`);return false
+238:   }
+239:   let party=Array.isArray(t.party)&&t.party.length?t.party:safeCall(buildTrainerParty,t);
+240:   if(!Array.isArray(party)||!party.length)party=[mon(CREATURES[0].id,Math.max(3,Number(t.level)||5))];
+241:   party=party.map(m=>normalizeCreature(m,t.level||5));
+242:   t.party=party;t.partyIndex=0;
+243:   return beginBattle(party[0],t)
+244: }
+245: 
+246: function beginWild(){
+247:   let base=Math.max(3,Number(safeCall(v83AreaLevelBase))||3),pool;
+248:   if(state.zone==='route4bis'){
+249:     base=20+(state.seals||[]).length*2;
+250:     pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=base+4)
+251:   }else{
+252:     const intended=Math.max(3,base-3+Math.floor(Math.random()*7));
+### line 322: enemyDefeated
+314:     text=`${nameOf(target)} perd ${out.damage} PV.${effectivenessTextV81(out.mult)}`;
+315:     if(out.critical)text=`Coup critique ! ${text}`;
+316:     if(effect)text+=` ${effect}`;
+317:     battle.anim={...battle.anim,impact:true}
+318:   }
+319:   safeCall(hud);setMessage(text);
+320:   schedule(TURN_DELAY,()=>{
+321:     battle.anim=null;
+322:     if(target.hp<=0){playerTurn?enemyDefeated():playerDefeated();return}
+323:     poisonAfterAction(user,playerTurn)
+324:   })
+325: }
+326: 
+327: function poisonAfterAction(actor,playerTurn){
+328:   if(actor.status==='empoisonné'&&actor.hp>0){
+329:     const loss=Math.max(1,Math.floor(maxHP(actor)*.09));actor.hp=Math.max(0,actor.hp-loss);
+330:     setMessage(`${nameOf(actor)} souffre du poison et perd ${loss} PV.`);safeCall(hud);
+331:     schedule(500,()=>{
+332:       if(actor.hp<=0){playerTurn?playerDefeated():enemyDefeated();return}
+333:       playerTurn?enemyTurnV105R():returnToPlayer()
+334:     });return
+335:   }
+### line 368: grantEnemyXP
+360:   battle.busy=false;useMove(false,{...pick.mv,_id:pick.id})
+361: }
+362: 
+363: function returnToPlayer(message='À toi de jouer.'){
+364:   if(!combatReady())return;
+365:   battle.busy=false;battle.phase='player';battle.menu='actions';setMessage(message);buildButtons()
+366: }
+367: 
+368: function grantEnemyXP(enemy){
+369:   const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+370:   const members=[...new Set((battle.participants||[]).filter(Boolean))];
+371:   for(const m of members){
+372:     const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+373:     const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+374:     battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+375:   }
+376: }
+377: 
+378: function enemyDefeated(){
+379:   if(!combatReady())return;
+380:   const defeated=battle.enemy;grantEnemyXP(defeated);
+381:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+### line 579: completeTaronMission, taronMission
+571:   if(result==='lose'){
+572:     scheduleOutside(420,()=>{if((state.team||[]).length&&(state.team||[]).every(m=>m.hp<=0))transferAfterDefeat()});return
+573:   }
+574:   if(result==='flee'){safeCall(toast,'Tu as quitté le combat.');return}
+575:   if(won&&b.trainer.guardian){
+576:     scheduleOutside(150,()=>safeCall(dialog,`<b>Gardien vaincu !</b><br>${sealObtained?`Tu remportes le <b>Sceau ${b.trainer.sealIndex}</b>.`:'Tu avais déjà remporté ce Sceau.'}<br><br>Récompense : ${voltronLabelV85(b.reward||0)}.${typeof window.v104GuardianRewardHtml==='function'?window.v104GuardianRewardHtml(b.trainer):''}`));return
+577:   }
+578:   if(won&&resolveSpecialReturn(b))return;
+579:   if(won&&b.trainer.taron){scheduleOutside(150,()=>safeCall(completeTaronMission));return}
+580:   if(won){
+581:     scheduleOutside(150,()=>safeCall(dialog,`<b>${b.trainer.dialog||'Dresseur vaincu'}</b><br>${safeCall(trainerAfterBattleTextV88,b.trainer)||'Combat remporté.'}${events.length?'<br><br>'+events.join('<br>'):''}`));return
+582:   }
+583:   if(result==='capture'){
+584:     const destination=b.capturedTo==='équipe'?'dans ton équipe':'dans ta Boîte';
+585:     safeCall(dialog,`<b>Capture réussie !</b><br>${nameOf(enemy)} rejoint ${destination}.${b.captureXP?`<br>${b.captureXP} EXP gagnés.`:''}${events.length?'<br><br>'+events.join('<br>'):''}`);return
+586:   }
+587:   if(events.length)safeCall(dialog,'<b>Résultats</b><br>'+events.join('<br>'))
+588: }
+589: 
+590: function roundRectPath(g,x,y,w,h,r){
+591:   r=Math.min(r,w/2,h/2);g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()
+592: }
+### line 765: trainerParty
+757:   }
+758:   const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+759:   if(d>72&&now<(e.deadline||now)){
+760:     const step=Math.min(7,Math.max(0,d-68));
+761:     if(d>0){t.x+=dx/d*step;t.y+=dy/d*step}
+762:     t.moving=true;safeCall(faceNPCToPlayer,t);return
+763:   }
+764:   t.moving=false;trainerEvent=null;
+765:   const partySize=Math.max(1,Number(safeCall(trainerPartySize,t))||1);
+766:   const challenge=safeCall(trainerChallengeLine,t)||'Prepare-toi au combat !';
+767:   const title=t.dialog||t.name||'Un dresseur te defie !';
+768:   safeCall(dialog,'<b>'+title+'</b><br>'+challenge+'<br><br><small>Equipe adverse : '+partySize+' creature'+(partySize>1?'s':'')+'.</small>',()=>beginTrainer(t))
+769: }
+770: 
+771: function brandV105R(){
+772:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+773:   const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${VERSION} — ${creator?'CRÉATEUR':'JOUEUR'}`;
+774:   document.title=`VALDORA ${VERSION} — combats réécrits`;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.combatEngine=VERSION
+775: }
+776: 
+777: function installOrbEconomy(){
+778:   ensureOrbInventory();preloadOrbImages();

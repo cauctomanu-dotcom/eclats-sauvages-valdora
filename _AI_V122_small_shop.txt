@@ -1,0 +1,1984 @@
+V122 SMALL REPORT: SHOP
+================================================================================================
+## game/V105Z_CORRECTIONS.js
+### line 253: Rappel, ElixirVital
+245:   // --------------------------------------------------------------------------
+246:   // 3. SAC UNIQUE EN COMBAT + UN TOUR POUR CHAQUE OBJET
+247:   // --------------------------------------------------------------------------
+248:   function combatActive(){return typeof scene!=='undefined'&&scene==='battle'&&typeof battle!=='undefined'&&!!battle}
+249:   function menu(){return document.getElementById('menuov')}
+250:   function closeMenu(){const m=menu();if(m)m.style.display='none'}
+251:   function ensureInventory(){
+252:     state.inventory=state.inventory||{};
+253:     for(const id of ['Potion','SuperPotion','Rappel','Baie','Antidote','Repas','FioleGuerison','ElixirVital','FioleAttaque','FioleDefense','Orbe','SuperOrbe','MegaOrbe'])if(state.inventory[id]==null)state.inventory[id]=0;
+254:   }
+255:   function itemLabel(id){return SHOP_ITEMS?.[id]?.label||({Potion:'Potion',SuperPotion:'Super Potion',Rappel:'Rappel',Baie:'Baie',Antidote:'Antidote',Repas:'Repas maison',FioleGuerison:'Fiole de Guérison',ElixirVital:'Élixir Vital',FioleAttaque:'Fiole d’Attaque',FioleDefense:'Fiole de Défense',Orbe:'Orbe d’Éclat',SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'}[id]||id)}
+256:   function battleMessage(text){
+257:     if(!battle)return;battle.message=text;
+258:     for(const id of ['battleMessageV105R','battleMessageV84']){const el=document.getElementById(id);if(el){el.textContent=text;if(id==='battleMessageV105R')el.style.setProperty('display','block','important')}}
+259:   }
+260:   function rebuildBattleBar(){try{window.buildBattleButtons?.()}catch(_){try{buildBattleButtons()}catch(__){ }}}
+261:   function consumeTurn(text){
+262:     if(!combatActive())return;
+263:     closeMenu();battle.busy=true;battle.menu='actions';battle.phase='player-item';battleMessage(text);
+264:     try{hud()}catch(_){ }try{save(false)}catch(_){ }rebuildBattleBar();
+265:     const token=battle.token;
+266:     setTimeout(()=>{if(!combatActive()||battle.token!==token)return;try{window.enemyTurn?.()}catch(err){console.error('V105Z tour objet',err);battle.busy=false;rebuildBattleBar()}},650);
+### line 272: ElixirVital
+264:     try{hud()}catch(_){ }try{save(false)}catch(_){ }rebuildBattleBar();
+265:     const token=battle.token;
+266:     setTimeout(()=>{if(!combatActive()||battle.token!==token)return;try{window.enemyTurn?.()}catch(err){console.error('V105Z tour objet',err);battle.busy=false;rebuildBattleBar()}},650);
+267:   }
+268:   function canUseOn(id,m){
+269:     if(!m)return false;
+270:     if(id==='Rappel')return m.hp<=0;
+271:     if(m.hp<=0)return false;
+272:     if(['Potion','SuperPotion','Repas','FioleGuerison','ElixirVital'].includes(id))return m.hp<maxHP(m)||(['FioleGuerison','ElixirVital'].includes(id)&&!!m.status);
+273:     if(id==='Baie')return !!m.status&&m.status!=='empoisonné';
+274:     if(id==='Antidote')return m.status==='empoisonné';
+275:     return true;
+276:   }
+277:   function targetHtml(id){
+278:     const choices=(state.team||[]).map((m,i)=>({m,i})).filter(x=>canUseOn(id,x.m));
+279:     if(!choices.length){toast('Aucun Éclat ne peut bénéficier de cet objet.');return}
+280:     let h=`<div id="v105zBattleBagMarker" class="quest"><b>${itemLabel(id)}</b><br>Choisis la cible. Son utilisation consommera ton tour.</div><div class="partyselect">`;
+281:     for(const {m,i} of choices)h+=`<button class="partycard" onclick="ValdoraV105Z.applyBattleItem('${id}',${i})"><b>${BY[m.id]?.name||'Éclat'}</b><br>N.${m.level}<br>PV ${m.hp}/${maxHP(m)}${m.status?`<br><small>${m.status}</small>`:''}</button>`;
+282:     h+=`</div><button onclick="ValdoraV105Z.openBattleBag()">Retour au sac</button>`;
+283:     openSimpleMenu('Sac — Choix de la cible',h);
+284:   }
+285:   function applyBattleItem(id,index){
+### line 293: ElixirVital
+285:   function applyBattleItem(id,index){
+286:     if(!combatActive()||battle.busy)return;ensureInventory();
+287:     const inv=state.inventory,m=state.team?.[index];if(!m||!(inv[id]>0)||!canUseOn(id,m)){toast('Cet objet ne peut pas être utilisé ici.');return}
+288:     inv[id]--;let text='';
+289:     if(id==='Rappel'){m.hp=Math.max(1,Math.floor(maxHP(m)*.5));m.status=null;text=`${BY[m.id]?.name||'L’Éclat'} revient avec ${m.hp} PV.`}
+290:     else if(id==='Baie'){m.status=null;text=`Le statut de ${BY[m.id]?.name||'l’Éclat'} est soigné.`}
+291:     else if(id==='Antidote'){m.status=null;text=`Le poison de ${BY[m.id]?.name||'l’Éclat'} est soigné.`}
+292:     else{
+293:       const amount={Potion:30,SuperPotion:80,Repas:50,FioleGuerison:120,ElixirVital:Infinity}[id]||0,before=m.hp;
+294:       m.hp=id==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+amount);
+295:       if(id==='FioleGuerison'||id==='ElixirVital')m.status=null;
+296:       text=`${itemLabel(id)} rend ${m.hp-before} PV à ${BY[m.id]?.name||'l’Éclat'}.`;
+297:     }
+298:     consumeTurn(text);
+299:   }
+300:   function applyBattleBoost(id){
+301:     if(!combatActive()||battle.busy)return;ensureInventory();if(!(state.inventory[id]>0)){toast('Tu n’en as plus.');return}
+302:     const m=battle.player||state.team?.[0];if(!m)return;state.inventory[id]--;
+303:     if(id==='FioleAttaque')m.atkBuff=Math.min(3,(m.atkBuff||0)+2);else m.defBuff=Math.min(3,(m.defBuff||0)+2);
+304:     consumeTurn(`${itemLabel(id)} renforce ${BY[m.id]?.name||'ton Éclat'}.`);
+305:   }
+306:   function useOrb(id){
+### line 319: Rappel
+311:     const n=state.inventory?.[id]||0,onclick=action==='orb'?`ValdoraV105Z.useOrb('${id}')`:action==='boost'?`ValdoraV105Z.applyBattleBoost('${id}')`:`ValdoraV105Z.selectBattleItem('${id}')`;
+312:     return `<button class="bagitem" ${n<=0||forcedDisabled?'disabled':''} onclick="${onclick}"><b>${icon} ${itemLabel(id)}</b><br>${n}<br><small>${desc}</small></button>`;
+313:   }
+314:   function openBattleBag(){
+315:     if(!combatActive()||battle.busy)return;ensureInventory();
+316:     let h='<div id="v105zBattleBagMarker" class="quest"><b>Sac unifié</b><br>Ce sac contient exactement les objets disponibles depuis le panneau de droite. Utiliser un objet consomme un tour.</div><div class="baggrid">';
+317:     h+=bagButton('Potion','🧪','Restaure 30 PV.');
+318:     h+=bagButton('SuperPotion','🧪✨','Restaure 80 PV.');
+319:     h+=bagButton('Rappel','✨','Réanime à 50 % des PV.');
+320:     h+=bagButton('Baie','🍓','Soigne un statut, sauf le poison.');
+321:     h+=bagButton('Antidote','⚗️','Soigne le poison.');
+322:     if((state.inventory.Repas||0)>0)h+=bagButton('Repas','🍲','Restaure 50 PV.');
+323:     h+=bagButton('FioleGuerison','💗','Restaure 120 PV et soigne le statut.');
+324:     h+=bagButton('ElixirVital','💎','Restaure tous les PV et soigne le statut.');
+325:     h+=bagButton('FioleAttaque','🔴','Augmente l’attaque.','boost');
+326:     h+=bagButton('FioleDefense','🔵','Augmente la défense.','boost');
+327:     h+=bagButton('Orbe','◈',battle.trainer?'Indisponible contre un dresseur.':'Capture standard.','orb',!!battle.trainer);
+328:     h+=bagButton('SuperOrbe','◆',battle.trainer?'Indisponible contre un dresseur.':'Capture améliorée.','orb',!!battle.trainer);
+329:     h+=bagButton('MegaOrbe','✦',battle.trainer?'Indisponible contre un dresseur.':'Capture d’élite.','orb',!!battle.trainer);
+330:     for(let n=1;n<=5;n++){const id=`Artefact${n}`;if((state.inventory[id]||0)>0)h+=`<button class="bagitem" disabled><b>🔷 ${itemLabel(id)}</b><br>${state.inventory[id]}<br><small>Utilisable hors combat.</small></button>`}
+331:     h+='</div><h3>Capsules de capacité</h3>';
+332:     h+=(state.capsules||[]).length?(state.capsules||[]).map(id=>`<div class="quest"><b>${MOVE_DB?.[id]?.name||id}</b><br>Apprentissage disponible hors combat depuis le menu Équipe.</div>`).join(''):'<div class="quest">Aucune Capsule de capacité pour le moment.</div>';
+## game/V105Y_REFERENCE_INTERIEURS.js
+### line 406: openShop
+398:     state.flags.finalHeartRestored=true;state.story=Math.max(state.story||0,100);state.money=(state.money||0)+7000;call('logEvent','Le Cœur de Valdora a été restauré grâce aux sept Sceaux.');call('save',false);call('tone',392,.18,.028,'sine');call('tone',523,.20,.026,'sine',.18);call('tone',659,.22,.024,'sine',.36);
+399:     safeDialog('<b>LES SEPT SCEAUX RÉSONNENT</b><br><br>Le Cœur de Valdora bat de nouveau. Une onde lumineuse traverse toute la région.<br><br>+7000 ✦');
+400:   }
+401:   function useFurniture(m){
+402:     // V106E : les fonctions indispensables sont appelées directement par le moteur
+403:     // d'intérieur final. Elles ne dépendent plus d'un ancien gestionnaire masqué dans une IIFE.
+404:     if(m.fonction==='ouvrir_stockage'){call('openPC');return}
+405:     if(m.fonction==='soins_centre'){call('startHealingSequence');return}
+406:     if(m.fonction==='ouvrir_boutique'){call('openShop');return}
+407:     if(m.fonction==='voyage_train'){call('v62StationMasterDialog');return}
+408:     if(m.fonction==='repos_15s_soin_complet'){startBed(m);return}
+409:     if(m.fonction==='s_asseoir'){sit(m);return}
+410:     if(['commander_repas','acheter_dessert','prendre_repas','repas_recup_pv','cuisiner'].includes(m.fonction)){mealAction(m.label||'Repas');return}
+411:     if(m.fonction==='interaction_finale'){finalAltar();return}
+412:     if(m.fonction==='carte_citadelle'){safeDialog('<b>Table stratégique</b><br>Le plan montre cinq salles : l’entrée, trois salles de Gardiens puis la salle du Maître du Cœur.');return}
+413:     if(m.fonction==='dialogue_citadelle'){safeDialog('<b>Trône de la Citadelle</b><br>Le trône domine la dernière salle. Une énergie ancienne vibre dans ses ornements.');return}
+414:     if(m.fonction==='lore_citadelle'){safeDialog('<b>Pilier d’Éclat</b><br>Les symboles du pilier s’illuminent à l’approche d’un combat décisif.');return}
+415:     if(m.fonction==='dialogue_gardien'){safeDialog(`<b>${m.label}</b><br>Ce mobilier porte les couleurs, les trophées et le Sceau du Gardien de la ville.`);return}
+416:     if(m.fonction==='ouvrir_rangement'){safeDialog(`<b>${m.label}</b><br>Le rangement est propre et soigneusement organisé.`);return}
+417:     try{if(typeof triggerFurniture==='function'){triggerFurniture({...m,nom:m.label});return}}catch(err){console.warn('V105Y interaction mobilier',err)}
+418:     safeDialog(`<b>${m.label||'Mobilier'}</b><br>${m.description||'Cet objet fait partie de l’aménagement du bâtiment.'}`);
+419:   }
+### line 427: openShop
+419:   }
+420:   function interactNpc(n){
+421:     if(n?._citadelV105Y){
+422:       if(state.trainerWins?.[n.id]){safeDialog(`<b>${n.dialog}</b><br>Tu as remporté ce combat. Le passage vers la salle suivante est désormais ouvert.`);return}
+423:       if(typeof startTrainer413==='function')startTrainer413(n);else call('startTrainer413',n);return;
+424:     }
+425:     if(INT.type==='laboratoire'&&n.id==='prof'){if(!state.team?.length)safeDialog('<b>Professeur Aurine</b><br>Choisis ton premier compagnon.',()=>call('showStarters'));else safeDialog('<b>Professeur Aurine</b><br>Continue ton enquête sur Valdora.');return}
+426:     if(INT.type==='centre_soins'){if(typeof healingSeq!=='undefined'&&healingSeq)safeToast('Le soin est déjà en cours.');else call('startHealingSequence');return}
+427:     if(INT.type==='boutique'){safeDialog('<b>Marchand</b><br>Bienvenue !',()=>call('openShop'));return}
+428:     if(INT.type==='gare'){safeDialog('<b>Chef de gare</b><br>Où souhaitez-vous aller ?',()=>call('v62StationMasterDialog'));return}
+429:     if(INT.type==='gardien'){
+430:       const sealMap={town1:1,town3:2,town5:3,town6:4,town9:5,town10:6,town13:7};
+431:       const src=sourceBuilding();
+432:       const seal=Number(src?.v105nSealIndex)||sealMap[state.zone]||Number(String(state.zone).replace('town',''))||1;
+433:       call('arenaChallenge',seal);return
+434:     }
+435:     safeDialog(`<b>${n.name||'Habitant'}</b><br>Bienvenue dans ce bâtiment.`);
+436:   }
+437:   function interact(){
+438:     if(!ensureInterior())return BASE_INTERACT();
+439:     try{if(closeDialog())return}catch(_){ }
+440:     if(INT.pose){if(INT.pose.mode==='seat')stand();else safeToast('Le repos doit d’abord se terminer.');return}
+## game/index.html
+### line 1716: Rappel
+1708: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1709: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"},"17":{"body":"tortue","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"18":{"body":"esprit","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"19":{"body":"pangolin","ornament":"crinière de flammes","pattern":"points lumineux","accent":"or"},"20":{"body":"félin","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"21":{"body":"renard","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"22":{"body":"mouton","ornament":"rochers sur les épaules","pattern":"écailles","accent":"ivoire"},"23":{"body":"champignon vivant","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"24":{"body":"cerf","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"25":{"body":"oiseau","ornament":"plumes en éventail","pattern":"rayures","accent":"bleu"},"26":{"body":"amphibien","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"27":{"body":"poisson","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"28":{"body":"tortue","ornament":"deux petites cornes","pattern":"plaques","accent":"violet"},"29":{"body":"esprit","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"30":{"body":"pangolin","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"31":{"body":"lapin","ornament":"petit volcan dorsal","pattern":"plumes","accent":"orange"},"32":{"body":"renard","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"33":{"body":"mouton","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"34":{"body":"champignon vivant","ornament":"cristaux sur le front","pattern":"dégradé","accent":"vert"},"35":{"body":"lézard","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"36":{"body":"oiseau","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"37":{"body":"amphibien","ornament":"antenne lumineuse","pattern":"feuilles","accent":"turquoise"},"38":{"body":"poisson","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"39":{"body":"serpent","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"40":{"body":"esprit","ornament":"corne cristalline","pattern":"taches","accent":"rouge"},"41":{"body":"pangolin","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"42":{"body":"lapin","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"43":{"body":"dragon","ornament":"oreilles en ailes","pattern":"points lumineux","accent":"or"},"44":{"body":"mouton","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"45":{"body":"champignon vivant","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"46":{"body":"lézard","ornament":"anneau lumineux","pattern":"écailles","accent":"ivoire"},"47":{"body":"quadrupède","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"48":{"body":"amphibien","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"49":{"body":"poisson","ornament":"graine géante","pattern":"rayures","accent":"bleu"},"50":{"body":"serpent","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"51":{"body":"golem","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"52":{"body":"pangolin","ornament":"ailes translucides","pattern":"plaques","accent":"violet"},"53":{"body":"lapin","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"54":{"body":"dragon","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"55":{"body":"grenouille","ornament":"racines visibles","pattern":"plumes","accent":"orange"},"56":{"body":"champignon vivant","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"57":{"body":"lézard","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"58":{"body":"quadrupède","ornament":"collerette de pétales","pattern":"dégradé","accent":"vert"},"59":{"body":"scarabée","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"60":{"body":"poisson","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"61":{"body":"serpent","ornament":"carapace bombée","pattern":"feuilles","accent":"turquoise"},"62":{"body":"golem","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"63":{"body":"hibou","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"64":{"body":"lapin","ornament":"crinière de flammes","pattern":"taches","accent":"rouge"},"65":{"body":"dragon","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"66":{"body":"grenouille","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"67":{"body":"félin","ornament":"rochers sur les épaules","pattern":"points lumineux","accent":"or"},"68":{"body":"lézard","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"69":{"body":"quadrupède","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"70":{"body":"scarabée","ornament":"plumes en éventail","pattern":"écailles","accent":"ivoire"},"71":{"body":"cerf","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"72":{"body":"serpent","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"73":{"body":"golem","ornament":"deux petites cornes","pattern":"rayures","accent":"bleu"},"74":{"body":"hibou","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"75":{"body":"tortue","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"76":{"body":"dragon","ornament":"petit volcan dorsal","pattern":"plaques","accent":"violet"},"77":{"body":"grenouille","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"78":{"body":"félin","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"79":{"body":"renard","ornament":"cristaux sur le front","pattern":"plumes","accent":"orange"},"80":{"body":"quadrupède","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"81":{"body":"scarabée","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"82":{"body":"cerf","ornament":"antenne lumineuse","pattern":"dégradé","accent":"vert"},"83":{"body":"oiseau","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"84":{"body":"golem","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"85":{"body":"hibou","ornament":"corne cristalline","pattern":"feuilles","accent":"turquoise"},"86":{"body":"tortue","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"87":{"body":"esprit","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"88":{"body":"grenouille","ornament":"oreilles en ailes","pattern":"taches","accent":"rouge"},"89":{"body":"félin","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"90":{"body":"renard","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"91":{"body":"mouton","ornament":"anneau lumineux","pattern":"points lumineux","accent":"or"},"92":{"body":"scarabée","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"93":{"body":"cerf","ornament":"queue en feuille","pattern":"feuilles","accent":"turquoise"},"94":{"body":"oiseau","ornament":"graine géante","pattern":"écailles","accent":"ivoire"},"95":{"body":"amphibien","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"96":{"body":"hibou","ornament":"champignon dorsal","pattern":"taches","accent":"rouge"},"97":{"body":"tortue","ornament":"ailes translucides","pattern":"rayures","accent":"bleu"},"98":{"body":"esprit","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"99":{"body":"pangolin","ornament":"lianes autour des pattes","pattern":"points lumineux","accent":"or"},"100":{"body":"félin","ornament":"racines visibles","pattern":"plaques","accent":"violet"}};
+1710: 
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1717: 
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1723:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1724:   const identity=(fam%7)-3;
+1725:   return {
+1726:     hp:Math.floor(30+lvl*3.0+stage*10+(fam%6)),
+1727:     atk:Math.floor(8+lvl*1.42+stage*6+Math.max(0,identity)),
+1728:     def:Math.floor(8+lvl*1.30+stage*6+Math.max(0,-identity)),
+1729:     spd:Math.floor(7+lvl*1.12+stage*4+((fam*3)%5))
+### line 2302: Rappel
+2294:   $('menucard').innerHTML=`<h2>${title}</h2>${html}
+2295:     ${entry?'<br><button onclick="openDex413()">← Retour à la liste</button> ':''}
+2296:     <button onclick="document.getElementById('menuov').style.display='none'">Fermer le Codex des Éclats</button>`;
+2297: }
+2298: 
+2299: 
+2300: function ensureInventoryV81(st=state){
+2301:   st.inventory=st.inventory||{};
+2302:   for(const k of ['Potion','SuperPotion','Orbe','SuperOrbe','MegaOrbe','Antidote','Baie','Repas','FioleAttaque','FioleDefense','Rappel']){
+2303:     if(st.inventory[k]==null)st.inventory[k]=0
+2304:   }
+2305:   return st
+2306: }
+2307: 
+2308: 
+2309: 
+2310: function mon(id,l){
+2311:   const level=Math.max(Number(l)||1,minLevelForSpeciesV81(id));
+2312:   const m={id,level,xp:0,hp:1,status:null,moves:defaultMoves(id,level),atkBuff:0,defBuff:0};
+2313:   m.hp=maxHP(m);ensureMovePPV106U(m,true);return m
+2314: }
+2315: 
+### line 6630: openShop
+6622:     return
+6623:   }
+6624:   if(building.type==='healer'&&n.id==='healer'){
+6625:     if(healingSeq){toast('Le soin est déjà en cours.');return}
+6626:     const needs=state.team.some(m=>m.hp<maxHP(m)||m.status);
+6627:     if(!needs){dialog('<b>Soigneuse Élise</b><br>Ton équipe est déjà en pleine forme.');return}
+6628:     startHealingSequence();return
+6629:   }
+6630:   if(building.type==='shop'&&n.id==='seller'){dialog('<b>Marchand</b><br>Bienvenue !',()=>openShop());return}
+6631:   if(building.type==='station'&&n.id==='agent'){window.ValdoraTrainV109D.open();return}
+6632:   if(building.type==='arena'&&n.id==='guard'){arenaChallenge(+state.zone.replace('town',''));return}
+6633:   dialog('<b>'+n.name+'</b><br>'+npcDialogue(n))
+6634: }
+6635: 
+6636: function interiorCollision(nx,ny,ox,oy){
+6637:   // Fonction harmonisée avec interiorBlocked pour éviter deux systèmes contradictoires.
+6638:   if(nx<48||nx>1152||ny<55||ny>770)return true;
+6639: 
+6640:   for(const n of (currentRoom().npcs||[])){
+6641:     const d=Math.hypot(nx-n.x,ny-n.y);
+6642:     if(d<42){
+6643:       const old=Math.hypot(ox-n.x,oy-n.y);
+### line 6981: Rappel
+6973: }
+6974: 
+6975: // ---------------- POTIONS : CHOIX DE LA CIBLE -------------------------
+6976: 
+6977: function battleHealingTargetsV86(item){
+6978:   const heal=item==='Potion'?30:item==='SuperPotion'?80:item==='Repas'?50:0;
+6979:   return state.team.map((m,i)=>({m,i})).filter(x=>{
+6980:     if(!x.m)return false;
+6981:     if(item==='Rappel')return x.m.hp<=0;
+6982:     if(x.m.hp<=0)return false;
+6983:     if(heal>0)return x.m.hp<maxHP(x.m);
+6984:     if(item==='Antidote')return x.m.status==='empoisonné';
+6985:     if(item==='Baie')return !!x.m.status && x.m.status!=='empoisonné';
+6986:     return true
+6987:   })
+6988: }
+6989: 
+6990: function openBattleItemTargetV86(item){
+6991:   if(!battleAlive()||battle.busy)return;
+6992:   ensureInventoryV81();
+6993:   if((state.inventory[item]||0)<=0){toast('Tu n’en as plus.');return}
+6994: 
+### line 7017: Rappel
+7009: function applyBattleItemTargetV86(item,index){
+7010:   if(!battleAlive()||battle.busy)return;
+7011:   ensureInventoryV81();
+7012:   const m=state.team[index];
+7013:   if(!m||(state.inventory[item]||0)<=0)return;
+7014: 
+7015:   let used=false,msg='';
+7016: 
+7017:   if(item==='Rappel'){
+7018:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+7019:     state.inventory.Rappel--;
+7020:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+7021:     m.status=null;
+7022:     used=true;
+7023:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7024:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7025:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+7026:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+7027:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+7028:     state.inventory[item]--;
+7029:     const n=Math.min(heal,maxHP(m)-m.hp);
+7030:     m.hp+=n;used=true;
+### line 7039: Rappel
+7031:     msg=BY[m.id].name+' récupère '+n+' PV.'
+7032:   }else if(item==='Baie'){
+7033:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7034:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+7035:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+7036:     state.inventory.Baie--;m.status=null;used=true;
+7037:     msg=BY[m.id].name+' est débarrassé de son statut.'
+7038:   }else if(item==='Antidote'){
+7039:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7040:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+7041:     state.inventory.Antidote--;m.status=null;used=true;
+7042:     msg=BY[m.id].name+' n’est plus empoisonné.'
+7043:   }
+7044: 
+7045:   if(!used)return;
+7046: 
+7047:   document.getElementById('menuov').style.display='none';
+7048:   save(false);hud();syncBattleMessageV84();
+7049:   battle.busy=true;
+7050:   battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';
+7051:   buildBattleButtons();syncBattleMessageV84();
+7052: 
+### line 7222: Rappel
+7214: 
+7215: 
+7216: function openBattleBag(){
+7217:   if(!battleAlive()||battle.busy)return;
+7218:   ensureInventoryV81();
+7219:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+7220:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>+30 PV</small></button>`;
+7221:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>+80 PV</small></button>`;
+7222:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime à 50 % des PV</small></button>`;
+7223:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un statut sauf poison</small></button>`;
+7224:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison</small></button>`;
+7225:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleAttaque')"><b>🔴 Fiole d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>ATQ +2</small></button>`;
+7226:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleDefense')"><b>🔵 Fiole de Défense</b><br>${state.inventory.FioleDefense}<br><small>DEF +2</small></button>`;
+7227:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>+50 PV</small></button>`;
+7228:   if(!battle.trainer){
+7229:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('Orbe')"><b>◈ Orbe d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard</small></button>`;
+7230:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('SuperOrbe')"><b>◆ Super Orbe</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée</small></button>`
+7231:   }
+7232:   h+='</div>';
+7233:   openSimpleMenu('Sac — Combat',h)
+7234: }
+7235: 
+### line 8415: SHOP_ITEMS
+8407:   }
+8408:   $('menuov').style.display='none';$('starterov').style.display='none'
+8409: }
+8410: },true);
+8411: window.addEventListener('keyup',e=>{if(e.code===held){held=null;clearInterval(timer);timer=null}},true);
+8412: function startMusicLegacyV76(){if(!musicOn)return;if(!musicCtx)musicCtx=new (window.AudioContext||window.webkitAudioContext)();if(musicCtx.state==='suspended')musicCtx.resume();if(musicTimer)return;let notes=[261.6,329.6,392,523.3,392,329.6,293.7,349.2,440,587.3,440,349.2],i=0;musicTimer=setInterval(()=>{if(scene==='battle')return;let o=musicCtx.createOscillator(),g=musicCtx.createGain();o.type='triangle';o.frequency.value=notes[i++%notes.length];g.gain.value=.025;o.connect(g);g.connect(musicCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,musicCtx.currentTime+.22);o.stop(musicCtx.currentTime+.23)},270)}
+8413: 
+8414: 
+8415: const SHOP_ITEMS={
+8416:   Potion:{label:'Potion',price:10,desc:'Restaure jusqu’à 30 PV.'},
+8417:   SuperPotion:{label:'Super Potion',price:50,desc:'Restaure jusqu’à 80 PV.'},
+8418:   Orbe:{label:'Orbe d’Éclat',price:50,desc:'Permet de capturer une Éclat sauvage.'},
+8419:   SuperOrbe:{label:'Super Orbe',price:100,desc:'Orbe renforcée : capture nettement facilitée.'},
+8420:   Antidote:{label:'Antidote',price:30,desc:'Soigne le poison.'},
+8421:   Baie:{label:'Baie de soin',price:30,desc:'Soigne certains changements de statut.'},
+8422:   FioleAttaque:{label:'Fiole d’Attaque',price:100,desc:'Augmente fortement l’attaque pendant un combat.'},
+8423:   FioleDefense:{label:'Fiole de Défense',price:100,desc:'Augmente fortement la défense pendant un combat.'},
+8424:   Rappel:{label:'Rappel',price:150,desc:'Réanime un Éclat K.O. avec 50 % de ses PV.'}
+8425: };
+8426: 
+8427: 
+8428: 
+### line 8433: shopTier
+8425: };
+8426: 
+8427: 
+8428: 
+8429: 
+8430: function openShop(){
+8431:   ensureInventoryV81();
+8432:   const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+8433:   const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+8434:   const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+8435: 
+8436:   let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+8437:     Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+8438:     <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+8439:     <div style="display:flex;gap:8px;margin-bottom:12px">
+8440:       <button onclick="openShop()">Acheter</button>
+8441:       <button onclick="openSellShopV101D()">Revendre</button>
+8442:     </div><div class="baggrid">`;
+8443: 
+8444:   for(const id of ids){
+8445:     const it=SHOP_ITEMS[id];if(!it)continue;
+8446:     const qty=state.inventory[id]||0;
+### line 8463: SHOP_ITEMS
+8455: }
+8456: 
+8457: 
+8458: 
+8459: 
+8460: 
+8461: 
+8462: function buyShopItem(id){
+8463:   const it=SHOP_ITEMS[id];if(!it)return;
+8464:   if(window.HOME_FURNITURE_ITEMS_V105J?.[id]){if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}const fid=window.HOME_FURNITURE_ITEMS_V105J[id];state.money-=it.price;state.homeFurnitureOwnedV105J=state.homeFurnitureOwnedV105J||{};state.homeFurnitureOwnedV105J[fid]=(state.homeFurnitureOwnedV105J[fid]||0)+1;save(false);hud();openShop();toast(it.label+' acheté pour ta maison !');return}
+8465:   if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}
+8466:   state.money-=it.price;state.inventory[id]=(state.inventory[id]||0)+1;
+8467:   save(false);hud();openShop();toast(it.label+' acheté pour '+it.price+' Voltrons !')
+8468: }
+8469: 
+8470: 
+8471: function openSimpleMenu(title,html){$('menuov').style.display='flex';$('menucard').innerHTML='<h2>'+title+'</h2>'+html+'<br><button onclick="$(\'menuov\').style.display=\'none\'">Fermer</button>'}
+8472: 
+8473: 
+8474: function pcPortraitV106C(m){
+8475:   const id=Number(m?.id),data=BY[id]||{};
+8476:   // V108S : le PC utilise exactement la même source de vérité que l'Équipe.
+### line 8970: Rappel
+8962: }
+8963: 
+8964: 
+8965: 
+8966: function applyBagItem(index){
+8967:   const item=pendingBagItem,m=state.team[index];if(!item||!m)return;
+8968:   ensureInventoryV81();
+8969: 
+8970:   if(item==='Rappel'){
+8971:     if((state.inventory.Rappel||0)<=0){toast('Plus de Rappels.');return}
+8972:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+8973:     state.inventory.Rappel--;
+8974:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+8975:     m.status=null;
+8976:     save(false);hud();toast(BY[m.id].name+' est réanimé !');openBag();return
+8977:   }
+8978: 
+8979:   if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+8980:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+8981:     if((state.inventory[item]||0)<=0){toast('Tu n’en as plus.');return}
+8982:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+8983:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+### line 8991: Rappel
+8983:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+8984:     state.inventory[item]--;
+8985:     const n=Math.min(heal,maxHP(m)-m.hp);m.hp+=n;
+8986:     save(false);toast(BY[m.id].name+' récupère '+n+' PV.');openBag();return
+8987:   }
+8988: 
+8989:   if(item==='Baie'){
+8990:     if((state.inventory.Baie||0)<=0){toast('Plus de Baies.');return}
+8991:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+8992:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+8993:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+8994:     state.inventory.Baie--;m.status=null;save(false);toast(BY[m.id].name+' est soigné.');openBag();return
+8995:   }
+8996: 
+8997:   if(item==='Antidote'){
+8998:     if((state.inventory.Antidote||0)<=0){toast('Plus d’Antidotes.');return}
+8999:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9000:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+9001:     state.inventory.Antidote--;m.status=null;save(false);toast('Poison soigné.');openBag();return
+9002:   }
+9003: }
+9004: 
+### line 9015: Rappel
+9007: 
+9008: 
+9009: 
+9010: function openBag(){
+9011:   ensureInventoryV81();
+9012:   let h='<div class="baggrid">';
+9013:   h+=`<button class="bagitem" onclick="selectBagTarget('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>Restaure jusqu’à 30 PV.</small></button>`;
+9014:   h+=`<button class="bagitem" onclick="selectBagTarget('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>Restaure jusqu’à 80 PV.</small></button>`;
+9015:   h+=`<button class="bagitem" onclick="selectBagTarget('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime un Éclat K.O. avec 50 % de ses PV.</small></button>`;
+9016:   h+=`<button class="bagitem" onclick="selectBagTarget('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un changement de statut, sauf le poison.</small></button>`;
+9017:   h+=`<button class="bagitem" onclick="selectBagTarget('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison.</small></button>`;
+9018:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="selectBagTarget('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>Restaure jusqu’à 50 PV.</small></button>`;
+9019:   h+=`<div class="bagitem"><b>◈ Orbes d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard en combat sauvage.</small></div>`;
+9020:   h+=`<div class="bagitem"><b>◆ Super Orbes</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée en combat sauvage.</small></div>`;
+9021:   h+=`<div class="bagitem"><b>🔴 Fioles d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>Utilisables en combat.</small></div>`;
+9022:   h+=`<div class="bagitem"><b>🔵 Fioles de Défense</b><br>${state.inventory.FioleDefense}<br><small>Utilisables en combat.</small></div>`;
+9023:   h+='</div><h3>Capsules de capacité</h3>';
+9024:   h+=(state.capsules||[]).length
+9025:     ?(state.capsules||[]).map(mid=>`<div class="quest"><b>${MOVE_DB[mid]?.name||mid}</b><br>Peut être apprise depuis le menu Équipe.</div>`).join('')
+9026:     :'<div class="quest">Aucune Capsule de capacité pour le moment.</div>';
+9027:   openSimpleMenu('Sac',h)
+9028: }
+### line 10439: SHOP_ITEMS
+10431:     return true
+10432:   }
+10433: 
+10434:   state.routeFindsV93[o.id]=true;ensureInventoryV81();
+10435: 
+10436:   if(o.type==='chest'){
+10437:     const money=35+(o.routeIndex%5)*15,item=o.routeIndex%3===0?'SuperPotion':o.routeIndex%3===1?'Orbe':'Antidote';
+10438:     state.money=(state.money||0)+money;state.inventory[item]=(state.inventory[item]||0)+1;save(false);hud();
+10439:     dialog('<b>Petit coffre trouvé !</b><br>Tu récupères <b>'+money+' Voltrons</b> et <b>1 '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10440:   }else if(o.type==='bush'){
+10441:     const r=o.routeIndex%4,item=r===0?'Baie':r===1?'Potion':r===2?'Orbe':'Antidote',qty=r===0?2:1;
+10442:     state.inventory[item]=(state.inventory[item]||0)+qty;save(false);hud();
+10443:     dialog('<b>Buisson fouillé</b><br>Tu trouves <b>'+qty+' '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10444:   }else{
+10445:     state.money=(state.money||0)+5;save(false);hud();
+10446:     dialog('<b>Panneau de Valdora</b><br>'+ROUTE_FIND_HINTS_V93[o.routeIndex%ROUTE_FIND_HINTS_V93.length]+'<br><br><small>Première lecture : +5 Voltrons.</small>')
+10447:   }
+10448:   return true
+10449: }
+10450: 
+10451: // ------------------------ ÉCRIN DES SCEAUX -----------------------------
+10452: const SEALS_V93=[
+### line 11238: Rappel
+11230: 
+11231: trainerAfterLine=function(t){
+11232:   const h=v98Hash('after|'+(t?.id||'')+'|'+state.zone);
+11233:   const base=V98_AFTER[h%V98_AFTER.length];
+11234:   const hints=[
+11235:     'Pense à regarder les types avant de choisir ton prochain Éclat.',
+11236:     'Un Centre de soins n’est jamais très loin d’une grande étape.',
+11237:     'Les buissons et petits coffres au bord des chemins valent parfois le détour.',
+11238:     'Garde au moins un Rappel si tu pars avec une équipe déjà fatiguée.',
+11239:     'Les dresseurs plus loin seront plus forts que ceux d’ici.',
+11240:     'Une capacité peu puissante mais super efficace peut faire très mal.',
+11241:     'Reviens me parler si tu repasses : je ne te provoquerai plus.',
+11242:     'Les objets utilisés en combat consomment un tour, il faut bien choisir le moment.',
+11243:     'Une équipe variée aide énormément contre les prochains Gardiens.',
+11244:     'Les gares sont pratiques une fois les villes correspondantes découvertes.'
+11245:   ];
+11246:   return base+'<br><br><b>Conseil :</b> '+hints[(h>>>7)%hints.length]
+11247: };
+11248: 
+11249: trainerAfterBattleTextV88=function(t){
+11250:   return trainerAfterLine(t)
+11251: };
+### line 12186: openShop
+12178: // ----------------------------------------------------------------------
+12179: // BOUTIQUE : REVENTE À 50 % DU PRIX.
+12180: // ----------------------------------------------------------------------
+12181: window.openSellShopV101D=function(){
+12182:   ensureInventoryV81();
+12183:   let h=`<div class="quest"><b>Ton argent : ${voltronLabelV85(state.money)}</b><br>
+12184:     Les objets sont repris à <b>50 % de leur prix d'achat</b>.</div>
+12185:     <div style="display:flex;gap:8px;margin-bottom:12px">
+12186:       <button onclick="openShop()">Acheter</button>
+12187:       <button disabled>Revendre</button>
+12188:     </div><div class="baggrid">`;
+12189: 
+12190:   let count=0;
+12191:   for(const [id,it] of Object.entries(SHOP_ITEMS)){
+12192:     const qty=state.inventory[id]||0;
+12193:     if(qty<=0)continue;
+12194:     count++;
+12195:     const price=Math.max(1,Math.floor(it.price*.5));
+12196:     h+=`<button class="bagitem" onclick="sellShopItemV101D('${id}')">
+12197:       <b>${it.label}</b><br>Reprise : ${price} Voltrons<br><small>Possédé : ${qty}</small>
+12198:     </button>`;
+12199:   }
+### line 12206: SHOP_ITEMS
+12198:     </button>`;
+12199:   }
+12200:   if(!count)h+='<div class="quest">Tu n’as aucun objet revendable.</div>';
+12201:   h+='</div>';
+12202:   openSimpleMenu('Boutique — Revente',h);
+12203: };
+12204: 
+12205: window.sellShopItemV101D=function(id){
+12206:   const it=SHOP_ITEMS[id];
+12207:   if(!it||(state.inventory[id]||0)<=0)return;
+12208:   const price=Math.max(1,Math.floor(it.price*.5));
+12209:   state.inventory[id]--;
+12210:   state.money=(state.money||0)+price;
+12211:   save(false);hud();
+12212:   openSellShopV101D();
+12213:   toast(it.label+' revendu pour '+price+' Voltrons.');
+12214: };
+12215: 
+12216: // ----------------------------------------------------------------------
+12217: // DRESSEURS : banques beaucoup plus variées.
+12218: // ----------------------------------------------------------------------
+12219: const V101D_TRAINER_OPEN=[
+### line 12785: SHOP_ITEMS
+12777:   return best
+12778: }
+12779: function searchTownBushV106G(o){
+12780:   state.townBushFindsV106G=state.townBushFindsV106G||{};
+12781:   if(state.townBushFindsV106G[o.key]){toast('Tu as déjà fouillé ce buisson.');return true}
+12782:   state.townBushFindsV106G[o.key]=true;state.inventory=state.inventory||{};
+12783:   const h=v106gWorldFindHash(o.key);if((h%100)>=30){save(false);dialog('<b>Buisson fouillé</b><br>Tu écartes les branches et regardes au pied du buisson, mais il n’y a rien à récupérer ici.');return true}
+12784:   const rewards=[['Baie',2],['Potion',1],['Orbe',1],['Antidote',1],['money',25+(h%51)]],r=rewards[(h>>>7)%rewards.length];
+12785:   let label='';if(r[0]==='money'){state.money=(Number(state.money)||0)+r[1];label=r[1]+' Voltrons'}else{state.inventory[r[0]]=(Number(state.inventory[r[0]])||0)+r[1];label=r[1]+' '+(SHOP_ITEMS?.[r[0]]?.label||r[0])}
+12786:   save(false);hud();dialog('<b>Buisson fouillé</b><br>Quelque chose était caché entre les branches : <b>'+label+'</b>.');return true
+12787: }
+12788: window.townBushSearchableV106G=townBushSearchableV106G;
+12789: const _interactV101F=window.interact;
+12790: window.interact=function(){
+12791:  if(scene==='world'){
+12792:    if(currentScene()?.kind==='town'){
+12793:      const hiddenBush=nearTownBushV106G();if(hiddenBush){searchTownBushV106G(hiddenBush);return}
+12794:    }
+12795:    const b=typeof nearBuilding==='function'?nearBuilding():null;
+12796:    if(b&&b.type==='inn'){
+12797:      const nm=currentScene().name||state.zone, arr=V101F_INN_LINES[nm]||[
+12798:        'Bienvenue dans notre auberge. Chaque voyageur apporte ici une histoire différente.',
+### line 13073: Rappel
+13065: const TVINFO=[
+13066:   "Flash Valdora : plusieurs dresseurs signalent une activité inhabituelle sur les routes.",
+13067:   "Conseil du jour : varie les types de ton équipe pour mieux résister aux combats difficiles.",
+13068:   "Documentaire : certaines créatures changent de comportement selon leur habitat et l'heure de la journée.",
+13069:   "Info régionale : les gares permettent de revenir rapidement dans les villes déjà découvertes.",
+13070:   "Émission scientifique : le Professeur Aurine poursuit ses recherches sur les perturbations de Valdora."
+13071: ];
+13072: const MUSEUM=[
+13073:   "Cette pièce est antérieure aux premières cités de Valdora et rappelle une espèce aujourd'hui disparue.",
+13074:   "Les premiers habitants vénéraient les créatures capables de manipuler la lumière et les éléments.",
+13075:   "Des fragments découverts sous le musée portent le même motif que plusieurs ruines de la région.",
+13076:   "Les archives indiquent qu'un ancien temple se trouvait exactement sous cette salle.",
+13077:   "Ce spécimen montre que certaines lignées de créatures ont profondément changé au fil des siècles."
+13078: ];
+13079: const pick=a=>a[Math.floor(Math.random()*a.length)];
+13080: const team=()=>Array.isArray(state.team)?state.team:[];
+13081: function healAll(){team().forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});hud();save(false)}
+13082: function meal(){
+13083:   if(!team().length){dialog('<b>Table familiale</b><br>Tu prends le temps de manger quelque chose.');return}
+13084:   team().forEach(m=>m.hp=Math.min(maxHP(m),m.hp+Math.max(1,Math.ceil(maxHP(m)*.25))));hud();save(false);
+13085:   dialog('<b>Repas</b><br>Tu prends un vrai repas. Les PV de tes créatures remontent légèrement.');
+13086: }
+### line 13158: SHOP_ITEMS
+13150:   const key=furnitureSearchKeyV106G(m);if(state.searchFindsV106G[key])return false;
+13151:   state.searchFindsV106G[key]=true;
+13152:   const h=searchHashV106G(key);state.inventory=state.inventory||{};
+13153:   const place=m.id==='bibliotheque'?'entre les livres':m.id==='etagere_produits'?'derrière les produits':m.id==='cartons_decor'?'dans les cartons':m.id==='chariot_bagages'?'dans une poche oubliée du chariot':m.id==='vitrine_verre'?'près du socle de la vitrine':m.id==='bureau_conservateur'?'dans un tiroir mal fermé':'derrière le pot';
+13154:   if((h%100)>=62){save(false);dialog('<b>Fouille</b><br>Tu cherches '+place+', mais tu ne trouves rien cette fois.');return true}
+13155:   const rewards=[['Baie',1],['Potion',1],['Orbe',1],['Antidote',1],['SuperPotion',1],['money',30+(h%71)]];
+13156:   const [kind,qty]=rewards[(h>>>8)%rewards.length];let label='';
+13157:   if(kind==='money'){state.money=(Number(state.money)||0)+qty;label=qty+' Voltrons'}
+13158:   else{state.inventory[kind]=(Number(state.inventory[kind])||0)+qty;label=qty+' '+(SHOP_ITEMS?.[kind]?.label||kind)}
+13159:   save(false);hud();dialog('<b>Objet trouvé !</b><br>En fouillant '+place+', tu récupères <b>'+label+'</b>.');return true
+13160: }
+13161: function triggerFurniture(m){
+13162:   state.mobilierInstanceIdV102Y=m.instanceId;
+13163:   if(tryFurnitureFindV106G(m))return;
+13164:   switch(m.fonction){
+13165:     case 'repos_15s_soin_complet': sleepAt(m);break;
+13166:     case 'ouvrir_stockage': openPC();break;
+13167:     case 'lire_lore_indices': dialog('<b>Bibliothèque</b><br>'+pick(BOOKS));break;
+13168:     case 'repas_recup_pv': meal();break;
+13169:     case 'infos_valdora': dialog('<b>Télévision</b><br>'+pick(TVINFO));break;
+13170:     case 'soins_centre':
+13171:       if(healingSeq)toast('Le soin est déjà en cours.');
+### line 13177: openShop
+13169:     case 'infos_valdora': dialog('<b>Télévision</b><br>'+pick(TVINFO));break;
+13170:     case 'soins_centre':
+13171:       if(healingSeq)toast('Le soin est déjà en cours.');
+13172:       else if(!team().some(x=>x.hp<maxHP(x)||x.status))dialog('<b>Centre de soins</b><br>Ton équipe est déjà en pleine forme.');
+13173:       else startHealingSequence();break;
+13174:     case 's_asseoir': sitAt(m);break;
+13175:     case 'infos_carte_region': dialog('<b>Carte de Valdora</b><br>La carte montre les grandes villes, les lacs, les routes de montagne et les principales lignes ferroviaires. Plusieurs anciennes voies sont marquées en pointillés.');break;
+13176:     case 'ouvrir_boutique':
+13177:       if(m.id==='etagere_produits')dialog('<b>Rayonnage</b><br>Les rayons sont remplis de marchandises. Tu aperçois '+pick(['des Potions','des Capsules de capture','des Anti-paralysie'])+'.',()=>openShop());
+13178:       else openShop();break;
+13179:     case 'personnaliser_maison': if(window.openHomeCustomizerV105J)window.openHomeCustomizerV105J();break;
+13180:     case 'reservation_hotel': reserveHotel();break;
+13181:     case 'voyage_train': window.ValdoraTrainV109D.open();break;
+13182:     case 'controle_ticket': window.ValdoraTrainV109D.open();break;
+13183:     case 'horaires_train': stationBoard();break;
+13184:     case 'distributeur_boissons': vending();break;
+13185:     case 'choix_starters': if(!state.team.length)dialog('<b>Table des Starters</b><br>Quatre capsules t’attendent…',()=>showStarters());else dialog('<b>Table des Starters</b><br>Ton premier compagnon est déjà avec toi.');break;
+13186:     case 'recherche_codex': superComputer();break;
+13187:     case 'lore_recherche': dialog('<b>Tableau de recherche</b><br>'+pick(['Les croquis comparent plusieurs stades d’évolution.','Une note indique : « environnement + expérience = évolution parfois imprévisible ».','Un schéma relie les types Feu, Plante et Eau dans un cycle d’avantages.','Des coordonnées sont entourées près des montagnes du nord.']));break;
+13188:     case 'infos_oeuf': dialog('<b>Incubateur</b><br>'+pick(['L’œuf réagit légèrement à ta présence.','Les capteurs indiquent une activité stable. Impossible encore d’identifier l’espèce.','Une étiquette indique : « origine inconnue — trouvé près d’anciennes ruines ».']));break;
+13189:     case 'lore_musee': dialog('<b>'+((m.nom)||'Exposition')+'</b><br>'+pick(MUSEUM));break;
+13190:     case 'decor': if(m.description)dialog('<b>'+(m.nom||'Objet')+'</b><br>'+m.description);break;
+### line 13267: ElixirVital
+13259: // ======================================================================
+13260: (function(){
+13261: 'use strict';
+13262: 
+13263: function zPick(a){return a[Math.floor(Math.random()*a.length)]}
+13264: function zHash(s){let h=2166136261>>>0;for(const c of String(s||'')){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+13265: function zEnsure(){
+13266:   state.inventory=state.inventory||{};
+13267:   for(const k of ['FioleGuerison','ElixirVital','Artefact1','Artefact2','Artefact3','Artefact4','Artefact5'])
+13268:     if(!Number.isFinite(state.inventory[k]))state.inventory[k]=0;
+13269:   state.v102z=state.v102z||{story:{},taronBossWins:{},combatWins:0};
+13270:   state.v102z.story=state.v102z.story||{};
+13271:   state.v102z.taronBossWins=state.v102z.taronBossWins||{};
+13272:   return state.v102z;
+13273: }
+13274: 
+13275: // ----------------------------------------------------------------------
+13276: // 1. ATTAQUES PLUS VARIÉES PAR TYPE
+13277: // ----------------------------------------------------------------------
+13278: const Z_MOVES={
+13279:   epines:{id:'epines',name:'Épines Vives',power:10,accuracy:96,kind:'nature',type:'Nature'},
+13280:   photosynthese:{id:'photosynthese',name:'Photosynthèse',power:0,accuracy:100,kind:'heal',type:'Nature'},
+### line 13364: Rappel
+13356:   const capChance=boss?1:(trainer?.26:.11);
+13357:   if(Math.random()<capChance){
+13358:     const mid=zCapsuleForEnemy(e);
+13359:     if(mid){state.capsules=state.capsules||[];state.capsules.push(mid);lines.push('Capsule de capacité obtenue : '+MOVE_DB[mid].name+'.')}
+13360:   }
+13361:   const itemChance=boss?1:(trainer?.34:.20);
+13362:   if(Math.random()<itemChance){
+13363:     const tier=Math.max(0,Math.min(6,Math.floor((e.level||1)/10)));
+13364:     const pool=['Potion','Baie','Antidote',...(tier>=1?['SuperPotion']:[]),...(tier>=2?['FioleGuerison']:[]),...(tier>=3?['SuperOrbe']:[]),...(tier>=4?['Rappel']:[])];
+13365:     const it=zPick(pool);state.inventory[it]=(state.inventory[it]||0)+1;lines.push('Objet récupéré : '+(SHOP_ITEMS[it]?.label||it)+'.')
+13366:   }
+13367:   // Petit bonus régulier : évite l'impression que les récompenses spéciales n'existent jamais.
+13368:   if(!boss && state.v102z.combatWins%7===0){
+13369:     const mid=zCapsuleForEnemy(e);if(mid){state.capsules.push(mid);lines.push('Bonus de série : Capsule '+MOVE_DB[mid].name+'.')}
+13370:   }
+13371:   return lines
+13372: }
+13373: 
+13374: enemyKO=function(){
+13375:   if(!battleAlive())return;
+13376:   const a=active(),e=battle.enemy;
+13377:   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
+### line 13510: SHOP_ITEMS
+13502:   const t=window._v102zTaronBossContext;
+13503:   if(!t)return Z_COMPLETE_TARON();
+13504:   window._v102zTaronBossContext=null;zEnsure();state.trainerWins=state.trainerWins||{};state.trainerWins[t.id]=true;state.v102z.taronBossWins[t.id]=true;
+13505:   state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+13506:   const route=Number(String(t.zone).replace('route',''))||0;
+13507:   const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+13508:   const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+13509:   logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+13510:   dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+13511: };
+13512: 
+13513: // ----------------------------------------------------------------------
+13514: // 7. STORYTELLING SUPPLÉMENTAIRE, DÉCOUVERT PROGRESSIVEMENT
+13515: // ----------------------------------------------------------------------
+13516: const Z_STORY={
+13517:   route0:'Au bord de la Route 1, plusieurs voyageurs parlent de caisses marquées d’un losange jaune. Personne ne sait encore à qui elles appartiennent.',
+13518:   town1:'À Rochebrune, les habitants évoquent pour la première fois un groupe appelé Team Taron. Ils achèteraient des informations sur les Éclats rares.',
+13519:   route2:'Des traces de véhicules et des balises brouillées indiquent qu’une opération organisée a lieu sur cette route.',
+13520:   town5:'À Soléria, certains documents administratifs mentionnent des sociétés-écrans reliées à Taronis.',
+13521:   route6:'La Team Taron ne se cache presque plus. Ses membres parlent désormais ouvertement du Projet Résonance.',
+13522:   town13:'Taronis. Les indices convergent ici : laboratoires privés, convois ferroviaires et disparition d’Éclats rares semblent liés au même réseau.'
+13523: };
+### line 13711: SHOP_ITEMS
+13703:     if(window._v108qWorldSpeaker){const n=window._v108qWorldSpeaker;window._v108qWorldSpeaker=null;setTimeout(()=>{n._v104Paused=false;n.moving=false;n.next=Date.now()+500},220)}
+13704:   }
+13705:   return r
+13706: };
+13707: 
+13708: // ----------------------------------------------------------------------
+13709: // 10. NOUVEAUX OBJETS : FIOLE DE GUÉRISON + ARTEFACTS + STOCK ÉVOLUTIF
+13710: // ----------------------------------------------------------------------
+13711: Object.assign(SHOP_ITEMS,{
+13712:   FioleGuerison:{label:'Fiole de Guérison',price:180,desc:'Restaure 120 PV et soigne le statut d’un Éclat.'},
+13713:   ElixirVital:{label:'Élixir Vital',price:360,desc:'Restaure totalement les PV et le statut, hors combat.'},
+13714:   Artefact1:{label:'Artefact de Résonance I',price:420,desc:'Fait gagner immédiatement 1 niveau à une créature.'},
+13715:   Artefact2:{label:'Artefact de Résonance II',price:850,desc:'Fait gagner immédiatement 2 niveaux à une créature.'},
+13716:   Artefact3:{label:'Artefact de Résonance III',price:1450,desc:'Fait gagner immédiatement 3 niveaux à une créature.'},
+13717:   Artefact4:{label:'Artefact de Résonance IV',price:2250,desc:'Fait gagner immédiatement 4 niveaux à une créature.'},
+13718:   Artefact5:{label:'Artefact de Résonance V',price:3400,desc:'Fait gagner immédiatement 5 niveaux à une créature.'}
+13719: });
+13720: const Z_ENSURE_INV=ensureInventoryV81;
+13721: ensureInventoryV81=function(){const r=Z_ENSURE_INV();zEnsure();return r};
+13722: const Z_NORMAL_SHOP=window.pNormalShopIdsV101P;
+13723: window.pNormalShopIdsV101P=function(){
+13724:   const ids=Z_NORMAL_SHOP?Z_NORMAL_SHOP():['Potion','Orbe','Antidote','Baie'];const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+### line 13734: shopTier
+13726:   if(tier>=3)ids.push('Artefact2');
+13727:   if(tier>=4)ids.push('ElixirVital','Artefact3');
+13728:   if(tier>=5)ids.push('Artefact4');
+13729:   if(tier>=6)ids.push('Artefact5');
+13730:   return [...new Set(ids)]
+13731: };
+13732: const Z_MARKET_IDS=window.pMarketItemIdsV101P;
+13733: if(Z_MARKET_IDS)window.pMarketItemIdsV101P=function(){
+13734:   const ids=Z_MARKET_IDS();const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+13735:   if(tier>=2)ids.push('FioleGuerison','Artefact1');if(tier>=3)ids.push('Artefact2');if(tier>=4)ids.push('ElixirVital','Artefact3');if(tier>=5)ids.push('Artefact4');if(tier>=6)ids.push('Artefact5');return [...new Set(ids)]
+13736: };
+13737: function zRaiseLevels(m,n){
+13738:   const events=[];if(!m||m.hp<=0)return events;
+13739:   for(let k=0;k<n&&m.level<100;k++){
+13740:     const oldMax=maxHP(m);m.level++;const newMax=maxHP(m);m.hp=Math.min(newMax,m.hp+(newMax-oldMax)+6);
+13741:     for(const mv of defaultMoves(m.id,m.level))if(!m.moves.includes(mv))v106pLearnNaturalMove(m,mv)
+13742:     const evo=checkEvolution(m);events.push(BY[m.id].name+' atteint le niveau '+m.level+'.');if(evo)events.push(evo)
+13743:   }
+13744:   return events
+13745: }
+13746: const Z_APPLY_BAG=applyBagItem;
+13747: applyBagItem=function(index){
+### line 13752: ElixirVital
+13744:   return events
+13745: }
+13746: const Z_APPLY_BAG=applyBagItem;
+13747: applyBagItem=function(index){
+13748:   const item=pendingBagItem,m=state.team[index];zEnsure();if(!item||!m)return;
+13749:   if(item==='FioleGuerison'||item==='ElixirVital'){
+13750:     if((state.inventory[item]||0)<=0)return toast('Tu n’en as plus.');if(m.hp<=0)return toast('Utilise d’abord un Rappel.');
+13751:     if(m.hp>=maxHP(m)&&!m.status)return toast(BY[m.id].name+' est déjà en pleine forme.');
+13752:     state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;save(false);hud();toast(BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut est soigné.');openBag();return
+13753:   }
+13754:   if(/^Artefact[1-5]$/.test(item)){
+13755:     if((state.inventory[item]||0)<=0)return toast('Tu n’en as plus.');if(m.hp<=0)return toast('Un Éclat K.O. ne peut pas utiliser un Artefact.');
+13756:     const n=Number(item.slice(-1));state.inventory[item]--;const ev=zRaiseLevels(m,n);save(false);hud();dialog('<b>'+SHOP_ITEMS[item].label+'</b><br>'+ev.join('<br>'));return
+13757:   }
+13758:   return Z_APPLY_BAG(index)
+13759: };
+13760: openBag=function(){
+13761:   ensureInventoryV81();let h='<div class="baggrid">';
+13762:   const target=(id,icon,small)=>`<button class="bagitem" onclick="selectBagTarget('${id}')"><b>${icon} ${SHOP_ITEMS[id]?.label||id}</b><br>${state.inventory[id]||0}<br><small>${small}</small></button>`;
+13763:   h+=target('Potion','🧪','Restaure jusqu’à 30 PV.');h+=target('SuperPotion','🧪✨','Restaure jusqu’à 80 PV.');h+=target('FioleGuerison','💗','+120 PV et soigne le statut.');h+=target('ElixirVital','💎','Restauration complète hors combat.');
+13764:   h+=target('Rappel','✨','Réanime à 50 % des PV.');h+=target('Baie','🍓','Soigne un statut sauf poison.');h+=target('Antidote','⚗️','Soigne le poison.');
+13765:   if((state.inventory.Repas||0)>0)h+=target('Repas','🍲','Restaure jusqu’à 50 PV.');
+### line 13784: Rappel
+13776: battleHealingTargetsV86=function(item){
+13777:   if(item==='FioleGuerison')return state.team.map((m,i)=>({m,i})).filter(x=>x.m&&x.m.hp>0&&(x.m.hp<maxHP(x.m)||x.m.status));
+13778:   return Z_BATTLE_TARGETS(item)
+13779: };
+13780: const Z_APPLY_BATTLE=applyBattleItemTargetV86;
+13781: applyBattleItemTargetV86=function(item,index){
+13782:   if(item!=='FioleGuerison')return Z_APPLY_BATTLE(item,index);
+13783:   if(!battleAlive()||battle.busy)return;zEnsure();const m=state.team[index];if(!m||(state.inventory.FioleGuerison||0)<=0)return;
+13784:   if(m.hp<=0)return toast('Utilise un Rappel pour un Éclat K.O.');
+13785:   state.inventory.FioleGuerison--;const before=m.hp;m.hp=Math.min(maxHP(m),m.hp+120);m.status=null;
+13786:   document.getElementById('menuov').style.display='none';save(false);hud();battle.busy=true;battle.message='Fiole de Guérison utilisée sur '+BY[m.id].name+' !';buildBattleButtons();syncBattleMessageV84();
+13787:   v84Schedule(520,()=>{if(!battleAlive())return;battle.message=BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut disparaît.';syncBattleMessageV84();v84Schedule(520,enemyTurn)})
+13788: };
+13789: const Z_OPEN_BATTLE_BAG=openBattleBag;
+13790: openBattleBag=function(){
+13791:   if(!battleAlive()||battle.busy)return;ensureInventoryV81();
+13792:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+13793:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion||0}<br><small>+30 PV</small></button>`;
+13794:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion||0}<br><small>+80 PV</small></button>`;
+13795:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('FioleGuerison')"><b>💗 Fiole de Guérison</b><br>${state.inventory.FioleGuerison||0}<br><small>+120 PV + statut</small></button>`;
+13796:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel||0}<br><small>Réanime à 50 %</small></button>`;
+13797:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie||0}</button><button class="bagitem" onclick="openBattleItemTargetV86('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote||0}</button>`;
+### line 13885: Élixir vital
+13877:   for(let i=0;i<4;i++){const mid=a?.moves?.[i],mv=mid?MOVE_DB[mid]:null;buttons.push({label:mv?mv.name:'—',disabled:!mv,action:()=>executerActionCombat({type:'attaque',slot:i})})}
+13878:   buttons.push({label:'Sac',action:()=>executerActionCombat({type:'sac'})});
+13879:   buttons.push({label:'Orbe ('+(state.inventory.Orbe||0)+')',disabled:!!battle.trainer,action:()=>throwBattleOrb('Orbe')});
+13880:   buttons.push({label:'Changer',action:()=>executerActionCombat({type:'changer'})});
+13881:   buttons.push({label:'Fuir',disabled:!!battle.trainer,action:()=>executerActionCombat({type:'fuite'})});
+13882:   for(const b of buttons){const bt=document.createElement('button');bt.textContent=b.label;bt.disabled=!!b.disabled||battle.busy;bt.onclick=b.action;el.appendChild(bt)}
+13883: };
+13884: 
+13885: // --- Élixir Vital / Fiole de Guérison en combat, avec consommation du tour.
+13886: const V104_BATTLE_TARGETS=battleHealingTargetsV86;
+13887: battleHealingTargetsV86=function(item){
+13888:   if(item==='FioleGuerison'||item==='ElixirVital')return state.team.map((m,i)=>({m,i})).filter(x=>x.m&&x.m.hp>0&&(x.m.hp<maxHP(x.m)||!!x.m.status));
+13889:   return V104_BATTLE_TARGETS(item)
+13890: };
+13891: const V104_APPLY_ITEM=applyBattleItemTargetV86;
+13892: applyBattleItemTargetV86=function(item,index){
+13893:   if(item!=='FioleGuerison'&&item!=='ElixirVital')return V104_APPLY_ITEM(item,index);
+13894:   if(!battleAlive()||battle.busy)return;ensureInventoryV81();const m=state.team[index];if(!m||(state.inventory[item]||0)<=0)return;
+13895:   if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+13896:   if(m.hp>=maxHP(m)&&!m.status){toast(BY[m.id].name+' est déjà en pleine forme.');return}
+13897:   state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;
+13898:   $('menuov').style.display='none';save(false);hud();battle.busy=true;battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';buildBattleButtons();syncBattleMessageV84();
+### line 13905: SHOP_ITEMS
+13897:   state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;
+13898:   $('menuov').style.display='none';save(false);hud();battle.busy=true;battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';buildBattleButtons();syncBattleMessageV84();
+13899:   v84Schedule(500,()=>{if(!battleAlive())return;battle.message=BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut est soigné.';hud();syncBattleMessageV84();v84Schedule(500,()=>v84FinishAction(true))})
+13900: };
+13901: const V104_OPEN_BATTLE_BAG=openBattleBag;
+13902: openBattleBag=function(){
+13903:   if(!battleAlive()||battle.busy)return;ensureInventoryV81();
+13904:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+13905:   const target=(id,ico,desc)=>`<button class="bagitem" onclick="openBattleItemTargetV86('${id}')"><b>${ico} ${SHOP_ITEMS[id]?.label||id}</b><br>${state.inventory[id]||0}<br><small>${desc}</small></button>`;
+13906:   h+=target('Potion','🧪','+30 PV')+target('SuperPotion','🧪✨','+80 PV')+target('FioleGuerison','💗','+120 PV et statut')+target('ElixirVital','💎','PV complets et statut');
+13907:   h+=target('Rappel','✨','Réanime à 50 %')+target('Baie','🍓','Soigne un statut sauf poison')+target('Antidote','⚗️','Soigne le poison');
+13908:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleAttaque')"><b>🔴 Fiole d’Attaque</b><br>${state.inventory.FioleAttaque||0}<br><small>ATQ +2</small></button>`;
+13909:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleDefense')"><b>🔵 Fiole de Défense</b><br>${state.inventory.FioleDefense||0}<br><small>DEF +2</small></button>`;
+13910:   if((state.inventory.Repas||0)>0)h+=target('Repas','🍲','+50 PV');
+13911:   if(!battle.trainer){h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('Orbe')"><b>◈ Orbe d’Éclat</b><br>${state.inventory.Orbe||0}</button>`;h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('SuperOrbe')"><b>◆ Super Orbe</b><br>${state.inventory.SuperOrbe||0}</button>`;h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('MegaOrbe')"><b>✦ Méga Orbe</b><br>${state.inventory.MegaOrbe||0}</button>`}
+13912:   h+='</div>';openSimpleMenu('Sac — Combat',h)
+13913: };
+13914: 
+13915: // Le bouton Sac du panneau droit ouvre le vrai sac de combat quand un combat est actif.
+13916: const V104_OPEN_BAG_WORLD=openBag;
+13917: window.openBag=function(){return scene==='battle'&&battleAlive()?openBattleBag():V104_OPEN_BAG_WORLD()};
+13918: if($('bag'))$('bag').onclick=()=>window.openBag();
+### line 13925: SHOP_ITEMS, ElixirVital
+13917: window.openBag=function(){return scene==='battle'&&battleAlive()?openBattleBag():V104_OPEN_BAG_WORLD()};
+13918: if($('bag'))$('bag').onclick=()=>window.openBag();
+13919: 
+13920: // Changement d'Éclat : reconstruire immédiatement la console avec les attaques du nouveau combattant.
+13921: const V104_SWITCH_BASE=selectBattleCreatureV81;
+13922: selectBattleCreatureV81=function(index){const r=V104_SWITCH_BASE(index);if(battleAlive())setTimeout(()=>{hud();buildBattleButtons();syncBattleMessageV84()},30);return r};
+13923: 
+13924: // Description de l'Élixir mise en cohérence avec son usage en combat.
+13925: if(SHOP_ITEMS.ElixirVital)SHOP_ITEMS.ElixirVital.desc='Restaure totalement les PV et le statut. Utilisable aussi en combat.';
+13926: 
+13927: // Compatibilité Vol permanent avec la carte existante.
+13928: const V104_FLY_TO=window.flyTo;
+13929: if(typeof V104_FLY_TO==='function')window.flyTo=function(zone){return V104_FLY_TO(zone)};
+13930: 
+13931: window.addEventListener('DOMContentLoaded',()=>{v104MigrateFieldRewards();if($('bag'))$('bag').onclick=()=>window.openBag();setTimeout(()=>{try{buildBattleButtons()}catch(_){ }},300)});
+13932: })();
+13933: </script>
+13934: 
+13935: 
+13936: 
+13937: 
+13938: <script>
+### line 14187: SHOP_ITEMS
+14179: (function(){
+14180: const TOWNS=['town0','town1','town2','town3','town4','town5','town6','town7','town8','town9','town10','town11','town12','town13','town14','route_simdor'];
+14181: function key(x,y){return x+','+y}function roadRects(sc){const C=Number(sc?.v105dCell)||72,core=Number(sc?.v105dCore)||34,raw=sc?.v105dRoad,cells=raw instanceof Set?[...raw]:raw instanceof Map?[...raw.keys()]:Array.isArray(raw)?raw:(raw&&typeof raw==='object'?Object.keys(raw).filter(k=>raw[k]):[]),road=new Set(cells.map(String)),out=[];for(const s of road){const m=/^(-?\d+),(-?\d+)$/.exec(s);if(!m)continue;const gx=Number(m[1]),gy=Number(m[2]),cx=(gx+.5)*C,cy=(gy+.5)*C;if(road.has(key(gx+1,gy)))out.push({x:cx-C/2,y:cy-core/2,w:C*2,h:core});if(road.has(key(gx,gy+1)))out.push({x:cx-core/2,y:cy-C/2,w:core,h:C*2})}return out}
+14182: function hit(a,b,p=0){return a.x-p<b.x+b.w+p&&a.x+a.w+p>b.x-p&&a.y-p<b.y+b.h+p&&a.y+a.h+p>b.y-p}
+14183: function ensureHeroHome(sc){if(sc.buildings.some(b=>b.type==='playerhome'))return;const src=sc.buildings.find(b=>b.type==='home')||{w:372,h:230};sc.buildings.push({...src,id:'maison_hero_clairval',type:'playerhome',label:'Maison du héros',w:Math.max(src.w,372),h:Math.max(src.h,230)})}
+14184: function layoutTown(sc,zone){if(!sc?.v105dRowsInfo?.length)return;if(zone==='town0')ensureHeroHome(sc);const roads=roadRects(sc),station=sc.buildings.find(b=>b.type==='station'||b.urbanType==='station'),bs=sc.buildings.filter(b=>b!==station),rows=sc.v105dRowsInfo,groups=Array.from({length:rows.length},()=>[]);bs.forEach((b,i)=>groups[i%rows.length].push(b));const placed=[];for(let ri=0;ri<groups.length;ri++){const g=groups[ri],row=rows[ri];if(!g.length)continue;const roadY=(row.gy+.5)*sc.v105dCell,bottom=roadY-sc.v105dCore/2-82,x0=(row.start+.5)*sc.v105dCell,x1=(row.end+.5)*sc.v105dCell;for(let i=0;i<g.length;i++){const b=g[i],ideal=x0+(x1-x0)*(i+1)/(g.length+1),cands=[0,-1,1,-2,2,-3,3].map(n=>ideal+n*sc.v105dCell*.72);let chosen=null;for(const cx0 of cands){const cx=Math.max(b.w/2+70,Math.min(sc.width-b.w/2-70,cx0)),r={x:cx-b.w/2-42,y:bottom-b.h-48,w:b.w+84,h:b.h+74};if(!roads.some(q=>hit(r,q,8))&&!placed.some(q=>hit(r,q,28))){chosen={cx,r};break}}if(!chosen){const cx=Math.max(b.w/2+70,Math.min(sc.width-b.w/2-70,ideal));chosen={cx,r:{x:cx-b.w/2-42,y:bottom-b.h-48,w:b.w+84,h:b.h+74}}}b.x=chosen.cx-b.w/2;b.y=bottom-b.h;b.doorX=chosen.cx;b.doorY=bottom;b.v105dRoadY=roadY;placed.push(chosen.r)}}sc.v105jRoadOverlapCount=placed.reduce((n,r)=>n+roads.filter(q=>hit(r,q,4)).length,0)}
+14185: function applySafeParcels(){for(const zone of TOWNS){const sc=SCENES[zone];if(sc&&!sc._v105kBuildingScale){sc._v105kBuildingScale=true;for(const b of sc.buildings||[]){const cx=b.x+b.w/2,bottom=b.y+b.h;b.w*=1.10;b.h*=1.10;b.x=cx-b.w/2;b.y=bottom-b.h;b.doorX=cx;b.doorY=bottom}}layoutTown(sc,zone)}document.documentElement.dataset.v105jRoadOverlaps=String(TOWNS.reduce((n,z)=>n+(SCENES[z]?.v105jRoadOverlapCount||0),0));const brand=document.querySelector('.brand b');if(brand)brand.textContent='VALDORA V105K — JOUEUR'}
+14186: const HOME_REF=window.MOBREF_DATA_V105J,HOME_CATALOG=window.MOBREF_CATALOG_V105J;
+14187: const FURN={MeubleBibliotheque:'bibliotheque',MeubleTable:'table_cuisine',MeubleTelevision:'television',MeublePlante:'plante_pot',MeubleCanape:'canape_attente'};window.HOME_FURNITURE_ITEMS_V105J=FURN;window.HOME_SHOP_IDS_V105J=Object.keys(FURN);Object.assign(SHOP_ITEMS,{MeubleBibliotheque:{label:'Meuble — Bibliothèque',price:260,desc:'Pour personnaliser la maison du héros.'},MeubleTable:{label:'Meuble — Table et chaises',price:320,desc:'Un coin repas pour la maison.'},MeubleTelevision:{label:'Meuble — Téléviseur',price:290,desc:'Un téléviseur pour le salon.'},MeublePlante:{label:'Meuble — Plante en pot',price:120,desc:'Une décoration végétale.'},MeubleCanape:{label:'Meuble — Canapé',price:240,desc:'Un canapé confortable.'}});
+14188: const SLOTS=[{x:230,y:70},{x:430,y:70},{x:660,y:70},{x:900,y:75},{x:210,y:330},{x:470,y:330},{x:760,y:340},{x:980,y:350},{x:250,y:560},{x:790,y:560}];
+14189: function initHome(){state.homeFurnitureOwnedV105J=state.homeFurnitureOwnedV105J||{lit_simple:1,console_salon:1};state.homeFurnitureLayoutV105J=state.homeFurnitureLayoutV105J||['lit_simple','console_salon']}
+14190: window.getPlayerHomeFurnitureV105J=function(){initHome();const used={};const out=[];for(let i=0;i<state.homeFurnitureLayoutV105J.length;i++){const id=state.homeFurnitureLayoutV105J[i],base=HOME_CATALOG[id];if(!base)continue;const slot=SLOTS[i%SLOTS.length],src=(HOME_REF.rooms.home||[]).find(x=>x.id===id),w=src?.w||130,h=src?.h||110;used[id]=(used[id]||0)+1;out.push({...base,instanceId:'hero_'+id+'_'+used[id],id,x:slot.x,y:slot.y,w,h,z:10+i,collision:base.bloquant?{x:slot.x,y:slot.y,w,h}:null})}const base=HOME_CATALOG.table_cuisine||{};out.push({...base,id:'table_cuisine',instanceId:'hero_customizer',nom:'Table de décoration',x:20,y:620,w:165,h:105,z:99,bloquant:true,interactif:true,fonction:'personnaliser_maison',description:'Permet d’aménager la maison.',collision:{x:20,y:620,w:165,h:105}});return out};
+14191: window.toggleHomeFurnitureV105J=function(id){initHome();const owned=state.homeFurnitureOwnedV105J[id]||0,used=state.homeFurnitureLayoutV105J.filter(x=>x===id).length;if(used<owned&&state.homeFurnitureLayoutV105J.length<SLOTS.length)state.homeFurnitureLayoutV105J.push(id);else{const i=state.homeFurnitureLayoutV105J.lastIndexOf(id);if(i>=0)state.homeFurnitureLayoutV105J.splice(i,1)}save(false);window.openHomeCustomizerV105J()};
+14192: window.openHomeCustomizerV105J=function(){initHome();const ids=['lit_simple','console_salon','bibliotheque','table_cuisine','television','plante_pot','canape_attente'];let h='<div class="quest"><b>Maison du héros</b><br>Achète des meubles dans les boutiques, puis installe-les ici. Touche C : accès rapide.</div><div class="baggrid">';for(const id of ids){const c=HOME_CATALOG[id];if(!c)continue;const own=state.homeFurnitureOwnedV105J[id]||0,use=state.homeFurnitureLayoutV105J.filter(x=>x===id).length;h+='<button class="bagitem" onclick="toggleHomeFurnitureV105J(\''+id+'\')"><b>'+(c.nom||id)+'</b><br>Possédé : '+own+'<br>Installé : '+use+'<br><small>'+(use<own?'Installer':'Retirer')+'</small></button>'}h+='</div>';openSimpleMenu('Personnaliser la maison',h)};
+14193: window.addEventListener('keydown',e=>{if(window.ValdoraTextInputActive&&window.ValdoraTextInputActive(e))return;if((e.key==='c'||e.key==='C')&&scene==='interior'&&building?.type==='playerhome'){e.preventDefault();window.openHomeCustomizerV105J()}},true);
+14194: setTimeout(applySafeParcels,2750);setTimeout(applySafeParcels,3750);
+14195: })();
+14196: </script>
+14197: <script>
+14198: // V105L — dimensions Nova-Cité et déplacements orthogonaux des PNJ.
+14199: (function(){
+14200: const MEGAS=['town5','town6','town9','town10','town13'],NOVA='town6';
+### line 14755: Rappel
+14747:   try{v109bRebuildTypeMoves()}catch(_){ }
+14748:   for(const m of [...(state?.team||[]),...(state?.box||[])])v109bNormalizeCreatureMoves(m);
+14749:   if(Array.isArray(state?.capsules))state.capsules=state.capsules.map(v109bCanonicalMoveId).filter(mid=>MOVE_DB[mid]);
+14750:   return true
+14751: }
+14752: function v109bPrepareCombatant(m){v109bNormalizeCreatureMoves(m);ensureMovePPV106U(m,false);return m}
+14753: function v109bBagEligible(kind,m){
+14754:   if(!m)return false;const hpMax=maxHP(m),aliveNow=m.hp>0;
+14755:   if(kind==='Rappel')return m.hp<=0;
+14756:   if(!aliveNow)return false;
+14757:   if(kind==='Potion'||kind==='SuperPotion'||kind==='Repas')return m.hp<hpMax;
+14758:   if(kind==='FioleGuerison'||kind==='ElixirVital')return m.hp<hpMax||!!m.status;
+14759:   if(kind==='Baie')return !!m.status&&m.status!=='empoisonné';
+14760:   if(kind==='Antidote')return m.status==='empoisonné';
+14761:   if(kind==='FioleAttaque'||kind==='FioleDefense')return true;
+14762:   return false
+14763: }
+14764: function v109bItemLabel(kind){return ({Potion:'Potion',SuperPotion:'Super Potion',Repas:'Repas',FioleGuerison:'Fiole de Guérison',ElixirVital:'Élixir Vital',Baie:'Baie',Antidote:'Antidote',Rappel:'Rappel',FioleAttaque:"Fiole d’Attaque",FioleDefense:'Fiole de Défense'})[kind]||kind}
+14765: function v109bBeginItemTarget(kind){
+14766:   if(!combatReady()||battle.busy)return;state.inventory=state.inventory||{};
+14767:   if(!(Number(state.inventory[kind])>0)){setMessage(`Tu n'as plus de ${v109bItemLabel(kind)}.`);return}
+14768:   battle.itemKind=kind;battle.menu='item-target';setMessage(`Choisis la créature qui recevra ${v109bItemLabel(kind)}.`);buildButtons()
+### line 14774: Rappel
+14766:   if(!combatReady()||battle.busy)return;state.inventory=state.inventory||{};
+14767:   if(!(Number(state.inventory[kind])>0)){setMessage(`Tu n'as plus de ${v109bItemLabel(kind)}.`);return}
+14768:   battle.itemKind=kind;battle.menu='item-target';setMessage(`Choisis la créature qui recevra ${v109bItemLabel(kind)}.`);buildButtons()
+14769: }
+14770: function v109bApplyItemTo(kind,m){
+14771:   if(!combatReady()||battle.busy||!m||!v109bBagEligible(kind,m))return false;
+14772:   state.inventory=state.inventory||{};if(!(Number(state.inventory[kind])>0))return false;
+14773:   const before=m.hp;let text='';
+14774:   if(kind==='Rappel'){m.hp=Math.max(1,Math.floor(maxHP(m)*.50));m.status=null;text=`${nameOf(m)} revient avec ${m.hp} PV.`}
+14775:   else if(kind==='Potion'||kind==='SuperPotion'||kind==='Repas'){
+14776:     const heal=kind==='SuperPotion'?80:kind==='Repas'?50:30;m.hp=Math.min(maxHP(m),m.hp+heal);text=`${nameOf(m)} récupère ${m.hp-before} PV.`
+14777:   }else if(kind==='FioleGuerison'){m.hp=Math.min(maxHP(m),m.hp+120);m.status=null;text=`${nameOf(m)} récupère ${m.hp-before} PV et son statut est soigné.`}
+14778:   else if(kind==='ElixirVital'){m.hp=maxHP(m);m.status=null;text=`${nameOf(m)} retrouve tous ses PV et son statut est soigné.`}
+14779:   else if(kind==='Baie'){m.status=null;text=`${nameOf(m)} est débarrassé de son altération.`}
+14780:   else if(kind==='Antidote'){m.status=null;text=`${nameOf(m)} n'est plus empoisonné.`}
+14781:   else if(kind==='FioleAttaque'){m.atkBuff=clamp((Number(m.atkBuff)||0)+2,-3,3);text=`L'Attaque de ${nameOf(m)} augmente fortement.`}
+14782:   else if(kind==='FioleDefense'){m.defBuff=clamp((Number(m.defBuff)||0)+2,-3,3);text=`La Défense de ${nameOf(m)} augmente fortement.`}
+14783:   else return false;
+14784:   state.inventory[kind]--;battle.itemKind=null;battle.busy=true;battle.menu='actions';safeCall(save,false);safeCall(hud);setMessage(text+' L’adversaire joue ensuite.');buildButtons();schedule(560,enemyTurnV105R);return true
+14785: }
+14786: function v109bDuplicateAudit(){
+14787:   const groups={},official=v109bOfficialNameMap();for(const [id,mv] of Object.entries(MOVE_DB)){if(!mv?.name)continue;const n=v109bNormMoveName(mv.name);(groups[n]||(groups[n]=[])).push(id)}
+### line 14832: Rappel, ElixirVital, Élixir vital
+14824:     const inv=state.inventory||{};
+14825:     bar.appendChild(button(`Orbe d'Éclat (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0),'v105r-wide'));
+14826:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0),'v105r-wide'));
+14827:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0),'v105r-wide'));
+14828:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked,'v105r-wide'));return
+14829:   }
+14830:   if(battle.menu==='bag'){
+14831:     const inv=state.inventory||{},add=(kind,label)=>bar.appendChild(button(`${label} (${inv[kind]||0})`,()=>v109bBeginItemTarget(kind),locked||!(inv[kind]>0)||!(state.team||[]).some(m=>v109bBagEligible(kind,m))));
+14832:     add('Potion','Potion');add('SuperPotion','Super Potion');add('FioleGuerison','Fiole de Guérison');add('ElixirVital','Élixir Vital');add('Baie','Baie');add('Antidote','Antidote');add('Rappel','Rappel');
+14833:     if((inv.Repas||0)>0)add('Repas','Repas');if((inv.FioleAttaque||0)>0)add('FioleAttaque',"Fiole d’Attaque");if((inv.FioleDefense||0)>0)add('FioleDefense','Fiole de Défense');
+14834:     bar.appendChild(button(`Orbe (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0)));
+14835:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0)));
+14836:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0)));
+14837:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked));return
+14838:   }
+14839: 
+14840:   const moves=(p?.moves||[]).slice(0,4);ensureMovePPV106U(p,false);const anyPP=hasUsableMoveV106U(p);
+14841:   for(let i=0;i<4;i++){
+14842:     const mid=moves[i],mv=MOVE_DB[mid],maxPP=mv?moveMaxPPV106U(mid):0,pp=mv?currentMovePPV106U(p,mid):0,pow=mv?moveDisplayPowerV106U(mv):0;
+14843:     const shown=mv?(pow>0?(Number(mv.hits)>1?`${Math.round(pow)}×${Number(mv.hits)}`:Math.round(pow)):'STATUT'):'—';
+14844:     if(mv)bar.appendChild(button(`${mv.name} · ${mv.type||'Neutre'} · PUI ${shown} · PRÉ ${Number.isFinite(Number(mv.accuracy))?Math.round(Number(mv.accuracy))+'%':'—'} · PP ${pp}/${maxPP}`,()=>chooseMoveV105R(i),locked||pp<=0,'v105r-move',TYPE_COLORS[mv?.type]||TYPE_COLORS.Neutre));
+14845:     else bar.appendChild(button('—',()=>{},true,'v105r-move',TYPE_COLORS.Neutre))
+## game/V109W_CORRECTIFS_GAMEPLAY.js
+### line 223: Rappel
+215:     if(!members.length)battle.eventQueue.push('Aucun Éclat encore conscient n’a participé à cet affrontement : aucune EXP distribuée.');
+216:     battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+217:     // Le prochain Éclat du dresseur repart avec une liste de participants vide.
+218:     battle.v109wEnemyParticipants=[];
+219:   };
+220: }catch(e){console.warn('V109W EXP grant',e)}
+221: 
+222: // ------------------------------------------------------------------
+223: // 6) BOUTIQUES : vrais paliers + Rappel/Élixir plus tôt + aucun objet perdu.
+224: // ------------------------------------------------------------------
+225: function highestTown(){
+226:   const vals=(state.discovered||[]).map(z=>{const m=String(z).match(/^town(\d+)$/);return m?+m[1]:-1}).filter(n=>n>=0);
+227:   const cur=String(state.zone||'').match(/^town(\d+)$/);if(cur)vals.push(+cur[1]);return Math.max(0,...vals)
+228: }
+229: function shopTier(){
+230:   if(creatorMode())return 6;const town=highestTown(),seals=(state.seals||[]).length;
+231:   if(town>=13||seals>=7)return 6;if(town>=11||seals>=6)return 5;if(town>=9||seals>=5)return 4;if(town>=6||seals>=3)return 3;if(town>=3||seals>=1)return 2;if(town>=1)return 1;return 0;
+232: }
+233: window.pShopTierV101P=shopTier;
+234: window.pNormalShopIdsV101P=function(){
+235:   const t=shopTier(),ids=['Potion','Orbe','Antidote','Baie'];
+236:   if(t>=1)ids.push('SuperPotion','FioleAttaque','FioleDefense','Rappel');
+### line 242: SHOP_ITEMS
+234: window.pNormalShopIdsV101P=function(){
+235:   const t=shopTier(),ids=['Potion','Orbe','Antidote','Baie'];
+236:   if(t>=1)ids.push('SuperPotion','FioleAttaque','FioleDefense','Rappel');
+237:   if(t>=2)ids.push('SuperOrbe','FioleGuerison','ElixirVital','Artefact1');
+238:   if(t>=3)ids.push('Artefact2');
+239:   if(t>=4)ids.push('MegaOrbe','Artefact3');
+240:   if(t>=5)ids.push('Artefact4');
+241:   if(t>=6)ids.push('Artefact5');
+242:   return uniq(ids.filter(id=>typeof SHOP_ITEMS==='undefined'||SHOP_ITEMS[id]));
+243: };
+244: try{
+245:   if(typeof pMarketItemIdsV101P==='function'||window.pMarketItemIdsV101P){
+246:     const baseMarket=window.pMarketItemIdsV101P||pMarketItemIdsV101P;
+247:     window.pMarketItemIdsV101P=function(){return uniq([...(baseMarket?.()||[]),...window.pNormalShopIdsV101P()])};
+248:     try{pMarketItemIdsV101P=window.pMarketItemIdsV101P}catch(_){}
+249:   }
+250: }catch(_){}
+251: 
+252: 
+253: // ------------------------------------------------------------------
+254: // 7) SOINS : blocage réel du déplacement pendant le soin et sortie
+255: //    interdite après un K.O. global tant que l'équipe n'est pas soignée.
+### line 483: shopTier
+475:   try{v109xClearHealLockIfDone()}catch(e){console.warn(e)}
+476:   document.documentElement.dataset.valdoraVersion=VERSION;
+477:   const b=document.querySelector('.brand b');if(b)b.textContent=`VALDORA ${VERSION} — ${creatorMode()?'CRÉATEUR':'JOUEUR'}`;
+478:   document.title=`Éclats Sauvages — Valdora ${VERSION}`;
+479: }
+480: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(install,3000);setTimeout(install,8000);setTimeout(install,11500)});else{setTimeout(install,2500);setTimeout(install,7500);setTimeout(install,11000)}
+481: 
+482: window.ValdoraGameplayV109W={
+483:   version:VERSION,install,completeTemple,configureSimdor,ensureVolAgent,shopTier,pendingRoadTrainers,ensureTaronisLinkV109Y,ensureLateQuestNpcs,totalCreatures:totalCreaturesV109W,
+484:   audit(){
+485:     const issues=[];
+486:     const temple=SCENES?.temple_final,ids=new Set((temple?.trainers||[]).map(t=>t.id));for(let i=1;i<=10;i++)if(!ids.has('temple_guard_'+i))issues.push('Citadelle : gardien '+i+' absent');
+487:     const pairs=[['route_simdor','route_m1'],['route_m1','town8']];for(const [a,b] of pairs){if(!(SCENES?.[a]?.exits||[]).some(e=>dest(e)===b)||!(SCENES?.[b]?.exits||[]).some(e=>dest(e)===a))issues.push(`${a} <-> ${b} non réciproque`)}
+488:     if(!(SCENES?.route3?.trainers||[]).some(t=>t.id===VOL_AGENT_ID))issues.push('Route 4 : agent Vol absent');
+489:     const tiers={rappel:window.pNormalShopIdsV101P().includes('Rappel'),elixir:shopTier()>=2?window.pNormalShopIdsV101P().includes('ElixirVital'):true};if(!tiers.rappel&&shopTier()>=1)issues.push('Rappel absent du palier attendu');if(!tiers.elixir)issues.push('Élixir Vital absent du palier attendu');
+490:     if(typeof NPCDATA!=='undefined'){for(const npc of V109W_LATE_NPCS)if(!NPCDATA.some(n=>n?.id===npc.id))issues.push('PNJ final absent : '+npc.id)}
+491:     if(!(SCENES?.town12?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Sylvaris -> Route de Taronis absent');
+492:     if(!(SCENES?.route12?.exits||[]).some(e=>dest(e)==='town13'))issues.push('Route de Taronis -> Taronis absent');
+493:     if(!(SCENES?.town13?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Taronis -> Route de Taronis absent');
+494:     return{ok:issues.length===0,issues,templeGuards:(temple?.trainers||[]).filter(t=>t.templeGuard).length,simdorToBrumes:(SCENES?.route_simdor?.exits||[]).some(e=>dest(e)==='route_m1'),brumesToCimes:(SCENES?.route_m1?.exits||[]).some(e=>dest(e)==='town8'),mustHealAfterKO:!!state?.flags?.v109xForceHeal,totalCreatures:totalCreaturesV109W()};
+495:   }
+496: };
+## game/V109V_INTERIEUR_REWRITE.js
+### line 246: openShop
+238: function roomAction(m){return moveToRoom(m.targetFloor||session.floorId,m.targetRoom||session.roomId,m.arrivalX,m.arrivalY)}
+239: function elevator(){const list=destinations();if(!list.length)return dialogSafe('Ascenseur','Aucune destination.');let html='<div class="quest"><b>Ascenseur</b><br>Choisis une destination.</div><div class="baggrid">'+list.map(x=>`<button class="bagitem" onclick="ValdoraInteriorV109V.moveToRoom('${x.floorId}','${x.roomId}')">${x.label}</button>`).join('')+'</div>';if(typeof openSimpleMenu==='function')openSimpleMenu('Ascenseur',html);else dialogSafe('Ascenseur',list.map(x=>x.label).join(' • '))}
+240: const HANDLED=new Set(['acheter_dessert','ascenseur_etages','carte_citadelle','choix_starters','collision_mur','commander_repas','consulter_archives','consulter_reunion','controle_ticket','cuisiner','decor','dialogue_citadelle','dialogue_direction','distributeur_boissons','emprunter_livre','etudier','horaires_train','infos_carte_region','infos_oeuf','infos_valdora','interaction_finale','lancer_defi_gardien','lecon','lire_lore_indices','lore_citadelle','lore_gardien','lore_musee','lore_recherche','missions_guilde','ouvrir_boutique','ouvrir_casier','ouvrir_rangement','ouvrir_stockage','parler_professeur','passage_etage','passage_piece_sol','prendre_repas','recevoir_sceau','recherche_codex','repas_recup_pv','repos_15s_soin_complet','reservation_hotel','s_asseoir','soins_centre','voir_trophees','voyage_train']);
+241: function interactFurniture(m){
+242:   if(!m)return false;const fn=String(m.fonction||'decor'),title=m.label||m.nom||m.id||'Mobilier';state.mobilierInstanceIdV102Y=m.instanceId;
+243:   switch(fn){
+244:     case 'ouvrir_stockage': if(typeof window.openPC==='function')window.openPC(); else dialogSafe('PC','Le stockage est indisponible.'); break;
+245:     case 'soins_centre': if(typeof startHealingSequence==='function')startHealingSequence();else{healAll();dialogSafe('Centre de soins','Ton équipe est soignée.')}break;
+246:     case 'ouvrir_boutique': if(typeof openShop==='function')openShop();else dialogSafe('Boutique','Le service est indisponible.');break;
+247:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dialogSafe(title,'Ton équipe récupère complètement.')}break;
+248:     case 's_asseoir': if(typeof sitAt==='function')sitAt(m);else dialogSafe(title,m.description||'Tu t’assois un instant.');break;
+249:     case 'repas_recup_pv':case 'prendre_repas':case 'commander_repas':case 'cuisiner':case 'acheter_dessert':partialHeal(.25);dialogSafe(title,m.description||'Ton équipe récupère un peu d’énergie.');break;
+250:     case 'infos_valdora':dialogSafe(title,m.description||'Informations sur Valdora.');break;
+251:     case 'lire_lore_indices':case 'consulter_archives':case 'consulter_reunion':case 'lore_recherche':case 'lore_musee':case 'lore_gardien':case 'lore_citadelle':case 'emprunter_livre':archives(m);break;
+252:     case 'infos_carte_region':dialogSafe(title,m.description||'Une carte détaillée de Valdora.');break;
+253:     case 'reservation_hotel': if(typeof reserveHotel==='function')reserveHotel();else dialogSafe(title,m.description||'Réception.');break;
+254:     case 'voyage_train':case 'controle_ticket':window.ValdoraTrainV109D?.open?.();break;
+255:     case 'horaires_train':if(typeof stationBoard==='function')stationBoard();else dialogSafe(title,m.description||'Horaires des trains.');break;
+256:     case 'distributeur_boissons':if(typeof vending==='function')vending();else dialogSafe(title,m.description||'Distributeur.');break;
+257:     case 'choix_starters':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe(title,'Ton premier compagnon a déjà été choisi.');break;
+258:     case 'recherche_codex':if(typeof superComputer==='function')superComputer();else dialogSafe(title,m.description||'Recherche Codex.');break;
+259:     case 'infos_oeuf':dialogSafe(title,m.description||'Les capteurs surveillent l’œuf.');break;
+### line 281: openShop
+273:     case 'collision_mur':return false;
+274:     case 'decor':default:dialogSafe(title,m.description||'Tu observes cet élément.');break;
+275:   }return true;
+276: }
+277: function faceNpc(n){if(!n)return;const dx=state.roomX-n.x,dy=state.roomY-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.pauseUntil=Date.now()+2600;n.moving=false}
+278: function serviceNpcInteract(n){
+279:   faceNpc(n);
+280:   if(!n?.service){dialogSafe(n?.name||'Habitant','Bonjour !');return true}
+281:   switch(session?.key){case 'centre_soins':return interactFurniture(furn().find(m=>m.fonction==='soins_centre')||{fonction:'soins_centre',label:'Centre de soins'});case 'laboratoire':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe('Professeur Aurine','Continue ton enquête sur Valdora.');return true;case 'boutique':if(typeof openShop==='function')openShop();return true;case 'gare':window.ValdoraTrainV109D?.open?.();return true;case 'musee':if(typeof window.openMuseumDirectorV109A==='function')window.openMuseumDirectorV109A();else dialogSafe(n.name,'Bienvenue au musée.');return true;case 'gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));return true;default:dialogSafe(n.name,'Bonjour !');return true}
+282: }
+283: function interact(){if(!session)return;const q=nearestInteractionTarget();if(q?.kind==='furniture')return interactFurniture(q.target);if(q?.kind==='npc')return serviceNpcInteract(q.target);try{toast('Approche-toi d’un élément ou d’un personnage : E / Entrée.')}catch(_){}}
+284: 
+285: // Interaction monde : la porte du bâtiment utilise exclusivement ce nouveau moteur.
+286: const WORLD_INTERACT_BEFORE=window.interact;
+287: function worldInteract(){if(scene==='world'){const b=nearDoor();if(b)return enter(b)}return WORLD_INTERACT_BEFORE?.apply(this,arguments)}
+288: 
+289: // Citadelle monde : déplacement dédié, sans dépendance au réseau routier des villes.
+290: const WORLD_MOVE_BEFORE=window.move;
+291: function worldMove(dx,dy,dir){if(scene==='world'&&state.zone==='temple_final'){
+292:   state.dir=dir;const sc=currentScene(),speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;let bad=false;if(typeof finalTempleCollisionV77==='function')bad=finalTempleCollisionV77(nx,ny);else bad=nx<390||nx>2010||ny<70||ny>2040;
+293:   if(!bad){for(const t of (typeof currentTrainers==='function'?currentTrainers():[])){const nd=Math.hypot(nx-t.x,ny-t.y),od=Math.hypot(state.x-t.x,state.y-t.y);if(nd<36&&nd<=od+.01){bad=true;break}}}
+294:   if(!bad){try{recordFollowerStep?.()}catch(_){}state.x=nx;state.y=ny;lastMove=Date.now();try{checkPortal?.()}catch(_){}}return;
+## game/CREATEUR.html
+### line 1717: Rappel
+1709: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1710: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"},"17":{"body":"tortue","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"18":{"body":"esprit","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"19":{"body":"pangolin","ornament":"crinière de flammes","pattern":"points lumineux","accent":"or"},"20":{"body":"félin","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"21":{"body":"renard","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"22":{"body":"mouton","ornament":"rochers sur les épaules","pattern":"écailles","accent":"ivoire"},"23":{"body":"champignon vivant","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"24":{"body":"cerf","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"25":{"body":"oiseau","ornament":"plumes en éventail","pattern":"rayures","accent":"bleu"},"26":{"body":"amphibien","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"27":{"body":"poisson","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"28":{"body":"tortue","ornament":"deux petites cornes","pattern":"plaques","accent":"violet"},"29":{"body":"esprit","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"30":{"body":"pangolin","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"31":{"body":"lapin","ornament":"petit volcan dorsal","pattern":"plumes","accent":"orange"},"32":{"body":"renard","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"33":{"body":"mouton","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"34":{"body":"champignon vivant","ornament":"cristaux sur le front","pattern":"dégradé","accent":"vert"},"35":{"body":"lézard","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"36":{"body":"oiseau","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"37":{"body":"amphibien","ornament":"antenne lumineuse","pattern":"feuilles","accent":"turquoise"},"38":{"body":"poisson","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"39":{"body":"serpent","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"40":{"body":"esprit","ornament":"corne cristalline","pattern":"taches","accent":"rouge"},"41":{"body":"pangolin","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"42":{"body":"lapin","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"43":{"body":"dragon","ornament":"oreilles en ailes","pattern":"points lumineux","accent":"or"},"44":{"body":"mouton","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"45":{"body":"champignon vivant","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"46":{"body":"lézard","ornament":"anneau lumineux","pattern":"écailles","accent":"ivoire"},"47":{"body":"quadrupède","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"48":{"body":"amphibien","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"49":{"body":"poisson","ornament":"graine géante","pattern":"rayures","accent":"bleu"},"50":{"body":"serpent","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"51":{"body":"golem","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"52":{"body":"pangolin","ornament":"ailes translucides","pattern":"plaques","accent":"violet"},"53":{"body":"lapin","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"54":{"body":"dragon","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"55":{"body":"grenouille","ornament":"racines visibles","pattern":"plumes","accent":"orange"},"56":{"body":"champignon vivant","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"57":{"body":"lézard","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"58":{"body":"quadrupède","ornament":"collerette de pétales","pattern":"dégradé","accent":"vert"},"59":{"body":"scarabée","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"60":{"body":"poisson","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"61":{"body":"serpent","ornament":"carapace bombée","pattern":"feuilles","accent":"turquoise"},"62":{"body":"golem","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"63":{"body":"hibou","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"64":{"body":"lapin","ornament":"crinière de flammes","pattern":"taches","accent":"rouge"},"65":{"body":"dragon","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"66":{"body":"grenouille","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"67":{"body":"félin","ornament":"rochers sur les épaules","pattern":"points lumineux","accent":"or"},"68":{"body":"lézard","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"69":{"body":"quadrupède","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"70":{"body":"scarabée","ornament":"plumes en éventail","pattern":"écailles","accent":"ivoire"},"71":{"body":"cerf","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"72":{"body":"serpent","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"73":{"body":"golem","ornament":"deux petites cornes","pattern":"rayures","accent":"bleu"},"74":{"body":"hibou","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"75":{"body":"tortue","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"76":{"body":"dragon","ornament":"petit volcan dorsal","pattern":"plaques","accent":"violet"},"77":{"body":"grenouille","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"78":{"body":"félin","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"79":{"body":"renard","ornament":"cristaux sur le front","pattern":"plumes","accent":"orange"},"80":{"body":"quadrupède","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"81":{"body":"scarabée","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"82":{"body":"cerf","ornament":"antenne lumineuse","pattern":"dégradé","accent":"vert"},"83":{"body":"oiseau","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"84":{"body":"golem","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"85":{"body":"hibou","ornament":"corne cristalline","pattern":"feuilles","accent":"turquoise"},"86":{"body":"tortue","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"87":{"body":"esprit","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"88":{"body":"grenouille","ornament":"oreilles en ailes","pattern":"taches","accent":"rouge"},"89":{"body":"félin","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"90":{"body":"renard","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"91":{"body":"mouton","ornament":"anneau lumineux","pattern":"points lumineux","accent":"or"},"92":{"body":"scarabée","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"93":{"body":"cerf","ornament":"queue en feuille","pattern":"feuilles","accent":"turquoise"},"94":{"body":"oiseau","ornament":"graine géante","pattern":"écailles","accent":"ivoire"},"95":{"body":"amphibien","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"96":{"body":"hibou","ornament":"champignon dorsal","pattern":"taches","accent":"rouge"},"97":{"body":"tortue","ornament":"ailes translucides","pattern":"rayures","accent":"bleu"},"98":{"body":"esprit","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"99":{"body":"pangolin","ornament":"lianes autour des pattes","pattern":"points lumineux","accent":"or"},"100":{"body":"félin","ornament":"racines visibles","pattern":"plaques","accent":"violet"}};
+1711: 
+1712: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1713: 
+1714: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1715: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1716: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1717: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1718: 
+1719: 
+1720: function creatureStats(m){
+1721:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1722:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1723:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1724:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1725:   const identity=(fam%7)-3;
+1726:   return {
+1727:     hp:Math.floor(30+lvl*3.0+stage*10+(fam%6)),
+1728:     atk:Math.floor(8+lvl*1.42+stage*6+Math.max(0,identity)),
+1729:     def:Math.floor(8+lvl*1.30+stage*6+Math.max(0,-identity)),
+1730:     spd:Math.floor(7+lvl*1.12+stage*4+((fam*3)%5))
+### line 2303: Rappel
+2295:   $('menucard').innerHTML=`<h2>${title}</h2>${html}
+2296:     ${entry?'<br><button onclick="openDex413()">← Retour à la liste</button> ':''}
+2297:     <button onclick="document.getElementById('menuov').style.display='none'">Fermer le Codex des Éclats</button>`;
+2298: }
+2299: 
+2300: 
+2301: function ensureInventoryV81(st=state){
+2302:   st.inventory=st.inventory||{};
+2303:   for(const k of ['Potion','SuperPotion','Orbe','SuperOrbe','MegaOrbe','Antidote','Baie','Repas','FioleAttaque','FioleDefense','Rappel']){
+2304:     if(st.inventory[k]==null)st.inventory[k]=0
+2305:   }
+2306:   return st
+2307: }
+2308: 
+2309: 
+2310: 
+2311: function mon(id,l){
+2312:   const level=Math.max(Number(l)||1,minLevelForSpeciesV81(id));
+2313:   const m={id,level,xp:0,hp:1,status:null,moves:defaultMoves(id,level),atkBuff:0,defBuff:0};
+2314:   m.hp=maxHP(m);ensureMovePPV106U(m,true);return m
+2315: }
+2316: 
+### line 6631: openShop
+6623:     return
+6624:   }
+6625:   if(building.type==='healer'&&n.id==='healer'){
+6626:     if(healingSeq){toast('Le soin est déjà en cours.');return}
+6627:     const needs=state.team.some(m=>m.hp<maxHP(m)||m.status);
+6628:     if(!needs){dialog('<b>Soigneuse Élise</b><br>Ton équipe est déjà en pleine forme.');return}
+6629:     startHealingSequence();return
+6630:   }
+6631:   if(building.type==='shop'&&n.id==='seller'){dialog('<b>Marchand</b><br>Bienvenue !',()=>openShop());return}
+6632:   if(building.type==='station'&&n.id==='agent'){window.ValdoraTrainV109D.open();return}
+6633:   if(building.type==='arena'&&n.id==='guard'){arenaChallenge(+state.zone.replace('town',''));return}
+6634:   dialog('<b>'+n.name+'</b><br>'+npcDialogue(n))
+6635: }
+6636: 
+6637: function interiorCollision(nx,ny,ox,oy){
+6638:   // Fonction harmonisée avec interiorBlocked pour éviter deux systèmes contradictoires.
+6639:   if(nx<48||nx>1152||ny<55||ny>770)return true;
+6640: 
+6641:   for(const n of (currentRoom().npcs||[])){
+6642:     const d=Math.hypot(nx-n.x,ny-n.y);
+6643:     if(d<42){
+6644:       const old=Math.hypot(ox-n.x,oy-n.y);
+### line 6982: Rappel
+6974: }
+6975: 
+6976: // ---------------- POTIONS : CHOIX DE LA CIBLE -------------------------
+6977: 
+6978: function battleHealingTargetsV86(item){
+6979:   const heal=item==='Potion'?30:item==='SuperPotion'?80:item==='Repas'?50:0;
+6980:   return state.team.map((m,i)=>({m,i})).filter(x=>{
+6981:     if(!x.m)return false;
+6982:     if(item==='Rappel')return x.m.hp<=0;
+6983:     if(x.m.hp<=0)return false;
+6984:     if(heal>0)return x.m.hp<maxHP(x.m);
+6985:     if(item==='Antidote')return x.m.status==='empoisonné';
+6986:     if(item==='Baie')return !!x.m.status && x.m.status!=='empoisonné';
+6987:     return true
+6988:   })
+6989: }
+6990: 
+6991: function openBattleItemTargetV86(item){
+6992:   if(!battleAlive()||battle.busy)return;
+6993:   ensureInventoryV81();
+6994:   if((state.inventory[item]||0)<=0){toast('Tu n’en as plus.');return}
+6995: 
+### line 7018: Rappel
+7010: function applyBattleItemTargetV86(item,index){
+7011:   if(!battleAlive()||battle.busy)return;
+7012:   ensureInventoryV81();
+7013:   const m=state.team[index];
+7014:   if(!m||(state.inventory[item]||0)<=0)return;
+7015: 
+7016:   let used=false,msg='';
+7017: 
+7018:   if(item==='Rappel'){
+7019:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+7020:     state.inventory.Rappel--;
+7021:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+7022:     m.status=null;
+7023:     used=true;
+7024:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7025:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7026:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+7027:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+7028:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+7029:     state.inventory[item]--;
+7030:     const n=Math.min(heal,maxHP(m)-m.hp);
+7031:     m.hp+=n;used=true;
+### line 7040: Rappel
+7032:     msg=BY[m.id].name+' récupère '+n+' PV.'
+7033:   }else if(item==='Baie'){
+7034:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7035:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+7036:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+7037:     state.inventory.Baie--;m.status=null;used=true;
+7038:     msg=BY[m.id].name+' est débarrassé de son statut.'
+7039:   }else if(item==='Antidote'){
+7040:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7041:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+7042:     state.inventory.Antidote--;m.status=null;used=true;
+7043:     msg=BY[m.id].name+' n’est plus empoisonné.'
+7044:   }
+7045: 
+7046:   if(!used)return;
+7047: 
+7048:   document.getElementById('menuov').style.display='none';
+7049:   save(false);hud();syncBattleMessageV84();
+7050:   battle.busy=true;
+7051:   battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';
+7052:   buildBattleButtons();syncBattleMessageV84();
+7053: 
+### line 7223: Rappel
+7215: 
+7216: 
+7217: function openBattleBag(){
+7218:   if(!battleAlive()||battle.busy)return;
+7219:   ensureInventoryV81();
+7220:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+7221:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>+30 PV</small></button>`;
+7222:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>+80 PV</small></button>`;
+7223:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime à 50 % des PV</small></button>`;
+7224:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un statut sauf poison</small></button>`;
+7225:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison</small></button>`;
+7226:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleAttaque')"><b>🔴 Fiole d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>ATQ +2</small></button>`;
+7227:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleDefense')"><b>🔵 Fiole de Défense</b><br>${state.inventory.FioleDefense}<br><small>DEF +2</small></button>`;
+7228:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>+50 PV</small></button>`;
+7229:   if(!battle.trainer){
+7230:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('Orbe')"><b>◈ Orbe d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard</small></button>`;
+7231:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('SuperOrbe')"><b>◆ Super Orbe</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée</small></button>`
+7232:   }
+7233:   h+='</div>';
+7234:   openSimpleMenu('Sac — Combat',h)
+7235: }
+7236: 
+### line 8416: SHOP_ITEMS
+8408:   }
+8409:   $('menuov').style.display='none';$('starterov').style.display='none'
+8410: }
+8411: },true);
+8412: window.addEventListener('keyup',e=>{if(e.code===held){held=null;clearInterval(timer);timer=null}},true);
+8413: function startMusicLegacyV76(){if(!musicOn)return;if(!musicCtx)musicCtx=new (window.AudioContext||window.webkitAudioContext)();if(musicCtx.state==='suspended')musicCtx.resume();if(musicTimer)return;let notes=[261.6,329.6,392,523.3,392,329.6,293.7,349.2,440,587.3,440,349.2],i=0;musicTimer=setInterval(()=>{if(scene==='battle')return;let o=musicCtx.createOscillator(),g=musicCtx.createGain();o.type='triangle';o.frequency.value=notes[i++%notes.length];g.gain.value=.025;o.connect(g);g.connect(musicCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,musicCtx.currentTime+.22);o.stop(musicCtx.currentTime+.23)},270)}
+8414: 
+8415: 
+8416: const SHOP_ITEMS={
+8417:   Potion:{label:'Potion',price:10,desc:'Restaure jusqu’à 30 PV.'},
+8418:   SuperPotion:{label:'Super Potion',price:50,desc:'Restaure jusqu’à 80 PV.'},
+8419:   Orbe:{label:'Orbe d’Éclat',price:50,desc:'Permet de capturer une Éclat sauvage.'},
+8420:   SuperOrbe:{label:'Super Orbe',price:100,desc:'Orbe renforcée : capture nettement facilitée.'},
+8421:   Antidote:{label:'Antidote',price:30,desc:'Soigne le poison.'},
+8422:   Baie:{label:'Baie de soin',price:30,desc:'Soigne certains changements de statut.'},
+8423:   FioleAttaque:{label:'Fiole d’Attaque',price:100,desc:'Augmente fortement l’attaque pendant un combat.'},
+8424:   FioleDefense:{label:'Fiole de Défense',price:100,desc:'Augmente fortement la défense pendant un combat.'},
+8425:   Rappel:{label:'Rappel',price:150,desc:'Réanime un Éclat K.O. avec 50 % de ses PV.'}
+8426: };
+8427: 
+8428: 
+8429: 
+### line 8434: shopTier
+8426: };
+8427: 
+8428: 
+8429: 
+8430: 
+8431: function openShop(){
+8432:   ensureInventoryV81();
+8433:   const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+8434:   const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+8435:   const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+8436: 
+8437:   let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+8438:     Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+8439:     <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+8440:     <div style="display:flex;gap:8px;margin-bottom:12px">
+8441:       <button onclick="openShop()">Acheter</button>
+8442:       <button onclick="openSellShopV101D()">Revendre</button>
+8443:     </div><div class="baggrid">`;
+8444: 
+8445:   for(const id of ids){
+8446:     const it=SHOP_ITEMS[id];if(!it)continue;
+8447:     const qty=state.inventory[id]||0;
+### line 8464: SHOP_ITEMS
+8456: }
+8457: 
+8458: 
+8459: 
+8460: 
+8461: 
+8462: 
+8463: function buyShopItem(id){
+8464:   const it=SHOP_ITEMS[id];if(!it)return;
+8465:   if(window.HOME_FURNITURE_ITEMS_V105J?.[id]){if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}const fid=window.HOME_FURNITURE_ITEMS_V105J[id];state.money-=it.price;state.homeFurnitureOwnedV105J=state.homeFurnitureOwnedV105J||{};state.homeFurnitureOwnedV105J[fid]=(state.homeFurnitureOwnedV105J[fid]||0)+1;save(false);hud();openShop();toast(it.label+' acheté pour ta maison !');return}
+8466:   if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}
+8467:   state.money-=it.price;state.inventory[id]=(state.inventory[id]||0)+1;
+8468:   save(false);hud();openShop();toast(it.label+' acheté pour '+it.price+' Voltrons !')
+8469: }
+8470: 
+8471: 
+8472: function openSimpleMenu(title,html){$('menuov').style.display='flex';$('menucard').innerHTML='<h2>'+title+'</h2>'+html+'<br><button onclick="$(\'menuov\').style.display=\'none\'">Fermer</button>'}
+8473: 
+8474: 
+8475: function pcPortraitV106C(m){
+8476:   const id=Number(m?.id),data=BY[id]||{};
+8477:   // V108S : le PC utilise exactement la même source de vérité que l'Équipe.
+### line 8971: Rappel
+8963: }
+8964: 
+8965: 
+8966: 
+8967: function applyBagItem(index){
+8968:   const item=pendingBagItem,m=state.team[index];if(!item||!m)return;
+8969:   ensureInventoryV81();
+8970: 
+8971:   if(item==='Rappel'){
+8972:     if((state.inventory.Rappel||0)<=0){toast('Plus de Rappels.');return}
+8973:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+8974:     state.inventory.Rappel--;
+8975:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+8976:     m.status=null;
+8977:     save(false);hud();toast(BY[m.id].name+' est réanimé !');openBag();return
+8978:   }
+8979: 
+8980:   if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+8981:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+8982:     if((state.inventory[item]||0)<=0){toast('Tu n’en as plus.');return}
+8983:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+8984:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+### line 8992: Rappel
+8984:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+8985:     state.inventory[item]--;
+8986:     const n=Math.min(heal,maxHP(m)-m.hp);m.hp+=n;
+8987:     save(false);toast(BY[m.id].name+' récupère '+n+' PV.');openBag();return
+8988:   }
+8989: 
+8990:   if(item==='Baie'){
+8991:     if((state.inventory.Baie||0)<=0){toast('Plus de Baies.');return}
+8992:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+8993:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+8994:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+8995:     state.inventory.Baie--;m.status=null;save(false);toast(BY[m.id].name+' est soigné.');openBag();return
+8996:   }
+8997: 
+8998:   if(item==='Antidote'){
+8999:     if((state.inventory.Antidote||0)<=0){toast('Plus d’Antidotes.');return}
+9000:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9001:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+9002:     state.inventory.Antidote--;m.status=null;save(false);toast('Poison soigné.');openBag();return
+9003:   }
+9004: }
+9005: 
+### line 9016: Rappel
+9008: 
+9009: 
+9010: 
+9011: function openBag(){
+9012:   ensureInventoryV81();
+9013:   let h='<div class="baggrid">';
+9014:   h+=`<button class="bagitem" onclick="selectBagTarget('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>Restaure jusqu’à 30 PV.</small></button>`;
+9015:   h+=`<button class="bagitem" onclick="selectBagTarget('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>Restaure jusqu’à 80 PV.</small></button>`;
+9016:   h+=`<button class="bagitem" onclick="selectBagTarget('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime un Éclat K.O. avec 50 % de ses PV.</small></button>`;
+9017:   h+=`<button class="bagitem" onclick="selectBagTarget('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un changement de statut, sauf le poison.</small></button>`;
+9018:   h+=`<button class="bagitem" onclick="selectBagTarget('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison.</small></button>`;
+9019:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="selectBagTarget('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>Restaure jusqu’à 50 PV.</small></button>`;
+9020:   h+=`<div class="bagitem"><b>◈ Orbes d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard en combat sauvage.</small></div>`;
+9021:   h+=`<div class="bagitem"><b>◆ Super Orbes</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée en combat sauvage.</small></div>`;
+9022:   h+=`<div class="bagitem"><b>🔴 Fioles d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>Utilisables en combat.</small></div>`;
+9023:   h+=`<div class="bagitem"><b>🔵 Fioles de Défense</b><br>${state.inventory.FioleDefense}<br><small>Utilisables en combat.</small></div>`;
+9024:   h+='</div><h3>Capsules de capacité</h3>';
+9025:   h+=(state.capsules||[]).length
+9026:     ?(state.capsules||[]).map(mid=>`<div class="quest"><b>${MOVE_DB[mid]?.name||mid}</b><br>Peut être apprise depuis le menu Équipe.</div>`).join('')
+9027:     :'<div class="quest">Aucune Capsule de capacité pour le moment.</div>';
+9028:   openSimpleMenu('Sac',h)
+9029: }
+### line 10440: SHOP_ITEMS
+10432:     return true
+10433:   }
+10434: 
+10435:   state.routeFindsV93[o.id]=true;ensureInventoryV81();
+10436: 
+10437:   if(o.type==='chest'){
+10438:     const money=35+(o.routeIndex%5)*15,item=o.routeIndex%3===0?'SuperPotion':o.routeIndex%3===1?'Orbe':'Antidote';
+10439:     state.money=(state.money||0)+money;state.inventory[item]=(state.inventory[item]||0)+1;save(false);hud();
+10440:     dialog('<b>Petit coffre trouvé !</b><br>Tu récupères <b>'+money+' Voltrons</b> et <b>1 '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10441:   }else if(o.type==='bush'){
+10442:     const r=o.routeIndex%4,item=r===0?'Baie':r===1?'Potion':r===2?'Orbe':'Antidote',qty=r===0?2:1;
+10443:     state.inventory[item]=(state.inventory[item]||0)+qty;save(false);hud();
+10444:     dialog('<b>Buisson fouillé</b><br>Tu trouves <b>'+qty+' '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10445:   }else{
+10446:     state.money=(state.money||0)+5;save(false);hud();
+10447:     dialog('<b>Panneau de Valdora</b><br>'+ROUTE_FIND_HINTS_V93[o.routeIndex%ROUTE_FIND_HINTS_V93.length]+'<br><br><small>Première lecture : +5 Voltrons.</small>')
+10448:   }
+10449:   return true
+10450: }
+10451: 
+10452: // ------------------------ ÉCRIN DES SCEAUX -----------------------------
+10453: const SEALS_V93=[
+### line 11239: Rappel
+11231: 
+11232: trainerAfterLine=function(t){
+11233:   const h=v98Hash('after|'+(t?.id||'')+'|'+state.zone);
+11234:   const base=V98_AFTER[h%V98_AFTER.length];
+11235:   const hints=[
+11236:     'Pense à regarder les types avant de choisir ton prochain Éclat.',
+11237:     'Un Centre de soins n’est jamais très loin d’une grande étape.',
+11238:     'Les buissons et petits coffres au bord des chemins valent parfois le détour.',
+11239:     'Garde au moins un Rappel si tu pars avec une équipe déjà fatiguée.',
+11240:     'Les dresseurs plus loin seront plus forts que ceux d’ici.',
+11241:     'Une capacité peu puissante mais super efficace peut faire très mal.',
+11242:     'Reviens me parler si tu repasses : je ne te provoquerai plus.',
+11243:     'Les objets utilisés en combat consomment un tour, il faut bien choisir le moment.',
+11244:     'Une équipe variée aide énormément contre les prochains Gardiens.',
+11245:     'Les gares sont pratiques une fois les villes correspondantes découvertes.'
+11246:   ];
+11247:   return base+'<br><br><b>Conseil :</b> '+hints[(h>>>7)%hints.length]
+11248: };
+11249: 
+11250: trainerAfterBattleTextV88=function(t){
+11251:   return trainerAfterLine(t)
+11252: };
+### line 12187: openShop
+12179: // ----------------------------------------------------------------------
+12180: // BOUTIQUE : REVENTE À 50 % DU PRIX.
+12181: // ----------------------------------------------------------------------
+12182: window.openSellShopV101D=function(){
+12183:   ensureInventoryV81();
+12184:   let h=`<div class="quest"><b>Ton argent : ${voltronLabelV85(state.money)}</b><br>
+12185:     Les objets sont repris à <b>50 % de leur prix d'achat</b>.</div>
+12186:     <div style="display:flex;gap:8px;margin-bottom:12px">
+12187:       <button onclick="openShop()">Acheter</button>
+12188:       <button disabled>Revendre</button>
+12189:     </div><div class="baggrid">`;
+12190: 
+12191:   let count=0;
+12192:   for(const [id,it] of Object.entries(SHOP_ITEMS)){
+12193:     const qty=state.inventory[id]||0;
+12194:     if(qty<=0)continue;
+12195:     count++;
+12196:     const price=Math.max(1,Math.floor(it.price*.5));
+12197:     h+=`<button class="bagitem" onclick="sellShopItemV101D('${id}')">
+12198:       <b>${it.label}</b><br>Reprise : ${price} Voltrons<br><small>Possédé : ${qty}</small>
+12199:     </button>`;
+12200:   }
+### line 12207: SHOP_ITEMS
+12199:     </button>`;
+12200:   }
+12201:   if(!count)h+='<div class="quest">Tu n’as aucun objet revendable.</div>';
+12202:   h+='</div>';
+12203:   openSimpleMenu('Boutique — Revente',h);
+12204: };
+12205: 
+12206: window.sellShopItemV101D=function(id){
+12207:   const it=SHOP_ITEMS[id];
+12208:   if(!it||(state.inventory[id]||0)<=0)return;
+12209:   const price=Math.max(1,Math.floor(it.price*.5));
+12210:   state.inventory[id]--;
+12211:   state.money=(state.money||0)+price;
+12212:   save(false);hud();
+12213:   openSellShopV101D();
+12214:   toast(it.label+' revendu pour '+price+' Voltrons.');
+12215: };
+12216: 
+12217: // ----------------------------------------------------------------------
+12218: // DRESSEURS : banques beaucoup plus variées.
+12219: // ----------------------------------------------------------------------
+12220: const V101D_TRAINER_OPEN=[
+### line 12786: SHOP_ITEMS
+12778:   return best
+12779: }
+12780: function searchTownBushV106G(o){
+12781:   state.townBushFindsV106G=state.townBushFindsV106G||{};
+12782:   if(state.townBushFindsV106G[o.key]){toast('Tu as déjà fouillé ce buisson.');return true}
+12783:   state.townBushFindsV106G[o.key]=true;state.inventory=state.inventory||{};
+12784:   const h=v106gWorldFindHash(o.key);if((h%100)>=30){save(false);dialog('<b>Buisson fouillé</b><br>Tu écartes les branches et regardes au pied du buisson, mais il n’y a rien à récupérer ici.');return true}
+12785:   const rewards=[['Baie',2],['Potion',1],['Orbe',1],['Antidote',1],['money',25+(h%51)]],r=rewards[(h>>>7)%rewards.length];
+12786:   let label='';if(r[0]==='money'){state.money=(Number(state.money)||0)+r[1];label=r[1]+' Voltrons'}else{state.inventory[r[0]]=(Number(state.inventory[r[0]])||0)+r[1];label=r[1]+' '+(SHOP_ITEMS?.[r[0]]?.label||r[0])}
+12787:   save(false);hud();dialog('<b>Buisson fouillé</b><br>Quelque chose était caché entre les branches : <b>'+label+'</b>.');return true
+12788: }
+12789: window.townBushSearchableV106G=townBushSearchableV106G;
+12790: const _interactV101F=window.interact;
+12791: window.interact=function(){
+12792:  if(scene==='world'){
+12793:    if(currentScene()?.kind==='town'){
+12794:      const hiddenBush=nearTownBushV106G();if(hiddenBush){searchTownBushV106G(hiddenBush);return}
+12795:    }
+12796:    const b=typeof nearBuilding==='function'?nearBuilding():null;
+12797:    if(b&&b.type==='inn'){
+12798:      const nm=currentScene().name||state.zone, arr=V101F_INN_LINES[nm]||[
+12799:        'Bienvenue dans notre auberge. Chaque voyageur apporte ici une histoire différente.',
+### line 13074: Rappel
+13066: const TVINFO=[
+13067:   "Flash Valdora : plusieurs dresseurs signalent une activité inhabituelle sur les routes.",
+13068:   "Conseil du jour : varie les types de ton équipe pour mieux résister aux combats difficiles.",
+13069:   "Documentaire : certaines créatures changent de comportement selon leur habitat et l'heure de la journée.",
+13070:   "Info régionale : les gares permettent de revenir rapidement dans les villes déjà découvertes.",
+13071:   "Émission scientifique : le Professeur Aurine poursuit ses recherches sur les perturbations de Valdora."
+13072: ];
+13073: const MUSEUM=[
+13074:   "Cette pièce est antérieure aux premières cités de Valdora et rappelle une espèce aujourd'hui disparue.",
+13075:   "Les premiers habitants vénéraient les créatures capables de manipuler la lumière et les éléments.",
+13076:   "Des fragments découverts sous le musée portent le même motif que plusieurs ruines de la région.",
+13077:   "Les archives indiquent qu'un ancien temple se trouvait exactement sous cette salle.",
+13078:   "Ce spécimen montre que certaines lignées de créatures ont profondément changé au fil des siècles."
+13079: ];
+13080: const pick=a=>a[Math.floor(Math.random()*a.length)];
+13081: const team=()=>Array.isArray(state.team)?state.team:[];
+13082: function healAll(){team().forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});hud();save(false)}
+13083: function meal(){
+13084:   if(!team().length){dialog('<b>Table familiale</b><br>Tu prends le temps de manger quelque chose.');return}
+13085:   team().forEach(m=>m.hp=Math.min(maxHP(m),m.hp+Math.max(1,Math.ceil(maxHP(m)*.25))));hud();save(false);
+13086:   dialog('<b>Repas</b><br>Tu prends un vrai repas. Les PV de tes créatures remontent légèrement.');
+13087: }
+### line 13159: SHOP_ITEMS
+13151:   const key=furnitureSearchKeyV106G(m);if(state.searchFindsV106G[key])return false;
+13152:   state.searchFindsV106G[key]=true;
+13153:   const h=searchHashV106G(key);state.inventory=state.inventory||{};
+13154:   const place=m.id==='bibliotheque'?'entre les livres':m.id==='etagere_produits'?'derrière les produits':m.id==='cartons_decor'?'dans les cartons':m.id==='chariot_bagages'?'dans une poche oubliée du chariot':m.id==='vitrine_verre'?'près du socle de la vitrine':m.id==='bureau_conservateur'?'dans un tiroir mal fermé':'derrière le pot';
+13155:   if((h%100)>=62){save(false);dialog('<b>Fouille</b><br>Tu cherches '+place+', mais tu ne trouves rien cette fois.');return true}
+13156:   const rewards=[['Baie',1],['Potion',1],['Orbe',1],['Antidote',1],['SuperPotion',1],['money',30+(h%71)]];
+13157:   const [kind,qty]=rewards[(h>>>8)%rewards.length];let label='';
+13158:   if(kind==='money'){state.money=(Number(state.money)||0)+qty;label=qty+' Voltrons'}
+13159:   else{state.inventory[kind]=(Number(state.inventory[kind])||0)+qty;label=qty+' '+(SHOP_ITEMS?.[kind]?.label||kind)}
+13160:   save(false);hud();dialog('<b>Objet trouvé !</b><br>En fouillant '+place+', tu récupères <b>'+label+'</b>.');return true
+13161: }
+13162: function triggerFurniture(m){
+13163:   state.mobilierInstanceIdV102Y=m.instanceId;
+13164:   if(tryFurnitureFindV106G(m))return;
+13165:   switch(m.fonction){
+13166:     case 'repos_15s_soin_complet': sleepAt(m);break;
+13167:     case 'ouvrir_stockage': openPC();break;
+13168:     case 'lire_lore_indices': dialog('<b>Bibliothèque</b><br>'+pick(BOOKS));break;
+13169:     case 'repas_recup_pv': meal();break;
+13170:     case 'infos_valdora': dialog('<b>Télévision</b><br>'+pick(TVINFO));break;
+13171:     case 'soins_centre':
+13172:       if(healingSeq)toast('Le soin est déjà en cours.');
+### line 13178: openShop
+13170:     case 'infos_valdora': dialog('<b>Télévision</b><br>'+pick(TVINFO));break;
+13171:     case 'soins_centre':
+13172:       if(healingSeq)toast('Le soin est déjà en cours.');
+13173:       else if(!team().some(x=>x.hp<maxHP(x)||x.status))dialog('<b>Centre de soins</b><br>Ton équipe est déjà en pleine forme.');
+13174:       else startHealingSequence();break;
+13175:     case 's_asseoir': sitAt(m);break;
+13176:     case 'infos_carte_region': dialog('<b>Carte de Valdora</b><br>La carte montre les grandes villes, les lacs, les routes de montagne et les principales lignes ferroviaires. Plusieurs anciennes voies sont marquées en pointillés.');break;
+13177:     case 'ouvrir_boutique':
+13178:       if(m.id==='etagere_produits')dialog('<b>Rayonnage</b><br>Les rayons sont remplis de marchandises. Tu aperçois '+pick(['des Potions','des Capsules de capture','des Anti-paralysie'])+'.',()=>openShop());
+13179:       else openShop();break;
+13180:     case 'personnaliser_maison': if(window.openHomeCustomizerV105J)window.openHomeCustomizerV105J();break;
+13181:     case 'reservation_hotel': reserveHotel();break;
+13182:     case 'voyage_train': window.ValdoraTrainV109D.open();break;
+13183:     case 'controle_ticket': window.ValdoraTrainV109D.open();break;
+13184:     case 'horaires_train': stationBoard();break;
+13185:     case 'distributeur_boissons': vending();break;
+13186:     case 'choix_starters': if(!state.team.length)dialog('<b>Table des Starters</b><br>Quatre capsules t’attendent…',()=>showStarters());else dialog('<b>Table des Starters</b><br>Ton premier compagnon est déjà avec toi.');break;
+13187:     case 'recherche_codex': superComputer();break;
+13188:     case 'lore_recherche': dialog('<b>Tableau de recherche</b><br>'+pick(['Les croquis comparent plusieurs stades d’évolution.','Une note indique : « environnement + expérience = évolution parfois imprévisible ».','Un schéma relie les types Feu, Plante et Eau dans un cycle d’avantages.','Des coordonnées sont entourées près des montagnes du nord.']));break;
+13189:     case 'infos_oeuf': dialog('<b>Incubateur</b><br>'+pick(['L’œuf réagit légèrement à ta présence.','Les capteurs indiquent une activité stable. Impossible encore d’identifier l’espèce.','Une étiquette indique : « origine inconnue — trouvé près d’anciennes ruines ».']));break;
+13190:     case 'lore_musee': dialog('<b>'+((m.nom)||'Exposition')+'</b><br>'+pick(MUSEUM));break;
+13191:     case 'decor': if(m.description)dialog('<b>'+(m.nom||'Objet')+'</b><br>'+m.description);break;
+### line 13268: ElixirVital
+13260: // ======================================================================
+13261: (function(){
+13262: 'use strict';
+13263: 
+13264: function zPick(a){return a[Math.floor(Math.random()*a.length)]}
+13265: function zHash(s){let h=2166136261>>>0;for(const c of String(s||'')){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+13266: function zEnsure(){
+13267:   state.inventory=state.inventory||{};
+13268:   for(const k of ['FioleGuerison','ElixirVital','Artefact1','Artefact2','Artefact3','Artefact4','Artefact5'])
+13269:     if(!Number.isFinite(state.inventory[k]))state.inventory[k]=0;
+13270:   state.v102z=state.v102z||{story:{},taronBossWins:{},combatWins:0};
+13271:   state.v102z.story=state.v102z.story||{};
+13272:   state.v102z.taronBossWins=state.v102z.taronBossWins||{};
+13273:   return state.v102z;
+13274: }
+13275: 
+13276: // ----------------------------------------------------------------------
+13277: // 1. ATTAQUES PLUS VARIÉES PAR TYPE
+13278: // ----------------------------------------------------------------------
+13279: const Z_MOVES={
+13280:   epines:{id:'epines',name:'Épines Vives',power:10,accuracy:96,kind:'nature',type:'Nature'},
+13281:   photosynthese:{id:'photosynthese',name:'Photosynthèse',power:0,accuracy:100,kind:'heal',type:'Nature'},
+### line 13365: Rappel
+13357:   const capChance=boss?1:(trainer?.26:.11);
+13358:   if(Math.random()<capChance){
+13359:     const mid=zCapsuleForEnemy(e);
+13360:     if(mid){state.capsules=state.capsules||[];state.capsules.push(mid);lines.push('Capsule de capacité obtenue : '+MOVE_DB[mid].name+'.')}
+13361:   }
+13362:   const itemChance=boss?1:(trainer?.34:.20);
+13363:   if(Math.random()<itemChance){
+13364:     const tier=Math.max(0,Math.min(6,Math.floor((e.level||1)/10)));
+13365:     const pool=['Potion','Baie','Antidote',...(tier>=1?['SuperPotion']:[]),...(tier>=2?['FioleGuerison']:[]),...(tier>=3?['SuperOrbe']:[]),...(tier>=4?['Rappel']:[])];
+13366:     const it=zPick(pool);state.inventory[it]=(state.inventory[it]||0)+1;lines.push('Objet récupéré : '+(SHOP_ITEMS[it]?.label||it)+'.')
+13367:   }
+13368:   // Petit bonus régulier : évite l'impression que les récompenses spéciales n'existent jamais.
+13369:   if(!boss && state.v102z.combatWins%7===0){
+13370:     const mid=zCapsuleForEnemy(e);if(mid){state.capsules.push(mid);lines.push('Bonus de série : Capsule '+MOVE_DB[mid].name+'.')}
+13371:   }
+13372:   return lines
+13373: }
+13374: 
+13375: enemyKO=function(){
+13376:   if(!battleAlive())return;
+13377:   const a=active(),e=battle.enemy;
+13378:   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
+### line 13511: SHOP_ITEMS
+13503:   const t=window._v102zTaronBossContext;
+13504:   if(!t)return Z_COMPLETE_TARON();
+13505:   window._v102zTaronBossContext=null;zEnsure();state.trainerWins=state.trainerWins||{};state.trainerWins[t.id]=true;state.v102z.taronBossWins[t.id]=true;
+13506:   state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+13507:   const route=Number(String(t.zone).replace('route',''))||0;
+13508:   const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+13509:   const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+13510:   logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+13511:   dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+13512: };
+13513: 
+13514: // ----------------------------------------------------------------------
+13515: // 7. STORYTELLING SUPPLÉMENTAIRE, DÉCOUVERT PROGRESSIVEMENT
+13516: // ----------------------------------------------------------------------
+13517: const Z_STORY={
+13518:   route0:'Au bord de la Route 1, plusieurs voyageurs parlent de caisses marquées d’un losange jaune. Personne ne sait encore à qui elles appartiennent.',
+13519:   town1:'À Rochebrune, les habitants évoquent pour la première fois un groupe appelé Team Taron. Ils achèteraient des informations sur les Éclats rares.',
+13520:   route2:'Des traces de véhicules et des balises brouillées indiquent qu’une opération organisée a lieu sur cette route.',
+13521:   town5:'À Soléria, certains documents administratifs mentionnent des sociétés-écrans reliées à Taronis.',
+13522:   route6:'La Team Taron ne se cache presque plus. Ses membres parlent désormais ouvertement du Projet Résonance.',
+13523:   town13:'Taronis. Les indices convergent ici : laboratoires privés, convois ferroviaires et disparition d’Éclats rares semblent liés au même réseau.'
+13524: };
+### line 13712: SHOP_ITEMS
+13704:     if(window._v108qWorldSpeaker){const n=window._v108qWorldSpeaker;window._v108qWorldSpeaker=null;setTimeout(()=>{n._v104Paused=false;n.moving=false;n.next=Date.now()+500},220)}
+13705:   }
+13706:   return r
+13707: };
+13708: 
+13709: // ----------------------------------------------------------------------
+13710: // 10. NOUVEAUX OBJETS : FIOLE DE GUÉRISON + ARTEFACTS + STOCK ÉVOLUTIF
+13711: // ----------------------------------------------------------------------
+13712: Object.assign(SHOP_ITEMS,{
+13713:   FioleGuerison:{label:'Fiole de Guérison',price:180,desc:'Restaure 120 PV et soigne le statut d’un Éclat.'},
+13714:   ElixirVital:{label:'Élixir Vital',price:360,desc:'Restaure totalement les PV et le statut, hors combat.'},
+13715:   Artefact1:{label:'Artefact de Résonance I',price:420,desc:'Fait gagner immédiatement 1 niveau à une créature.'},
+13716:   Artefact2:{label:'Artefact de Résonance II',price:850,desc:'Fait gagner immédiatement 2 niveaux à une créature.'},
+13717:   Artefact3:{label:'Artefact de Résonance III',price:1450,desc:'Fait gagner immédiatement 3 niveaux à une créature.'},
+13718:   Artefact4:{label:'Artefact de Résonance IV',price:2250,desc:'Fait gagner immédiatement 4 niveaux à une créature.'},
+13719:   Artefact5:{label:'Artefact de Résonance V',price:3400,desc:'Fait gagner immédiatement 5 niveaux à une créature.'}
+13720: });
+13721: const Z_ENSURE_INV=ensureInventoryV81;
+13722: ensureInventoryV81=function(){const r=Z_ENSURE_INV();zEnsure();return r};
+13723: const Z_NORMAL_SHOP=window.pNormalShopIdsV101P;
+13724: window.pNormalShopIdsV101P=function(){
+13725:   const ids=Z_NORMAL_SHOP?Z_NORMAL_SHOP():['Potion','Orbe','Antidote','Baie'];const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+### line 13735: shopTier
+13727:   if(tier>=3)ids.push('Artefact2');
+13728:   if(tier>=4)ids.push('ElixirVital','Artefact3');
+13729:   if(tier>=5)ids.push('Artefact4');
+13730:   if(tier>=6)ids.push('Artefact5');
+13731:   return [...new Set(ids)]
+13732: };
+13733: const Z_MARKET_IDS=window.pMarketItemIdsV101P;
+13734: if(Z_MARKET_IDS)window.pMarketItemIdsV101P=function(){
+13735:   const ids=Z_MARKET_IDS();const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+13736:   if(tier>=2)ids.push('FioleGuerison','Artefact1');if(tier>=3)ids.push('Artefact2');if(tier>=4)ids.push('ElixirVital','Artefact3');if(tier>=5)ids.push('Artefact4');if(tier>=6)ids.push('Artefact5');return [...new Set(ids)]
+13737: };
+13738: function zRaiseLevels(m,n){
+13739:   const events=[];if(!m||m.hp<=0)return events;
+13740:   for(let k=0;k<n&&m.level<100;k++){
+13741:     const oldMax=maxHP(m);m.level++;const newMax=maxHP(m);m.hp=Math.min(newMax,m.hp+(newMax-oldMax)+6);
+13742:     for(const mv of defaultMoves(m.id,m.level))if(!m.moves.includes(mv))v106pLearnNaturalMove(m,mv)
+13743:     const evo=checkEvolution(m);events.push(BY[m.id].name+' atteint le niveau '+m.level+'.');if(evo)events.push(evo)
+13744:   }
+13745:   return events
+13746: }
+13747: const Z_APPLY_BAG=applyBagItem;
+13748: applyBagItem=function(index){
+### line 13753: ElixirVital
+13745:   return events
+13746: }
+13747: const Z_APPLY_BAG=applyBagItem;
+13748: applyBagItem=function(index){
+13749:   const item=pendingBagItem,m=state.team[index];zEnsure();if(!item||!m)return;
+13750:   if(item==='FioleGuerison'||item==='ElixirVital'){
+13751:     if((state.inventory[item]||0)<=0)return toast('Tu n’en as plus.');if(m.hp<=0)return toast('Utilise d’abord un Rappel.');
+13752:     if(m.hp>=maxHP(m)&&!m.status)return toast(BY[m.id].name+' est déjà en pleine forme.');
+13753:     state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;save(false);hud();toast(BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut est soigné.');openBag();return
+13754:   }
+13755:   if(/^Artefact[1-5]$/.test(item)){
+13756:     if((state.inventory[item]||0)<=0)return toast('Tu n’en as plus.');if(m.hp<=0)return toast('Un Éclat K.O. ne peut pas utiliser un Artefact.');
+13757:     const n=Number(item.slice(-1));state.inventory[item]--;const ev=zRaiseLevels(m,n);save(false);hud();dialog('<b>'+SHOP_ITEMS[item].label+'</b><br>'+ev.join('<br>'));return
+13758:   }
+13759:   return Z_APPLY_BAG(index)
+13760: };
+13761: openBag=function(){
+13762:   ensureInventoryV81();let h='<div class="baggrid">';
+13763:   const target=(id,icon,small)=>`<button class="bagitem" onclick="selectBagTarget('${id}')"><b>${icon} ${SHOP_ITEMS[id]?.label||id}</b><br>${state.inventory[id]||0}<br><small>${small}</small></button>`;
+13764:   h+=target('Potion','🧪','Restaure jusqu’à 30 PV.');h+=target('SuperPotion','🧪✨','Restaure jusqu’à 80 PV.');h+=target('FioleGuerison','💗','+120 PV et soigne le statut.');h+=target('ElixirVital','💎','Restauration complète hors combat.');
+13765:   h+=target('Rappel','✨','Réanime à 50 % des PV.');h+=target('Baie','🍓','Soigne un statut sauf poison.');h+=target('Antidote','⚗️','Soigne le poison.');
+13766:   if((state.inventory.Repas||0)>0)h+=target('Repas','🍲','Restaure jusqu’à 50 PV.');
+### line 13785: Rappel
+13777: battleHealingTargetsV86=function(item){
+13778:   if(item==='FioleGuerison')return state.team.map((m,i)=>({m,i})).filter(x=>x.m&&x.m.hp>0&&(x.m.hp<maxHP(x.m)||x.m.status));
+13779:   return Z_BATTLE_TARGETS(item)
+13780: };
+13781: const Z_APPLY_BATTLE=applyBattleItemTargetV86;
+13782: applyBattleItemTargetV86=function(item,index){
+13783:   if(item!=='FioleGuerison')return Z_APPLY_BATTLE(item,index);
+13784:   if(!battleAlive()||battle.busy)return;zEnsure();const m=state.team[index];if(!m||(state.inventory.FioleGuerison||0)<=0)return;
+13785:   if(m.hp<=0)return toast('Utilise un Rappel pour un Éclat K.O.');
+13786:   state.inventory.FioleGuerison--;const before=m.hp;m.hp=Math.min(maxHP(m),m.hp+120);m.status=null;
+13787:   document.getElementById('menuov').style.display='none';save(false);hud();battle.busy=true;battle.message='Fiole de Guérison utilisée sur '+BY[m.id].name+' !';buildBattleButtons();syncBattleMessageV84();
+13788:   v84Schedule(520,()=>{if(!battleAlive())return;battle.message=BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut disparaît.';syncBattleMessageV84();v84Schedule(520,enemyTurn)})
+13789: };
+13790: const Z_OPEN_BATTLE_BAG=openBattleBag;
+13791: openBattleBag=function(){
+13792:   if(!battleAlive()||battle.busy)return;ensureInventoryV81();
+13793:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+13794:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion||0}<br><small>+30 PV</small></button>`;
+13795:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion||0}<br><small>+80 PV</small></button>`;
+13796:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('FioleGuerison')"><b>💗 Fiole de Guérison</b><br>${state.inventory.FioleGuerison||0}<br><small>+120 PV + statut</small></button>`;
+13797:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel||0}<br><small>Réanime à 50 %</small></button>`;
+13798:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie||0}</button><button class="bagitem" onclick="openBattleItemTargetV86('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote||0}</button>`;
+### line 13886: Élixir vital
+13878:   for(let i=0;i<4;i++){const mid=a?.moves?.[i],mv=mid?MOVE_DB[mid]:null;buttons.push({label:mv?mv.name:'—',disabled:!mv,action:()=>executerActionCombat({type:'attaque',slot:i})})}
+13879:   buttons.push({label:'Sac',action:()=>executerActionCombat({type:'sac'})});
+13880:   buttons.push({label:'Orbe ('+(state.inventory.Orbe||0)+')',disabled:!!battle.trainer,action:()=>throwBattleOrb('Orbe')});
+13881:   buttons.push({label:'Changer',action:()=>executerActionCombat({type:'changer'})});
+13882:   buttons.push({label:'Fuir',disabled:!!battle.trainer,action:()=>executerActionCombat({type:'fuite'})});
+13883:   for(const b of buttons){const bt=document.createElement('button');bt.textContent=b.label;bt.disabled=!!b.disabled||battle.busy;bt.onclick=b.action;el.appendChild(bt)}
+13884: };
+13885: 
+13886: // --- Élixir Vital / Fiole de Guérison en combat, avec consommation du tour.
+13887: const V104_BATTLE_TARGETS=battleHealingTargetsV86;
+13888: battleHealingTargetsV86=function(item){
+13889:   if(item==='FioleGuerison'||item==='ElixirVital')return state.team.map((m,i)=>({m,i})).filter(x=>x.m&&x.m.hp>0&&(x.m.hp<maxHP(x.m)||!!x.m.status));
+13890:   return V104_BATTLE_TARGETS(item)
+13891: };
+13892: const V104_APPLY_ITEM=applyBattleItemTargetV86;
+13893: applyBattleItemTargetV86=function(item,index){
+13894:   if(item!=='FioleGuerison'&&item!=='ElixirVital')return V104_APPLY_ITEM(item,index);
+13895:   if(!battleAlive()||battle.busy)return;ensureInventoryV81();const m=state.team[index];if(!m||(state.inventory[item]||0)<=0)return;
+13896:   if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+13897:   if(m.hp>=maxHP(m)&&!m.status){toast(BY[m.id].name+' est déjà en pleine forme.');return}
+13898:   state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;
+13899:   $('menuov').style.display='none';save(false);hud();battle.busy=true;battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';buildBattleButtons();syncBattleMessageV84();
+### line 13906: SHOP_ITEMS
+13898:   state.inventory[item]--;const before=m.hp;m.hp=item==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+120);m.status=null;
+13899:   $('menuov').style.display='none';save(false);hud();battle.busy=true;battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';buildBattleButtons();syncBattleMessageV84();
+13900:   v84Schedule(500,()=>{if(!battleAlive())return;battle.message=BY[m.id].name+' récupère '+(m.hp-before)+' PV et son statut est soigné.';hud();syncBattleMessageV84();v84Schedule(500,()=>v84FinishAction(true))})
+13901: };
+13902: const V104_OPEN_BATTLE_BAG=openBattleBag;
+13903: openBattleBag=function(){
+13904:   if(!battleAlive()||battle.busy)return;ensureInventoryV81();
+13905:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+13906:   const target=(id,ico,desc)=>`<button class="bagitem" onclick="openBattleItemTargetV86('${id}')"><b>${ico} ${SHOP_ITEMS[id]?.label||id}</b><br>${state.inventory[id]||0}<br><small>${desc}</small></button>`;
+13907:   h+=target('Potion','🧪','+30 PV')+target('SuperPotion','🧪✨','+80 PV')+target('FioleGuerison','💗','+120 PV et statut')+target('ElixirVital','💎','PV complets et statut');
+13908:   h+=target('Rappel','✨','Réanime à 50 %')+target('Baie','🍓','Soigne un statut sauf poison')+target('Antidote','⚗️','Soigne le poison');
+13909:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleAttaque')"><b>🔴 Fiole d’Attaque</b><br>${state.inventory.FioleAttaque||0}<br><small>ATQ +2</small></button>`;
+13910:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleDefense')"><b>🔵 Fiole de Défense</b><br>${state.inventory.FioleDefense||0}<br><small>DEF +2</small></button>`;
+13911:   if((state.inventory.Repas||0)>0)h+=target('Repas','🍲','+50 PV');
+13912:   if(!battle.trainer){h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('Orbe')"><b>◈ Orbe d’Éclat</b><br>${state.inventory.Orbe||0}</button>`;h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('SuperOrbe')"><b>◆ Super Orbe</b><br>${state.inventory.SuperOrbe||0}</button>`;h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('MegaOrbe')"><b>✦ Méga Orbe</b><br>${state.inventory.MegaOrbe||0}</button>`}
+13913:   h+='</div>';openSimpleMenu('Sac — Combat',h)
+13914: };
+13915: 
+13916: // Le bouton Sac du panneau droit ouvre le vrai sac de combat quand un combat est actif.
+13917: const V104_OPEN_BAG_WORLD=openBag;
+13918: window.openBag=function(){return scene==='battle'&&battleAlive()?openBattleBag():V104_OPEN_BAG_WORLD()};
+13919: if($('bag'))$('bag').onclick=()=>window.openBag();
+### line 13926: SHOP_ITEMS, ElixirVital
+13918: window.openBag=function(){return scene==='battle'&&battleAlive()?openBattleBag():V104_OPEN_BAG_WORLD()};
+13919: if($('bag'))$('bag').onclick=()=>window.openBag();
+13920: 
+13921: // Changement d'Éclat : reconstruire immédiatement la console avec les attaques du nouveau combattant.
+13922: const V104_SWITCH_BASE=selectBattleCreatureV81;
+13923: selectBattleCreatureV81=function(index){const r=V104_SWITCH_BASE(index);if(battleAlive())setTimeout(()=>{hud();buildBattleButtons();syncBattleMessageV84()},30);return r};
+13924: 
+13925: // Description de l'Élixir mise en cohérence avec son usage en combat.
+13926: if(SHOP_ITEMS.ElixirVital)SHOP_ITEMS.ElixirVital.desc='Restaure totalement les PV et le statut. Utilisable aussi en combat.';
+13927: 
+13928: // Compatibilité Vol permanent avec la carte existante.
+13929: const V104_FLY_TO=window.flyTo;
+13930: if(typeof V104_FLY_TO==='function')window.flyTo=function(zone){return V104_FLY_TO(zone)};
+13931: 
+13932: window.addEventListener('DOMContentLoaded',()=>{v104MigrateFieldRewards();if($('bag'))$('bag').onclick=()=>window.openBag();setTimeout(()=>{try{buildBattleButtons()}catch(_){ }},300)});
+13933: })();
+13934: </script>
+13935: 
+13936: 
+13937: 
+13938: 
+13939: <script>
+### line 14166: SHOP_ITEMS
+14158: (function(){
+14159: const TOWNS=['town0','town1','town2','town3','town4','town5','town6','town7','town8','town9','town10','town11','town12','town13','town14','route_simdor'];
+14160: function key(x,y){return x+','+y}function roadRects(sc){const C=sc.v105dCell,core=sc.v105dCore,out=[];for(const s of sc.v105dRoad||[]){const [gx,gy]=s.split(',').map(Number),cx=(gx+.5)*C,cy=(gy+.5)*C;if(sc.v105dRoad.has(key(gx+1,gy)))out.push({x:cx-C/2,y:cy-core/2,w:C*2,h:core});if(sc.v105dRoad.has(key(gx,gy+1)))out.push({x:cx-core/2,y:cy-C/2,w:core,h:C*2})}return out}
+14161: function hit(a,b,p=0){return a.x-p<b.x+b.w+p&&a.x+a.w+p>b.x-p&&a.y-p<b.y+b.h+p&&a.y+a.h+p>b.y-p}
+14162: function ensureHeroHome(sc){if(sc.buildings.some(b=>b.type==='playerhome'))return;const src=sc.buildings.find(b=>b.type==='home')||{w:372,h:230};sc.buildings.push({...src,id:'maison_hero_clairval',type:'playerhome',label:'Maison du héros',w:Math.max(src.w,372),h:Math.max(src.h,230)})}
+14163: function layoutTown(sc,zone){if(!sc?.v105dRowsInfo?.length)return;if(zone==='town0')ensureHeroHome(sc);const roads=roadRects(sc),station=sc.buildings.find(b=>b.type==='station'||b.urbanType==='station'),bs=sc.buildings.filter(b=>b!==station),rows=sc.v105dRowsInfo,groups=Array.from({length:rows.length},()=>[]);bs.forEach((b,i)=>groups[i%rows.length].push(b));const placed=[];for(let ri=0;ri<groups.length;ri++){const g=groups[ri],row=rows[ri];if(!g.length)continue;const roadY=(row.gy+.5)*sc.v105dCell,bottom=roadY-sc.v105dCore/2-82,x0=(row.start+.5)*sc.v105dCell,x1=(row.end+.5)*sc.v105dCell;for(let i=0;i<g.length;i++){const b=g[i],ideal=x0+(x1-x0)*(i+1)/(g.length+1),cands=[0,-1,1,-2,2,-3,3].map(n=>ideal+n*sc.v105dCell*.72);let chosen=null;for(const cx0 of cands){const cx=Math.max(b.w/2+70,Math.min(sc.width-b.w/2-70,cx0)),r={x:cx-b.w/2-42,y:bottom-b.h-48,w:b.w+84,h:b.h+74};if(!roads.some(q=>hit(r,q,8))&&!placed.some(q=>hit(r,q,28))){chosen={cx,r};break}}if(!chosen){const cx=Math.max(b.w/2+70,Math.min(sc.width-b.w/2-70,ideal));chosen={cx,r:{x:cx-b.w/2-42,y:bottom-b.h-48,w:b.w+84,h:b.h+74}}}b.x=chosen.cx-b.w/2;b.y=bottom-b.h;b.doorX=chosen.cx;b.doorY=bottom;b.v105dRoadY=roadY;placed.push(chosen.r)}}sc.v105jRoadOverlapCount=placed.reduce((n,r)=>n+roads.filter(q=>hit(r,q,4)).length,0)}
+14164: function applySafeParcels(){for(const zone of TOWNS){const sc=SCENES[zone];if(sc&&!sc._v105kBuildingScale){sc._v105kBuildingScale=true;for(const b of sc.buildings||[]){const cx=b.x+b.w/2,bottom=b.y+b.h;b.w*=1.10;b.h*=1.10;b.x=cx-b.w/2;b.y=bottom-b.h;b.doorX=cx;b.doorY=bottom}}layoutTown(sc,zone)}document.documentElement.dataset.v105jRoadOverlaps=String(TOWNS.reduce((n,z)=>n+(SCENES[z]?.v105jRoadOverlapCount||0),0));const brand=document.querySelector('.brand b');if(brand)brand.textContent='VALDORA V105K — JOUEUR'}
+14165: const HOME_REF=window.MOBREF_DATA_V105J,HOME_CATALOG=window.MOBREF_CATALOG_V105J;
+14166: const FURN={MeubleBibliotheque:'bibliotheque',MeubleTable:'table_cuisine',MeubleTelevision:'television',MeublePlante:'plante_pot',MeubleCanape:'canape_attente'};window.HOME_FURNITURE_ITEMS_V105J=FURN;window.HOME_SHOP_IDS_V105J=Object.keys(FURN);Object.assign(SHOP_ITEMS,{MeubleBibliotheque:{label:'Meuble — Bibliothèque',price:260,desc:'Pour personnaliser la maison du héros.'},MeubleTable:{label:'Meuble — Table et chaises',price:320,desc:'Un coin repas pour la maison.'},MeubleTelevision:{label:'Meuble — Téléviseur',price:290,desc:'Un téléviseur pour le salon.'},MeublePlante:{label:'Meuble — Plante en pot',price:120,desc:'Une décoration végétale.'},MeubleCanape:{label:'Meuble — Canapé',price:240,desc:'Un canapé confortable.'}});
+14167: const SLOTS=[{x:230,y:70},{x:430,y:70},{x:660,y:70},{x:900,y:75},{x:210,y:330},{x:470,y:330},{x:760,y:340},{x:980,y:350},{x:250,y:560},{x:790,y:560}];
+14168: function initHome(){state.homeFurnitureOwnedV105J=state.homeFurnitureOwnedV105J||{lit_simple:1,console_salon:1};state.homeFurnitureLayoutV105J=state.homeFurnitureLayoutV105J||['lit_simple','console_salon']}
+14169: window.getPlayerHomeFurnitureV105J=function(){initHome();const used={};const out=[];for(let i=0;i<state.homeFurnitureLayoutV105J.length;i++){const id=state.homeFurnitureLayoutV105J[i],base=HOME_CATALOG[id];if(!base)continue;const slot=SLOTS[i%SLOTS.length],src=(HOME_REF.rooms.home||[]).find(x=>x.id===id),w=src?.w||130,h=src?.h||110;used[id]=(used[id]||0)+1;out.push({...base,instanceId:'hero_'+id+'_'+used[id],id,x:slot.x,y:slot.y,w,h,z:10+i,collision:base.bloquant?{x:slot.x,y:slot.y,w,h}:null})}const base=HOME_CATALOG.table_cuisine||{};out.push({...base,id:'table_cuisine',instanceId:'hero_customizer',nom:'Table de décoration',x:20,y:620,w:165,h:105,z:99,bloquant:true,interactif:true,fonction:'personnaliser_maison',description:'Permet d’aménager la maison.',collision:{x:20,y:620,w:165,h:105}});return out};
+14170: window.toggleHomeFurnitureV105J=function(id){initHome();const owned=state.homeFurnitureOwnedV105J[id]||0,used=state.homeFurnitureLayoutV105J.filter(x=>x===id).length;if(used<owned&&state.homeFurnitureLayoutV105J.length<SLOTS.length)state.homeFurnitureLayoutV105J.push(id);else{const i=state.homeFurnitureLayoutV105J.lastIndexOf(id);if(i>=0)state.homeFurnitureLayoutV105J.splice(i,1)}save(false);window.openHomeCustomizerV105J()};
+14171: window.openHomeCustomizerV105J=function(){initHome();const ids=['lit_simple','console_salon','bibliotheque','table_cuisine','television','plante_pot','canape_attente'];let h='<div class="quest"><b>Maison du héros</b><br>Achète des meubles dans les boutiques, puis installe-les ici. Touche C : accès rapide.</div><div class="baggrid">';for(const id of ids){const c=HOME_CATALOG[id];if(!c)continue;const own=state.homeFurnitureOwnedV105J[id]||0,use=state.homeFurnitureLayoutV105J.filter(x=>x===id).length;h+='<button class="bagitem" onclick="toggleHomeFurnitureV105J(\''+id+'\')"><b>'+(c.nom||id)+'</b><br>Possédé : '+own+'<br>Installé : '+use+'<br><small>'+(use<own?'Installer':'Retirer')+'</small></button>'}h+='</div>';openSimpleMenu('Personnaliser la maison',h)};
+14172: window.addEventListener('keydown',e=>{if(window.ValdoraTextInputActive&&window.ValdoraTextInputActive(e))return;if((e.key==='c'||e.key==='C')&&scene==='interior'&&building?.type==='playerhome'){e.preventDefault();window.openHomeCustomizerV105J()}},true);
+14173: setTimeout(applySafeParcels,2750);setTimeout(applySafeParcels,3750);
+14174: })();
+14175: </script>
+14176: <script>
+14177: // V105L — dimensions Nova-Cité et déplacements orthogonaux des PNJ.
+14178: (function(){
+14179: const MEGAS=['town5','town6','town9','town10','town13'],NOVA='town6';
+### line 14734: Rappel
+14726:   try{v109bRebuildTypeMoves()}catch(_){ }
+14727:   for(const m of [...(state?.team||[]),...(state?.box||[])])v109bNormalizeCreatureMoves(m);
+14728:   if(Array.isArray(state?.capsules))state.capsules=state.capsules.map(v109bCanonicalMoveId).filter(mid=>MOVE_DB[mid]);
+14729:   return true
+14730: }
+14731: function v109bPrepareCombatant(m){v109bNormalizeCreatureMoves(m);ensureMovePPV106U(m,false);return m}
+14732: function v109bBagEligible(kind,m){
+14733:   if(!m)return false;const hpMax=maxHP(m),aliveNow=m.hp>0;
+14734:   if(kind==='Rappel')return m.hp<=0;
+14735:   if(!aliveNow)return false;
+14736:   if(kind==='Potion'||kind==='SuperPotion'||kind==='Repas')return m.hp<hpMax;
+14737:   if(kind==='FioleGuerison'||kind==='ElixirVital')return m.hp<hpMax||!!m.status;
+14738:   if(kind==='Baie')return !!m.status&&m.status!=='empoisonné';
+14739:   if(kind==='Antidote')return m.status==='empoisonné';
+14740:   if(kind==='FioleAttaque'||kind==='FioleDefense')return true;
+14741:   return false
+14742: }
+14743: function v109bItemLabel(kind){return ({Potion:'Potion',SuperPotion:'Super Potion',Repas:'Repas',FioleGuerison:'Fiole de Guérison',ElixirVital:'Élixir Vital',Baie:'Baie',Antidote:'Antidote',Rappel:'Rappel',FioleAttaque:"Fiole d’Attaque",FioleDefense:'Fiole de Défense'})[kind]||kind}
+14744: function v109bBeginItemTarget(kind){
+14745:   if(!combatReady()||battle.busy)return;state.inventory=state.inventory||{};
+14746:   if(!(Number(state.inventory[kind])>0)){setMessage(`Tu n'as plus de ${v109bItemLabel(kind)}.`);return}
+14747:   battle.itemKind=kind;battle.menu='item-target';setMessage(`Choisis la créature qui recevra ${v109bItemLabel(kind)}.`);buildButtons()
+### line 14753: Rappel
+14745:   if(!combatReady()||battle.busy)return;state.inventory=state.inventory||{};
+14746:   if(!(Number(state.inventory[kind])>0)){setMessage(`Tu n'as plus de ${v109bItemLabel(kind)}.`);return}
+14747:   battle.itemKind=kind;battle.menu='item-target';setMessage(`Choisis la créature qui recevra ${v109bItemLabel(kind)}.`);buildButtons()
+14748: }
+14749: function v109bApplyItemTo(kind,m){
+14750:   if(!combatReady()||battle.busy||!m||!v109bBagEligible(kind,m))return false;
+14751:   state.inventory=state.inventory||{};if(!(Number(state.inventory[kind])>0))return false;
+14752:   const before=m.hp;let text='';
+14753:   if(kind==='Rappel'){m.hp=Math.max(1,Math.floor(maxHP(m)*.50));m.status=null;text=`${nameOf(m)} revient avec ${m.hp} PV.`}
+14754:   else if(kind==='Potion'||kind==='SuperPotion'||kind==='Repas'){
+14755:     const heal=kind==='SuperPotion'?80:kind==='Repas'?50:30;m.hp=Math.min(maxHP(m),m.hp+heal);text=`${nameOf(m)} récupère ${m.hp-before} PV.`
+14756:   }else if(kind==='FioleGuerison'){m.hp=Math.min(maxHP(m),m.hp+120);m.status=null;text=`${nameOf(m)} récupère ${m.hp-before} PV et son statut est soigné.`}
+14757:   else if(kind==='ElixirVital'){m.hp=maxHP(m);m.status=null;text=`${nameOf(m)} retrouve tous ses PV et son statut est soigné.`}
+14758:   else if(kind==='Baie'){m.status=null;text=`${nameOf(m)} est débarrassé de son altération.`}
+14759:   else if(kind==='Antidote'){m.status=null;text=`${nameOf(m)} n'est plus empoisonné.`}
+14760:   else if(kind==='FioleAttaque'){m.atkBuff=clamp((Number(m.atkBuff)||0)+2,-3,3);text=`L'Attaque de ${nameOf(m)} augmente fortement.`}
+14761:   else if(kind==='FioleDefense'){m.defBuff=clamp((Number(m.defBuff)||0)+2,-3,3);text=`La Défense de ${nameOf(m)} augmente fortement.`}
+14762:   else return false;
+14763:   state.inventory[kind]--;battle.itemKind=null;battle.busy=true;battle.menu='actions';safeCall(save,false);safeCall(hud);setMessage(text+' L’adversaire joue ensuite.');buildButtons();schedule(560,enemyTurnV105R);return true
+14764: }
+14765: function v109bDuplicateAudit(){
+14766:   const groups={},official=v109bOfficialNameMap();for(const [id,mv] of Object.entries(MOVE_DB)){if(!mv?.name)continue;const n=v109bNormMoveName(mv.name);(groups[n]||(groups[n]=[])).push(id)}
+### line 14811: Rappel, ElixirVital, Élixir vital
+14803:     const inv=state.inventory||{};
+14804:     bar.appendChild(button(`Orbe d'Éclat (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0),'v105r-wide'));
+14805:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0),'v105r-wide'));
+14806:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0),'v105r-wide'));
+14807:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked,'v105r-wide'));return
+14808:   }
+14809:   if(battle.menu==='bag'){
+14810:     const inv=state.inventory||{},add=(kind,label)=>bar.appendChild(button(`${label} (${inv[kind]||0})`,()=>v109bBeginItemTarget(kind),locked||!(inv[kind]>0)||!(state.team||[]).some(m=>v109bBagEligible(kind,m))));
+14811:     add('Potion','Potion');add('SuperPotion','Super Potion');add('FioleGuerison','Fiole de Guérison');add('ElixirVital','Élixir Vital');add('Baie','Baie');add('Antidote','Antidote');add('Rappel','Rappel');
+14812:     if((inv.Repas||0)>0)add('Repas','Repas');if((inv.FioleAttaque||0)>0)add('FioleAttaque',"Fiole d’Attaque");if((inv.FioleDefense||0)>0)add('FioleDefense','Fiole de Défense');
+14813:     bar.appendChild(button(`Orbe (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0)));
+14814:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0)));
+14815:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0)));
+14816:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked));return
+14817:   }
+14818: 
+14819:   const moves=(p?.moves||[]).slice(0,4);ensureMovePPV106U(p,false);const anyPP=hasUsableMoveV106U(p);
+14820:   for(let i=0;i<4;i++){
+14821:     const mid=moves[i],mv=MOVE_DB[mid],maxPP=mv?moveMaxPPV106U(mid):0,pp=mv?currentMovePPV106U(p,mid):0,pow=mv?moveDisplayPowerV106U(mv):0;
+14822:     const shown=mv?(pow>0?(Number(mv.hits)>1?`${Math.round(pow)}×${Number(mv.hits)}`:Math.round(pow)):'STATUT'):'—';
+14823:     if(mv)bar.appendChild(button(`${mv.name} · ${mv.type||'Neutre'} · PUI ${shown} · PRÉ ${Number.isFinite(Number(mv.accuracy))?Math.round(Number(mv.accuracy))+'%':'—'} · PP ${pp}/${maxPP}`,()=>chooseMoveV105R(i),locked||pp<=0,'v105r-move',TYPE_COLORS[mv?.type]||TYPE_COLORS.Neutre));
+14824:     else bar.appendChild(button('—',()=>{},true,'v105r-move',TYPE_COLORS.Neutre))
+## game/V105W_INTERIEURS.js
+### line 518: openShop
+510:       citadel:'Une énergie ancienne semble vibrer autour de cet objet.',map:'La carte montre les principales régions et routes de Valdora.'
+511:     };
+512:     dialog(`<b>${m.label}</b><br>${texts[m.action]||'Cet objet fait partie de l’aménagement du bâtiment.'}`)
+513:   }
+514:   function useItem(m){
+515:     switch(m.action){
+516:       case 'heal':
+517:         if(typeof startHealingSequence==='function')startHealingSequence();else rest('Les machines terminent le soin.');break;
+518:       case 'shop': if(typeof openShop==='function')openShop();else describe(m);break;
+519:       case 'station': dialog('<b>Gare</b><br>Choisis ta destination.',()=>typeof v62StationMasterDialog==='function'&&v62StationMasterDialog());break;
+520:       case 'board': if(typeof stationBoard==='function')stationBoard();else describe(m);break;
+521:       case 'vending': if(typeof vending==='function')vending();else describe(m);break;
+522:       case 'starters': if(!state.team?.length&&typeof showStarters==='function')showStarters();else describe(m);break;
+523:       case 'computer': if(typeof superComputer==='function')superComputer();else describe(m);break;
+524:       case 'bed': rest(INT.kind==='hotel'||INT.kind==='inn'?'Tu passes une nuit paisible dans cette chambre.':'Tu prends le temps de te reposer.');break;
+525:       default: describe(m)
+526:     }
+527:   }
+528:   function interactNpc(n){
+529:     if(!n)return false;
+530:     if(!INT.multi){
+531:       if(building.type==='lab'&&n.id==='prof'){
+## game/VALDORA_BIOMES_V112.js
+### line 263: openShop
+255:   function installButton(){const button=document.getElementById('v111MapBtn');if(!button)return;const final=window.ValdoraWorldV117||window.ValdoraWorldV116,version=document.documentElement.dataset.valdoraPolish,label=final?.active?'Carte du monde V117':version==='V115-BIOMES-AUDIO'?'Carte du monde V115':version==='V114-ROUTES-BIOMES'?'Carte du monde V114':version==='V113-POLISH'?'Carte du monde V113':'Carte du monde V112';if(button.textContent!==label)button.textContent=label;button.onclick=()=>openMap()}
+256:   function enforceIdentity(){const final=window.ValdoraWorldV117||window.ValdoraWorldV116;if(final?.active)return final.enforceIdentity?.();if(document.documentElement.dataset.valdoraPolish==='V113-POLISH')return window.ValdoraPolishV113?.enforceIdentity?.();const title='Éclats Sauvages — Valdora V112 Biomes';if(document.title!==title)document.title=title;const brand=document.querySelector('.brand'),label=`ÉCLATS SAUVAGES — VALDORA V112 BIOMES — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==label)brand.textContent=label;document.documentElement.dataset.valdoraVersion=VERSION}
+257:   function audit(){
+258:     const issues=[],travel=new Set();for(const link of LINKS){travel.add(link.a);travel.add(link.b);travel.add(link.id);const route=SCENES?.[link.id],a=SCENES?.[link.a],b=SCENES?.[link.b];if(!route)issues.push(`${link.id}: route absente`);else{const exits=(route.exits||[]).map(target);if(exits.length!==2||!exits.includes(link.a)||!exits.includes(link.b))issues.push(`${link.id}: extrémités invalides`)}if(!a?.exits?.some(exit=>target(exit)===link.id))issues.push(`${link.a} -> ${link.id}: accès absent`);if(!b?.exits?.some(exit=>target(exit)===link.id))issues.push(`${link.b} -> ${link.id}: accès absent`)}
+259:     const wrong=[['town3','route_m1'],['town3','route_m5'],['town11','route_m1']];for(const [from,to] of wrong)if(SCENES?.[from]?.exits?.some(exit=>target(exit)===to)||SCENES?.[to]?.exits?.some(exit=>target(exit)===from))issues.push(`${from} <-> ${to}: ancien raccord fantôme`);
+260:     for(const [zone,type] of Object.entries(LEGEND_TYPES))if(!SCENES?.[zone]||SCENES[zone].legendaryType!==type||!String(SCENES[zone].v112Theme).startsWith('legend_'))issues.push(`${zone}: ambiance ${type} absente`);
+261:     const lakeNPC=(typeof NPCDATA!=='undefined'?NPCDATA:[]).filter(n=>n.zone==='route4bis'&&n.swimmerV109O).length;
+262:     const core={scenes:Object.keys(SCENES||{}).length,creatures:(typeof CREATURES!=='undefined'?CREATURES:[]).length,moves:typeof MOVE_DB!=='undefined'?Object.keys(MOVE_DB||{}).length:0,save:typeof save==='function',load:typeof load==='function'||typeof loadGame==='function',battle:typeof startBattle==='function',codex:!!document.getElementById('dexBtn')||!!document.getElementById('dexov')};
+263:     const systems={movement:typeof window.collision==='function',interaction:typeof window.interact==='function',shop:typeof window.openShop==='function',healing:typeof window.startHealingSequence==='function',objectives:typeof window.openObjectivesV84==='function',bag:typeof window.openBag==='function',pc:typeof window.openPC==='function',saveFile:typeof window.ValdoraSaveV108A?.saveAsNow==='function'&&typeof window.ValdoraSaveV108A?.loadFile==='function',transport:typeof window.ValdoraProV111?.playTransport==='function',secretBook:typeof window.ValdoraProV111?.openBook==='function'};
+264:     for(const [name,ok] of Object.entries(systems))if(!ok)issues.push(`système ${name} indisponible`);
+265:     return{version:VERSION,ok:issues.length===0,issues,locations:LOCATIONS.length,routes:LINKS.length,legendaryBiomes:Object.keys(LEGEND_TYPES).length,lakeNPC,lakeTrainers:(SCENES?.route4bis?.trainers||[]).filter(n=>n.swimmer).length,core,systems,assets:{map:MAP_IMAGE,swimmer:ready(IMAGES.swimmer),playerBuoy:ready(IMAGES.playerBuoy),roadside:ready(IMAGES.roadside),tree:ready(IMAGES.tree)},hooks:{world:!!window.drawWorld?.__v112World,route:!!window.drawRouteObjectsV93?.__v112Route,hero:!!window.drawHero?.__v112Hero,treeOverlay:ready(IMAGES.tree),creatorNavigation:!creator()||window.creatorTeleportZoneV105N===creatorPreviewZone}}
+266:   }
+267:   function publishAudit(){try{document.documentElement.dataset.valdoraV112Audit=JSON.stringify(audit())}catch(_){}}
+268:   function install(){canonicalTopology();injectMapStyle();hookRouteDrawing();hookWorldDrawing();hookHero();hookTrees();hookCreatorNavigation();hookCreatorNavigationClicks();installButton();enforceIdentity();window.ValdoraProV112={version:VERSION,locations:LOCATIONS,links:LINKS,openMap,previewZone:creatorPreviewZone,repair:canonicalTopology,audit};document.documentElement.dataset.valdoraBiomes=VERSION;publishAudit()}
+269: 
+270:   install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[900,3200,7800,10800,13300,14900].forEach(delay=>setTimeout(install,delay));setInterval(()=>{try{canonicalTopology();installButton();enforceIdentity();publishAudit()}catch(_){}},2800);
+271: })();
+## game/assets/v105r-combat.js
+### line 185: Rappel
+177:   }
+178: 
+179:   if(battle.menu==='bag'){
+180:     const inv=state.inventory||{};
+181:     bar.appendChild(button(`Potion (${inv.Potion||0})`,()=>useItem('Potion'),locked||!(inv.Potion>0)||p.hp>=maxHP(p)));
+182:     bar.appendChild(button(`Super Potion (${inv.SuperPotion||0})`,()=>useItem('SuperPotion'),locked||!(inv.SuperPotion>0)||p.hp>=maxHP(p)));
+183:     bar.appendChild(button(`Baie (${inv.Baie||0})`,()=>useItem('Baie'),locked||!(inv.Baie>0)||p.hp>=maxHP(p)));
+184:     bar.appendChild(button(`Antidote (${inv.Antidote||0})`,()=>useItem('Antidote'),locked||!(inv.Antidote>0)||!p.status));
+185:     bar.appendChild(button(`Rappel (${inv.Rappel||0})`,()=>openRevive(),locked||!(inv.Rappel>0)||!(state.team||[]).some(m=>m.hp<=0)));
+186:     bar.appendChild(button(`Orbe (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0)));
+187:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0)));
+188:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0)));
+189:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked));
+190:     return
+191:   }
+192: 
+193:   const moves=(p?.moves||[]).slice(0,4);
+194:   for(let i=0;i<4;i++){
+195:     const mid=moves[i],mv=MOVE_DB[mid];
+196:     bar.appendChild(button(mv?mv.name:'—',()=>chooseMoveV105R(i),locked||!mv,'v105r-move',TYPE_COLORS[mv?.type]||TYPE_COLORS.Neutre))
+197:   }
+198:   bar.appendChild(button('Sac',()=>{battle.menu='bag';buildButtons()},locked));
+### line 431: Rappel
+423:     const healed=Math.min(amount,maxHP(p)-p.hp);if(healed<=0)return;
+424:     state.inventory[kind]--;p.hp+=healed;text=`${nameOf(p)} récupère ${healed} PV.`
+425:   }
+426:   battle.busy=true;battle.menu='actions';setMessage(text);safeCall(hud);buildButtons();schedule(560,enemyTurnV105R)
+427: }
+428: 
+429: function openRevive(){battle.menu='revive';buildButtons()}
+430: function useRevive(target){
+431:   if(!combatReady()||battle.busy||target.hp>0||!(state.inventory?.Rappel>0))return;
+432:   state.inventory.Rappel--;target.hp=Math.max(1,Math.floor(maxHP(target)*.45));target.status=null;
+433:   battle.busy=true;battle.menu='actions';setMessage(`${nameOf(target)} revient avec ${target.hp} PV.`);safeCall(hud);buildButtons();schedule(560,enemyTurnV105R)
+434: }
+435: 
+436: function completeOrbCapture(enemy){
+437:   const xp=Math.max(8,Math.floor((enemy.level*11+12+(BY[enemy.id]?.stage||0)*8)*.80));
+438:   const events=safeCall(gainXP,currentPlayer(),xp)||[];
+439:   battle.eventQueue.push(`${nameOf(currentPlayer())} gagne ${xp} EXP pour la capture.`,...events);
+440:   battle.captureXP=xp;battle.result='capture';setMessage(`${nameOf(enemy)} est capturé !`);
+441:   schedule(900,()=>finishV105R('capture'))
+442: }
+443: 
+444: function continueOrbShakes(orb,enemy,index=0){
+### line 779: SHOP_ITEMS
+771: function brandV105R(){
+772:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+773:   const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${VERSION} — ${creator?'CRÉATEUR':'JOUEUR'}`;
+774:   document.title=`VALDORA ${VERSION} — combats réécrits`;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.combatEngine=VERSION
+775: }
+776: 
+777: function installOrbEconomy(){
+778:   ensureOrbInventory();preloadOrbImages();
+779:   if(typeof SHOP_ITEMS==='object'){
+780:     SHOP_ITEMS.Orbe={...(SHOP_ITEMS.Orbe||{}),label:"Orbe d'Éclat",price:50,desc:'Capture standard à noyau ambré.'};
+781:     SHOP_ITEMS.SuperOrbe={...(SHOP_ITEMS.SuperOrbe||{}),label:'Super Orbe',price:240,desc:'Flux renforcé pour les captures difficiles.'};
+782:     SHOP_ITEMS.MegaOrbe={label:'Méga Orbe',price:1800,desc:'Orbe d’élite vendue seulement très tard dans l’aventure.'}
+783:   }
+784:   if(!window.__v105uShopInstalled){
+785:     window.__v105uShopInstalled=true;
+786:     const priorNormal=window.pNormalShopIdsV101P;
+787:     window.pNormalShopIdsV101P=function(){
+788:       const ids=priorNormal?priorNormal():['Potion','Orbe','Antidote','Baie'];
+789:       const seals=(state.seals||[]).length,town=Number(String(state.zone||'').match(/\d+/)?.[0]||0),creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+790:       if(creator||seals>=3||town>=7)ids.push('SuperOrbe');
+791:       if(creator||seals>=6||town>=12)ids.push('MegaOrbe');
+792:       return [...new Set(ids)]
