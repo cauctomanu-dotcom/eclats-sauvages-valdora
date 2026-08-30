@@ -1,4 +1,4 @@
-name: Temporary V122 focused extraction
+name: Apply final V122 regression fixes
 on:
   push:
     paths:
@@ -7,18 +7,43 @@ on:
 permissions:
   contents: write
 jobs:
-  extract:
+  patch:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract focused code
+      - name: Apply V122 source fixes
         run: python tools/extract_v122_focus.py
-      - name: Commit focused reports
+      - name: Validate V122 JavaScript
+        run: node --check game/V122_REGRESSION_FIXES.js
+      - name: Validate patched source markers
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          g=Path('game')
+          idx=(g/'index.html').read_text(encoding='utf-8')
+          cre=(g/'CREATEUR.html').read_text(encoding='utf-8')
+          live=(g/'VALDORA_LIVING_WORLD_V118.js').read_text(encoding='utf-8')
+          interior=(g/'V109V_INTERIEUR_REWRITE.js').read_text(encoding='utf-8')
+          legacy=(g/'V105Y_REFERENCE_INTERIEURS.js').read_text(encoding='utf-8')
+          assert idx.count('V122_REGRESSION_FIXES.js')==1
+          assert cre.count('V122_REGRESSION_FIXES.js')==1
+          assert "'route_simdor','town8'" in idx and "'route_simdor','town8'" in cre
+          assert 'party,partyIndex:0' in idx and 'party,partyIndex:0' in cre
+          assert '_bus_v122' in idx and '_bus_v122' in cre
+          assert "const SAVE='valdora_v41_creator';" in cre
+          assert 'const PLAYER_PROGRESSION_LOCK=false;' in cre
+          assert 'if(d>72)continue;' in live and 'bd<=68' in live
+          assert 'worldInteractV118.__v107dInteract=true;worldInteractV118.__v118StableInteract=true;' in live
+          assert 'function nearFurniture(max=52)' in interior and 'targetMetrics(n.x,n.y,56)' in interior
+          assert 'const reach=42,' in legacy and 'bd<40' in legacy and 'bd<68' in legacy
+          print('V122 static validation OK')
+          PY
+      - name: Commit final game fixes
         run: |
           git config user.name "cauctomanu-dotcom"
           git config user.email "cauctomanu@gmail.com"
-          git add _AI_V122_*.txt
-          git commit -m "chore: add V122 focused code reports" || exit 0
+          git add game/index.html game/CREATEUR.html game/V105Y_REFERENCE_INTERIEURS.js game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js game/V122_REGRESSION_FIXES.js
+          git commit -m "fix: complete V122 regressions and creator mode" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
-# small-final-diagnostics-20260830
+# apply-final-v122-20260830
