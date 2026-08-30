@@ -10,18 +10,22 @@ FILES=[
 FILES=[p for p in FILES if p.exists()]
 
 FUNCTIONS=[
- 'v61CreatorMode','creatorMode','isCreatorMode','enableCreatorMode','applyCreatorMode',
- 'openPC','openPc','openStorage','openDex','openCodex','dex','codex',
- 'citadel','citadelle','canEnterCitadel','canEnterCitadelle','playerQuestGateMessage',
- 'interactInterior','interactInteriorNew','targetFurniture','targetNpc','nearInteriorNPC',
- 'nearNpc','serviceInteract','worldInteractV118','nearNPC','near'
+ 'v61CreatorMode','creatorMode','creatorLegends','v107kCreator',
+ 'pcStateV106E','openPC','mon','defaultMoves','showDex','openDex','openCodex','dex','codex',
+ 'v83CaughtCount','v106pHasVolMastery','v106pCitadelRequirements','v83CitadelGateText',
+ 'finalTempleAvailableV77','altarReadyV77','templeGuardsClearedV77','playerQuestGateMessage',
+ 'interactInterior','interactInteriorNew','targetFurniture','v109jTargetFurniture','facesFurniture',
+ 'interactionRect','targetNpc','nearInteriorNPC','nearNpc','serviceInteract',
+ 'playerInteractionPoint','worldInteractV118','nearNPC','near'
 ]
 TERMS=[
- 'v61CreatorMode','creator','createur','créateur','Codex','Écladex','Ecladex','caught','seen',
- 'storage','reserve','réserve','box','pcBox','computer','ordinateur','Citadelle','citadel',
- 'seals','sceaux','legendary','légendaire','trainerWins','targetFurniture','targetNpc',
- 'nearInteriorNPC','interaction','interactif','Math.hypot','distanceRect','reach=',
- 'bd<','range=','near?.('
+ 'creatorLegends','v61CreatorMode','creatorMode()','CREATEUR','CREATOR_MODE',
+ 'state.dex','state.box','state.pc','caught:true','seen:true','V83_TOTAL_CREATURES','169',
+ 'Codex','Écladex','Ecladex','ordinateur','stockage','PC de stockage',
+ 'v106pCitadelRequirements','Citadelle','citadel','state.seals','state.fly','Vol',
+ 'trainerWins','targetFurniture','v109jTargetFurniture','targetNpc','nearInteriorNPC','nearNpc',
+ 'playerInteractionPoint','interactionRect','facesFurniture','Math.hypot','distanceRect','reach=',
+ 'bd<','bd<=','range=','near?.('
 ]
 
 def function_block(txt,name):
@@ -53,14 +57,14 @@ def function_block(txt,name):
                 depth-=1
                 if depth==0:return txt[s:i+1]
         i+=1
-    return txt[s:s+12000]
+    return txt[s:s+18000]
 
-def contexts(txt,term,limit=8,before=5,after=10):
+def contexts(txt,term,limit=12,before=7,after=14):
     ls=txt.splitlines();out=[]
     for i,line in enumerate(ls):
         if term.lower() not in line.lower():continue
         a=max(0,i-before);b=min(len(ls),i+after)
-        out.append(f'### line {i+1} :: {term}\n'+'\n'.join(f'{j+1}: {ls[j][:1800]}' for j in range(a,b)))
+        out.append(f'### line {i+1} :: {term}\n'+'\n'.join(f'{j+1}: {ls[j][:2200]}' for j in range(a,b)))
         if len(out)>=limit:break
     return out
 
@@ -70,7 +74,7 @@ for p in FILES:
     section=[f'\n\n######## {p.as_posix()} ########\n']
     for name in FUNCTIONS:
         b=function_block(txt,name)
-        if b:section.append(f'\n===== FUNCTION {name} =====\n{b[:18000]}\n')
+        if b:section.append(f'\n===== FUNCTION {name} =====\n{b[:24000]}\n')
     for term in TERMS:
         cs=contexts(txt,term)
         if cs:section.append(f'\n===== TERM {term} =====\n'+'\n---\n'.join(cs)+'\n')
