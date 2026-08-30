@@ -1,14 +1,14 @@
-// VALDORA V126 — fiche de nouveautés de la mise à jour V125
+// Fiche de nouveautés publique — Valdora V1.0.1
 (function(){
 'use strict';
 
 const VERSION='V126-UPDATE-NOTES-1';
 const RELEASE_KEY='valdora_last_seen_update';
-const CURRENT_ID='v125-first-hours-and-fixes-1';
+const CURRENT_ID='v1.0.1-release-1';
 const LEGACY_ID='v118-mobile-5';
 const RELEASE={
   id:CURRENT_ID,
-  title:'Mise à jour V125 — La première Résonance',
+  title:'Mise à jour V1.0.1 — La première Résonance',
   intro:'Cette mise à jour renforce le début de l’aventure, améliore la vie du monde et corrige plusieurs systèmes importants.',
   notes:[
     'Nouveau Chapitre I « La première Résonance » : Orée devient un personnage récurrent lié au Professeur Aurine, aux anomalies et à la Team Taron.',
@@ -75,18 +75,17 @@ function syncMobileApi(){
   try{api.release=RELEASE;api.openUpdateDialog=open;api.closeUpdateDialog=close}catch(_){}
 }
 function install(){
-  // La couche V110 a temporairement marqué l’ancienne fiche comme vue afin que
-  // la popup V118 ne s’ouvre pas juste avant celle-ci.
   syncMobileApi();replaceNewsButton();
   if(wasCurrentSeen())setSeen(CURRENT_ID);
+  try{window.ValdoraStableV110?.applyPublicBranding?.()}catch(_){}
   document.documentElement.dataset.valdoraUpdateNotes=VERSION
 }
 
 const firstSeen=previousSeen();
-window.ValdoraUpdateNotesV126={version:VERSION,release:RELEASE,open,close,install,previousSeen:firstSeen};
+window.ValdoraUpdateNotesV126={version:VERSION,publicVersion:'V1.0.1',release:RELEASE,open,close,install,previousSeen:firstSeen};
 install();
 setTimeout(()=>{install();if(firstSeen!==CURRENT_ID)open(false);else setSeen(CURRENT_ID)},140);
 [500,1200,2600,5200].forEach(ms=>setTimeout(install,ms));
-setInterval(()=>{try{replaceNewsButton();syncMobileApi()}catch(_){}},2500);
-console.log('V126 : fiche de nouveautés V125 synchronisée.');
+setInterval(()=>{try{replaceNewsButton();syncMobileApi();window.ValdoraStableV110?.applyPublicBranding?.()}catch(_){}},2500);
+console.log('Fiche de nouveautés Valdora V1.0.1 synchronisée.');
 })();
