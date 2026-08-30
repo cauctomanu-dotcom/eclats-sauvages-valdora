@@ -1,0 +1,251 @@
+name: Repair precise interactions and Valdora cycleways
+on:
+  push:
+    paths:
+      - '.github/workflows/repair-v119-interactions-bike.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Patch precise interior targeting and bicycle progression
+        shell: python
+        run: |
+          from pathlib import Path
+
+          index_path=Path('game/index.html')
+          interior_path=Path('game/V109V_INTERIEUR_REWRITE.js')
+          living_path=Path('game/VALDORA_LIVING_WORLD_V118.js')
+          index=index_path.read_text(encoding='utf-8')
+          interior=interior_path.read_text(encoding='utf-8')
+          living=living_path.read_text(encoding='utf-8')
+
+          def block_end(text, open_brace):
+              depth=0; quote=None; escape=False; template=False; i=open_brace
+              while i<len(text):
+                  ch=text[i]
+                  if escape:
+                      escape=False; i+=1; continue
+                  if quote:
+                      if ch=='\\': escape=True
+                      elif ch==quote: quote=None
+                      i+=1; continue
+                  if ch in ('"',"'"):
+                      quote=ch; i+=1; continue
+                  if ch=='`':
+                      template=not template; i+=1; continue
+                  if template:
+                      i+=1; continue
+                  if ch=='{': depth+=1
+                  elif ch=='}':
+                      depth-=1
+                      if depth==0:return i+1
+                  i+=1
+              raise SystemExit('Unbalanced block')
+
+          def function_span(text, anchor, start_at=0):
+              start=text.find(anchor,start_at)
+              if start<0: raise SystemExit('Missing anchor: '+anchor)
+              brace=text.find('{',start+len(anchor))
+              if brace<0: raise SystemExit('Missing opening brace: '+anchor)
+              return start,brace,block_end(text,brace)
+
+          def replace_function(text, anchor, replacement, start_at=0):
+              start,brace,end=function_span(text,anchor,start_at)
+              return text[:start]+replacement+text[end:]
+
+          # -------------------------------------------------------------
+          # 1) Bicycle progression: the 3rd Seal unlocks ownership only.
+          # Riding itself is controlled later by V118 and cycleway position.
+          # -------------------------------------------------------------
+          award=r'''function v83AwardGuardianSeal(t){
+            if(!t?.guardian||!t.sealIndex)return false;
+            const seal=t.sealIndex;
+            if(!(state.seals||[]).includes(seal)){
+              state.seals.push(seal);
+              state.seals.sort((a,b)=>a-b);
+              state.flags=state.flags||{};
+              if(state.seals.length>=3&&!state.flags.bikeUnlockedV119){
+                state.flags.bikeUnlockedV119=true;
+                try{toast('Bicyclette débloquée ! Rejoins une piste cyclable pour l’utiliser.')}catch(_){}
+                try{logEvent('Bicyclette débloquée après le 3e Sceau.')}catch(_){}
+              }
+              state.bike=false;
+              logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+              return true
+            }
+            return false
+          }'''
+          index=replace_function(index,'function v83AwardGuardianSeal(t)',award)
+
+          # -------------------------------------------------------------
+          # 2) Several real cycleways, parallel to existing route paths.
+          # This bridge lives in V107E because it already owns the exact camera.
+          # -------------------------------------------------------------
+          if 'window.ValdoraCyclewaysV119Bridge=' not in index:
+              marker='window.ValdoraChestV118Bridge='
+              start=index.find(marker)
+              if start<0: raise SystemExit('Chest bridge missing')
+              brace=index.find('{',start+len(marker))
+              end=block_end(index,brace)
+              semi=index.find(';',end)
+              if semi<0: raise SystemExit('Chest bridge terminator missing')
+              bridge=r'''
+
+function v119CyclewayZones(){
+  const all=Object.keys(typeof SCENES==='object'&&SCENES?SCENES:{}).filter(z=>/^route\d+$/.test(z)&&SCENES[z]?.kind==='route'&&!SCENES[z]?.v116Sanctuary).sort((a,b)=>Number(a.slice(5))-Number(b.slice(5)));
+  let picked=all.filter(z=>{const n=Number(z.slice(5));return n>=2&&n<=12&&n%2===0});
+  if(picked.length<3)picked=all.filter((_,i)=>i%2===1).slice(0,6);
+  return picked
+}
+function v119PathPoint(p){if(Array.isArray(p))return{x:Number(p[0]),y:Number(p[1])};return{x:Number(p?.x),y:Number(p?.y)}}
+function v119BaseRoutePath(sc){const raw=Array.isArray(sc?.v104Path)&&sc.v104Path.length>1?sc.v104Path:Array.isArray(sc?.v76Path)&&sc.v76Path.length>1?sc.v76Path:Array.isArray(sc?.path)&&sc.path.length>1?sc.path:[];return raw.map(v119PathPoint).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))}
+function v119CyclewayPath(sc,zone=state?.zone){
+  if(!sc||!v119CyclewayZones().includes(String(zone)))return[];const raw=v119BaseRoutePath(sc);if(raw.length<2)return[];
+  const n=Number(String(zone).replace('route',''))||0,side=n%4===0?1:-1,offset=38;
+  return raw.map((p,i)=>{const a=raw[Math.max(0,i-1)],b=raw[Math.min(raw.length-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,len=Math.max(1,Math.hypot(dx,dy)),x=p.x-dy/len*offset*side,y=p.y+dx/len*offset*side;return{x:Math.max(26,Math.min((sc.width||2400)-26,x)),y:Math.max(26,Math.min((sc.height||1400)-26,y))}})
+}
+function v119SegmentDistance(px,py,a,b){const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;if(l2<.001)return Math.hypot(px-a.x,py-a.y);const t=Math.max(0,Math.min(1,((px-a.x)*dx+(py-a.y)*dy)/l2)),x=a.x+t*dx,y=a.y+t*dy;return Math.hypot(px-x,py-y)}
+function v119OnCycleway(x,y,zone=state?.zone,range=23){const sc=typeof SCENES==='object'?SCENES?.[zone]:null,path=v119CyclewayPath(sc,zone);if(path.length<2)return false;for(let i=0;i<path.length-1;i++)if(v119SegmentDistance(Number(x),Number(y),path[i],path[i+1])<=Number(range||23))return true;return false}
+function v119DrawCycleway(sc,zone=state?.zone){
+  const path=v119CyclewayPath(sc,zone);if(path.length<2)return false;const c=camera(sc)||{},sx=Number(c.sx)||(960/1600),sy=Number(c.sy)||(600/1000),camX=Number(c.camX)||0,camY=Number(c.camY)||0,s=Math.max(.35,(Math.abs(sx)+Math.abs(sy))/2);
+  const trace=()=>{ctx.beginPath();path.forEach((p,i)=>{const x=(p.x-camX)*sx,y=(p.y-camY)*sy;i?ctx.lineTo(x,y):ctx.moveTo(x,y)})};
+  ctx.save();ctx.lineCap='round';ctx.lineJoin='round';trace();ctx.strokeStyle='rgba(18,60,72,.88)';ctx.lineWidth=34*s;ctx.stroke();trace();ctx.strokeStyle='#55c4cf';ctx.lineWidth=27*s;ctx.stroke();trace();ctx.setLineDash([20*s,15*s]);ctx.strokeStyle='rgba(255,255,255,.88)';ctx.lineWidth=2.5*s;ctx.stroke();ctx.setLineDash([]);
+  for(const p of[path[0],path[path.length-1]]){const x=(p.x-camX)*sx,y=(p.y-camY)*sy;ctx.fillStyle='rgba(14,55,67,.94)';ctx.beginPath();ctx.arc(x,y,18*s,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2*s;ctx.stroke();ctx.fillStyle='#fff';ctx.font=`${Math.max(11,18*s)}px Segoe UI Symbol,Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🚲',x,y)}
+  ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic';return true
+}
+window.ValdoraCyclewaysV119Bridge={version:'V119-CYCLEWAYS',zones:v119CyclewayZones,path:function(zone=state?.zone){return v119CyclewayPath(typeof SCENES==='object'?SCENES?.[zone]:null,zone)},isOn:v119OnCycleway,drawNow:function(){const sc=scNow();return sc?.kind==='route'?v119DrawCycleway(sc,state?.zone):false}};
+'''
+              index=index[:semi+1]+bridge+index[semi+1:]
+
+          overlay_start=index.find('window.ValdoraCyclewaysV119Bridge=')
+          overlay=r'''function drawOverlay(){
+            if(typeof scene!=='undefined'&&scene!=='world')return;const sc=scNow();if(!sc)return;const {camX,camY,sx,sy}=camera(sc);
+            if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}
+            else if(sc.kind==='route'){try{window.ValdoraCyclewaysV119Bridge?.drawNow?.()}catch(_){}for(const o of routeObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy)}
+          }'''
+          index=replace_function(index,'function drawOverlay()',overlay,overlay_start)
+
+          # -------------------------------------------------------------
+          # 3) Interior targeting: facing + close range, furniture first.
+          # V118 residents are deliberately excluded here and handled by V118.
+          # -------------------------------------------------------------
+          target_anchor='function nearestNpcWithDistance()'
+          if 'function directionalScore(' not in interior:
+              pos=interior.find(target_anchor)
+              if pos<0: raise SystemExit('Interior target anchor missing')
+              helpers=r'''function facingVector(dir=state.dir){const d=((Number(dir)||0)%4+4)%4;if(d===0)return{x:0,y:1};if(d===1)return{x:-1,y:0};if(d===2)return{x:1,y:0};return{x:0,y:-1}}
+function directionalScore(x,y,max=82){const dx=Number(x)-Number(state.roomX),dy=Number(y)-Number(state.roomY),d=Math.hypot(dx,dy);if(d>max)return null;if(d<=22)return{distance:d,forward:0,lateral:0,score:d};const v=facingVector(),forward=dx*v.x+dy*v.y,lateral=Math.abs(dx*v.y-dy*v.x);if(forward<-2||forward>max||lateral>Math.max(27,forward*.58))return null;return{distance:d,forward,lateral,score:d+lateral*.65}}
+function furnitureTargetPoint(m){const r=rectOf(m),px=Number(state.roomX),py=Number(state.roomY);let x=Math.max(r.x,Math.min(px,r.x+r.w)),y=Math.max(r.y,Math.min(py,r.y+r.h));if(Math.hypot(x-px,y-py)<1){const v=facingVector(),fx=px+v.x*42,fy=py+v.y*42;x=Math.max(r.x,Math.min(fx,r.x+r.w));y=Math.max(r.y,Math.min(fy,r.y+r.h));if(Math.hypot(x-px,y-py)<1){x=r.x+r.w/2;y=r.y+r.h/2}}return{x,y}}
+'''
+              interior=interior[:pos]+helpers+interior[pos:]
+
+          interior=replace_function(interior,'function nearestNpcWithDistance()',r'''function nearestNpcWithDistance(){let best=null,bd=Infinity,bs=Infinity;for(const n of session?.npcs||[]){if(n?.v118Resident)continue;const a=directionalScore(n.x,n.y,74);if(!a)continue;if(a.score<bs){bs=a.score;bd=a.distance;best=n}}return{target:best,distance:bd,score:bs}}''')
+          interior=replace_function(interior,'function nearestFurnitureWithDistance(max=150)',r'''function nearestFurnitureWithDistance(max=82){let best=null,bd=Infinity,bs=Infinity;for(const m of furn()){if(!userInteractable(m))continue;const p=furnitureTargetPoint(m),a=directionalScore(p.x,p.y,Math.min(96,Number(max)||82));if(!a)continue;const fn=String(m.fonction||'decor'),functional=fn!=='decor'&&fn!=='collision_mur',score=a.score-(functional?7:0);if(score<bs||(score===bs&&a.distance<bd)){bs=score;bd=a.distance;best=m}}return{target:best,distance:bd,score:bs}}''')
+          interior=replace_function(interior,'function nearNpc()',r'''function nearNpc(){return nearestNpcWithDistance().target||null}''')
+          interior=replace_function(interior,'function nearFurniture(max=150)',r'''function nearFurniture(max=82){return nearestFurnitureWithDistance(max).target}''')
+          interior=replace_function(interior,'function nearestInteractionTarget()',r'''function nearestInteractionTarget(){const fq=nearestFurnitureWithDistance(82);if(fq.target)return{kind:'furniture',target:fq.target,distance:fq.distance};const nq=nearestNpcWithDistance();if(nq.target)return{kind:'npc',target:nq.target,distance:nq.distance};return null}''')
+
+          interior=replace_function(interior,'function serviceNpcInteract(n)',r'''function serviceNpcInteract(n){faceNpc(n);if(!n?.service){dialogSafe(n?.name||'Habitant','Bonjour !');return true}switch(session?.key){case 'centre_soins':return interactFurniture(furn().find(m=>m.fonction==='soins_centre')||{fonction:'soins_centre',label:'Centre de soins'});case 'laboratoire':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe('Professeur Aurine','Continue ton enquête sur Valdora.');return true;case 'boutique':if(typeof openShop==='function')openShop();return true;case 'gare':window.ValdoraTrainV109D?.open?.();return true;case 'musee':if(typeof window.openMuseumDirectorV109A==='function')window.openMuseumDirectorV109A();else dialogSafe(n.name,'Bienvenue au musée.');return true;case 'gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));return true;default:dialogSafe(n.name,'Bonjour !');return true}}''')
+
+          api_old='interact,interactFurniture,nearFurniture,nearNpc,nearDoor'
+          api_new='interact,interactFurniture,interactionTarget:nearestInteractionTarget,directionalScore,nearFurniture,nearNpc,nearDoor'
+          if api_new not in interior:
+              if api_old not in interior: raise SystemExit('Interior API anchor missing')
+              interior=interior.replace(api_old,api_new,1)
+
+          # -------------------------------------------------------------
+          # 4) V118: base furniture/service target gets first refusal;
+          # ordinary residents use a smaller directional cone afterwards.
+          # -------------------------------------------------------------
+          living=replace_function(living,'function nearInteriorResident()',r'''function nearInteriorResident(){const s=interiorSession();if(!s)return null;let best=null,bs=Infinity;for(const n of s.npcs||[]){if(!n.v118Resident)continue;let a=null;try{a=BASE.interior?.directionalScore?.(n.x,n.y,76)||null}catch(_){}if(!a){const dx=n.x-Number(state.roomX),dy=n.y-Number(state.roomY),d=Math.hypot(dx,dy);if(d>72)continue;const dir=((Number(state.dir)||0)%4+4)%4,v=dir===0?[0,1]:dir===1?[-1,0]:dir===2?[1,0]:[0,-1],f=dx*v[0]+dy*v[1],l=Math.abs(dx*v[1]-dy*v[0]);if(d>22&&(f<0||l>Math.max(27,f*.58)))continue;a={score:d+l*.65}}if(a.score<bs){bs=a.score;best=n}}return best}''')
+
+          living=replace_function(living,'function interactInteriorV118()',r'''function interactInteriorV118(){
+            ensureInteriorPopulation(true);
+            const baseTarget=BASE.interior?.interactionTarget?.();
+            if(baseTarget&&typeof BASE.interactInterior==='function')return BASE.interactInterior.apply(this,arguments);
+            const n=nearInteriorResident();if(n){faceInterior(n);const s=interiorSession(),zone=s?.zone||state.zone,name=n.name||'Habitant';if(typeof dialog==='function')dialog(`<b>${name}</b><br>${talkLine(n,zone,s?.key||'intérieur')}`);return true}
+            return typeof BASE.interactInterior==='function'?BASE.interactInterior.apply(this,arguments):false
+          }''')
+
+          if 'function drawInteriorResidentPromptV119(' not in living:
+              pos=living.find('function drawInteriorV118()')
+              if pos<0: raise SystemExit('V118 interior draw anchor missing')
+              prompt=r'''function drawInteriorResidentPromptV119(n){if(!n||typeof ctx==='undefined')return;const txt='E / Entrée — '+(n.name||'Habitant');ctx.save();ctx.font='800 13px Segoe UI';const w=Math.min(700,ctx.measureText(txt).width+34),x=(960-w)/2,y=548;ctx.fillStyle='rgba(15,32,43,.92)';ctx.beginPath();ctx.roundRect(x,y,w,36,12);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.28)';ctx.stroke();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(txt,480,y+23);ctx.restore()}
+'''
+              living=living[:pos]+prompt+living[pos:]
+          living=replace_function(living,'function drawInteriorV118()',r'''function drawInteriorV118(){ensureInteriorPopulation(true);const result=typeof BASE.drawInterior==='function'?BASE.drawInterior.apply(this,arguments):undefined;try{if(!BASE.interior?.interactionTarget?.()){const n=nearInteriorResident();if(n)drawInteriorResidentPromptV119(n)}}catch(_){}return result}''')
+          living=replace_function(living,'function enterInteriorV118(b)',r'''function enterInteriorV118(b){state.bike=false;const ok=typeof BASE.interiorEnter==='function'?BASE.interiorEnter(b):false;if(ok)ensureInteriorPopulation(true);return ok}''')
+          living=replace_function(living,'function moveInteriorRoomV118()',r'''function moveInteriorRoomV118(){state.bike=false;const ok=typeof BASE.interiorMoveToRoom==='function'?BASE.interiorMoveToRoom(...arguments):false;if(ok)ensureInteriorPopulation(true);return ok}''')
+
+          if 'function bikeUnlockedV119()' not in living:
+              pos=living.find('function installHooks()')
+              if pos<0: raise SystemExit('V118 hooks anchor missing')
+              bike=r'''function bikeUnlockedV119(){state.flags=state.flags||{};if((state.seals||[]).length>=3)state.flags.bikeUnlockedV119=true;return !!state.flags.bikeUnlockedV119}
+function onCyclewayV119(x=state.x,y=state.y,zone=state.zone,range=24){try{return !!window.ValdoraCyclewaysV119Bridge?.isOn?.(Number(x),Number(y),zone,range)}catch(_){return false}}
+function syncBikeV119(){const on=typeof scene!=='undefined'&&scene==='world'&&bikeUnlockedV119()&&onCyclewayV119();state.bike=!!on;return state.bike}
+function moveV119(dx,dy,dir){
+  if(typeof scene==='undefined'||scene!=='world'){state.bike=false;return typeof BASE.move==='function'?BASE.move(dx,dy,dir):false}
+  const unlocked=bikeUnlockedV119(),x=Number(state.x),y=Number(state.y),walkX=x+Number(dx),walkY=y+Number(dy),bikeX=x+Number(dx)*1.55,bikeY=y+Number(dy)*1.55,was=!!state.bike;
+  const riding=unlocked&&(onCyclewayV119(walkX,walkY,state.zone,25)||onCyclewayV119(bikeX,bikeY,state.zone,25));state.bike=!!riding;
+  if(state.bike&&!was){state.flags=state.flags||{};if(!state.flags.bikeFirstRideV119){state.flags.bikeFirstRideV119=true;try{toast?.('Piste cyclable — bicyclette activée.')}catch(_){}}}
+  const result=typeof BASE.move==='function'?BASE.move(dx,dy,dir):false;
+  if(!onCyclewayV119(state.x,state.y,state.zone,28))state.bike=false;
+  return result
+}
+'''
+              living=living[:pos]+bike+living[pos:]
+
+          move_old='window.move=BASE.move;try{move=BASE.move}catch(_){}'
+          move_new='window.move=moveV119;try{move=moveV119}catch(_){}'
+          if move_new not in living:
+              if move_old not in living: raise SystemExit('V118 move hook anchor missing')
+              living=living.replace(move_old,move_new,1)
+
+          living=replace_function(living,'function install()',r'''function install(){syncBikeV119();configureCurrent(false);installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}''')
+
+          export_anchor='window.ValdoraLivingWorldV118=api;'
+          export_line="window.ValdoraBikeV119={version:'V119-CYCLEWAYS',unlocked:bikeUnlockedV119,onTrack:onCyclewayV119,sync:syncBikeV119,zones:()=>window.ValdoraCyclewaysV119Bridge?.zones?.()||[]};"
+          if export_line not in living:
+              if export_anchor not in living: raise SystemExit('V118 export anchor missing')
+              living=living.replace(export_anchor,export_anchor+export_line,1)
+
+          index_path.write_text(index,encoding='utf-8')
+          interior_path.write_text(interior,encoding='utf-8')
+          living_path.write_text(living,encoding='utf-8')
+
+      - name: Verify V119 repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q "state.seals.length>=3" game/index.html
+          grep -q "ValdoraCyclewaysV119Bridge" game/index.html
+          grep -q "v119DrawCycleway" game/index.html
+          grep -q "interactionTarget:nearestInteractionTarget" game/V109V_INTERIEUR_REWRITE.js
+          grep -q "if(!n?.service)" game/V109V_INTERIEUR_REWRITE.js
+          grep -q "baseTarget=BASE.interior?.interactionTarget?.()" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "function moveV119" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "window.move=moveV119" game/VALDORA_LIVING_WORLD_V118.js
+          grep -q "V119-CYCLEWAYS" game/VALDORA_LIVING_WORLD_V118.js
+          node --check game/V109V_INTERIEUR_REWRITE.js
+          node --check game/VALDORA_LIVING_WORLD_V118.js
+          git diff --check
+
+      - name: Commit V119 repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- game/index.html game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js; then
+            echo 'No source change needed'
+            exit 0
+          fi
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add game/index.html game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js
+          git commit -m "feat: precise interactions and cycleway-only bicycle"
+          git push origin HEAD:main
