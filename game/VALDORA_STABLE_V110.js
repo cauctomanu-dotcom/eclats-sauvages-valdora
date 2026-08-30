@@ -174,3 +174,15 @@
   // (2,8 s / 7,6 s / 10,5 s) afin qu'elles travaillent toujours sur un réseau complet.
   [2200, 7200, 10200, 11800].forEach(delay => setTimeout(install, delay));
 })();
+
+// V123 est volontairement chargé depuis un module déjà commun aux versions
+// Joueur et Créateur : les deux modes reçoivent ainsi exactement le même
+// correctif de gameplay sans maintenir deux copies divergentes dans les HTML.
+(function loadValdoraV123(){
+  if(document.getElementById('valdoraV123ParityLoader'))return;
+  const script=document.createElement('script');
+  script.id='valdoraV123ParityLoader';
+  script.src='V123_CREATOR_PARITY_NPC_FIXES.js?v=123-parity-1';
+  script.async=false;
+  (document.head||document.documentElement).appendChild(script);
+})();
