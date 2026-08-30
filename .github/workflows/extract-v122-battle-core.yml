@@ -1,0 +1,23 @@
+name: Temporary V122 battle core diagnostics
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-v122-battle-core.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract battle core
+        run: python tools/extract_v122_battle_core.py
+      - name: Commit report
+        run: |
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add _AI_V122_battle_core.txt
+          git commit -m "chore: add battle core report" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
