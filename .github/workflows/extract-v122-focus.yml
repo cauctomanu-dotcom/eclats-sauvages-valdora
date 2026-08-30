@@ -19,5 +19,6 @@ jobs:
           git config user.email "cauctomanu@gmail.com"
           git add _AI_V122_*.txt
           git commit -m "chore: add V122 focused code reports" || exit 0
+          git pull --rebase origin main
           git push origin HEAD:main
-# split-deep-extraction-run-20260830
+# split-deep-extraction-run-rebase-20260830
