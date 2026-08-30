@@ -1,0 +1,55 @@
+name: Diagnose Valdora NPC and bus regressions
+
+on:
+  push:
+    paths:
+      - '.github/workflows/diag-valdora-bus-npc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect current game source
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('game/index.html')
+          s=p.read_text(encoding='utf-8')
+          print('INDEX_CHARS',len(s),'LINES',s.count('\n')+1)
+          needles=[
+            'function setupNPCs','v105dStreetNPCs','function activate','setTimeout(activate',
+            'busStops','busStop','BUS_STOPS','drawBus','openBus','busTravel','busMenu',
+            'Fluo','Val d’Ora','Val d\'Ora','arrêt','arret','Arrêt','gare routière','bus'
+          ]
+          seen=set()
+          for needle in needles:
+            print('\n===== NEEDLE',repr(needle),'=====')
+            count=0
+            start=0
+            while True:
+              i=s.find(needle,start)
+              if i<0: break
+              count+=1
+              if count<=10:
+                a=max(0,i-900); b=min(len(s),i+1800)
+                snippet=s[a:b].replace('\r','')
+                print(f'--- match {count} at char {i} ---')
+                print(snippet)
+              start=i+max(1,len(needle))
+            print('COUNT',count)
+          # Function names containing bus/stop/transit-ish words
+          funcs=re.findall(r'function\s+([A-Za-z0-9_$]+)\s*\(',s)
+          print('\n===== TRANSIT FUNCTION NAMES =====')
+          for f in funcs:
+            if re.search(r'bus|stop|arret|gare|transport|travel|route|ligne',f,re.I): print(f)
+          # const/let/var identifiers around bus occurrences
+          print('\n===== BUS IDENTIFIER CONTEXT =====')
+          for m in list(re.finditer(r'bus',s,re.I))[:80]:
+            a=max(0,m.start()-180); b=min(len(s),m.start()+300)
+            print(s[a:b].replace('\n',' '))
