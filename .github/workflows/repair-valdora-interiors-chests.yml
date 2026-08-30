@@ -16,170 +16,35 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Repair nurses and restore chests
+      - name: Guard route chest rendering
         shell: python
         run: |
           from pathlib import Path
-
-          index_path=Path('game/index.html')
-          living_path=Path('game/VALDORA_LIVING_WORLD_V118.js')
-          index=index_path.read_text(encoding='utf-8')
-          living=living_path.read_text(encoding='utf-8')
-
-          def block_end(text, open_brace):
-              depth=0; quote=None; escape=False; template=False; i=open_brace
-              while i<len(text):
-                  ch=text[i]
-                  if escape:
-                      escape=False; i+=1; continue
-                  if quote:
-                      if ch=='\\': escape=True
-                      elif ch==quote: quote=None
-                      i+=1; continue
-                  if ch in ('"',"'"):
-                      quote=ch; i+=1; continue
-                  if ch=='`':
-                      template=not template; i+=1; continue
-                  if template:
-                      i+=1; continue
-                  if ch=='{': depth+=1
-                  elif ch=='}':
-                      depth-=1
-                      if depth==0:return i+1
-                  i+=1
-              raise SystemExit('Unbalanced block')
-
-          def function_span(text, anchor):
-              start=text.find(anchor)
-              if start<0: raise SystemExit('Missing anchor: '+anchor)
-              brace=text.find('{',start+len(anchor))
-              if brace<0: raise SystemExit('Missing opening brace: '+anchor)
-              return start,brace,block_end(text,brace)
-
-          def replace_function(text, anchor, replacement):
-              start,brace,end=function_span(text,anchor)
-              return text[:start]+replacement+text[end:]
-
-          sstart,sbrace,send=function_span(index,'function sleepAt(m)')
-          sleep_block=index[sstart:send]
-          if 'Date.now()+15000' not in sleep_block or '},15000)' not in sleep_block:
-              raise SystemExit('Bed rest is no longer exactly 15 seconds')
-
-          if 'window.ValdoraChestV118Bridge=' not in index:
-              marker='window.ValdoraBusV118Bridge={'
-              start=index.find(marker)
-              if start<0: raise SystemExit('ValdoraBusV118Bridge not found')
-              brace=index.find('{',start+len('window.ValdoraBusV118Bridge='))
-              end=block_end(index,brace)
-              semi=index.find(';',end)
-              if semi<0: raise SystemExit('Bus bridge terminator not found')
-              chest_bridge=r'''
-          window.ValdoraChestV118Bridge={
-            ownedByV118:false,
-            list:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return[];const all=sc.kind==='town'?townObjects(sc,state?.zone):sc.kind==='route'?routeObjects(sc,state?.zone):[];return all.filter(o=>o?.type==='chest')},
-            nearest:function(range=110){let best=null,bd=Number(range)||110;for(const o of this.list()){const d=Math.hypot(Number(state?.x||0)-o.x,Number(state?.y||0)-o.y);if(d<=bd){bd=d;best=o}}return best},
-            drawNow:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return false;const c=camera(sc)||{};const list=this.list();for(const o of list)drawObject(o,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return list.length>0},
-            interact:function(range=110){const o=this.nearest(range);if(!o)return false;return !!interactFind(o)}
-          };
-          '''
-              index=index[:semi+1]+chest_bridge+index[semi+1:]
-
-          dstart,dbrace,dend=function_span(index,'function drawOverlay()')
-          dblock=index[dstart:dend]
-          old_town="if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}"
-          new_town="if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}"
-          old_route="else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy)}"
-          new_route="else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy)}"
-          if old_town in dblock:dblock=dblock.replace(old_town,new_town,1)
-          if old_route in dblock:dblock.replace(old_route,new_route,1)
-          if 'ValdoraChestV118Bridge?.ownedByV118' not in dblock:
-              raise SystemExit('Could not guard legacy chest draw')
-          index=index[:dstart]+dblock+index[dend:]
-
-          version_marker="window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;"
-          version_replacement="window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;if(window.ValdoraChestV118Bridge)window.ValdoraChestV118Bridge.ownedByV118=true;"
-          if version_marker in living:
-              living=living.replace(version_marker,version_replacement,1)
-          elif 'window.ValdoraChestV118Bridge' not in living:
-              raise SystemExit('V118 ownership marker not found')
-
-          ensure_replacement=r'''function ensureInteriorPopulation(record=false){
-            const s=interiorSession();if(!s)return false;const g=roomGeometry(),key=`${s.zone}|${buildingId(s.source,s)}|${s.floorId}|${s.roomId}`;if(record)recordInterior(s);if(s._v118PopulationKey===key&&s.npcs?.some(n=>n.v118Resident))return true;
-            const base=(s.npcs||[]).filter(n=>!n.v118Resident),roles=INTERIOR_ROLES[s.key]||INTERIOR_ROLES.maison,count=INTERIOR_COUNT[s.key]||3,candidates=interiorCandidates(g,BASE.interior?.furniture?.()||[]),random=rng(hash(key)),used=base.map(n=>({x:n.x,y:n.y})),people=[];
-            const reservedLooks=new Set(base.filter(n=>n?.service).map(n=>Number(n.look)).filter(Number.isFinite));
-            const reservedNames=new Set(base.filter(n=>n?.service).map(n=>String(n.name||'').trim().toLowerCase()).filter(Boolean));
-            for(let i=0;i<count&&candidates.length;i++){
-              let pick=-1;for(let tries=0;tries<candidates.length;tries++){const at=Math.floor(random()*candidates.length),p=candidates[at];if(used.every(o=>distance(p,o)>=76)){pick=at;break}}if(pick<0)pick=0;const p=candidates.splice(pick,1)[0],id=npcIdentity(s.zone||state.zone,i,key),role=roles[i%roles.length];
-              let look=Number(id.look);if(!Number.isFinite(look))look=0;while(reservedLooks.has(look))look=(look+7)%41;
-              let name=String(id.name||'Habitant');if(reservedNames.has(name.trim().toLowerCase()))name=`${name} — visiteur`;
-              const n={id:`v118_inside_${hash(key).toString(36)}_${i}`,name,look,x:p.x,y:p.y,homeX:p.x,homeY:p.y,targetX:p.x,targetY:p.y,dir:hash(name+key)%4,moving:false,service:false,v118Resident:true,v118Role:role,nextDecision:0,pauseUntil:0};people.push(n);used.push(p)
-            }
-            s.npcs=[...base,...people];s._v118PopulationKey=key;return true
-          }'''
-          living=replace_function(living,'function ensureInteriorPopulation(record=false)',ensure_replacement)
-
-          interact_replacement=r'''function worldInteractV118(){
-            if(typeof scene!=='undefined'&&scene==='world'){
-              try{
-                const bus=window.ValdoraBusV118Bridge;
-                if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}
-              }catch(e){console.warn('V118 interaction arrêt Fluo Valdora',e)}
-              try{
-                const chest=window.ValdoraChestV118Bridge;
-                if(chest){chest.ownedByV118=true;if(chest.interact?.(110))return true}
-              }catch(e){console.warn('V118 interaction coffre Valdora',e)}
-              const n=nearWorldNpc();if(n&&distance(n,state)<=88)return talkWorldNpc(n);
-              const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;
-              if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);
-              return result
-            }
-            return typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false
-          }'''
-          living=replace_function(living,'function worldInteractV118()',interact_replacement)
-
-          draw_replacement=r'''function drawWorldV118(){
-            const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;
-            if(typeof scene!=='undefined'&&scene==='world'){
-              try{if(window.ValdoraChestV118Bridge){window.ValdoraChestV118Bridge.ownedByV118=true;window.ValdoraChestV118Bridge.drawNow?.()}}catch(e){console.warn('V118 coffre Valdora',e)}
-              if(current()?.kind==='town'){
-                try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
-                drawTownAmbience()
-              }
-            }
-            return result
-          }'''
-          living=replace_function(living,'function drawWorldV118()',draw_replacement)
-
-          index_path.write_text(index,encoding='utf-8')
-          living_path.write_text(living,encoding='utf-8')
-
-      - name: Verify repair
+          p=Path('game/index.html')
+          s=p.read_text(encoding='utf-8')
+          old="else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy)}"
+          new="else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy)}"
+          if old in s:s=s.replace(old,new,1)
+          if new not in s:raise SystemExit('Route chest guard missing')
+          p.write_text(s,encoding='utf-8')
+      - name: Verify final repair
         shell: bash
         run: |
           set -euo pipefail
           grep -q "Date.now()+15000" game/index.html
           grep -q "},15000)" game/index.html
           grep -q "window.ValdoraChestV118Bridge=" game/index.html
-          grep -q "chest.interact?.(110)" game/VALDORA_LIVING_WORLD_V118.js
           grep -q "reservedLooks" game/VALDORA_LIVING_WORLD_V118.js
-          test -f game/ASSETS_DECOR_V107D/chest_search/front.png
-          test -f game/ASSETS_DECOR_V107D/chest_search/back.png
-          test -f game/ASSETS_DECOR_V107D/chest_search/left.png
-          test -f game/ASSETS_DECOR_V107D/chest_search/right.png
+          grep -q "ValdoraChestV118Bridge?.ownedByV118" game/index.html
           node --check game/VALDORA_LIVING_WORLD_V118.js
           git diff --check
-
-      - name: Commit repair
+      - name: Commit final guard
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet -- game/index.html game/VALDORA_LIVING_WORLD_V118.js; then
-            echo "No source change needed"
-            exit 0
-          fi
+          if git diff --quiet -- game/index.html; then exit 0; fi
           git config user.name "cauctomanu-dotcom"
           git config user.email "cauctomanu@gmail.com"
-          git add game/index.html game/VALDORA_LIVING_WORLD_V118.js
-          git commit -m "fix: restore chests and deduplicate care staff"
+          git add game/index.html
+          git commit -m "fix: prevent duplicate route chest rendering"
           git push origin HEAD:main
