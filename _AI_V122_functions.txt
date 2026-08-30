@@ -1,0 +1,1308 @@
+
+==============================================================================================================
+FUNCTION playerQuestGateMessage
+==============================================================================================================
+
+## game/index.html line 5794
+function playerQuestGateMessage(from,to){
+  if(!PLAYER_PROGRESSION_LOCK)return null;
+  if(from==='town0'&&to==='route0'&&!state.team.length)return 'Le Professeur Aurine t’attend au laboratoire. Choisis d’abord ton premier compagnon.';
+  if(from.startsWith('route')){
+    const ri=+from.replace('route','');
+    if(to==='town'+(ri+1)&&!routeTrainersComplete(ri))return 'Avant de continuer, termine ta quête sur cette route : affronte les dresseurs qui te barrent le chemin.';
+  }
+  if(from.startsWith('town')){
+    const ti=+from.replace('town','');
+    if(ti>0&&to==='route'+ti&&!(state.seals||[]).includes(ti))return 'Ta quête dans cette ville n’est pas terminée. Obtiens d’abord son Sceau.';
+  }
+  return null
+}
+
+
+## game/index.html line 16460
+window.playerQuestGateMessage=function(from,to){
+ if((to==='route_horizons'||to==='route_legends'||V107C_BY_ZONE[to])&&!v107cHasPermit()){
+   return 'La Route des Horizons est réservée aux expéditions autorisées. Remporte d’abord l’Épreuve des Horizons auprès de Solène à Aubeval.'
+ }
+ return V107C_GATE_BASE?V107C_GATE_BASE(from,to):null
+}
+
+
+## game/index.html line 18442
+window.playerQuestGateMessage=function(from,to){
+  const shortcut=optionalShortcutGate(from,to);if(shortcut)return shortcut;
+  return oldGate(from,to);
+}
+
+
+## game/CREATEUR.html line 5795
+function playerQuestGateMessage(from,to){
+  if(!PLAYER_PROGRESSION_LOCK)return null;
+  if(from==='town0'&&to==='route0'&&!state.team.length)return 'Le Professeur Aurine t’attend au laboratoire. Choisis d’abord ton premier compagnon.';
+  if(from.startsWith('route')){
+    const ri=+from.replace('route','');
+    if(to==='town'+(ri+1)&&!routeTrainersComplete(ri))return 'Avant de continuer, termine ta quête sur cette route : affronte les dresseurs qui te barrent le chemin.';
+  }
+  if(from.startsWith('town')){
+    const ti=+from.replace('town','');
+    if(ti>0&&to==='route'+ti&&!(state.seals||[]).includes(ti))return 'Ta quête dans cette ville n’est pas terminée. Obtiens d’abord son Sceau.';
+  }
+  return null
+}
+
+
+## game/CREATEUR.html line 16439
+window.playerQuestGateMessage=function(from,to){
+ if((to==='route_horizons'||to==='route_legends'||V107C_BY_ZONE[to])&&!v107cHasPermit()){
+   return 'La Route des Horizons est réservée aux expéditions autorisées. Remporte d’abord l’Épreuve des Horizons auprès de Solène à Aubeval.'
+ }
+ return V107C_GATE_BASE?V107C_GATE_BASE(from,to):null
+}
+
+
+## game/CREATEUR.html line 18403
+window.playerQuestGateMessage=function(from,to){
+  const shortcut=optionalShortcutGate(from,to);if(shortcut)return shortcut;
+  return oldGate(from,to);
+}
+
+
+==============================================================================================================
+FUNCTION checkPortal
+==============================================================================================================
+
+## game/index.html line 5817
+function checkPortal(){
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+
+    if(ex.finalTemple&&!finalTempleAvailableV77()){
+      toast(typeof v83CitadelGateText==='function'?v83CitadelGateText():'La Citadelle exige 75 espèces, les 7 Sceaux et la maîtrise de Vol.');
+      // repousser légèrement le joueur à l'intérieur de Taronis
+      if(ex.side==='east')state.x-=45;
+      else if(ex.side==='west')state.x+=45;
+      else if(ex.side==='north')state.y+=45;
+      else state.y-=45;
+      return
+    }
+
+    const target=ex.to;
+    if(!target||!SCENES[target]){
+      toast('Cette liaison n’est pas encore disponible.');
+      return
+    }
+
+    // En arrivant, on entre depuis le côté opposé du portail franchi.
+    transitionWithQuestGate(target,opposite(ex.side));
+    return
+  }
+}
+
+
+## game/index.html line 9445
+checkPortal=function(){
+  if(Date.now()<Number(state.v78PortalLock||0))return;
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+    const from=state.zone,target=ex.to;
+
+    if(sc.kind==='town'&&V78_BY_ROUTE[target]){
+      const end=ex.v78Enter;
+      if(!end){toast('Liaison V78 invalide');return}
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceOnRoute(target,end);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      setTimeout(()=>maybeSpawnTaron(false),450);
+      return;
+    }
+
+    if(sc.kind==='route'&&V78_BY_ROUTE[from]&&ex.v78End){
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceInCity(target,from);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      return;
+    }
+
+    // Sanctuaire et autres transitions restent gérés par le système précédent.
+    return V78_OLD_CHECK();
+  }
+}
+
+
+## game/index.html line 12830
+window.checkPortal=function(){
+ if(typeof PLAYER_PROGRESSION_LOCK!=='undefined'&&PLAYER_PROGRESSION_LOCK&&state.zone==='town0'&&!v101fHasStarter()){
+   const sc=currentScene();
+   const touching=(sc.exits||[]).some(ex=>pointIn(state.x,state.y,ex));
+   if(touching){
+     // Repousse physiquement le joueur au centre de Clairval : aucune transition ne peut passer.
+     state.x=Math.min((sc.width||1800)-160,Math.max(160,state.x));
+     state.y=Math.min((sc.height||1100)-190,Math.max(160,state.y-90));
+     toast('Impossible de quitter Clairval sans ton premier Éclat.');
+     dialog('<b>Le voyage ne peut pas encore commencer.</b><br>Rends-toi au laboratoire du Professeur Aurine et choisis ton premier compagnon.');
+     return false
+   }
+ }
+ return _checkPortalV101F()
+}
+
+
+## game/index.html line 17039
+checkPortal=function(){
+    if(!v107kCreator()&&scene==='world'){
+      const sc=currentScene?.(),ex=(sc?.exits||[]).find(e=>pointIn(state.x,state.y,e)),to=ex?.to||ex?.target;
+      if(ex&&to){
+        const msg=v107kProgressionGate(state.zone,to);
+        if(msg){
+          v107kPushBack(ex);
+          const now=Date.now();
+          if(now-Number(state._v107kGateShown||0)>900){
+            state._v107kGateShown=now;toast(msg);
+            try{logEvent('Progression bloquée : '+msg)}catch(_){}
+            try{dialog('<b>Progression verrouillée</b><br><br>'+msg)}catch(_){}
+          }
+          return false;
+        }
+      }
+    }
+    return V107K_CHECK_BASE();
+  }
+
+
+## game/CREATEUR.html line 5818
+function checkPortal(){
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+
+    if(ex.finalTemple&&!finalTempleAvailableV77()){
+      toast(typeof v83CitadelGateText==='function'?v83CitadelGateText():'La Citadelle exige 75 espèces, les 7 Sceaux et la maîtrise de Vol.');
+      // repousser légèrement le joueur à l'intérieur de Taronis
+      if(ex.side==='east')state.x-=45;
+      else if(ex.side==='west')state.x+=45;
+      else if(ex.side==='north')state.y+=45;
+      else state.y-=45;
+      return
+    }
+
+    const target=ex.to;
+    if(!target||!SCENES[target]){
+      toast('Cette liaison n’est pas encore disponible.');
+      return
+    }
+
+    // En arrivant, on entre depuis le côté opposé du portail franchi.
+    transitionWithQuestGate(target,opposite(ex.side));
+    return
+  }
+}
+
+
+## game/CREATEUR.html line 9446
+checkPortal=function(){
+  if(Date.now()<Number(state.v78PortalLock||0))return;
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+    const from=state.zone,target=ex.to;
+
+    if(sc.kind==='town'&&V78_BY_ROUTE[target]){
+      const end=ex.v78Enter;
+      if(!end){toast('Liaison V78 invalide');return}
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceOnRoute(target,end);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      setTimeout(()=>maybeSpawnTaron(false),450);
+      return;
+    }
+
+    if(sc.kind==='route'&&V78_BY_ROUTE[from]&&ex.v78End){
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceInCity(target,from);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      return;
+    }
+
+    // Sanctuaire et autres transitions restent gérés par le système précédent.
+    return V78_OLD_CHECK();
+  }
+}
+
+
+## game/CREATEUR.html line 12831
+window.checkPortal=function(){
+ if(typeof PLAYER_PROGRESSION_LOCK!=='undefined'&&PLAYER_PROGRESSION_LOCK&&state.zone==='town0'&&!v101fHasStarter()){
+   const sc=currentScene();
+   const touching=(sc.exits||[]).some(ex=>pointIn(state.x,state.y,ex));
+   if(touching){
+     // Repousse physiquement le joueur au centre de Clairval : aucune transition ne peut passer.
+     state.x=Math.min((sc.width||1800)-160,Math.max(160,state.x));
+     state.y=Math.min((sc.height||1100)-190,Math.max(160,state.y-90));
+     toast('Impossible de quitter Clairval sans ton premier Éclat.');
+     dialog('<b>Le voyage ne peut pas encore commencer.</b><br>Rends-toi au laboratoire du Professeur Aurine et choisis ton premier compagnon.');
+     return false
+   }
+ }
+ return _checkPortalV101F()
+}
+
+
+## game/CREATEUR.html line 17002
+checkPortal=function(){
+    if(!v107kCreator()&&scene==='world'){
+      const sc=currentScene?.(),ex=(sc?.exits||[]).find(e=>pointIn(state.x,state.y,e)),to=ex?.to||ex?.target;
+      if(ex&&to){
+        const msg=v107kProgressionGate(state.zone,to);
+        if(msg){
+          v107kPushBack(ex);
+          const now=Date.now();
+          if(now-Number(state._v107kGateShown||0)>900){
+            state._v107kGateShown=now;toast(msg);
+            try{logEvent('Progression bloquée : '+msg)}catch(_){}
+            try{dialog('<b>Progression verrouillée</b><br><br>'+msg)}catch(_){}
+          }
+          return false;
+        }
+      }
+    }
+    return V107K_CHECK_BASE();
+  }
+
+
+==============================================================================================================
+FUNCTION startTrainer413
+==============================================================================================================
+
+## game/index.html line 6898
+function startTrainer413(t){
+  const opponent={...t,party:buildTrainerParty(t),partyIndex:0};
+  startBattle(opponent.party[0],opponent)
+}
+
+
+## game/index.html line 10176
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && trainerDefeatedV88(t)){ interactDefeatedTrainerV88(t); return; }
+  if(!guardBattleStartV87()){
+    clearTrainerAggroV87();
+    return
+  }
+  return V87_START_TRAINER_ORIGINAL?.(t)
+}
+
+
+## game/index.html line 11350
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && !t.finalBoss && !t.templeGuard && currentScene()?.kind==='route'){
+    const copy={...t};
+    copy.level=v98RoadTrainerLevel(copy);
+    copy.zone=state.zone;
+    return _v98StartTrainer(copy)
+  }
+  return _v98StartTrainer(t)
+}
+
+
+## game/index.html line 13496
+startTrainer413=function(t){
+  if(t?.taronBossV102Z){window._v102zTaronBossContext=t;dialog('<b>'+t.dialog+'</b><br>'+Z_TARON_BOSSES[t.zone]?.story,()=>Z_START_TRAINER(t));return}
+  return Z_START_TRAINER(t)
+}
+
+
+## game/CREATEUR.html line 6899
+function startTrainer413(t){
+  const opponent={...t,party:buildTrainerParty(t),partyIndex:0};
+  startBattle(opponent.party[0],opponent)
+}
+
+
+## game/CREATEUR.html line 10177
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && trainerDefeatedV88(t)){ interactDefeatedTrainerV88(t); return; }
+  if(!guardBattleStartV87()){
+    clearTrainerAggroV87();
+    return
+  }
+  return V87_START_TRAINER_ORIGINAL?.(t)
+}
+
+
+## game/CREATEUR.html line 11351
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && !t.finalBoss && !t.templeGuard && currentScene()?.kind==='route'){
+    const copy={...t};
+    copy.level=v98RoadTrainerLevel(copy);
+    copy.zone=state.zone;
+    return _v98StartTrainer(copy)
+  }
+  return _v98StartTrainer(t)
+}
+
+
+## game/CREATEUR.html line 13497
+startTrainer413=function(t){
+  if(t?.taronBossV102Z){window._v102zTaronBossContext=t;dialog('<b>'+t.dialog+'</b><br>'+Z_TARON_BOSSES[t.zone]?.story,()=>Z_START_TRAINER(t));return}
+  return Z_START_TRAINER(t)
+}
+
+
+==============================================================================================================
+FUNCTION grantEnemyXP
+==============================================================================================================
+
+## game/index.html line 15162
+function grantEnemyXP(enemy){
+  const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+  const members=[...new Set((battle.participants||[]).filter(Boolean))],xpLines=[];
+  for(const m of members){
+    const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+    const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+    const line=`${nameOf(m)} : +${amount} EXP`;
+    xpLines.push(line);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+  }
+  battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+}
+
+
+## game/V109W_CORRECTIFS_GAMEPLAY.js line 205
+window.grantEnemyXP=function(enemy){
+    const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+    const members=uniq((battle?.v109wEnemyParticipants||[]).filter(m=>m&&m.hp>0)),xpLines=[];
+    battle.eventQueue=Array.isArray(battle.eventQueue)?battle.eventQueue:[];
+    for(const m of members){
+      if(m.hp<=0)continue;
+      const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+      const events=(typeof safeCall==='function'?safeCall(gainXP,m,amount):gainXP(m,amount))||[];
+      xpLines.push(`${nameOf(m)} : +${amount} EXP`);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events);
+    }
+    if(!members.length)battle.eventQueue.push('Aucun Éclat encore conscient n’a participé à cet affrontement : aucune EXP distribuée.');
+    battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+    // Le prochain Éclat du dresseur repart avec une liste de participants vide.
+    battle.v109wEnemyParticipants=[];
+  }
+
+
+## game/CREATEUR.html line 15141
+function grantEnemyXP(enemy){
+  const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+  const members=[...new Set((battle.participants||[]).filter(Boolean))],xpLines=[];
+  for(const m of members){
+    const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+    const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+    const line=`${nameOf(m)} : +${amount} EXP`;
+    xpLines.push(line);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+  }
+  battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+}
+
+
+## game/assets/v105r-combat.js line 368
+function grantEnemyXP(enemy){
+  const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+  const members=[...new Set((battle.participants||[]).filter(Boolean))];
+  for(const m of members){
+    const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+    const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+    battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+  }
+}
+
+
+==============================================================================================================
+FUNCTION endBattle
+==============================================================================================================
+
+[not found]
+
+
+==============================================================================================================
+FUNCTION finishBattle
+==============================================================================================================
+
+## game/index.html line 8025
+function finishBattle(forcedResult=null){
+  if(!battle)return;
+  const b=battle,res=forcedResult||b.result,e=b.enemy,events=[...(b.eventQueue||[])];
+
+  if(res==='capture'){
+    logEvent('Capture de '+BY[e.id].name+'.');
+    state.dex[e.id]={...(state.dex[e.id]||{}),seen:true,caught:true};
+    const cp=JSON.parse(JSON.stringify(e));clampCreatureLevelV81(cp);
+    if(state.team.length<7)state.team.push(cp);else state.box.push(cp)
+  }
+
+  const guardianWon=res==='win'&&b.trainer?.guardian;
+  const taronWon=res==='win'&&b.trainer&&b.trainer.taron;
+  const normalTrainerWon=res==='win'&&b.trainer&&!b.trainer.taron&&!b.trainer.guardian;
+
+  let sealObtained=false;
+  if(guardianWon)sealObtained=v83AwardGuardianSeal(b.trainer);
+
+  // V88 : un dresseur de route vaincu est enregistré AVANT la fermeture du combat.
+  if(normalTrainerWon){
+    markTrainerDefeatedV88(b.trainer);
+  }
+
+  stopBattleMusic();
+  if(res==='win')playVictoryJingleV81();
+
+  battleToken++;battle=null;$('battleUI').style.display='none';scene='world';hud();save(false);
+  syncDefeatedTrainersV88();
+
+  if(guardianWon){
+    setTimeout(()=>dialog(
+      '<b>Gardien vaincu !</b><br>'+
+      (sealObtained
+        ?'Tu remportes le <b>Sceau '+b.trainer.sealIndex+'</b>.'
+        :'Tu avais déjà remporté ce Sceau.')+
+      '<br><br>Récompense : '+voltronLabelV85(b.reward||0)+'.'+(typeof v104GuardianRewardHtml==='function'?v104GuardianRewardHtml(b.trainer):'')
+    ),180);return
+  }
+
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV66){setTimeout(resolveBuildingBattleV66,150);return}
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV67){
+    setTimeout(()=>{
+      const c=window._v67Battle;if(!c)return;
+      window._v67Battle=null;state.zone=c.zone;v67ReturnZone=c.zone;v67Building=c.building;v67Floor=c.floor;
+      building={...c.building,type:'v67building'};scene='interior';state.roomX=600;state.roomY=420;
+      c.event.done=true;state.flags=state.flags||{};state.flags[c.event.key]=true;
+      state.money=(state.money||0)+700;save(false);
+      dialog('<b>Immeuble libéré</b><br>La Team Taron est repoussée. +700 Voltrons.');
+    },150);return
+  }
+  if(taronWon){setTimeout(completeTaronMission,150);return}
+
+  if(normalTrainerWon){
+    setTimeout(()=>dialog(
+      '<b>'+b.trainer.dialog+'</b><br>'+
+      trainerAfterBattleTextV88(b.trainer)+
+      (events.length?'<br><br>'+events.join('<br>'):'')
+    ),150);
+    return
+  }
+
+  if(events.length)dialog('<b>Résultats</b><br>'+events.join('<br>'));
+  else toast(res==='capture'?('Éclat capturé !'+(b.captureXP?' +'+b.captureXP+' EXP':''))
+    :res==='win'?('Victoire ! +'+voltronLabelV85(b.reward||0))
+    :res==='lose'?'Défaite...':'Combat terminé.')
+}
+
+
+## game/index.html line 11335
+finishBattle=function(forcedResult=null){
+  const result=forcedResult||battle?.result;
+  const fullKO=result==='lose' && (state.team||[]).length>0 && state.team.every(m=>m.hp<=0);
+
+  _v98FinishBattle(forcedResult);
+
+  if(fullKO){
+    // Laisse l'écran de combat se fermer avant le transfert.
+    setTimeout(v98TransferToHealingCenter,450)
+  }
+}
+
+
+## game/CREATEUR.html line 8026
+function finishBattle(forcedResult=null){
+  if(!battle)return;
+  const b=battle,res=forcedResult||b.result,e=b.enemy,events=[...(b.eventQueue||[])];
+
+  if(res==='capture'){
+    logEvent('Capture de '+BY[e.id].name+'.');
+    state.dex[e.id]={...(state.dex[e.id]||{}),seen:true,caught:true};
+    const cp=JSON.parse(JSON.stringify(e));clampCreatureLevelV81(cp);
+    if(state.team.length<7)state.team.push(cp);else state.box.push(cp)
+  }
+
+  const guardianWon=res==='win'&&b.trainer?.guardian;
+  const taronWon=res==='win'&&b.trainer&&b.trainer.taron;
+  const normalTrainerWon=res==='win'&&b.trainer&&!b.trainer.taron&&!b.trainer.guardian;
+
+  let sealObtained=false;
+  if(guardianWon)sealObtained=v83AwardGuardianSeal(b.trainer);
+
+  // V88 : un dresseur de route vaincu est enregistré AVANT la fermeture du combat.
+  if(normalTrainerWon){
+    markTrainerDefeatedV88(b.trainer);
+  }
+
+  stopBattleMusic();
+  if(res==='win')playVictoryJingleV81();
+
+  battleToken++;battle=null;$('battleUI').style.display='none';scene='world';hud();save(false);
+  syncDefeatedTrainersV88();
+
+  if(guardianWon){
+    setTimeout(()=>dialog(
+      '<b>Gardien vaincu !</b><br>'+
+      (sealObtained
+        ?'Tu remportes le <b>Sceau '+b.trainer.sealIndex+'</b>.'
+        :'Tu avais déjà remporté ce Sceau.')+
+      '<br><br>Récompense : '+voltronLabelV85(b.reward||0)+'.'+(typeof v104GuardianRewardHtml==='function'?v104GuardianRewardHtml(b.trainer):'')
+    ),180);return
+  }
+
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV66){setTimeout(resolveBuildingBattleV66,150);return}
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV67){
+    setTimeout(()=>{
+      const c=window._v67Battle;if(!c)return;
+      window._v67Battle=null;state.zone=c.zone;v67ReturnZone=c.zone;v67Building=c.building;v67Floor=c.floor;
+      building={...c.building,type:'v67building'};scene='interior';state.roomX=600;state.roomY=420;
+      c.event.done=true;state.flags=state.flags||{};state.flags[c.event.key]=true;
+      state.money=(state.money||0)+700;save(false);
+      dialog('<b>Immeuble libéré</b><br>La Team Taron est repoussée. +700 Voltrons.');
+    },150);return
+  }
+  if(taronWon){setTimeout(completeTaronMission,150);return}
+
+  if(normalTrainerWon){
+    setTimeout(()=>dialog(
+      '<b>'+b.trainer.dialog+'</b><br>'+
+      trainerAfterBattleTextV88(b.trainer)+
+      (events.length?'<br><br>'+events.join('<br>'):'')
+    ),150);
+    return
+  }
+
+  if(events.length)dialog('<b>Résultats</b><br>'+events.join('<br>'));
+  else toast(res==='capture'?('Éclat capturé !'+(b.captureXP?' +'+b.captureXP+' EXP':''))
+    :res==='win'?('Victoire ! +'+voltronLabelV85(b.reward||0))
+    :res==='lose'?'Défaite...':'Combat terminé.')
+}
+
+
+## game/CREATEUR.html line 11336
+finishBattle=function(forcedResult=null){
+  const result=forcedResult||battle?.result;
+  const fullKO=result==='lose' && (state.team||[]).length>0 && state.team.every(m=>m.hp<=0);
+
+  _v98FinishBattle(forcedResult);
+
+  if(fullKO){
+    // Laisse l'écran de combat se fermer avant le transfert.
+    setTimeout(v98TransferToHealingCenter,450)
+  }
+}
+
+
+==============================================================================================================
+FUNCTION endCombat
+==============================================================================================================
+
+[not found]
+
+
+==============================================================================================================
+FUNCTION arenaChallenge
+==============================================================================================================
+
+## game/index.html line 8098
+function arenaChallenge(ti){
+  const sealIndex=Math.max(1,Math.min(7,Number(ti)||1));
+  if((state.seals||[]).includes(sealIndex)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné mon Sceau. Reviens me voir si tu veux parler entraînement.');
+    return
+  }
+  const count=v83GuardianPartySize(sealIndex);
+  const base=v83GuardianBaseLevel(sealIndex);
+  const guardian={
+    id:'guardian_seal_'+sealIndex,
+    guardian:true,
+    sealIndex,
+    look:15,
+    level:base,
+    dialog:'Gardien du Sceau '+sealIndex,
+    zone:state.zone
+  };
+  dialog('<b>Gardien du Sceau '+sealIndex+'</b><br>'+
+    'Pour obtenir ce Sceau, tu dois me vaincre. Mon équipe compte <b>'+count+
+    ' créatures</b>, autour du niveau <b>'+base+'</b>. Prépare ton équipe !',
+    ()=>startTrainer413(guardian))
+}
+
+
+## game/index.html line 12345
+window.arenaChallenge=function(ti){
+  const seal=Math.max(1,Math.min(7,Number(ti)||1));
+  const type=V101D_SEAL_TYPES[seal];
+  if((state.seals||[]).includes(seal)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné le '+V101D_SEAL_NAMES[seal]+'.');
+    return;
+  }
+  const count=v83GuardianPartySize(seal),base=v83GuardianBaseLevel(seal);
+  const guardian={
+    id:'guardian_seal_'+seal,guardian:true,sealIndex:seal,look:15,level:base,
+    dialog:'Gardien du '+V101D_SEAL_NAMES[seal],zone:state.zone
+  };
+  dialog(
+    '<b>'+V101D_SEAL_NAMES[seal]+'</b><br>'+
+    'Ce Sceau représente le type <b>'+type+'</b>. Mon équipe est donc composée uniquement d’Éclats de type <b>'+type+'</b>.'+
+    '<br><br>Tu devras vaincre '+count+' créature'+(count>1?'s':'')+' autour du niveau '+base+'.',
+    ()=>startTrainer413(guardian)
+  );
+}
+
+
+## game/index.html line 14310
+window.arenaChallenge=function(index){const seal=building?.v105nSealIndex||GUARDS[state.zone]||index;return ARENA_BASE(seal)}
+
+
+## game/CREATEUR.html line 8099
+function arenaChallenge(ti){
+  const sealIndex=Math.max(1,Math.min(7,Number(ti)||1));
+  if((state.seals||[]).includes(sealIndex)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné mon Sceau. Reviens me voir si tu veux parler entraînement.');
+    return
+  }
+  const count=v83GuardianPartySize(sealIndex);
+  const base=v83GuardianBaseLevel(sealIndex);
+  const guardian={
+    id:'guardian_seal_'+sealIndex,
+    guardian:true,
+    sealIndex,
+    look:15,
+    level:base,
+    dialog:'Gardien du Sceau '+sealIndex,
+    zone:state.zone
+  };
+  dialog('<b>Gardien du Sceau '+sealIndex+'</b><br>'+
+    'Pour obtenir ce Sceau, tu dois me vaincre. Mon équipe compte <b>'+count+
+    ' créatures</b>, autour du niveau <b>'+base+'</b>. Prépare ton équipe !',
+    ()=>startTrainer413(guardian))
+}
+
+
+## game/CREATEUR.html line 12346
+window.arenaChallenge=function(ti){
+  const seal=Math.max(1,Math.min(7,Number(ti)||1));
+  const type=V101D_SEAL_TYPES[seal];
+  if((state.seals||[]).includes(seal)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné le '+V101D_SEAL_NAMES[seal]+'.');
+    return;
+  }
+  const count=v83GuardianPartySize(seal),base=v83GuardianBaseLevel(seal);
+  const guardian={
+    id:'guardian_seal_'+seal,guardian:true,sealIndex:seal,look:15,level:base,
+    dialog:'Gardien du '+V101D_SEAL_NAMES[seal],zone:state.zone
+  };
+  dialog(
+    '<b>'+V101D_SEAL_NAMES[seal]+'</b><br>'+
+    'Ce Sceau représente le type <b>'+type+'</b>. Mon équipe est donc composée uniquement d’Éclats de type <b>'+type+'</b>.'+
+    '<br><br>Tu devras vaincre '+count+' créature'+(count>1?'s':'')+' autour du niveau '+base+'.',
+    ()=>startTrainer413(guardian)
+  );
+}
+
+
+## game/CREATEUR.html line 14289
+window.arenaChallenge=function(index){const seal=building?.v105nSealIndex||GUARDS[state.zone]||index;return ARENA_BASE(seal)}
+
+
+==============================================================================================================
+FUNCTION v83AwardGuardianSeal
+==============================================================================================================
+
+## game/index.html line 1873
+function v83AwardGuardianSeal(t){
+  if(!t?.guardian||!t.sealIndex)return false;
+  const seal=t.sealIndex;
+  if(!(state.seals||[]).includes(seal)){
+    state.seals.push(seal);
+    state.seals.sort((a,b)=>a-b);
+    if(state.seals.length>=3){state.flags=state.flags||{};state.flags.v119BikeUnlocked=true;}
+    logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+    return true
+  }
+  return false
+}
+
+
+## game/index.html line 13844
+v83AwardGuardianSeal=function(t){const got=V104_AWARD_BASE(t);if(got)v104GrantFieldReward(t);return got}
+
+
+## game/index.html line 14284
+v83AwardGuardianSeal=function(t){const got=AWARD_BASE(t);if(got&&t?.zone==='town3'){awardNage();t.v105nNageGranted=true}return got}
+
+
+## game/index.html line 17899
+v83AwardGuardianSeal=function(t){const got=BASE_SEAL(t);if(got&&Number(t?.sealIndex)===3){state.v109a=state.v109a&&typeof state.v109a==='object'?state.v109a:{};const s=state.v109a;s.livret=s.livret&&typeof s.livret==='object'?s.livret:{};s.livret.unlocked=true;s.livret.code=V109A_LIVRET_CODE;s.livret.receivedAt=Date.now();save(false);setTimeout(()=>dialog('<b>Troisième Gardien</b><br>Tu as suffisamment prouvé ta valeur. Dans les fichiers de Valdora se trouve le <b>Livret des Éclats</b>, un dossier réservé aux dresseurs confirmés.<br><br>Code d’ouverture : <b>'+V109A_LIVRET_CODE+'</b><br><br>Ce code est désormais noté dans tes objectifs. Certaines missions du livret sont nécessaires pour comprendre ce qui mène à la Citadelle.'),1100)}return got}
+
+
+## game/CREATEUR.html line 1874
+function v83AwardGuardianSeal(t){
+  if(!t?.guardian||!t.sealIndex)return false;
+  const seal=t.sealIndex;
+  if(!(state.seals||[]).includes(seal)){
+    state.seals.push(seal);
+    state.seals.sort((a,b)=>a-b);
+    if(state.seals.length>=4)state.bike=true;
+    logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+    return true
+  }
+  return false
+}
+
+
+## game/CREATEUR.html line 13845
+v83AwardGuardianSeal=function(t){const got=V104_AWARD_BASE(t);if(got)v104GrantFieldReward(t);return got}
+
+
+## game/CREATEUR.html line 14263
+v83AwardGuardianSeal=function(t){const got=AWARD_BASE(t);if(got&&t?.zone==='town3'){awardNage();t.v105nNageGranted=true}return got}
+
+
+## game/CREATEUR.html line 17860
+v83AwardGuardianSeal=function(t){const got=BASE_SEAL(t);if(got&&Number(t?.sealIndex)===3){state.v109a=state.v109a&&typeof state.v109a==='object'?state.v109a:{};const s=state.v109a;s.livret=s.livret&&typeof s.livret==='object'?s.livret:{};s.livret.unlocked=true;s.livret.code=V109A_LIVRET_CODE;s.livret.receivedAt=Date.now();save(false);setTimeout(()=>dialog('<b>Troisième Gardien</b><br>Tu as suffisamment prouvé ta valeur. Dans les fichiers de Valdora se trouve le <b>Livret des Éclats</b>, un dossier réservé aux dresseurs confirmés.<br><br>Code d’ouverture : <b>'+V109A_LIVRET_CODE+'</b><br><br>Ce code est désormais noté dans tes objectifs. Certaines missions du livret sont nécessaires pour comprendre ce qui mène à la Citadelle.'),1100)}return got}
+
+
+==============================================================================================================
+FUNCTION startHealingSequence
+==============================================================================================================
+
+## game/index.html line 6094
+function startHealingSequence(){
+  if(healingSeq)return;
+  healingSeq={start:performance.now(),duration:5000,done:false};
+  dialog('<b>Soigneuse Élise</b><br>Très bien, confie-moi ton équipe.<br><br>Le soin complet va prendre quelques instants...',()=>{});
+  setTimeout(()=>closeDialog(true),900);
+
+  // soft healing loop melody
+  for(let i=0;i<10;i++){
+    const f=[440,554,659,554][i%4];
+    setTimeout(()=>tone(f,.12,.018,'sine',0,35),i*700)
+  }
+
+  setTimeout(()=>{
+    if(!healingSeq)return;
+    state.team.forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});
+    healingSeq.done=true;
+    hud();save(false);
+
+    // completion jingle
+    tone(523,.14,.035,'sine',0,40);
+    tone(659,.14,.035,'sine',.12,45);
+    tone(784,.18,.032,'sine',.24,60);
+    tone(1046,.28,.026,'sine',.39,0);
+
+    dialog('<b>Soigneuse Élise</b><br>Et voilà ! Toute ton équipe est de nouveau en pleine forme.',()=>{
+      healingSeq=null;
+      toast('Équipe entièrement soignée !')
+    })
+  },5000)
+}
+
+
+## game/CREATEUR.html line 6095
+function startHealingSequence(){
+  if(healingSeq)return;
+  healingSeq={start:performance.now(),duration:5000,done:false};
+  dialog('<b>Soigneuse Élise</b><br>Très bien, confie-moi ton équipe.<br><br>Le soin complet va prendre quelques instants...',()=>{});
+  setTimeout(()=>closeDialog(true),900);
+
+  // soft healing loop melody
+  for(let i=0;i<10;i++){
+    const f=[440,554,659,554][i%4];
+    setTimeout(()=>tone(f,.12,.018,'sine',0,35),i*700)
+  }
+
+  setTimeout(()=>{
+    if(!healingSeq)return;
+    state.team.forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});
+    healingSeq.done=true;
+    hud();save(false);
+
+    // completion jingle
+    tone(523,.14,.035,'sine',0,40);
+    tone(659,.14,.035,'sine',.12,45);
+    tone(784,.18,.032,'sine',.24,60);
+    tone(1046,.28,.026,'sine',.39,0);
+
+    dialog('<b>Soigneuse Élise</b><br>Et voilà ! Toute ton équipe est de nouveau en pleine forme.',()=>{
+      healingSeq=null;
+      toast('Équipe entièrement soignée !')
+    })
+  },5000)
+}
+
+
+==============================================================================================================
+FUNCTION openShop
+==============================================================================================================
+
+## game/index.html line 8430
+function openShop(){
+  ensureInventoryV81();
+  const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+  const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+  const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+
+  let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+    Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+    <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="openShop()">Acheter</button>
+      <button onclick="openSellShopV101D()">Revendre</button>
+    </div><div class="baggrid">`;
+
+  for(const id of ids){
+    const it=SHOP_ITEMS[id];if(!it)continue;
+    const qty=state.inventory[id]||0;
+    h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+      <b>${it.label}</b><br>${it.price} Voltrons<br>
+      <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+    </button>`
+  }
+
+  h+='</div>';
+  openSimpleMenu('Boutique — '+city,h)
+}
+
+
+## game/CREATEUR.html line 8431
+function openShop(){
+  ensureInventoryV81();
+  const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+  const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+  const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+
+  let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+    Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+    <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="openShop()">Acheter</button>
+      <button onclick="openSellShopV101D()">Revendre</button>
+    </div><div class="baggrid">`;
+
+  for(const id of ids){
+    const it=SHOP_ITEMS[id];if(!it)continue;
+    const qty=state.inventory[id]||0;
+    h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+      <b>${it.label}</b><br>${it.price} Voltrons<br>
+      <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+    </button>`
+  }
+
+  h+='</div>';
+  openSimpleMenu('Boutique — '+city,h)
+}
+
+
+==============================================================================================================
+FUNCTION openDex
+==============================================================================================================
+
+[not found]
+
+
+==============================================================================================================
+FUNCTION openCodex
+==============================================================================================================
+
+[not found]
+
+
+==============================================================================================================
+FUNCTION drawPlayer
+==============================================================================================================
+
+[not found]
+
+
+==============================================================================================================
+FUNCTION drawHero
+==============================================================================================================
+
+## game/index.html line 2577
+function drawHero(x,y,dir,moving){
+  const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+  const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+  if(v102eDrawGrounded(im,x,y,62,.22))return;
+  // Secours uniquement pendant le chargement de l'image.
+  v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+}
+
+
+## game/index.html line 18604
+window.drawHero=function(x,y,dir,moving){HERO_BASE(x,y,dir,moving);if(state.zone!=='route4bis'||scene!=='world')return;ctx.save();ctx.strokeStyle='#ffd83d';ctx.lineWidth=9;ctx.beginPath();ctx.ellipse(x,y-12,28,13,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffd83d';ctx.beginPath();ctx.arc(x+24,y-22,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff8b28';ctx.beginPath();ctx.moveTo(x+32,y-22);ctx.lineTo(x+44,y-18);ctx.lineTo(x+32,y-15);ctx.closePath();ctx.fill();ctx.fillStyle='#1e3442';ctx.beginPath();ctx.arc(x+27,y-24,1.7,0,Math.PI*2);ctx.fill();ctx.restore()}
+
+
+## game/VALDORA_PRO_V111.js line 163
+window.drawHero=function(x,y,dir,moving){
+      if(state?.bike&&typeof ctx!=='undefined'){ctx.save();ctx.strokeStyle='#172e38';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x-17,y+11,13,0,Math.PI*2);ctx.arc(x+19,y+11,13,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#43d5e8';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-17,y+11);ctx.lineTo(x-2,y-7);ctx.lineTo(x+19,y+11);ctx.lineTo(x-7,y+11);ctx.lineTo(x+9,y-7);ctx.stroke();ctx.fillStyle='#ffd84a';ctx.fillRect(x+5,y-11,17,4);ctx.restore()}
+      return base.apply(this,arguments)
+    }
+
+
+## game/CREATEUR.html line 2578
+function drawHero(x,y,dir,moving){
+  const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+  const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+  if(v102eDrawGrounded(im,x,y,62,.22))return;
+  // Secours uniquement pendant le chargement de l'image.
+  v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+}
+
+
+## game/CREATEUR.html line 18565
+window.drawHero=function(x,y,dir,moving){HERO_BASE(x,y,dir,moving);if(state.zone!=='route4bis'||scene!=='world')return;ctx.save();ctx.strokeStyle='#ffd83d';ctx.lineWidth=9;ctx.beginPath();ctx.ellipse(x,y-12,28,13,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffd83d';ctx.beginPath();ctx.arc(x+24,y-22,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff8b28';ctx.beginPath();ctx.moveTo(x+32,y-22);ctx.lineTo(x+44,y-18);ctx.lineTo(x+32,y-15);ctx.closePath();ctx.fill();ctx.fillStyle='#1e3442';ctx.beginPath();ctx.arc(x+27,y-24,1.7,0,Math.PI*2);ctx.fill();ctx.restore()}
+
+
+==============================================================================================================
+FUNCTION drawCharacter
+==============================================================================================================
+
+[not found]
+
+
+==============================================================================================================
+FUNCTION v107dBusStop
+==============================================================================================================
+
+## game/index.html line 16576
+function v107dBusStop(sc=scNow(),zone=state?.zone){
+  if(!sc||sc.kind!=='town')return null;const h=healer(sc);if(!h)return null;
+  const w=Number(sc.width)||1800,hh=Number(sc.height)||1100,core=Math.max(70,Number(sc.v105dCore)||100);
+  const roadY=Number.isFinite(Number(h.v105dRoadY))?Number(h.v105dRoadY):(Number(h.doorY)||((Number(h.y)||0)+(Number(h.h)||0)))+Math.max(42,core*.32);
+  const hx=Number(h.doorX)||((Number(h.x)||0)+(Number(h.w)||0)/2),hy=(Number(h.y)||0)+(Number(h.h)||0)/2;
+  const sideSpaceR=w-((Number(h.x)||0)+(Number(h.w)||0)),sideSpaceL=Number(h.x)||0;
+  const side=sideSpaceR>=sideSpaceL?1:-1;
+  // V107E : l'abri est placé au niveau du trottoir, et non plus au milieu de la chaussée.
+  // On le décale aussi légèrement sur le côté du Centre de soins pour laisser sa porte dégagée.
+  const lateral=Math.max(78,Math.min(138,(Number(h.w)||200)*.45+44));
+  const x=Math.max(78,Math.min(w-78,hx+side*lateral));
+  const curbSide=hy<roadY?-1:1;
+  const y=Math.max(82,Math.min(hh-58,roadY+curbSide*(core/2+18)));
+  return {id:`${zone}_bus_v107e`,type:'bus',x,y,roadY,curbSide,dir:'front'}
+}
+
+
+## game/CREATEUR.html line 16555
+function v107dBusStop(sc=scNow(),zone=state?.zone){
+  if(!sc||sc.kind!=='town')return null;const h=healer(sc);if(!h)return null;
+  const w=Number(sc.width)||1800,hh=Number(sc.height)||1100,core=Math.max(70,Number(sc.v105dCore)||100);
+  const roadY=Number.isFinite(Number(h.v105dRoadY))?Number(h.v105dRoadY):(Number(h.doorY)||((Number(h.y)||0)+(Number(h.h)||0)))+Math.max(42,core*.32);
+  const hx=Number(h.doorX)||((Number(h.x)||0)+(Number(h.w)||0)/2),hy=(Number(h.y)||0)+(Number(h.h)||0)/2;
+  const sideSpaceR=w-((Number(h.x)||0)+(Number(h.w)||0)),sideSpaceL=Number(h.x)||0;
+  const side=sideSpaceR>=sideSpaceL?1:-1;
+  // V107E : l'abri est placé au niveau du trottoir, et non plus au milieu de la chaussée.
+  // On le décale aussi légèrement sur le côté du Centre de soins pour laisser sa porte dégagée.
+  const lateral=Math.max(78,Math.min(138,(Number(h.w)||200)*.45+44));
+  const x=Math.max(78,Math.min(w-78,hx+side*lateral));
+  const curbSide=hy<roadY?-1:1;
+  const y=Math.max(82,Math.min(hh-58,roadY+curbSide*(core/2+18)));
+  return {id:`${zone}_bus_v107e`,type:'bus',x,y,roadY,curbSide,dir:'front'}
+}
+
+
+==============================================================================================================
+FUNCTION openBusMenuV106Y
+==============================================================================================================
+
+## game/index.html line 15842
+function openBusMenuV106Y(){
+  const lines=lineForZone(state.zone),dest=busDestinations(),count=lines.length;
+  let h=`<div class="quest"><b>Arrêt de ${cityName(state.zone)}</b><br><b>${count} ligne${count>1?'s':''} desservie${count>1?'s':''}</b><br>${lines.map(l=>l.name).join(' • ')||'Desserte locale'}<br><small>${SCENES?.[state.zone]?.megacity?'Mégalopole : toutes les lignes du réseau passent par cet arrêt.':'Le bus ne dessert que les villes déjà découvertes des lignes de cet arrêt.'}</small></div>`;
+  if(!dest.length)h+='<div class="quest">Aucune autre destination connue sur cette ligne pour le moment.</div>';
+  for(const d of dest){const fare=busFare(d.distance);h+=`<button class="bagitem" onclick="boardBusV106Y('${d.zone}',${fare})"><b>🚌 ${cityName(d.zone)}</b><br>${d.line}<br><small>${fare} V</small></button>`}
+  openSimpleMenu('Réseau de bus',`<div class="baggrid">${h}</div>`)
+}
+
+
+## game/CREATEUR.html line 15821
+function openBusMenuV106Y(){
+  const lines=lineForZone(state.zone),dest=busDestinations(),count=lines.length;
+  let h=`<div class="quest"><b>Arrêt de ${cityName(state.zone)}</b><br><b>${count} ligne${count>1?'s':''} desservie${count>1?'s':''}</b><br>${lines.map(l=>l.name).join(' • ')||'Desserte locale'}<br><small>${SCENES?.[state.zone]?.megacity?'Mégalopole : toutes les lignes du réseau passent par cet arrêt.':'Le bus ne dessert que les villes déjà découvertes des lignes de cet arrêt.'}</small></div>`;
+  if(!dest.length)h+='<div class="quest">Aucune autre destination connue sur cette ligne pour le moment.</div>';
+  for(const d of dest){const fare=busFare(d.distance);h+=`<button class="bagitem" onclick="boardBusV106Y('${d.zone}',${fare})"><b>🚌 ${cityName(d.zone)}</b><br>${d.line}<br><small>${fare} V</small></button>`}
+  openSimpleMenu('Réseau de bus',`<div class="baggrid">${h}</div>`)
+}
+
+
+==============================================================================================================
+FUNCTION nearBusStop
+==============================================================================================================
+
+## game/index.html line 15832
+function nearBusStop(){return null /* V107E : interaction uniquement sur l'arrêt chibi visible */}
+
+
+## game/CREATEUR.html line 15811
+function nearBusStop(){return null /* V107E : interaction uniquement sur l'arrêt chibi visible */}
+
+
+==============================================================================================================
+FUNCTION completeTaronMission
+==============================================================================================================
+
+## game/index.html line 2865
+function completeTaronMission(){
+  const ts=ensureTaronState(),a=ts.active;if(!a)return;
+  const m=TARON_MISSIONS[a.missionIndex];
+  ts.wins++;ts.missions++;
+  state.inventory[m.reward]=(state.inventory[m.reward]||0)+1;
+  logEvent('Plan de la Team Taron déjoué : '+m.title+'. Récompense : '+m.reward+'.');
+  ts.active=null;save(false);hud();
+  dialog('<b>Mission accomplie !</b><br>Le plan de la Team Taron est déjoué.<br><br>Récompense trouvée : <b>'+m.reward+'</b>.<br><br>Ils reviendront sûrement ailleurs dans Valdora...')
+}
+
+
+## game/index.html line 13501
+completeTaronMission=function(){
+  const t=window._v102zTaronBossContext;
+  if(!t)return Z_COMPLETE_TARON();
+  window._v102zTaronBossContext=null;zEnsure();state.trainerWins=state.trainerWins||{};state.trainerWins[t.id]=true;state.v102z.taronBossWins[t.id]=true;
+  state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+  const route=Number(String(t.zone).replace('route',''))||0;
+  const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+  const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+  logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+  dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+}
+
+
+## game/index.html line 15989
+window.completeTaronMission=function(){const id=window._v106zActiveTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return BASE_COMPLETE_TARON_V106Z?BASE_COMPLETE_TARON_V106Z():undefined;const st=zOpState(id);st.waves=Math.min(op.waves,(st.waves||0)+1);state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;window._v106zActiveTaronOp=null;window._v106zActiveTaronWave=null;
+ if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} }
+
+
+## game/CREATEUR.html line 2866
+function completeTaronMission(){
+  const ts=ensureTaronState(),a=ts.active;if(!a)return;
+  const m=TARON_MISSIONS[a.missionIndex];
+  ts.wins++;ts.missions++;
+  state.inventory[m.reward]=(state.inventory[m.reward]||0)+1;
+  logEvent('Plan de la Team Taron déjoué : '+m.title+'. Récompense : '+m.reward+'.');
+  ts.active=null;save(false);hud();
+  dialog('<b>Mission accomplie !</b><br>Le plan de la Team Taron est déjoué.<br><br>Récompense trouvée : <b>'+m.reward+'</b>.<br><br>Ils reviendront sûrement ailleurs dans Valdora...')
+}
+
+
+## game/CREATEUR.html line 13502
+completeTaronMission=function(){
+  const t=window._v102zTaronBossContext;
+  if(!t)return Z_COMPLETE_TARON();
+  window._v102zTaronBossContext=null;zEnsure();state.trainerWins=state.trainerWins||{};state.trainerWins[t.id]=true;state.v102z.taronBossWins[t.id]=true;
+  state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+  const route=Number(String(t.zone).replace('route',''))||0;
+  const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+  const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+  logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+  dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+}
+
+
+## game/CREATEUR.html line 15968
+window.completeTaronMission=function(){const id=window._v106zActiveTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return BASE_COMPLETE_TARON_V106Z?BASE_COMPLETE_TARON_V106Z():undefined;const st=zOpState(id);st.waves=Math.min(op.waves,(st.waves||0)+1);state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;window._v106zActiveTaronOp=null;window._v106zActiveTaronWave=null;
+ if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} }
+
+
+## game/V106A_QUETES_TARON_COMBATS_EQUIPE.js line 190
+completeTaronMission=function(){
+    const t=window._v106aLastTaron;window._v106aLastTaron=null;
+    if(t?.taronBossV102Z&&!window._v102zTaronBossContext)window._v102zTaronBossContext=t;
+    return BASE_COMPLETE_TARON();
+  }
+
+
+==============================================================================================================
+FUNCTION questInteractionV106C
+==============================================================================================================
+
+## game/index.html line 5946
+function questInteractionV106C(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return false;const e=v106cQuestState()[q.id],p=Math.min(v106cProgress(q),q.goal),important=q.zone==='town0'?'<br><small><b>Mission obligatoire de Clairval :</b> toutes les missions de la ville doivent être terminées avant de prendre la Route 1.</small>':(q.required?'<br><small><b>Mission essentielle :</b> elle compte pour la conclusion de l’aventure.</small>':'');if(!e){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Objectif : '+p+'/'+q.goal+'</b>'+important,()=>v106cAccept(q));return true}if(e.status==='active'&&p>=q.goal){dialog('<b>'+q.giverName+' — Mission accomplie</b><br>Merci pour ton aide !<br><br>Récompense : <b>'+q.money+' V'+(q.item?' + '+(q.qty||1)+' '+q.item:'')+'</b>.',()=>v106cClaim(q));return true}if(e.status==='active'){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Progression : '+p+'/'+q.goal+'</b>'+important);return true}dialog('<b>'+q.giverName+'</b><br>Merci encore pour ton aide.');return true}
+
+
+## game/index.html line 16317
+questInteractionV106C=function(n){
+  if(n?.id!=='solene_aubeval')return V107B_QUEST_INTERACT_BASE(n);
+  const q=V107B_AUBE_QUEST,e=v106cQuestState()[q.id];
+  if(state.flags?.aubevalExpeditionLicense||e?.status==='done'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;return dialog('<b>Solène — Bureau des Horizons</b><br>Ton permis est valide. Quelle expédition veux-tu rejoindre ?',openLegendExpeditionsV107B),true}
+  if(!e){dialog('<b>Solène — Épreuve des Horizons</b><br>Aubeval est le dernier bureau d’expédition avant les sanctuaires légendaires. Pour obtenir ton <b>Permis des Horizons</b>, tu dois vaincre mon équipe d’évaluation.<br><br>Cette étape est obligatoire avant la Citadelle.',()=>{v106cAccept(q);setTimeout(v107bStartAubeTrial,220)});return true}
+  if(e.status==='active'&&!state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Épreuve des Horizons</b><br>L’épreuve n’est pas encore remportée. Mon équipe t’attend.',v107bStartAubeTrial);return true}
+  if(e.status==='active'&&state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Permis accordé</b><br>Épreuve réussie. Tu peux désormais partir vers les onze biomes légendaires.',()=>{v106cClaim(q);state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;save(false);openLegendExpeditionsV107B()});return true}
+  return true
+}
+
+
+## game/CREATEUR.html line 5947
+function questInteractionV106C(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return false;const e=v106cQuestState()[q.id],p=Math.min(v106cProgress(q),q.goal),important=q.zone==='town0'?'<br><small><b>Mission obligatoire de Clairval :</b> toutes les missions de la ville doivent être terminées avant de prendre la Route 1.</small>':(q.required?'<br><small><b>Mission essentielle :</b> elle compte pour la conclusion de l’aventure.</small>':'');if(!e){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Objectif : '+p+'/'+q.goal+'</b>'+important,()=>v106cAccept(q));return true}if(e.status==='active'&&p>=q.goal){dialog('<b>'+q.giverName+' — Mission accomplie</b><br>Merci pour ton aide !<br><br>Récompense : <b>'+q.money+' V'+(q.item?' + '+(q.qty||1)+' '+q.item:'')+'</b>.',()=>v106cClaim(q));return true}if(e.status==='active'){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Progression : '+p+'/'+q.goal+'</b>'+important);return true}dialog('<b>'+q.giverName+'</b><br>Merci encore pour ton aide.');return true}
+
+
+## game/CREATEUR.html line 16296
+questInteractionV106C=function(n){
+  if(n?.id!=='solene_aubeval')return V107B_QUEST_INTERACT_BASE(n);
+  const q=V107B_AUBE_QUEST,e=v106cQuestState()[q.id];
+  if(state.flags?.aubevalExpeditionLicense||e?.status==='done'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;return dialog('<b>Solène — Bureau des Horizons</b><br>Ton permis est valide. Quelle expédition veux-tu rejoindre ?',openLegendExpeditionsV107B),true}
+  if(!e){dialog('<b>Solène — Épreuve des Horizons</b><br>Aubeval est le dernier bureau d’expédition avant les sanctuaires légendaires. Pour obtenir ton <b>Permis des Horizons</b>, tu dois vaincre mon équipe d’évaluation.<br><br>Cette étape est obligatoire avant la Citadelle.',()=>{v106cAccept(q);setTimeout(v107bStartAubeTrial,220)});return true}
+  if(e.status==='active'&&!state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Épreuve des Horizons</b><br>L’épreuve n’est pas encore remportée. Mon équipe t’attend.',v107bStartAubeTrial);return true}
+  if(e.status==='active'&&state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Permis accordé</b><br>Épreuve réussie. Tu peux désormais partir vers les onze biomes légendaires.',()=>{v106cClaim(q);state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;save(false);openLegendExpeditionsV107B()});return true}
+  return true
+}
+
+
+==============================================================================================================
+FUNCTION openMuseumDirectorV109A
+==============================================================================================================
+
+## game/index.html line 17843
+function openMuseumDirectorV109A(){
+  const s=v109aState();v109aSeedHistory();
+  if(s.egg.status==='return'){
+    s.egg.status='done';s.egg.completedAt=Date.now();state.inventory=state.inventory||{};state.inventory.MegaOrbe=(state.inventory.MegaOrbe||0)+1;logEvent('Musée : l’œuf inconnu est identifié comme sensible à la Résonance.');save(false);dialog('<b>Directeur du musée</b><br>Les relevés correspondent aux anciens dossiers de Résonance. L’œuf reste au musée sous surveillance. Pour ton aide, voici une MegaOrbe. Une autre affaire m’inquiète : une page d’archives a disparu.');return
+  }
+  if(s.archives.status==='return'){
+    s.archives.status='done';s.archives.completedAt=Date.now();state.money=(Number(state.money)||0)+900;logEvent('Musée : les archives disparues sont reconstituées.');save(false);dialog('<b>Directeur du musée</b><br>Les témoignages confirment qu’un membre de la Team Taron cherchait cette page. Tu reçois 900 Voltrons. Ce dossier rejoint désormais le fil rouge du Projet Résonance.');return
+  }
+  const name=v109aMuseumDirector()?.name||'Direction du musée';
+  let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+  h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+  h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+  h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+  if(s.livret.unlocked&&v109aHasSeal3())h+='<button class="bagitem" onclick="v109aOpenLivret()"><b>Livret des Éclats</b><br>Ouvrir le dossier secret</button>';
+  h+='</div>';openSimpleMenu('Direction du musée',h);
+}
+
+
+## game/CREATEUR.html line 17804
+function openMuseumDirectorV109A(){
+  const s=v109aState();v109aSeedHistory();
+  if(s.egg.status==='return'){
+    s.egg.status='done';s.egg.completedAt=Date.now();state.inventory=state.inventory||{};state.inventory.MegaOrbe=(state.inventory.MegaOrbe||0)+1;logEvent('Musée : l’œuf inconnu est identifié comme sensible à la Résonance.');save(false);dialog('<b>Directeur du musée</b><br>Les relevés correspondent aux anciens dossiers de Résonance. L’œuf reste au musée sous surveillance. Pour ton aide, voici une MegaOrbe. Une autre affaire m’inquiète : une page d’archives a disparu.');return
+  }
+  if(s.archives.status==='return'){
+    s.archives.status='done';s.archives.completedAt=Date.now();state.money=(Number(state.money)||0)+900;logEvent('Musée : les archives disparues sont reconstituées.');save(false);dialog('<b>Directeur du musée</b><br>Les témoignages confirment qu’un membre de la Team Taron cherchait cette page. Tu reçois 900 Voltrons. Ce dossier rejoint désormais le fil rouge du Projet Résonance.');return
+  }
+  const name=v109aMuseumDirector()?.name||'Direction du musée';
+  let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+  h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+  h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+  h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+  if(s.livret.unlocked&&v109aHasSeal3())h+='<button class="bagitem" onclick="v109aOpenLivret()"><b>Livret des Éclats</b><br>Ouvrir le dossier secret</button>';
+  h+='</div>';openSimpleMenu('Direction du musée',h);
+}
+
+
+==============================================================================================================
+FUNCTION openAdventureChallengesV106Y
+==============================================================================================================
+
+## game/index.html line 15802
+function openAdventureChallengesV106Y(){
+  ensureDiscoveredChallenges();const r=rank();
+  let h=`<div class="quest"><b>Rang d'aventure : ${r.name}</b><br>${marks()}/15 maîtrises de ville<br><small>Bonus réseau de bus : -${Math.round(r.discount*100)} % sur les billets.</small></div>`;
+  for(let i=0;i<15;i++){
+    const z='town'+i;if(!townDiscovered(z))continue;const ch=challengeFor(z),shape=CHALLENGE_SHAPES_V106Y[z]||[],done=challengeDone(z,ch),rw=rewardFor(z);
+    h+=`<div class="quest"><b>${cityName(z)} — Défi de maîtrise</b><br>`+shape.map(([k,g])=>{const p=Math.min(g,objectiveProgress(z,k,g,ch));return `${p>=g?'✓':'•'} ${objectiveText(z,k,g)} : <b>${p}/${g}</b>`}).join('<br>')+`<br><small>Récompense : ${rw.money} V + ${rw.qty} ${rw.item}</small>`;
+    if(ch.claimed)h+='<br><b>Maîtrise validée ✓</b>';
+    else if(done)h+=`<br><button onclick="claimChallengeV106Y('${z}')">Valider la maîtrise</button>`;
+    h+='</div>'
+  }
+  openSimpleMenu('Défis de Valdora',h)
+}
+
+
+## game/CREATEUR.html line 15781
+function openAdventureChallengesV106Y(){
+  ensureDiscoveredChallenges();const r=rank();
+  let h=`<div class="quest"><b>Rang d'aventure : ${r.name}</b><br>${marks()}/15 maîtrises de ville<br><small>Bonus réseau de bus : -${Math.round(r.discount*100)} % sur les billets.</small></div>`;
+  for(let i=0;i<15;i++){
+    const z='town'+i;if(!townDiscovered(z))continue;const ch=challengeFor(z),shape=CHALLENGE_SHAPES_V106Y[z]||[],done=challengeDone(z,ch),rw=rewardFor(z);
+    h+=`<div class="quest"><b>${cityName(z)} — Défi de maîtrise</b><br>`+shape.map(([k,g])=>{const p=Math.min(g,objectiveProgress(z,k,g,ch));return `${p>=g?'✓':'•'} ${objectiveText(z,k,g)} : <b>${p}/${g}</b>`}).join('<br>')+`<br><small>Récompense : ${rw.money} V + ${rw.qty} ${rw.item}</small>`;
+    if(ch.claimed)h+='<br><b>Maîtrise validée ✓</b>';
+    else if(done)h+=`<br><button onclick="claimChallengeV106Y('${z}')">Valider la maîtrise</button>`;
+    h+='</div>'
+  }
+  openSimpleMenu('Défis de Valdora',h)
+}
+
+
+==============================================================================================================
+FUNCTION startRematchV106Y
+==============================================================================================================
+
+## game/index.html line 15886
+function startRematchV106Y(t){
+  const seals=(state.seals||[]).length,avg=Math.max(5,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(75,Math.max(Number(t.level)||5,avg+1+Math.min(4,seals))),count=Math.min(5,1+Math.ceil(seals/2)),types=rematchPoolTypes(),party=[];
+  const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+  for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+  const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+}
+
+
+## game/CREATEUR.html line 15865
+function startRematchV106Y(t){
+  const seals=(state.seals||[]).length,avg=Math.max(5,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(75,Math.max(Number(t.level)||5,avg+1+Math.min(4,seals))),count=Math.min(5,1+Math.ceil(seals/2)),types=rematchPoolTypes(),party=[];
+  const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+  for(let i=0;i<count;i++){const lvl=Math.min(78,base+Math.floor(i/2)),pool=CREATURES.filter(c=>types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(Math.abs((t.look||0)*17+(t.level||0)*11+i*29+seals*31))%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}
+  const clone={...t,id:rematchId(t),dialog:`Revanche — ${t.dialog||'Dresseur'}`,level:base,party,partyIndex:0,rematchV106Y:true,zone:state.zone};$('menuov').style.display='none';window.startBattle(party[0],clone)
+}
+
+
+==============================================================================================================
+FUNCTION rematchAvailable
+==============================================================================================================
+
+## game/index.html line 15884
+function rematchAvailable(t){return !!(t&&state.trainerWins?.[t.id]&&(state.seals||[]).length>0&&!state.trainerWins?.[rematchId(t)])}
+
+
+## game/CREATEUR.html line 15863
+function rematchAvailable(t){return !!(t&&state.trainerWins?.[t.id]&&(state.seals||[]).length>0&&!state.trainerWins?.[rematchId(t)])}
+
+
+==============================================================================================================
+FUNCTION useMove
+==============================================================================================================
+
+## game/index.html line 15129
+function useMove(playerTurn,mv){
+  if(!combatReady()||battle.busy||!mv)return;const user=v109bPrepareCombatant(playerTurn?currentPlayer():battle.enemy);if(!alive(user))return;let mid=mv._id||mv.id||Object.keys(MOVE_DB).find(k=>MOVE_DB[k]===mv);mid=v109bCanonicalMoveId(mid);mv={...MOVE_DB[mid],_id:mid};
+  if(mid!=='lutte'&&!consumeMovePPV106U(user,mid)){if(playerTurn){battle.busy=false;setMessage(`${mv.name} n'a plus de PP.`);buildButtons();return}battle.busy=false;return enemyTurnV105R()}
+  battle.busy=true;battle.phase=playerTurn?'player-action':'enemy-action';battle.menu='actions';const blocked=canAct(user);if(blocked){setMessage(blocked);buildButtons();schedule(520,()=>poisonAfterAction(user,playerTurn));return}setMessage(`${nameOf(user)} utilise ${mv.name} !`);safeCall(playMoveSound,mv);battle.anim={start:performance.now(),duration:560,fromPlayer:playerTurn,move:mv,impact:false};buildButtons();schedule(560,()=>resolveMove(playerTurn,mv))
+}
+
+
+## game/V109W_CORRECTIFS_GAMEPLAY.js line 198
+window.useMove=function(playerTurn,mv){
+    // Un Éclat compte comme participant s'il agit OU s'il est la cible vivante de l'adversaire.
+    if(battle&&(playerTurn||(!playerTurn&&battle.enemy?.hp>0)))markCurrentParticipant();
+    return baseUseMove.apply(this,arguments);
+  }
+
+
+## game/CREATEUR.html line 15108
+function useMove(playerTurn,mv){
+  if(!combatReady()||battle.busy||!mv)return;const user=v109bPrepareCombatant(playerTurn?currentPlayer():battle.enemy);if(!alive(user))return;let mid=mv._id||mv.id||Object.keys(MOVE_DB).find(k=>MOVE_DB[k]===mv);mid=v109bCanonicalMoveId(mid);mv={...MOVE_DB[mid],_id:mid};
+  if(mid!=='lutte'&&!consumeMovePPV106U(user,mid)){if(playerTurn){battle.busy=false;setMessage(`${mv.name} n'a plus de PP.`);buildButtons();return}battle.busy=false;return enemyTurnV105R()}
+  battle.busy=true;battle.phase=playerTurn?'player-action':'enemy-action';battle.menu='actions';const blocked=canAct(user);if(blocked){setMessage(blocked);buildButtons();schedule(520,()=>poisonAfterAction(user,playerTurn));return}setMessage(`${nameOf(user)} utilise ${mv.name} !`);safeCall(playMoveSound,mv);battle.anim={start:performance.now(),duration:560,fromPlayer:playerTurn,move:mv,impact:false};buildButtons();schedule(560,()=>resolveMove(playerTurn,mv))
+}
+
+
+## game/assets/v105r-combat.js line 339
+function useMove(playerTurn,mv){
+  if(!combatReady()||battle.busy||!mv)return;
+  const user=playerTurn?currentPlayer():battle.enemy;if(!alive(user))return;
+  battle.busy=true;battle.phase=playerTurn?'player-action':'enemy-action';battle.menu='actions';
+  const blocked=canAct(user);
+  if(blocked){setMessage(blocked);buildButtons();schedule(520,()=>poisonAfterAction(user,playerTurn));return}
+  setMessage(`${nameOf(user)} utilise ${mv.name} !`);
+  safeCall(playMoveSound,mv);
+  battle.anim={start:performance.now(),duration:460,fromPlayer:playerTurn,move:mv,impact:false};
+  buildButtons();schedule(460,()=>resolveMove(playerTurn,mv))
+}
