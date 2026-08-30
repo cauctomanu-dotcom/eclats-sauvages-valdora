@@ -2856,11 +2856,20 @@ function interactTaron(n){
 }
 function startTaronBattle(){
   const ts=ensureTaronState(),a=ts.active;if(!a)return;
-  const ri=Math.max(0,+state.zone.replace('route','')||0);
-  const level=7+ri*4+Math.floor(Math.random()*3);
-  const idx=Math.min(CREATURES.length-1,8+ri*11+Math.floor(Math.random()*8));
-  const c=CREATURES[idx]||CREATURES[8];
-  startBattle(mon(c.id,level),{id:'taron_'+Date.now(),level,dialog:'Un agent de la Team Taron',taron:true})
+  const ri=Math.max(0,+String(state.zone||'').replace('route','')||0);
+  const avg=Math.max(6,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length)));
+  const base=Math.max(7,Math.min(76,Math.max(7+ri*4,avg))),count=Math.min(5,Math.max(2,2+Math.floor(ri/3))),party=[];
+  const used=new Set();
+  for(let i=0;i<count;i++){
+    let idx=Math.min(CREATURES.length-1,8+ri*11+((i*17+ri*7)%Math.max(12,CREATURES.length-8)));
+    while(used.has(idx)&&idx<CREATURES.length-1)idx++;used.add(idx);
+    const lvl=Math.min(78,base+Math.floor(i/2)),c=CREATURES[idx]||CREATURES[8]||CREATURES[0],m=mon(c.id,lvl);
+    m.moves=defaultMoves(m.id,m.level);party.push(m);
+  }
+  const trainer={id:'taron_'+Date.now(),level:party[0]?.level||base,dialog:'Un agent de la Team Taron',taron:true,party,partyIndex:0,partySize:party.length,partyMax:party.length};
+  trainerEvent=trainer;
+  battle={enemy:party[0],trainer,trainerEvent:trainer,party,partyIndex:0,eventQueue:[],_v122Participants:[]};
+  try{startBattleEnemy()}catch(_){startBattle(party[0],trainer)}
 }
 function completeTaronMission(){
   const ts=ensureTaronState(),a=ts.active;if(!a)return;
@@ -7818,8 +7827,13 @@ function enemyKO(){
   if(!battleAlive())return;
   const a=active(),e=battle.enemy;
   const xp=Math.max(10,Math.floor(e.level*11+12+(BY[e.id].stage||0)*8));
-  const ev=gainXP(a,xp);
-  battle.eventQueue.push(BY[a.id].name+' gagne '+xp+' EXP.',...ev);
+  battle._v122Participants=Array.isArray(battle._v122Participants)?battle._v122Participants:[];
+  if(a&&!battle._v122Participants.includes(a))battle._v122Participants.push(a);
+  const participants=[...new Set(battle._v122Participants)].filter(Boolean);
+  for(const p of participants){
+    const ev=gainXP(p,xp);
+    battle.eventQueue.push(BY[p.id].name+' gagne '+xp+' EXP.',...ev);
+  }
 
   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
     battle.trainerIndex++;
@@ -15726,7 +15740,7 @@ installInterface();installOrbEconomy();brandV105R();window.addEventListener('res
 const V106Y_VERSION='V106Y';
 const BUS_LINES_V106Y=[
   {id:'A',name:'Ligne Vallée',stops:['town0','town1','town4','town2']},
-  {id:'B',name:'Ligne des Monts',stops:['town3','town8','town5','town6']},
+  {id:'B',name:'Ligne des Monts',stops:['town3','route_simdor','town8','town5','town6']},
   {id:'C',name:'Ligne du Littoral',stops:['town14','town9','town13','town2']},
   {id:'D',name:'Ligne Sylve & Lacs',stops:['town7','town12','town11','town10','town4']}
 ];
@@ -16574,7 +16588,11 @@ function hash(s){let h=2166136261>>>0;for(const c of String(s)){h^=c.charCodeAt(
 function scNow(){try{return currentScene()}catch(_){return null}}
 function healer(sc){return (sc?.buildings||[]).find(b=>b&&(b.type==='healer'||b.type==='care'||b.urbanType==='clinic'||/centre\s*(de\s*)?soins|soins|clinique|dispensaire/i.test(String(b.label||b.name||''))))||null}
 function v107dBusStop(sc=scNow(),zone=state?.zone){
-  if(!sc||sc.kind!=='town')return null;const h=healer(sc);if(!h)return null;
+  if(!sc||sc.kind!=='town')return null;const h=healer(sc);if(!h){
+  const w=Number(sc.width)||1800,hh=Number(sc.height)||1100;let x=Math.max(180,w*.18),y=Math.max(180,hh*.78);
+  try{if(typeof nearestRoad==='function'&&sc.v105dRoad?.size){const q=nearestRoad(sc,x,y);if(q){x=q.x+70;y=q.y}}}catch(_){}
+  return {id:`${zone}_bus_v122`,type:'bus',x:Math.max(78,Math.min(w-78,x)),y:Math.max(82,Math.min(hh-58,y)),roadY:y,curbSide:-1,dir:'front'};
+}
   const w=Number(sc.width)||1800,hh=Number(sc.height)||1100,core=Math.max(70,Number(sc.v105dCore)||100);
   const roadY=Number.isFinite(Number(h.v105dRoadY))?Number(h.v105dRoadY):(Number(h.doorY)||((Number(h.y)||0)+(Number(h.h)||0)))+Math.max(42,core*.32);
   const hx=Number(h.doorX)||((Number(h.x)||0)+(Number(h.w)||0)/2),hy=(Number(h.y)||0)+(Number(h.h)||0)/2;
@@ -16746,7 +16764,7 @@ function installInteract(){
   const wrap=function(){
     try{if(scene==='world'){
       const sc=scNow();if(sc?.kind==='town'){
-        const b=v107dBusStop(sc,state.zone);if(near(b,125)&&window.ValdoraGameplayV106Y?.openBus){window.ValdoraGameplayV106Y.openBus();return}
+        const b=v107dBusStop(sc,state.zone);if(near(b,110)&&window.ValdoraGameplayV106Y?.openBus){window.ValdoraGameplayV106Y.openBus();return}
         const o=townNearest();if(o){interactFind(o);return}
       }else if(sc?.kind==='route'){
         const o=routeNearest();if(o){interactFind(o);return}
@@ -18628,6 +18646,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script src="VALDORA_SAVE_V118.js?v=118-save-3"></script>
 <script src="VALDORA_MOBILE_UI_V118.js?v=118-mobile-5"></script>
 <script src="VALDORA_CREATOR_GATE_V121.js?v=121-creator-2"></script>
+<script src="V122_REGRESSION_FIXES.js?v=122-regression-2"></script>
 </body></html
 >
 

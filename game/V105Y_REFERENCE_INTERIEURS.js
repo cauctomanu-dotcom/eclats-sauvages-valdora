@@ -196,7 +196,7 @@
     ctx.restore();
   }
   function passageLocked(p){
-    if(INT.type!=='citadelle')return false;
+    if((typeof v61CreatorMode==='function'&&v61CreatorMode())||INT.type!=='citadelle')return false;
     const rule={salle_2:{salle_3:'citadelle_coeur_gardien_1'},salle_3:{salle_4:'citadelle_coeur_gardien_2'},salle_4:{salle_5:'citadelle_coeur_gardien_3'}};
     const needed=rule[INT.roomId]?.[p.targetRoom];
     return needed?!state.trainerWins?.[needed]:false;
@@ -366,12 +366,12 @@
   }
 
   function targetFurniture(){
-    const reach=58,v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
+    const reach=42,v=state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1};
     const px=state.roomX+v.x*reach,py=state.roomY+v.y*reach;let best=null,bd=Infinity;
     for(const m of roomFurniture()){if(!m.interactif)continue;const r=transformedBounds(m),d=distanceRect(px,py,r);if(d<bd){bd=d;best=m}}
-    return best&&bd<78?best:null;
+    return best&&bd<40?best:null;
   }
-  function targetNpc(){let best=null,bd=Infinity;for(const n of standardNpcs()){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}return best&&bd<88?best:null}
+  function targetNpc(){let best=null,bd=Infinity;for(const n of standardNpcs()){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}return best&&bd<68?best:null}
   function healTeam(){
     for(const m of state.team||[]){try{m.hp=maxHP(m);m.status=null}catch(_){ }}call('hud');call('save',false);
   }

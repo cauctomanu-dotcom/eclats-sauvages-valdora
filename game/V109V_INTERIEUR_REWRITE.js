@@ -171,7 +171,7 @@ function furnitureAimPoint(m){
   return{x:r.x+r.w/2,y:r.y+r.h/2}
 }
 function nearestNpcWithDistance(){
-  let best=null,bm=null;for(const n of session?.npcs||[]){const m=targetMetrics(n.x,n.y,68);if(!m)continue;if(!bm||m.score<bm.score){best=n;bm=m}}
+  let best=null,bm=null;for(const n of session?.npcs||[]){const m=targetMetrics(n.x,n.y,56);if(!m)continue;if(!bm||m.score<bm.score){best=n;bm=m}}
   return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
 }
 function nearestFurnitureWithDistance(max=72){
@@ -184,9 +184,9 @@ function nearestFurnitureWithDistance(max=72){
   return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
 }
 function nearNpc(){const q=nearestNpcWithDistance();return q.target||null}
-function nearFurniture(max=72){return nearestFurnitureWithDistance(max).target}
+function nearFurniture(max=52){return nearestFurnitureWithDistance(max).target}
 function nearestInteractionTarget(){
-  const fq=nearestFurnitureWithDistance(72);if(fq.target)return{kind:'furniture',target:fq.target,score:fq.score};
+  const fq=nearestFurnitureWithDistance(52);if(fq.target)return{kind:'furniture',target:fq.target,score:fq.score};
   const nq=nearestNpcWithDistance();if(nq.target)return{kind:'npc',target:nq.target,score:nq.score};
   return null
 }

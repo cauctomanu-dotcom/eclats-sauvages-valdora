@@ -324,7 +324,7 @@ function updateWorldCitizens(){
 function facingVector(){return state.dir===0?{x:0,y:1}:state.dir===1?{x:-1,y:0}:state.dir===2?{x:1,y:0}:{x:0,y:-1}}
 function nearWorldNpc(){
   const sc=current();if(!sc||sc.kind!=='town')return null;const v=facingVector(),people=allWorldCitizens(sc,state.zone);let best=null,score=Infinity;
-  for(const n of people){const dx=n.x-state.x,dy=n.y-state.y,d=Math.hypot(dx,dy);if(d>94)continue;const dot=d?((dx/d)*v.x+(dy/d)*v.y):1,side=1-dot,rank=d+side*34;if(rank<score){score=rank;best=n}}
+  for(const n of people){const dx=n.x-state.x,dy=n.y-state.y,d=Math.hypot(dx,dy);if(d>72)continue;const dot=d?((dx/d)*v.x+(dy/d)*v.y):1,side=1-dot,rank=d+side*34;if(rank<score){score=rank;best=n}}
   return best
 }
 function faceWorldNpc(n){const dx=state.x-n.x,dy=state.y-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.moving=false;n._v118PauseUntil=Date.now()+3600;n._v118Wait=performance.now()+3800}
@@ -341,9 +341,18 @@ function talkWorldNpc(n){
 }
 function worldInteractV118(){
   if(typeof scene!=='undefined'&&scene==='world'){
+    // V122 : les agents Team Taron vivent sur les routes et ne font pas partie de nearWorldNpc().
+    try{
+      const taron=typeof currentTaronNPC==='function'?currentTaronNPC():null;
+      const d=taron?Math.hypot(Number(state?.x||0)-Number(taron.x||0),Number(state?.y||0)-Number(taron.y||0)):Infinity;
+      if(taron&&d<=72){
+        try{if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(taron)}catch(_){}
+        if(typeof interactTaron==='function'){interactTaron(taron);return true}
+      }
+    }catch(e){console.warn('V122 interaction Team Taron',e)}
     try{
       const bus=window.ValdoraBusV118Bridge;
-      if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}
+      if(bus){bus.ownedByV118=true;if(bus.near?.(110)&&bus.open?.())return true}
     }catch(e){console.warn('V118 interaction arrêt Fluo Valdora',e)}
     try{
       const chest=window.ValdoraChestV118Bridge;
@@ -391,7 +400,7 @@ function ensureInteriorPopulation(record=false){
   }
   s.npcs=[...base,...people];s._v118PopulationKey=key;return true
 }
-function nearInteriorResident(){const s=interiorSession();if(!s)return null;let best=null,bd=Infinity;for(const n of s.npcs||[]){if(!n.v118Resident)continue;const d=Math.hypot(Number(state.roomX)-n.x,Number(state.roomY)-n.y);if(d<bd){bd=d;best=n}}return best&&bd<=102?best:null}
+function nearInteriorResident(){const s=interiorSession();if(!s)return null;let best=null,bd=Infinity;for(const n of s.npcs||[]){if(!n.v118Resident)continue;const d=Math.hypot(Number(state.roomX)-n.x,Number(state.roomY)-n.y);if(d<bd){bd=d;best=n}}return best&&bd<=68?best:null}
 function faceInterior(n){const dx=state.roomX-n.x,dy=state.roomY-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.moving=false;n.pauseUntil=Date.now()+3600;n.nextDecision=performance.now()+3900}
 function interactInteriorV118(){
   ensureInteriorPopulation(true);
