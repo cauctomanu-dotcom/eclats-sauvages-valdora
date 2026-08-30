@@ -58,7 +58,7 @@
     });
     upsertExit(crossroad, 'route_horizons', {
       x: Math.max(0, crossroad.width / 2 - 110), y: crossroad.height - 120,
-      w: 220, h: 120, side: 'south', label: 'Route des Horizons', v110Stable: true
+      w: 220, h: 120, side: 'south', label: 'Retour', v110Stable: true
     });
 
     const radius = Math.min(crossroad.width, crossroad.height) * 0.34;
@@ -183,6 +183,16 @@
   const script=document.createElement('script');
   script.id='valdoraV123ParityLoader';
   script.src='V123_CREATOR_PARITY_NPC_FIXES.js?v=123-parity-1';
+  script.async=false;
+  (document.head||document.documentElement).appendChild(script);
+})();
+
+// V124 — contrôle tactile direct commun Joueur / Créateur.
+(function loadValdoraV124(){
+  if(document.getElementById('valdoraV124TouchLoader'))return;
+  const script=document.createElement('script');
+  script.id='valdoraV124TouchLoader';
+  script.src='V124_TOUCH_DIRECT.js?v=124-touch-1';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
