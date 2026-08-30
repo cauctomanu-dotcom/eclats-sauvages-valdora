@@ -1,0 +1,68 @@
+V122 FUNCTION: startTrainer413
+==========================================================================================
+
+## game/index.html line 6898
+function startTrainer413(t){
+  const opponent={...t,party:buildTrainerParty(t),partyIndex:0};
+  startBattle(opponent.party[0],opponent)
+}
+
+## game/index.html line 10176
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && trainerDefeatedV88(t)){ interactDefeatedTrainerV88(t); return; }
+  if(!guardBattleStartV87()){
+    clearTrainerAggroV87();
+    return
+  }
+  return V87_START_TRAINER_ORIGINAL?.(t)
+}
+
+## game/index.html line 11350
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && !t.finalBoss && !t.templeGuard && currentScene()?.kind==='route'){
+    const copy={...t};
+    copy.level=v98RoadTrainerLevel(copy);
+    copy.zone=state.zone;
+    return _v98StartTrainer(copy)
+  }
+  return _v98StartTrainer(t)
+}
+
+## game/index.html line 13496
+startTrainer413=function(t){
+  if(t?.taronBossV102Z){window._v102zTaronBossContext=t;dialog('<b>'+t.dialog+'</b><br>'+Z_TARON_BOSSES[t.zone]?.story,()=>Z_START_TRAINER(t));return}
+  return Z_START_TRAINER(t)
+}
+
+## game/CREATEUR.html line 6899
+function startTrainer413(t){
+  const opponent={...t,party:buildTrainerParty(t),partyIndex:0};
+  startBattle(opponent.party[0],opponent)
+}
+
+## game/CREATEUR.html line 10177
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && trainerDefeatedV88(t)){ interactDefeatedTrainerV88(t); return; }
+  if(!guardBattleStartV87()){
+    clearTrainerAggroV87();
+    return
+  }
+  return V87_START_TRAINER_ORIGINAL?.(t)
+}
+
+## game/CREATEUR.html line 11351
+startTrainer413=function(t){
+  if(t && !t.guardian && !t.taron && !t.finalBoss && !t.templeGuard && currentScene()?.kind==='route'){
+    const copy={...t};
+    copy.level=v98RoadTrainerLevel(copy);
+    copy.zone=state.zone;
+    return _v98StartTrainer(copy)
+  }
+  return _v98StartTrainer(t)
+}
+
+## game/CREATEUR.html line 13497
+startTrainer413=function(t){
+  if(t?.taronBossV102Z){window._v102zTaronBossContext=t;dialog('<b>'+t.dialog+'</b><br>'+Z_TARON_BOSSES[t.zone]?.story,()=>Z_START_TRAINER(t));return}
+  return Z_START_TRAINER(t)
+}

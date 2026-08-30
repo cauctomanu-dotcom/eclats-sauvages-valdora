@@ -1,0 +1,24 @@
+V122 FUNCTION: v109kTalkToOutdoorNPC
+==========================================================================================
+
+## game/index.html line 18351
+function v109kTalkToOutdoorNPC(n){
+  if(!n)return false;
+  try{if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(n)}catch(_){}
+  if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}
+  try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}
+  // Certains PNJ ont une interaction narrative dédiée ; la laisser prioritaire si elle existe.
+  try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}
+  const name=n.name||n.dialog||'Habitant';dialog(`<b>${name}</b><br>${v109kOutdoorDialogue(n)}`);return true
+}
+
+## game/CREATEUR.html line 18312
+function v109kTalkToOutdoorNPC(n){
+  if(!n)return false;
+  try{if(typeof faceNPCToPlayer==='function')faceNPCToPlayer(n)}catch(_){}
+  if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}
+  try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}
+  // Certains PNJ ont une interaction narrative dédiée ; la laisser prioritaire si elle existe.
+  try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}
+  const name=n.name||n.dialog||'Habitant';dialog(`<b>${name}</b><br>${v109kOutdoorDialogue(n)}`);return true
+}

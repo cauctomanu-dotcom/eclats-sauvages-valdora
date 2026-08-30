@@ -1,0 +1,164 @@
+V122 FUNCTION: finishBattle
+==========================================================================================
+
+## game/index.html line 8025
+function finishBattle(forcedResult=null){
+  if(!battle)return;
+  const b=battle,res=forcedResult||b.result,e=b.enemy,events=[...(b.eventQueue||[])];
+
+  if(res==='capture'){
+    logEvent('Capture de '+BY[e.id].name+'.');
+    state.dex[e.id]={...(state.dex[e.id]||{}),seen:true,caught:true};
+    const cp=JSON.parse(JSON.stringify(e));clampCreatureLevelV81(cp);
+    if(state.team.length<7)state.team.push(cp);else state.box.push(cp)
+  }
+
+  const guardianWon=res==='win'&&b.trainer?.guardian;
+  const taronWon=res==='win'&&b.trainer&&b.trainer.taron;
+  const normalTrainerWon=res==='win'&&b.trainer&&!b.trainer.taron&&!b.trainer.guardian;
+
+  let sealObtained=false;
+  if(guardianWon)sealObtained=v83AwardGuardianSeal(b.trainer);
+
+  // V88 : un dresseur de route vaincu est enregistré AVANT la fermeture du combat.
+  if(normalTrainerWon){
+    markTrainerDefeatedV88(b.trainer);
+  }
+
+  stopBattleMusic();
+  if(res==='win')playVictoryJingleV81();
+
+  battleToken++;battle=null;$('battleUI').style.display='none';scene='world';hud();save(false);
+  syncDefeatedTrainersV88();
+
+  if(guardianWon){
+    setTimeout(()=>dialog(
+      '<b>Gardien vaincu !</b><br>'+
+      (sealObtained
+        ?'Tu remportes le <b>Sceau '+b.trainer.sealIndex+'</b>.'
+        :'Tu avais déjà remporté ce Sceau.')+
+      '<br><br>Récompense : '+voltronLabelV85(b.reward||0)+'.'+(typeof v104GuardianRewardHtml==='function'?v104GuardianRewardHtml(b.trainer):'')
+    ),180);return
+  }
+
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV66){setTimeout(resolveBuildingBattleV66,150);return}
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV67){
+    setTimeout(()=>{
+      const c=window._v67Battle;if(!c)return;
+      window._v67Battle=null;state.zone=c.zone;v67ReturnZone=c.zone;v67Building=c.building;v67Floor=c.floor;
+      building={...c.building,type:'v67building'};scene='interior';state.roomX=600;state.roomY=420;
+      c.event.done=true;state.flags=state.flags||{};state.flags[c.event.key]=true;
+      state.money=(state.money||0)+700;save(false);
+      dialog('<b>Immeuble libéré</b><br>La Team Taron est repoussée. +700 Voltrons.');
+    },150);return
+  }
+  if(taronWon){setTimeout(completeTaronMission,150);return}
+
+  if(normalTrainerWon){
+    setTimeout(()=>dialog(
+      '<b>'+b.trainer.dialog+'</b><br>'+
+      trainerAfterBattleTextV88(b.trainer)+
+      (events.length?'<br><br>'+events.join('<br>'):'')
+    ),150);
+    return
+  }
+
+  if(events.length)dialog('<b>Résultats</b><br>'+events.join('<br>'));
+  else toast(res==='capture'?('Éclat capturé !'+(b.captureXP?' +'+b.captureXP+' EXP':''))
+    :res==='win'?('Victoire ! +'+voltronLabelV85(b.reward||0))
+    :res==='lose'?'Défaite...':'Combat terminé.')
+}
+
+## game/index.html line 11335
+finishBattle=function(forcedResult=null){
+  const result=forcedResult||battle?.result;
+  const fullKO=result==='lose' && (state.team||[]).length>0 && state.team.every(m=>m.hp<=0);
+
+  _v98FinishBattle(forcedResult);
+
+  if(fullKO){
+    // Laisse l'écran de combat se fermer avant le transfert.
+    setTimeout(v98TransferToHealingCenter,450)
+  }
+}
+
+## game/CREATEUR.html line 8026
+function finishBattle(forcedResult=null){
+  if(!battle)return;
+  const b=battle,res=forcedResult||b.result,e=b.enemy,events=[...(b.eventQueue||[])];
+
+  if(res==='capture'){
+    logEvent('Capture de '+BY[e.id].name+'.');
+    state.dex[e.id]={...(state.dex[e.id]||{}),seen:true,caught:true};
+    const cp=JSON.parse(JSON.stringify(e));clampCreatureLevelV81(cp);
+    if(state.team.length<7)state.team.push(cp);else state.box.push(cp)
+  }
+
+  const guardianWon=res==='win'&&b.trainer?.guardian;
+  const taronWon=res==='win'&&b.trainer&&b.trainer.taron;
+  const normalTrainerWon=res==='win'&&b.trainer&&!b.trainer.taron&&!b.trainer.guardian;
+
+  let sealObtained=false;
+  if(guardianWon)sealObtained=v83AwardGuardianSeal(b.trainer);
+
+  // V88 : un dresseur de route vaincu est enregistré AVANT la fermeture du combat.
+  if(normalTrainerWon){
+    markTrainerDefeatedV88(b.trainer);
+  }
+
+  stopBattleMusic();
+  if(res==='win')playVictoryJingleV81();
+
+  battleToken++;battle=null;$('battleUI').style.display='none';scene='world';hud();save(false);
+  syncDefeatedTrainersV88();
+
+  if(guardianWon){
+    setTimeout(()=>dialog(
+      '<b>Gardien vaincu !</b><br>'+
+      (sealObtained
+        ?'Tu remportes le <b>Sceau '+b.trainer.sealIndex+'</b>.'
+        :'Tu avais déjà remporté ce Sceau.')+
+      '<br><br>Récompense : '+voltronLabelV85(b.reward||0)+'.'+(typeof v104GuardianRewardHtml==='function'?v104GuardianRewardHtml(b.trainer):'')
+    ),180);return
+  }
+
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV66){setTimeout(resolveBuildingBattleV66,150);return}
+  if(res==='win'&&b.trainer&&b.trainer.buildingEventV67){
+    setTimeout(()=>{
+      const c=window._v67Battle;if(!c)return;
+      window._v67Battle=null;state.zone=c.zone;v67ReturnZone=c.zone;v67Building=c.building;v67Floor=c.floor;
+      building={...c.building,type:'v67building'};scene='interior';state.roomX=600;state.roomY=420;
+      c.event.done=true;state.flags=state.flags||{};state.flags[c.event.key]=true;
+      state.money=(state.money||0)+700;save(false);
+      dialog('<b>Immeuble libéré</b><br>La Team Taron est repoussée. +700 Voltrons.');
+    },150);return
+  }
+  if(taronWon){setTimeout(completeTaronMission,150);return}
+
+  if(normalTrainerWon){
+    setTimeout(()=>dialog(
+      '<b>'+b.trainer.dialog+'</b><br>'+
+      trainerAfterBattleTextV88(b.trainer)+
+      (events.length?'<br><br>'+events.join('<br>'):'')
+    ),150);
+    return
+  }
+
+  if(events.length)dialog('<b>Résultats</b><br>'+events.join('<br>'));
+  else toast(res==='capture'?('Éclat capturé !'+(b.captureXP?' +'+b.captureXP+' EXP':''))
+    :res==='win'?('Victoire ! +'+voltronLabelV85(b.reward||0))
+    :res==='lose'?'Défaite...':'Combat terminé.')
+}
+
+## game/CREATEUR.html line 11336
+finishBattle=function(forcedResult=null){
+  const result=forcedResult||battle?.result;
+  const fullKO=result==='lose' && (state.team||[]).length>0 && state.team.every(m=>m.hp<=0);
+
+  _v98FinishBattle(forcedResult);
+
+  if(fullKO){
+    // Laisse l'écran de combat se fermer avant le transfert.
+    setTimeout(v98TransferToHealingCenter,450)
+  }
+}

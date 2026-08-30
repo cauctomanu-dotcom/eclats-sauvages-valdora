@@ -1,0 +1,98 @@
+V122 FUNCTION: arenaChallenge
+==========================================================================================
+
+## game/index.html line 8098
+function arenaChallenge(ti){
+  const sealIndex=Math.max(1,Math.min(7,Number(ti)||1));
+  if((state.seals||[]).includes(sealIndex)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné mon Sceau. Reviens me voir si tu veux parler entraînement.');
+    return
+  }
+  const count=v83GuardianPartySize(sealIndex);
+  const base=v83GuardianBaseLevel(sealIndex);
+  const guardian={
+    id:'guardian_seal_'+sealIndex,
+    guardian:true,
+    sealIndex,
+    look:15,
+    level:base,
+    dialog:'Gardien du Sceau '+sealIndex,
+    zone:state.zone
+  };
+  dialog('<b>Gardien du Sceau '+sealIndex+'</b><br>'+
+    'Pour obtenir ce Sceau, tu dois me vaincre. Mon équipe compte <b>'+count+
+    ' créatures</b>, autour du niveau <b>'+base+'</b>. Prépare ton équipe !',
+    ()=>startTrainer413(guardian))
+}
+
+## game/index.html line 12345
+window.arenaChallenge=function(ti){
+  const seal=Math.max(1,Math.min(7,Number(ti)||1));
+  const type=V101D_SEAL_TYPES[seal];
+  if((state.seals||[]).includes(seal)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné le '+V101D_SEAL_NAMES[seal]+'.');
+    return;
+  }
+  const count=v83GuardianPartySize(seal),base=v83GuardianBaseLevel(seal);
+  const guardian={
+    id:'guardian_seal_'+seal,guardian:true,sealIndex:seal,look:15,level:base,
+    dialog:'Gardien du '+V101D_SEAL_NAMES[seal],zone:state.zone
+  };
+  dialog(
+    '<b>'+V101D_SEAL_NAMES[seal]+'</b><br>'+
+    'Ce Sceau représente le type <b>'+type+'</b>. Mon équipe est donc composée uniquement d’Éclats de type <b>'+type+'</b>.'+
+    '<br><br>Tu devras vaincre '+count+' créature'+(count>1?'s':'')+' autour du niveau '+base+'.',
+    ()=>startTrainer413(guardian)
+  );
+}
+
+## game/index.html line 14310
+window.arenaChallenge=function(index){const seal=building?.v105nSealIndex||GUARDS[state.zone]||index;return ARENA_BASE(seal)}
+
+## game/CREATEUR.html line 8099
+function arenaChallenge(ti){
+  const sealIndex=Math.max(1,Math.min(7,Number(ti)||1));
+  if((state.seals||[]).includes(sealIndex)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné mon Sceau. Reviens me voir si tu veux parler entraînement.');
+    return
+  }
+  const count=v83GuardianPartySize(sealIndex);
+  const base=v83GuardianBaseLevel(sealIndex);
+  const guardian={
+    id:'guardian_seal_'+sealIndex,
+    guardian:true,
+    sealIndex,
+    look:15,
+    level:base,
+    dialog:'Gardien du Sceau '+sealIndex,
+    zone:state.zone
+  };
+  dialog('<b>Gardien du Sceau '+sealIndex+'</b><br>'+
+    'Pour obtenir ce Sceau, tu dois me vaincre. Mon équipe compte <b>'+count+
+    ' créatures</b>, autour du niveau <b>'+base+'</b>. Prépare ton équipe !',
+    ()=>startTrainer413(guardian))
+}
+
+## game/CREATEUR.html line 12346
+window.arenaChallenge=function(ti){
+  const seal=Math.max(1,Math.min(7,Number(ti)||1));
+  const type=V101D_SEAL_TYPES[seal];
+  if((state.seals||[]).includes(seal)){
+    dialog('<b>Gardien</b><br>Tu as déjà gagné le '+V101D_SEAL_NAMES[seal]+'.');
+    return;
+  }
+  const count=v83GuardianPartySize(seal),base=v83GuardianBaseLevel(seal);
+  const guardian={
+    id:'guardian_seal_'+seal,guardian:true,sealIndex:seal,look:15,level:base,
+    dialog:'Gardien du '+V101D_SEAL_NAMES[seal],zone:state.zone
+  };
+  dialog(
+    '<b>'+V101D_SEAL_NAMES[seal]+'</b><br>'+
+    'Ce Sceau représente le type <b>'+type+'</b>. Mon équipe est donc composée uniquement d’Éclats de type <b>'+type+'</b>.'+
+    '<br><br>Tu devras vaincre '+count+' créature'+(count>1?'s':'')+' autour du niveau '+base+'.',
+    ()=>startTrainer413(guardian)
+  );
+}
+
+## game/CREATEUR.html line 14289
+window.arenaChallenge=function(index){const seal=building?.v105nSealIndex||GUARDS[state.zone]||index;return ARENA_BASE(seal)}

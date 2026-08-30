@@ -1,0 +1,8 @@
+V122 FUNCTION: nearBusStop
+==========================================================================================
+
+## game/index.html line 15832
+function nearBusStop(){return null /* V107E : interaction uniquement sur l'arrêt chibi visible */}
+
+## game/CREATEUR.html line 15811
+function nearBusStop(){return null /* V107E : interaction uniquement sur l'arrêt chibi visible */}

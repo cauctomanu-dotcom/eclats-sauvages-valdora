@@ -1,0 +1,56 @@
+V122 FUNCTION: grantEnemyXP
+==========================================================================================
+
+## game/index.html line 15162
+function grantEnemyXP(enemy){
+  const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+  const members=[...new Set((battle.participants||[]).filter(Boolean))],xpLines=[];
+  for(const m of members){
+    const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+    const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+    const line=`${nameOf(m)} : +${amount} EXP`;
+    xpLines.push(line);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+  }
+  battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+}
+
+## game/V109W_CORRECTIFS_GAMEPLAY.js line 205
+window.grantEnemyXP=function(enemy){
+    const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+    const members=uniq((battle?.v109wEnemyParticipants||[]).filter(m=>m&&m.hp>0)),xpLines=[];
+    battle.eventQueue=Array.isArray(battle.eventQueue)?battle.eventQueue:[];
+    for(const m of members){
+      if(m.hp<=0)continue;
+      const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+      const events=(typeof safeCall==='function'?safeCall(gainXP,m,amount):gainXP(m,amount))||[];
+      xpLines.push(`${nameOf(m)} : +${amount} EXP`);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events);
+    }
+    if(!members.length)battle.eventQueue.push('Aucun Éclat encore conscient n’a participé à cet affrontement : aucune EXP distribuée.');
+    battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+    // Le prochain Éclat du dresseur repart avec une liste de participants vide.
+    battle.v109wEnemyParticipants=[];
+  }
+
+## game/CREATEUR.html line 15141
+function grantEnemyXP(enemy){
+  const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+  const members=[...new Set((battle.participants||[]).filter(Boolean))],xpLines=[];
+  for(const m of members){
+    const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+    const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+    const line=`${nameOf(m)} : +${amount} EXP`;
+    xpLines.push(line);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+  }
+  battle.xpFlashLines=xpLines;battle.xpFlashUntil=performance.now()+2400;
+}
+
+## game/assets/v105r-combat.js line 368
+function grantEnemyXP(enemy){
+  const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+  const members=[...new Set((battle.participants||[]).filter(Boolean))];
+  for(const m of members){
+    const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+    const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+    battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+  }
+}

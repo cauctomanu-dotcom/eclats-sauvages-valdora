@@ -1,0 +1,205 @@
+V122 FUNCTION: interact
+==========================================================================================
+
+## game/V105Y_REFERENCE_INTERIEURS.js line 437
+function interact(){
+    if(!ensureInterior())return BASE_INTERACT();
+    try{if(closeDialog())return}catch(_){ }
+    if(INT.pose){if(INT.pose.mode==='seat')stand();else safeToast('Le repos doit d’abord se terminer.');return}
+    const n=targetNpc();if(n){interactNpc(n);return}
+    const m=targetFurniture();if(m){useFurniture(m);return}
+    safeToast('Approche-toi d’un meuble ou d’un personnage pour interagir.');
+  }
+
+## game/index.html line 5949
+function interact(){
+  if(scene==='interior'){interactInterior();return}
+  if(closeDialog())return;
+  if(scene!=='world'||trainerEvent)return;
+
+  if(tryFinalAltarV77())return;
+
+  const b=nearBuilding();
+  if(b){
+    if(currentScene().megacity && b.megaInterior && !['station','inn','healer','shop'].includes(b.type)){
+      enterBuildingV70(b);return
+    }
+    building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+  }
+
+  const n=nearNPC();
+  if(n){
+    faceNPCToPlayer(n);
+    if(n.taron){interactTaron(n);return}
+    if(questInteractionV106C(n))return;
+    dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return
+  }
+
+  if(['route','temple'].includes(currentScene().kind)){
+    const t=nearTrainer();
+    if(t){
+      faceNPCToPlayer(t);
+      if(t.finalBoss&&!templeGuardsClearedV77()){
+        dialog('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');
+        return
+      }
+      if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));
+      else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));
+      return
+    }
+  }
+}
+
+## game/index.html line 10519
+interact=function(){
+  if(scene==='world'&&currentScene().kind==='route'){
+    const o=nearRouteObjectV93();
+    if(o){searchRouteObjectV93(o);return}
+  }
+  return _v93Interact()
+}
+
+## game/index.html line 11057
+interact=function(){
+  if(healingSeq){
+    toast('Soin en cours — ton équipe revient dans quelques secondes.');
+    return
+  }
+  return _v97Interact()
+}
+
+## game/index.html line 12790
+window.interact=function(){
+ if(scene==='world'){
+   if(currentScene()?.kind==='town'){
+     const hiddenBush=nearTownBushV106G();if(hiddenBush){searchTownBushV106G(hiddenBush);return}
+   }
+   const b=typeof nearBuilding==='function'?nearBuilding():null;
+   if(b&&b.type==='inn'){
+     const nm=currentScene().name||state.zone, arr=V101F_INN_LINES[nm]||[
+       'Bienvenue dans notre auberge. Chaque voyageur apporte ici une histoire différente.',
+       'Repose-toi si tu en as besoin : la route est rarement aussi courte qu’elle en a l’air.'
+     ];
+     b.v101fInnTalk=(b.v101fInnTalk||0)+1; b.v101fInnLine=arr[(b.v101fInnTalk-1)%arr.length];
+     // Le texte sera disponible dans l'intérieur sans modifier le fonctionnement de l'auberge.
+     setTimeout(()=>{ if(scene==='interior')toast(b.v101fInnLine); },180);
+   }
+ }
+ return _interactV101F()
+}
+
+## game/index.html line 15895
+window.interact=function(){
+  if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+  if(scene==='world'&&currentScene()?.kind==='route'&&!trainerEvent){try{const t=nearTrainer();if(t&&rematchAvailable(t)){rematchMenu(t);return}}catch(_){} }
+  return BASE_INTERACT_V106Y()
+}
+
+## game/index.html line 16066
+window.interact=function(){if(scene==='world'){if(interactTaronOpV106Z())return;if(collectCacheV106Z())return}return BASE_INTERACT_V106Z()}
+
+## game/V109V_INTERIEUR_REWRITE.js line 283
+function interact(){if(!session)return;const q=nearestInteractionTarget();if(q?.kind==='furniture')return interactFurniture(q.target);if(q?.kind==='npc')return serviceNpcInteract(q.target);try{toast('Approche-toi d’un élément ou d’un personnage : E / Entrée.')}catch(_){}}
+
+## game/CREATEUR.html line 5950
+function interact(){
+  if(scene==='interior'){interactInterior();return}
+  if(closeDialog())return;
+  if(scene!=='world'||trainerEvent)return;
+
+  if(tryFinalAltarV77())return;
+
+  const b=nearBuilding();
+  if(b){
+    if(currentScene().megacity && b.megaInterior && !['station','inn','healer','shop'].includes(b.type)){
+      enterBuildingV70(b);return
+    }
+    building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+  }
+
+  const n=nearNPC();
+  if(n){
+    faceNPCToPlayer(n);
+    if(n.taron){interactTaron(n);return}
+    if(questInteractionV106C(n))return;
+    dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return
+  }
+
+  if(['route','temple'].includes(currentScene().kind)){
+    const t=nearTrainer();
+    if(t){
+      faceNPCToPlayer(t);
+      if(t.finalBoss&&!templeGuardsClearedV77()){
+        dialog('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');
+        return
+      }
+      if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));
+      else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));
+      return
+    }
+  }
+}
+
+## game/CREATEUR.html line 10520
+interact=function(){
+  if(scene==='world'&&currentScene().kind==='route'){
+    const o=nearRouteObjectV93();
+    if(o){searchRouteObjectV93(o);return}
+  }
+  return _v93Interact()
+}
+
+## game/CREATEUR.html line 11058
+interact=function(){
+  if(healingSeq){
+    toast('Soin en cours — ton équipe revient dans quelques secondes.');
+    return
+  }
+  return _v97Interact()
+}
+
+## game/CREATEUR.html line 12791
+window.interact=function(){
+ if(scene==='world'){
+   if(currentScene()?.kind==='town'){
+     const hiddenBush=nearTownBushV106G();if(hiddenBush){searchTownBushV106G(hiddenBush);return}
+   }
+   const b=typeof nearBuilding==='function'?nearBuilding():null;
+   if(b&&b.type==='inn'){
+     const nm=currentScene().name||state.zone, arr=V101F_INN_LINES[nm]||[
+       'Bienvenue dans notre auberge. Chaque voyageur apporte ici une histoire différente.',
+       'Repose-toi si tu en as besoin : la route est rarement aussi courte qu’elle en a l’air.'
+     ];
+     b.v101fInnTalk=(b.v101fInnTalk||0)+1; b.v101fInnLine=arr[(b.v101fInnTalk-1)%arr.length];
+     // Le texte sera disponible dans l'intérieur sans modifier le fonctionnement de l'auberge.
+     setTimeout(()=>{ if(scene==='interior')toast(b.v101fInnLine); },180);
+   }
+ }
+ return _interactV101F()
+}
+
+## game/CREATEUR.html line 15874
+window.interact=function(){
+  if(scene==='world'&&currentScene()?.kind==='town'&&nearBusStop()){openBusMenuV106Y();return}
+  if(scene==='world'&&currentScene()?.kind==='route'&&!trainerEvent){try{const t=nearTrainer();if(t&&rematchAvailable(t)){rematchMenu(t);return}}catch(_){} }
+  return BASE_INTERACT_V106Y()
+}
+
+## game/CREATEUR.html line 16045
+window.interact=function(){if(scene==='world'){if(interactTaronOpV106Z())return;if(collectCacheV106Z())return}return BASE_INTERACT_V106Z()}
+
+## game/V105W_INTERIEURS.js line 554
+function interact(){
+    if(!ensureInterior())return BASE_INTERACT();
+    if(closeDialog())return;
+    if(INT.mode==='corridor'){
+      if(nearElevator()){openElevator();return}
+      toast('Marche sur un passage pour entrer dans une pièce, ou approche-toi de l’ascenseur.');return
+    }
+    const m=targetItem();if(m){useItem(m);return}
+    const n=targetNpc();if(n){interactNpc(n);return}
+    if(INT.multi&&building?.type==='v70building'){
+      try{BASE_INTERACT();return}catch(_){ }
+    }
+    toast('Approche-toi d’un meuble ou d’un personnage pour interagir.');
+  }

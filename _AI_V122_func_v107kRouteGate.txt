@@ -1,0 +1,18 @@
+V122 FUNCTION: v107kRouteGate
+==========================================================================================
+
+## game/index.html line 17017
+function v107kRouteGate(from,to){
+  if(!v107kIsAdvancingRouteExit(from,to))return null;
+  const pending=(SCENES?.[from]?.trainers||[]).filter(t=>t&&!state.trainerWins?.[t.id]);
+  if(pending.length)return `La route n’est pas encore terminée : bats les ${pending.length} dresseur${pending.length>1?'s':''} obligatoire${pending.length>1?'s':''} restant${pending.length>1?'s':''} avant d’atteindre la ville suivante.`;
+  return null;
+}
+
+## game/CREATEUR.html line 16980
+function v107kRouteGate(from,to){
+  if(!v107kIsAdvancingRouteExit(from,to))return null;
+  const pending=(SCENES?.[from]?.trainers||[]).filter(t=>t&&!state.trainerWins?.[t.id]);
+  if(pending.length)return `La route n’est pas encore terminée : bats les ${pending.length} dresseur${pending.length>1?'s':''} obligatoire${pending.length>1?'s':''} restant${pending.length>1?'s':''} avant d’atteindre la ville suivante.`;
+  return null;
+}

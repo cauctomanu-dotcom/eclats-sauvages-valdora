@@ -1,0 +1,30 @@
+V122 FUNCTION: questInteractionV106C
+==========================================================================================
+
+## game/index.html line 5946
+function questInteractionV106C(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return false;const e=v106cQuestState()[q.id],p=Math.min(v106cProgress(q),q.goal),important=q.zone==='town0'?'<br><small><b>Mission obligatoire de Clairval :</b> toutes les missions de la ville doivent être terminées avant de prendre la Route 1.</small>':(q.required?'<br><small><b>Mission essentielle :</b> elle compte pour la conclusion de l’aventure.</small>':'');if(!e){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Objectif : '+p+'/'+q.goal+'</b>'+important,()=>v106cAccept(q));return true}if(e.status==='active'&&p>=q.goal){dialog('<b>'+q.giverName+' — Mission accomplie</b><br>Merci pour ton aide !<br><br>Récompense : <b>'+q.money+' V'+(q.item?' + '+(q.qty||1)+' '+q.item:'')+'</b>.',()=>v106cClaim(q));return true}if(e.status==='active'){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Progression : '+p+'/'+q.goal+'</b>'+important);return true}dialog('<b>'+q.giverName+'</b><br>Merci encore pour ton aide.');return true}
+
+## game/index.html line 16317
+questInteractionV106C=function(n){
+  if(n?.id!=='solene_aubeval')return V107B_QUEST_INTERACT_BASE(n);
+  const q=V107B_AUBE_QUEST,e=v106cQuestState()[q.id];
+  if(state.flags?.aubevalExpeditionLicense||e?.status==='done'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;return dialog('<b>Solène — Bureau des Horizons</b><br>Ton permis est valide. Quelle expédition veux-tu rejoindre ?',openLegendExpeditionsV107B),true}
+  if(!e){dialog('<b>Solène — Épreuve des Horizons</b><br>Aubeval est le dernier bureau d’expédition avant les sanctuaires légendaires. Pour obtenir ton <b>Permis des Horizons</b>, tu dois vaincre mon équipe d’évaluation.<br><br>Cette étape est obligatoire avant la Citadelle.',()=>{v106cAccept(q);setTimeout(v107bStartAubeTrial,220)});return true}
+  if(e.status==='active'&&!state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Épreuve des Horizons</b><br>L’épreuve n’est pas encore remportée. Mon équipe t’attend.',v107bStartAubeTrial);return true}
+  if(e.status==='active'&&state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Permis accordé</b><br>Épreuve réussie. Tu peux désormais partir vers les onze biomes légendaires.',()=>{v106cClaim(q);state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;save(false);openLegendExpeditionsV107B()});return true}
+  return true
+}
+
+## game/CREATEUR.html line 5947
+function questInteractionV106C(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return false;const e=v106cQuestState()[q.id],p=Math.min(v106cProgress(q),q.goal),important=q.zone==='town0'?'<br><small><b>Mission obligatoire de Clairval :</b> toutes les missions de la ville doivent être terminées avant de prendre la Route 1.</small>':(q.required?'<br><small><b>Mission essentielle :</b> elle compte pour la conclusion de l’aventure.</small>':'');if(!e){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Objectif : '+p+'/'+q.goal+'</b>'+important,()=>v106cAccept(q));return true}if(e.status==='active'&&p>=q.goal){dialog('<b>'+q.giverName+' — Mission accomplie</b><br>Merci pour ton aide !<br><br>Récompense : <b>'+q.money+' V'+(q.item?' + '+(q.qty||1)+' '+q.item:'')+'</b>.',()=>v106cClaim(q));return true}if(e.status==='active'){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Progression : '+p+'/'+q.goal+'</b>'+important);return true}dialog('<b>'+q.giverName+'</b><br>Merci encore pour ton aide.');return true}
+
+## game/CREATEUR.html line 16296
+questInteractionV106C=function(n){
+  if(n?.id!=='solene_aubeval')return V107B_QUEST_INTERACT_BASE(n);
+  const q=V107B_AUBE_QUEST,e=v106cQuestState()[q.id];
+  if(state.flags?.aubevalExpeditionLicense||e?.status==='done'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;return dialog('<b>Solène — Bureau des Horizons</b><br>Ton permis est valide. Quelle expédition veux-tu rejoindre ?',openLegendExpeditionsV107B),true}
+  if(!e){dialog('<b>Solène — Épreuve des Horizons</b><br>Aubeval est le dernier bureau d’expédition avant les sanctuaires légendaires. Pour obtenir ton <b>Permis des Horizons</b>, tu dois vaincre mon équipe d’évaluation.<br><br>Cette étape est obligatoire avant la Citadelle.',()=>{v106cAccept(q);setTimeout(v107bStartAubeTrial,220)});return true}
+  if(e.status==='active'&&!state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Épreuve des Horizons</b><br>L’épreuve n’est pas encore remportée. Mon équipe t’attend.',v107bStartAubeTrial);return true}
+  if(e.status==='active'&&state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Permis accordé</b><br>Épreuve réussie. Tu peux désormais partir vers les onze biomes légendaires.',()=>{v106cClaim(q);state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;save(false);openLegendExpeditionsV107B()});return true}
+  return true
+}

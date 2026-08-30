@@ -1,0 +1,9 @@
+V122 FUNCTION: nearDoorV114
+==========================================================================================
+
+## game/VALDORA_ROUTES_BIOMES_V114.js line 235
+function nearDoorV114(){
+  if(typeof scene!=='undefined'&&scene!=='world')return null;const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc||sc.kind!=='town')return null;let best=null,score=Infinity;
+  for(const b of sc.buildings||[]){const zone=doorZone(b,sc),d=doorPoint(b);if(!pointInRect(Number(state.x),Number(state.y),zone))continue;const s=Math.abs(Number(state.x)-d.x)+Math.abs(Number(state.y)-d.y)*.22;if(s<score){score=s;best=b}}
+  return best;
+}

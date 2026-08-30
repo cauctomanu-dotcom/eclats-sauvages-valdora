@@ -1,0 +1,58 @@
+V122 FUNCTION: openShop
+==========================================================================================
+
+## game/index.html line 8430
+function openShop(){
+  ensureInventoryV81();
+  const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+  const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+  const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+
+  let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+    Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+    <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="openShop()">Acheter</button>
+      <button onclick="openSellShopV101D()">Revendre</button>
+    </div><div class="baggrid">`;
+
+  for(const id of ids){
+    const it=SHOP_ITEMS[id];if(!it)continue;
+    const qty=state.inventory[id]||0;
+    h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+      <b>${it.label}</b><br>${it.price} Voltrons<br>
+      <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+    </button>`
+  }
+
+  h+='</div>';
+  openSimpleMenu('Boutique — '+city,h)
+}
+
+## game/CREATEUR.html line 8431
+function openShop(){
+  ensureInventoryV81();
+  const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+  const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+  const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+
+  let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+    Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+    <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="openShop()">Acheter</button>
+      <button onclick="openSellShopV101D()">Revendre</button>
+    </div><div class="baggrid">`;
+
+  for(const id of ids){
+    const it=SHOP_ITEMS[id];if(!it)continue;
+    const qty=state.inventory[id]||0;
+    h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+      <b>${it.label}</b><br>${it.price} Voltrons<br>
+      <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+    </button>`
+  }
+
+  h+='</div>';
+  openSimpleMenu('Boutique — '+city,h)
+}

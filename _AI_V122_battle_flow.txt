@@ -1,0 +1,1860 @@
+V122 GROUP: battle_flow
+==========================================================================================
+## game/V105Z_CORRECTIONS.js
+### line 307: battle.trainer
+299:   }
+300:   function applyBattleBoost(id){
+301:     if(!combatActive()||battle.busy)return;ensureInventory();if(!(state.inventory[id]>0)){toast('Tu n’en as plus.');return}
+302:     const m=battle.player||state.team?.[0];if(!m)return;state.inventory[id]--;
+303:     if(id==='FioleAttaque')m.atkBuff=Math.min(3,(m.atkBuff||0)+2);else m.defBuff=Math.min(3,(m.defBuff||0)+2);
+304:     consumeTurn(`${itemLabel(id)} renforce ${BY[m.id]?.name||'ton Éclat'}.`);
+305:   }
+306:   function useOrb(id){
+307:     if(!combatActive()||battle.busy)return;if(battle.trainer){toast('Impossible d’utiliser une Orbe contre la créature d’un dresseur.');return}
+308:     closeMenu();try{window.throwBattleOrb?.(id)}catch(_){try{throwBattleOrb(id)}catch(__){ }}
+309:   }
+310:   function bagButton(id,icon,desc,action='target',forcedDisabled=false){
+311:     const n=state.inventory?.[id]||0,onclick=action==='orb'?`ValdoraV105Z.useOrb('${id}')`:action==='boost'?`ValdoraV105Z.applyBattleBoost('${id}')`:`ValdoraV105Z.selectBattleItem('${id}')`;
+312:     return `<button class="bagitem" ${n<=0||forcedDisabled?'disabled':''} onclick="${onclick}"><b>${icon} ${itemLabel(id)}</b><br>${n}<br><small>${desc}</small></button>`;
+313:   }
+314:   function openBattleBag(){
+315:     if(!combatActive()||battle.busy)return;ensureInventory();
+316:     let h='<div id="v105zBattleBagMarker" class="quest"><b>Sac unifié</b><br>Ce sac contient exactement les objets disponibles depuis le panneau de droite. Utiliser un objet consomme un tour.</div><div class="baggrid">';
+317:     h+=bagButton('Potion','🧪','Restaure 30 PV.');
+318:     h+=bagButton('SuperPotion','🧪✨','Restaure 80 PV.');
+319:     h+=bagButton('Rappel','✨','Réanime à 50 % des PV.');
+320:     h+=bagButton('Baie','🍓','Soigne un statut, sauf le poison.');
+321:     h+=bagButton('Antidote','⚗️','Soigne le poison.');
+322:     if((state.inventory.Repas||0)>0)h+=bagButton('Repas','🍲','Restaure 50 PV.');
+### line 327: battle.trainer
+319:     h+=bagButton('Rappel','✨','Réanime à 50 % des PV.');
+320:     h+=bagButton('Baie','🍓','Soigne un statut, sauf le poison.');
+321:     h+=bagButton('Antidote','⚗️','Soigne le poison.');
+322:     if((state.inventory.Repas||0)>0)h+=bagButton('Repas','🍲','Restaure 50 PV.');
+323:     h+=bagButton('FioleGuerison','💗','Restaure 120 PV et soigne le statut.');
+324:     h+=bagButton('ElixirVital','💎','Restaure tous les PV et soigne le statut.');
+325:     h+=bagButton('FioleAttaque','🔴','Augmente l’attaque.','boost');
+326:     h+=bagButton('FioleDefense','🔵','Augmente la défense.','boost');
+327:     h+=bagButton('Orbe','◈',battle.trainer?'Indisponible contre un dresseur.':'Capture standard.','orb',!!battle.trainer);
+328:     h+=bagButton('SuperOrbe','◆',battle.trainer?'Indisponible contre un dresseur.':'Capture améliorée.','orb',!!battle.trainer);
+329:     h+=bagButton('MegaOrbe','✦',battle.trainer?'Indisponible contre un dresseur.':'Capture d’élite.','orb',!!battle.trainer);
+330:     for(let n=1;n<=5;n++){const id=`Artefact${n}`;if((state.inventory[id]||0)>0)h+=`<button class="bagitem" disabled><b>🔷 ${itemLabel(id)}</b><br>${state.inventory[id]}<br><small>Utilisable hors combat.</small></button>`}
+331:     h+='</div><h3>Capsules de capacité</h3>';
+332:     h+=(state.capsules||[]).length?(state.capsules||[]).map(id=>`<div class="quest"><b>${MOVE_DB?.[id]?.name||id}</b><br>Apprentissage disponible hors combat depuis le menu Équipe.</div>`).join(''):'<div class="quest">Aucune Capsule de capacité pour le moment.</div>';
+333:     openSimpleMenu('Sac — Combat',h);
+334:   }
+335: 
+336:   const worldBag=window.openBag;
+337:   window.openBag=function(){return combatActive()?openBattleBag():worldBag?.()};
+338:   const rightBag=document.getElementById('bag');if(rightBag)rightBag.onclick=()=>window.openBag();
+339: 
+340:   document.addEventListener('click',event=>{
+341:     if(!combatActive())return;
+342:     const button=event.target?.closest?.('#battleUI button');
+## game/V105Y_REFERENCE_INTERIEURS.js
+### line 202: trainerWins
+194:     ctx.fillStyle='rgba(218,255,231,.90)';ctx.beginPath();ctx.moveTo(0,-12*v.scale);ctx.quadraticCurveTo(9*v.scale,0,3*v.scale,10*v.scale);ctx.quadraticCurveTo(-7*v.scale,8*v.scale,-5*v.scale,0);ctx.closePath();ctx.fill();
+195:     for(let i=0;i<3;i++){const phase=(t*.35+i*.37+(m.y||0)*.01)%1;ctx.fillStyle=`rgba(116,247,255,${1-phase})`;ctx.beginPath();ctx.arc((i-1)*7*v.scale,-(22+phase*28)*v.scale,Math.max(1,2.3*(1-phase))*v.scale,0,Math.PI*2);ctx.fill()}
+196:     ctx.restore();
+197:   }
+198:   function passageLocked(p){
+199:     if(INT.type!=='citadelle')return false;
+200:     const rule={salle_2:{salle_3:'citadelle_coeur_gardien_1'},salle_3:{salle_4:'citadelle_coeur_gardien_2'},salle_4:{salle_5:'citadelle_coeur_gardien_3'}};
+201:     const needed=rule[INT.roomId]?.[p.targetRoom];
+202:     return needed?!state.trainerWins?.[needed]:false;
+203:   }
+204:   function drawPassage(p,v,label='PASSAGE'){
+205:     const locked=passageLocked(p),x=v.ox+p.x*v.scale,y=v.oy+p.y*v.scale,w=p.w*v.scale,h=p.h*v.scale;
+206:     ctx.save();ctx.fillStyle=locked?'rgba(113,42,50,.92)':'rgba(23,103,109,.90)';roundRect(x,y,w,h,7);ctx.fill();
+207:     ctx.strokeStyle=locked?'#ef9b91':'#f0c96b';ctx.lineWidth=Math.max(2,3*v.scale);ctx.stroke();
+208:     if(w>58&&h>18){ctx.fillStyle='#fff';ctx.font=`800 ${Math.max(8,Math.min(11,10*v.scale))}px Segoe UI`;ctx.textAlign='center';ctx.fillText(locked?'VERROUILLÉ':label,x+w/2,y+h/2+4)}
+209:     ctx.restore();
+210:   }
+211:   function exitRect(room=currentRefRoom()){
+212:     const w=Math.min(190,Math.max(120,room.width*.24));
+213:     return {id:'v105y_exit',x:(room.width-w)/2,y:room.height-28,w,h:28};
+214:   }
+215:   function drawHeader(){
+216:     const roomNames={principal:'Salle 1 — Entrée',salle_2:'Salle 2 — Premier Gardien',salle_3:'Salle 3 — Deuxième Gardien',salle_4:'Salle 4 — Troisième Gardien',salle_5:'Salle 5 — Maître du Cœur'};
+217:     const base=INT.type==='citadelle'?(roomNames[INT.roomId]||'Citadelle du Cœur'):(INT.src?.label||INT.ref?.name||'Intérieur');
+### line 394: trainerWins
+386:   function sit(m){
+387:     INT.pose={mode:'seat',item:m,returnX:state.roomX,returnY:state.roomY,returnDir:state.dir};window.joueurBloque=true;safeToast('Tu t’assois. Appuie de nouveau sur E ou Entrée pour te relever.');
+388:   }
+389:   function stand(){const p=INT.pose;if(!p)return;state.roomX=p.returnX;state.roomY=p.returnY;state.dir=p.returnDir;INT.pose=null;window.joueurBloque=false;safeToast('Tu te relèves.')}
+390:   function mealAction(label){
+391:     for(const m of state.team||[]){try{m.hp=Math.min(maxHP(m),m.hp+Math.max(1,Math.ceil(maxHP(m)*.25)))}catch(_){ }}call('hud');call('save',false);safeDialog(`<b>${label}</b><br>Le repas rend un peu d’énergie à toute ton équipe.`);
+392:   }
+393:   function finalAltar(){
+394:     if(!state.trainerWins?.final_boss){safeDialog('<b>Autel du Cœur</b><br>Le Maître du Cœur se tient encore entre toi et l’autel.');return}
+395:     if((state.seals||[]).length<7){safeDialog('<b>Autel du Cœur</b><br>Il manque des Sceaux. Les sept doivent être réunis pour restaurer le Cœur de Valdora.');return}
+396:     state.flags=state.flags||{};
+397:     if(state.flags.finalHeartRestored){safeDialog('<b>Cœur de Valdora</b><br>Le Cœur bat de nouveau en harmonie.');return}
+398:     state.flags.finalHeartRestored=true;state.story=Math.max(state.story||0,100);state.money=(state.money||0)+7000;call('logEvent','Le Cœur de Valdora a été restauré grâce aux sept Sceaux.');call('save',false);call('tone',392,.18,.028,'sine');call('tone',523,.20,.026,'sine',.18);call('tone',659,.22,.024,'sine',.36);
+399:     safeDialog('<b>LES SEPT SCEAUX RÉSONNENT</b><br><br>Le Cœur de Valdora bat de nouveau. Une onde lumineuse traverse toute la région.<br><br>+7000 ✦');
+400:   }
+401:   function useFurniture(m){
+402:     // V106E : les fonctions indispensables sont appelées directement par le moteur
+403:     // d'intérieur final. Elles ne dépendent plus d'un ancien gestionnaire masqué dans une IIFE.
+404:     if(m.fonction==='ouvrir_stockage'){call('openPC');return}
+405:     if(m.fonction==='soins_centre'){call('startHealingSequence');return}
+406:     if(m.fonction==='ouvrir_boutique'){call('openShop');return}
+407:     if(m.fonction==='voyage_train'){call('v62StationMasterDialog');return}
+408:     if(m.fonction==='repos_15s_soin_complet'){startBed(m);return}
+409:     if(m.fonction==='s_asseoir'){sit(m);return}
+### line 422: trainerWins
+414:     if(m.fonction==='lore_citadelle'){safeDialog('<b>Pilier d’Éclat</b><br>Les symboles du pilier s’illuminent à l’approche d’un combat décisif.');return}
+415:     if(m.fonction==='dialogue_gardien'){safeDialog(`<b>${m.label}</b><br>Ce mobilier porte les couleurs, les trophées et le Sceau du Gardien de la ville.`);return}
+416:     if(m.fonction==='ouvrir_rangement'){safeDialog(`<b>${m.label}</b><br>Le rangement est propre et soigneusement organisé.`);return}
+417:     try{if(typeof triggerFurniture==='function'){triggerFurniture({...m,nom:m.label});return}}catch(err){console.warn('V105Y interaction mobilier',err)}
+418:     safeDialog(`<b>${m.label||'Mobilier'}</b><br>${m.description||'Cet objet fait partie de l’aménagement du bâtiment.'}`);
+419:   }
+420:   function interactNpc(n){
+421:     if(n?._citadelV105Y){
+422:       if(state.trainerWins?.[n.id]){safeDialog(`<b>${n.dialog}</b><br>Tu as remporté ce combat. Le passage vers la salle suivante est désormais ouvert.`);return}
+423:       if(typeof startTrainer413==='function')startTrainer413(n);else call('startTrainer413',n);return;
+424:     }
+425:     if(INT.type==='laboratoire'&&n.id==='prof'){if(!state.team?.length)safeDialog('<b>Professeur Aurine</b><br>Choisis ton premier compagnon.',()=>call('showStarters'));else safeDialog('<b>Professeur Aurine</b><br>Continue ton enquête sur Valdora.');return}
+426:     if(INT.type==='centre_soins'){if(typeof healingSeq!=='undefined'&&healingSeq)safeToast('Le soin est déjà en cours.');else call('startHealingSequence');return}
+427:     if(INT.type==='boutique'){safeDialog('<b>Marchand</b><br>Bienvenue !',()=>call('openShop'));return}
+428:     if(INT.type==='gare'){safeDialog('<b>Chef de gare</b><br>Où souhaitez-vous aller ?',()=>call('v62StationMasterDialog'));return}
+429:     if(INT.type==='gardien'){
+430:       const sealMap={town1:1,town3:2,town5:3,town6:4,town9:5,town10:6,town13:7};
+431:       const src=sourceBuilding();
+432:       const seal=Number(src?.v105nSealIndex)||sealMap[state.zone]||Number(String(state.zone).replace('town',''))||1;
+433:       call('arenaChallenge',seal);return
+434:     }
+435:     safeDialog(`<b>${n.name||'Habitant'}</b><br>Bienvenue dans ce bâtiment.`);
+436:   }
+437:   function interact(){
+## game/index.html
+### line 368: trainerWins
+360: ['Port-Écume','metropole',480,7],['Luminor','metropole',650,12],['Brumelac','ville',240,1],
+361: ['Sylvaris','ville',0,1],['Taronis','metropole',700,10],['Aubeval','ville',300,1]
+362: ].map((v,i)=>({id:'city'+(i+1),name:v[0],kind:v[1],hotelPrice:v[2],floors:v[3]}));
+363: 
+364: const SIDE_QUESTS_V60=[
+365: {id:'q_pyroin',giver:'Mila',title:'Une chaleur rassurante',type:'capture',target:'Pyroin',qty:1,money:450,item:'Potion',itemQty:3},
+366: {id:'q_florin',giver:'Basile',title:'Le jardin vivant',type:'capture',target:'Florin',qty:1,money:400,item:'Baie',itemQty:5},
+367: {id:'q_rocor',giver:'Nora',title:'Un Rocor pour l’étude',type:'capture',target:'Rocor',qty:1,money:650,item:'Orbe',itemQty:4},
+368: {id:'q_trainers',giver:'Yanis',title:'Faire ses preuves',type:'trainerWins',qty:3,money:800,item:'Potion',itemQty:4},
+369: {id:'q_cities',giver:'Alma',title:'Carnet de voyage',type:'cities',qty:5,money:1000,item:'Orbe',itemQty:6}
+370: ];
+371: 
+372: function ensureV60(){
+373:  state.sideQuests=state.sideQuests||{};
+374:  state.visitedCities=state.visitedCities||[];
+375:  state.hotelStays=state.hotelStays||0;
+376: }
+377: function v60Cash(){return Number(state.money??state.gold??state.coins??0)}
+378: function v60CashSet(n){if('money'in state)state.money=n;else if('gold'in state)state.gold=n;else state.coins=n}
+379: function acceptSideQuestV60(id){
+380:  ensureV60();const q=SIDE_QUESTS_V60.find(q=>q.id===id);if(!q)return;
+381:  if(state.sideQuests[id])return toast('Cette mission est déjà dans ton journal.');
+382:  state.sideQuests[id]={status:'active',progress:0};toast('Nouvelle mission : '+q.title);save();
+383: }
+### line 987: startTrainer413
+979:  }
+980: }
+981: function handleBuildingEventV66(){
+982:  if(!megaEventV66||megaEventV66.type==='none'||megaEventV66.handled)return false;
+983:  const t=megaEventV66.type;
+984:  if(t==='taron'){
+985:    const tr={id:'bld_taron_'+megaEventV66.doneKey,level:10+megaFloorV66*2,look:12,dialog:'Cet immeuble appartient désormais à la Team Taron !',buildingEventV66:true};
+986:    window._buildingBattleContextV66={zone:megaReturnZoneV66,building:megaBuildingV66,floor:megaFloorV66,event:megaEventV66};
+987:    startTrainer413(tr);return true
+988:  }
+989:  megaEventV66.handled=true;state.flags=state.flags||{};state.flags[megaEventV66.doneKey]=true;
+990:  if(t==='lostCreature'){state.money=(state.money||0)+300;dialog('<b>Créature retrouvée !</b><br>Tu retrouves la petite créature cachée près d’une porte. Son propriétaire te récompense de 300 ✦.')}
+991:  else if(t==='blackout'){state.inventory.Potion=(state.inventory.Potion||0)+2;dialog('<b>Panne résolue</b><br>Tu aides le gardien à réarmer le tableau électrique. Il t’offre 2 Potions.')}
+992:  else if(t==='injured'){state.money=(state.money||0)+250;dialog('<b>Habitant secouru</b><br>Tu aides un résident blessé à rejoindre le hall. +250 ✦.')}
+993:  else if(t==='researcher'){state.inventory.Baie=(state.inventory.Baie||0)+3;dialog('<b>Étude terminée</b><br>Le chercheur te remercie pour ton aide et t’offre 3 Baies.')}
+994:  else if(t==='hiddenItem'){state.inventory.Orbe=(state.inventory.Orbe||0)+2;dialog('<b>Objet caché</b><br>Dans un renfoncement technique : 2 Orbes d’Éclat !')}
+995:  else if(t==='alarm'){dialog('<b>Fausse alerte</b><br>Tu découvres qu’un Éclat minuscule jouait avec un détecteur. Les habitants sont rassurés.')}
+996:  else if(t==='delivery'){state.money=(state.money||0)+350;dialog('<b>Livraison effectuée</b><br>Le colis arrive à son destinataire. +350 ✦.')}
+997:  save(false);return true
+998: }
+999: function interactMegaInteriorV66(){
+1000:  // room coordinates mapped to screen stair positions / .8, .75
+1001:  const up=Math.hypot(state.roomX-385,state.roomY-620);
+1002:  const down=Math.hypot(state.roomX-815,state.roomY-620);
+### line 1079: trainerEvent
+1071:  }else{
+1072:    toast('La chambre est vide pour le moment.')
+1073:  }
+1074: }
+1075: 
+1076: // Le système d’entrée est désormais branché AVANT l’ancien intérieur générique.
+1077: function interactV66(){
+1078:  if(closeDialog())return;
+1079:  if(scene!=='world'||trainerEvent)return;
+1080:  const b=nearBuilding();
+1081:  if(b){
+1082:    if(currentScene().megacity && b.megaInterior && b.urbanType!=='hotel'){enterMegaBuildingV66(b);return}
+1083:    if(b.type==='inn'||b.urbanType==='hotel'){enterHotelV66(b);return}
+1084:    building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+1085:  }
+1086:  const n=nearNPC();
+1087:  if(n){faceNPCToPlayer(n);if(n.taron){interactTaron(n);return}dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return}
+1088:  if(currentScene().kind==='route'){
+1089:    const t=nearTrainer();if(t){faceNPCToPlayer(t);if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));return}
+1090:  }
+1091: }
+1092: 
+1093: // Bataille Team Taron d’immeuble : retour au même étage après victoire.
+1094: function resolveBuildingBattleV66(){
+### line 1716: trainerWins
+1708: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1709: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"},"17":{"body":"tortue","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"18":{"body":"esprit","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"19":{"body":"pangolin","ornament":"crinière de flammes","pattern":"points lumineux","accent":"or"},"20":{"body":"félin","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"21":{"body":"renard","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"22":{"body":"mouton","ornament":"rochers sur les épaules","pattern":"écailles","accent":"ivoire"},"23":{"body":"champignon vivant","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"24":{"body":"cerf","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"25":{"body":"oiseau","ornament":"plumes en éventail","pattern":"rayures","accent":"bleu"},"26":{"body":"amphibien","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"27":{"body":"poisson","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"28":{"body":"tortue","ornament":"deux petites cornes","pattern":"plaques","accent":"violet"},"29":{"body":"esprit","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"30":{"body":"pangolin","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"31":{"body":"lapin","ornament":"petit volcan dorsal","pattern":"plumes","accent":"orange"},"32":{"body":"renard","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"33":{"body":"mouton","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"34":{"body":"champignon vivant","ornament":"cristaux sur le front","pattern":"dégradé","accent":"vert"},"35":{"body":"lézard","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"36":{"body":"oiseau","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"37":{"body":"amphibien","ornament":"antenne lumineuse","pattern":"feuilles","accent":"turquoise"},"38":{"body":"poisson","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"39":{"body":"serpent","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"40":{"body":"esprit","ornament":"corne cristalline","pattern":"taches","accent":"rouge"},"41":{"body":"pangolin","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"42":{"body":"lapin","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"43":{"body":"dragon","ornament":"oreilles en ailes","pattern":"points lumineux","accent":"or"},"44":{"body":"mouton","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"45":{"body":"champignon vivant","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"46":{"body":"lézard","ornament":"anneau lumineux","pattern":"écailles","accent":"ivoire"},"47":{"body":"quadrupède","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"48":{"body":"amphibien","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"49":{"body":"poisson","ornament":"graine géante","pattern":"rayures","accent":"bleu"},"50":{"body":"serpent","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"51":{"body":"golem","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"52":{"body":"pangolin","ornament":"ailes translucides","pattern":"plaques","accent":"violet"},"53":{"body":"lapin","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"54":{"body":"dragon","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"55":{"body":"grenouille","ornament":"racines visibles","pattern":"plumes","accent":"orange"},"56":{"body":"champignon vivant","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"57":{"body":"lézard","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"58":{"body":"quadrupède","ornament":"collerette de pétales","pattern":"dégradé","accent":"vert"},"59":{"body":"scarabée","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"60":{"body":"poisson","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"61":{"body":"serpent","ornament":"carapace bombée","pattern":"feuilles","accent":"turquoise"},"62":{"body":"golem","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"63":{"body":"hibou","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"64":{"body":"lapin","ornament":"crinière de flammes","pattern":"taches","accent":"rouge"},"65":{"body":"dragon","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"66":{"body":"grenouille","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"67":{"body":"félin","ornament":"rochers sur les épaules","pattern":"points lumineux","accent":"or"},"68":{"body":"lézard","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"69":{"body":"quadrupède","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"70":{"body":"scarabée","ornament":"plumes en éventail","pattern":"écailles","accent":"ivoire"},"71":{"body":"cerf","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"72":{"body":"serpent","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"73":{"body":"golem","ornament":"deux petites cornes","pattern":"rayures","accent":"bleu"},"74":{"body":"hibou","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"75":{"body":"tortue","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"76":{"body":"dragon","ornament":"petit volcan dorsal","pattern":"plaques","accent":"violet"},"77":{"body":"grenouille","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"78":{"body":"félin","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"79":{"body":"renard","ornament":"cristaux sur le front","pattern":"plumes","accent":"orange"},"80":{"body":"quadrupède","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"81":{"body":"scarabée","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"82":{"body":"cerf","ornament":"antenne lumineuse","pattern":"dégradé","accent":"vert"},"83":{"body":"oiseau","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"84":{"body":"golem","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"85":{"body":"hibou","ornament":"corne cristalline","pattern":"feuilles","accent":"turquoise"},"86":{"body":"tortue","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"87":{"body":"esprit","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"88":{"body":"grenouille","ornament":"oreilles en ailes","pattern":"taches","accent":"rouge"},"89":{"body":"félin","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"90":{"body":"renard","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"91":{"body":"mouton","ornament":"anneau lumineux","pattern":"points lumineux","accent":"or"},"92":{"body":"scarabée","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"93":{"body":"cerf","ornament":"queue en feuille","pattern":"feuilles","accent":"turquoise"},"94":{"body":"oiseau","ornament":"graine géante","pattern":"écailles","accent":"ivoire"},"95":{"body":"amphibien","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"96":{"body":"hibou","ornament":"champignon dorsal","pattern":"taches","accent":"rouge"},"97":{"body":"tortue","ornament":"ailes translucides","pattern":"rayures","accent":"bleu"},"98":{"body":"esprit","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"99":{"body":"pangolin","ornament":"lianes autour des pattes","pattern":"points lumineux","accent":"or"},"100":{"body":"félin","ornament":"racines visibles","pattern":"plaques","accent":"violet"}};
+1710: 
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1717: 
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1723:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1724:   const identity=(fam%7)-3;
+1725:   return {
+1726:     hp:Math.floor(30+lvl*3.0+stage*10+(fam%6)),
+1727:     atk:Math.floor(8+lvl*1.42+stage*6+Math.max(0,identity)),
+1728:     def:Math.floor(8+lvl*1.30+stage*6+Math.max(0,-identity)),
+1729:     spd:Math.floor(7+lvl*1.12+stage*4+((fam*3)%5))
+1730:   }
+1731: }
+### line 1982: teamIndex
+1974: function v106pLearnNaturalMove(m,mid){
+1975:   if(!m||!MOVE_DB[mid]||m.moves?.includes(mid)||v106pQueuedFor(m,mid))return false;
+1976:   if((m.moves||[]).length<4){v106pApplyMove(m,mid);return true}
+1977:   v106pRequestMoveChoice(m,mid,'niveau');return true;
+1978: }
+1979: window.v106pConfirmMoveReplacement=v106pConfirmMoveReplacement;window.v106pCancelMoveReplacement=v106pCancelMoveReplacement;window.v106pProcessMoveChoiceQueue=v106pProcessMoveChoiceQueue;
+1980: 
+1981: // ----- CS/Capsules à usage unique -----
+1982: function v83TeachMove(teamIndex,mid){
+1983:   teamIndex=Number(teamIndex);mid=String(mid||'');
+1984:   const m=(state.team||[])[teamIndex],mv=MOVE_DB?.[mid],caps=state.capsules||[],idx=caps.indexOf(mid);
+1985:   if(!m){toast('Créature introuvable dans l’équipe.');return false}
+1986:   if(!mv){toast('Cette capacité est indisponible.');return false}
+1987:   if(idx<0){toast('Tu ne possèdes plus cette Capsule.');return false}
+1988:   if(!canLearnMove(m,mid)){toast((BY?.[m.id]?.name||'Cette créature')+' ne peut pas apprendre '+mv.name+'.');return false}
+1989:   m.moves=Array.isArray(m.moves)?m.moves:[];
+1990:   if(m.moves.includes(mid)){toast((BY?.[m.id]?.name||'Cette créature')+' connaît déjà '+mv.name+'.');return false}
+1991:   if(m.moves.length<4){
+1992:     if(!v106pApplyMove(m,mid)){toast('Impossible d’apprendre '+mv.name+'.');return false}
+1993:     caps.splice(idx,1);save(false);hud();toast((BY?.[m.id]?.name||'La créature')+' apprend '+mv.name+' !');setTimeout(()=>{try{openTeam()}catch(_){}},60);return true
+1994:   }
+1995:   // Quatre capacités déjà connues : choix immédiat et explicite, aucun remplacement automatique.
+1996:   window._v106pMoveChoiceCurrent={creature:m,mid,source:'capsule'};
+1997:   const power=typeof moveDisplayPowerV106U==='function'?moveDisplayPowerV106U(mid):(mv.displayPower??mv.power??'—');
+### line 2115: battle.trainer
+2107: function v82ConsumeCapsule(moveId,target){
+2108:   const ti=(state.team||[]).indexOf(target);
+2109:   if(ti<0)return false;
+2110:   return v83TeachMove(ti,moveId)
+2111: }
+2112: 
+2113: function v82EscapeGuard(e){
+2114:   if(e.key!=='Escape'||scene!=='battle'||!battle)return;
+2115:   if(battle.trainer){
+2116:     e.preventDefault();e.stopImmediatePropagation();
+2117:     toast('Impossible de fuir un combat de dresseur !')
+2118:   }
+2119: }
+2120: window.addEventListener('keydown',v82EscapeGuard,true);
+2121: 
+2122: function v82ShiftTouchPad(){
+2123:   const el=document.getElementById('touchControlsV79');
+2124:   if(el){el.style.left='18px';el.style.transform='translateX(8px)'}
+2125: }
+2126: 
+2127: function v82ExpandCreatures(){
+2128:   if(CREATURES.length>=150)return;
+2129:   const types=['Nature','Feu','Eau','Foudre','Roche','Air','Spore','Glace','Lumière','Ombre','Neutre'];
+2130:   const bodies=['félin','rapace','lézard','cerf','tortue','renard','amphibien','insecte','bélier','serpent'];
+### line 2222: battle.enemy
+2214:   if(defender.status==='gelé')evasion=0;
+2215:   const hitChance=Math.max(.50,Math.min(.975,accuracy-evasion));
+2216:   if(Math.random()<=hitChance)return {hit:true,hitChance,evasion};
+2217:   return {hit:false,dodge:(ds.spd>=as.spd&&Math.random()<.72),hitChance,evasion};
+2218: }
+2219: 
+2220: function poisonTickV81(userIsPlayer,next){
+2221:   if(!battleAlive())return;
+2222:   const m=userIsPlayer?active():battle.enemy;
+2223:   if(!m||m.hp<=0||m.status!=='empoisonné'){next();return}
+2224:   const dmg=Math.max(1,Math.floor(maxHP(m)*.10));
+2225:   m.hp=Math.max(0,m.hp-dmg);
+2226:   if(userIsPlayer)battle.playerHit=1;else battle.enemyHit=1;
+2227:   battle.message='☠ Poison : '+BY[m.id].name+' perd '+dmg+' PV !';
+2228:   hud();
+2229:   laterBattle(220,()=>{if(battle){battle.playerHit=0;battle.enemyHit=0}});
+2230:   laterBattle(650,()=>{
+2231:     if(!battleAlive())return;
+2232:     if(m.hp<=0){
+2233:       if(userIsPlayer)playerKO();else enemyKO();
+2234:       return
+2235:     }
+2236:     next()
+2237:   })
+### line 2257: battle.enemy
+2249:     setTimeout(()=>{
+2250:       if(scene==='world'&&musicOn&&typeof refreshMusicV77==='function')refreshMusicV77()
+2251:     },1750)
+2252:   }catch(e){console.warn('Victory jingle',e)}
+2253: }
+2254: 
+2255: function grantCaptureXPV81(){
+2256:   if(!battleAlive()||battle.captureXpGranted)return 0;
+2257:   const a=active(),e=battle.enemy;
+2258:   if(!a||!e)return 0;
+2259:   const xp=Math.max(8,Math.floor((e.level*11+12+(BY[e.id].stage||0)*8)*.80));
+2260:   const ev=gainXP(a,xp);
+2261:   battle.captureXpGranted=true;
+2262:   battle.captureXP=xp;
+2263:   battle.eventQueue.push(BY[a.id].name+' gagne '+xp+' EXP pour la capture.',...ev);
+2264:   logEvent('Capture de '+BY[e.id].name+' : +'+xp+' EXP.');
+2265:   return xp
+2266: }
+2267: 
+2268: function captureChanceV81(kind){
+2269:   const e=battle.enemy;
+2270:   const hpMissing=1-e.hp/maxHP(e);
+2271:   const stage=BY[e.id].stage||0;
+2272:   let chance=.20+hpMissing*.61-stage*.055;
+### line 2357: trainerWins
+2349:   st._v106tCodexMigrated=true;
+2350:   return st
+2351: }
+2352: 
+2353: 
+2354: function reset(){
+2355:   state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,
+2356:     inventory:{Potion:0,SuperPotion:0,Orbe:0,SuperOrbe:0,MegaOrbe:0,Antidote:2,Baie:3,Repas:0,FioleAttaque:0,FioleDefense:0},
+2357:     trainerWins:{},bike:false,fly:false,light:false,capsules:[],discovered:['town0'],hasDex:false,profGift:false,follow:true,
+2358:     taron:{wins:0,missions:0,active:null}};
+2359:   scene='world';save(false);hud()
+2360: }
+2361: 
+2362: 
+2363: function save(show=true){
+2364:   try{
+2365:     if(!state||typeof state!=='object')throw new Error('État de partie invalide.');
+2366:     ensureInventoryV81(state);
+2367:     state._saveMeta={version:'V96',savedAt:Date.now(),zone:state.zone||'town0',
+2368:       playerMode:typeof PLAYER_PROGRESSION_LOCK!=='undefined'?!!PLAYER_PROGRESSION_LOCK:true};
+2369:     const payload=JSON.stringify(state);
+2370:     try{
+2371:       localStorage.setItem(SAVE,payload);
+2372:       localStorage.setItem(SAVE+'_backup',payload);
+### line 2989: trainerEvent
+2981: function npcCollision(x,y){
+2982:   for(const n of currentNPCs()){
+2983:     // feet/body collision, not the whole oversized head
+2984:     if(Math.hypot(x-n.x,y-n.y)<43)return n;
+2985:   }
+2986:   return null;
+2987: }
+2988: 
+2989: let trainerEvent=null;
+2990: function currentTrainers(){return currentScene().trainers||[]}
+2991: function undefeatedTrainers(){return currentTrainers().filter(t=>!state.trainerWins[t.id])}
+2992: function trainerCollision(x,y){for(const t of currentTrainers())if(Math.hypot(x-t.x,y-t.y)<42)return t;return null}
+2993: function nearTrainer(){
+2994:   let best=null,bd=999;
+2995:   for(const t of currentTrainers()){const d=Math.hypot(state.x-t.x,state.y-t.y);if(d<bd){bd=d;best=t}}
+2996:   return best&&bd<78?best:null
+2997: }
+2998: 
+2999: function updateRouteTrainerIdle(){
+3000:   if(scene!=='world'||currentScene().kind!=='route'||trainerEvent)return;
+3001:   const sc=currentScene(),now=performance.now();
+3002: 
+3003:   function nearestPathData(px,py){
+3004:     const pts=routePathPoints(sc);let best=null,bestD=1e30;
+### line 3152: trainerEvent, trainerWins
+3144:   }
+3145:   return party
+3146: }
+3147: 
+3148: 
+3149: 
+3150: function trainerCanSee(t){
+3151:   const sc=currentScene();
+3152:   if(state.trainerWins[t.id]||trainerEvent||scene!=='world'||!['route','temple'].includes(sc.kind))return false;
+3153:   if(t.finalBoss&&!templeGuardsClearedV77())return false;
+3154:   const d=Math.hypot(state.x-t.x,state.y-t.y);
+3155:   return d<=215
+3156: }
+3157: 
+3158: 
+3159: function checkTrainerDetection(){
+3160:   if(teamAllKOV87())return;
+3161: 
+3162:   if(!trainerMayDetectPlayerV87())return;
+3163: 
+3164:   if(trainerEvent||scene!=='world'||!['route','temple'].includes(currentScene().kind))return;
+3165:   const t=undefeatedTrainers().find(trainerCanSee);
+3166:   if(!t)return;
+3167:   faceNPCToPlayer(t);
+### line 3172: trainerEvent
+3164:   if(trainerEvent||scene!=='world'||!['route','temple'].includes(currentScene().kind))return;
+3165:   const t=undefeatedTrainers().find(trainerCanSee);
+3166:   if(!t)return;
+3167:   faceNPCToPlayer(t);
+3168:   trainerEvent={trainer:t,stage:'alert',start:performance.now()};
+3169:   tone(880,.09,.025,'square',0,100);tone(1080,.10,.02,'square',.09,0)
+3170: }
+3171: 
+3172: function updateTrainerEvent(){
+3173:   if(!trainerEvent||scene!=='world')return;
+3174:   const e=trainerEvent,t=e.trainer,now=performance.now();
+3175:   if(e.stage==='alert'){
+3176:     if(now-e.start>550){e.stage='approach';e.start=now}
+3177:     return
+3178:   }
+3179:   if(e.stage==='approach'){
+3180:     const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+3181:     if(d>72){
+3182:       const step=Math.min(5,d-68);
+3183:       t.x+=dx/d*step;t.y+=dy/d*step;
+3184:       t.moving=true;faceNPCToPlayer(t);
+3185:       return
+3186:     }
+3187:     t.moving=false;e.stage='dialog';
+### line 3194: trainerEvent
+3186:     }
+3187:     t.moving=false;e.stage='dialog';
+3188:     dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t)+'<br><br><small>Équipe adverse : '+trainerPartySize(t)+' créature'+(trainerPartySize(t)>1?'s':'')+'.</small>',()=>{
+3189:       const target=t;trainerEvent=null;startTrainer413(target)
+3190:     })
+3191:   }
+3192: }
+3193: function drawTrainerAlert(t,x,y){
+3194:   if(!trainerEvent||trainerEvent.trainer!==t)return;
+3195:   const pulse=1+Math.sin(performance.now()/110)*.08;
+3196:   ctx.save();ctx.translate(x,y-104);ctx.scale(pulse,pulse);
+3197:   ctx.fillStyle='#fff';ctx.strokeStyle='#233d4b';ctx.lineWidth=3;
+3198:   ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill();ctx.stroke();
+3199:   ctx.fillStyle='#e44f4f';ctx.font='900 25px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!',0,1);
+3200:   ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic'
+3201: }
+3202: 
+3203: function faceNPCToPlayer(n){
+3204:   const dx=state.x-n.x,dy=state.y-n.y;
+3205:   if(Math.abs(dx)>Math.abs(dy)) n.dir=dx<0?1:2;
+3206:   else n.dir=dy<0?3:0;
+3207: }
+3208: function playerInteractionPoint(){
+3209:   const dist=52;
+### line 3713: startTrainer413
+3705:  dialog('<b>Habitant</b><br>'+['Les pièces donnent sur le couloir principal.','Cet étage est surtout résidentiel.','Certaines portes mènent à des bureaux ou à des appartements.','Il y a parfois des choses étranges dans les étages supérieurs.'][v67Floor%4])
+3706: }
+3707: function resolveV67Event(){
+3708:  if(!v67Event||v67Event.done)return;
+3709:  const t=v67Event.type;
+3710:  if(t==='taron'){
+3711:    const tr={id:'v67Taron_'+v67Event.key,level:12+v67Floor*2,look:12,dialog:'Personne ne passe !',buildingEventV67:true};
+3712:    window._v67Battle={zone:v67ReturnZone,building:v67Building,floor:v67Floor,event:v67Event};
+3713:    startTrainer413(tr);return
+3714:  }
+3715:  v67Event.done=true;state.flags=state.flags||{};state.flags[v67Event.key]=true;
+3716:  if(t==='lostCreature'){state.money=(state.money||0)+300;dialog('<b>Mission improvisée</b><br>Tu retrouves la créature perdue dans une pièce. +300 ✦.')}
+3717:  else if(t==='blackout'){dialog('<b>Panne réparée</b><br>Tu aides le gardien à rétablir le courant dans l’étage.')}
+3718:  else if(t==='injured'){state.money=(state.money||0)+250;dialog('<b>Habitant secouru</b><br>Tu aides un habitant blessé. +250 ✦.')}
+3719:  else if(t==='researcher'){state.inventory.Baie=(state.inventory.Baie||0)+3;dialog('<b>Chercheur</b><br>Il te remercie pour ton aide et t’offre 3 Baies.')}
+3720:  else if(t==='hiddenItem'){state.inventory.Orbe=(state.inventory.Orbe||0)+2;dialog('<b>Objet caché</b><br>Tu trouves 2 Orbes d’Éclat.')}
+3721:  else if(t==='alarm'){dialog('<b>Alarme</b><br>La source était une petite créature coincée dans une réserve.')}
+3722:  else if(t==='delivery'){state.money=(state.money||0)+350;dialog('<b>Livraison</b><br>Le colis arrive enfin à destination. +350 ✦.')}
+3723:  else if(t==='rareCreature'){dialog('<b>Rencontre rare</b><br>Des traces indiquent qu’une créature rare fréquente cet immeuble.')}
+3724:  save(false)
+3725: }
+3726: 
+3727: // ---------- MOUNTAIN ROUTES ----------
+3728: function buildMountainRouteV67(id,name){
+### line 4126: startTrainer413
+4118: }
+4119: function interactV68Interior(){
+4120:   if(V68_INTERIOR.mode==='room'){
+4121:     const key=v69DiscoveryKey();
+4122:     if(!state.flags?.[key]){
+4123:       const t=v69DiscoveryType();
+4124:       if(t==='taron'){
+4125:         const tr={id:'v69Taron_'+key,level:12+V68_INTERIOR.floor*2,look:12,dialog:'Tu n’aurais jamais dû entrer ici !',buildingEventV68:true};
+4126:         window._v68Battle={interior:JSON.parse(JSON.stringify(V68_INTERIOR))};startTrainer413(tr);return
+4127:       }
+4128:       if(t!=='none'){
+4129:         state.flags=state.flags||{};state.flags[key]=true;
+4130:         if(t==='coins'){state.money=(state.money||0)+180;dialog('<b>Découverte</b><br>Tu trouves 180 ✦ oubliées dans un tiroir.')}
+4131:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Une Orbe d’Éclat était cachée ici.')}
+4132:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Tu récupères 2 Baies.')}
+4133:         else if(t==='lore'){dialog('<b>Document local</b><br>Un vieux dossier raconte comment ce quartier s’est développé autour des premiers Éclats.')}
+4134:         else if(t==='note'){dialog('<b>Note trouvée</b><br>« On raconte qu’une créature inhabituelle apparaît après la tombée du jour près de la gare. »')}
+4135:         else if(t==='rare'){dialog('<b>Traces étranges</b><br>Tu découvres des traces appartenant probablement à une créature rare.')}
+4136:         else if(t==='quest'){dialog('<b>Demande d’un habitant</b><br>Un résident te demande de retrouver un objet perdu dans un autre étage. Cette mission est ajoutée à ton journal.')}
+4137:         save(false);return
+4138:       }
+4139:     }
+4140: 
+4141:     const data=roomDataV69();
+### line 4834: startTrainer413
+4826: 
+4827: function interactInteriorV70(){
+4828:   if(V70_INT.mode==='room'){
+4829:     const key=v70DiscoveryKey();
+4830:     if(!state.flags?.[key]){
+4831:       const t=v70DiscoveryType();
+4832:       if(t==='taron'){
+4833:         const tr={id:'v70Taron_'+key,level:12+V70_INT.floor*2,look:12,dialog:'Cet immeuble est sous notre contrôle !',buildingEventV70:true};
+4834:         window._v70Battle={int:JSON.parse(JSON.stringify(V70_INT))};startTrainer413(tr);return
+4835:       }
+4836:       if(t!=='none'){
+4837:         state.flags=state.flags||{};state.flags[key]=true;
+4838:         if(t==='coins'){state.money=(state.money||0)+200;dialog('<b>Découverte</b><br>Tu trouves 200 ✦.')}
+4839:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Tu récupères une Orbe d’Éclat.')}
+4840:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Deux Baies étaient rangées ici.')}
+4841:         else if(t==='lore'){dialog('<b>Document</b><br>Un dossier raconte l’histoire de ce quartier et de ses premiers habitants.')}
+4842:         else if(t==='hint'){dialog('<b>Indice</b><br>Un habitant mentionne une créature rare aperçue près de la gare à la tombée du jour.')}
+4843:         else if(t==='rare'){dialog('<b>Traces rares</b><br>Ces marques semblent appartenir à une créature peu commune.')}
+4844:         else if(t==='quest'){dialog('<b>Nouvelle mission</b><br>Un habitant te demande un service. La mission est ajoutée au journal.')}
+4845:         else if(t==='gift'){state.inventory.Potion=(state.inventory.Potion||0)+1;dialog('<b>Cadeau</b><br>Un habitant t’offre une Potion pour te remercier.')}
+4846:         save(false);return
+4847:       }
+4848:     }
+4849: 
+### line 5454: trainerWins
+5446:     kind:'temple',name:'Citadelle du Cœur',width:2400,height:2100,
+5447:     trainers,exits:[
+5448:       {x:1110,y:2010,w:180,h:90,side:'south',to:'town14',label:'Aubeval'}
+5449:     ],
+5450:     obstacles:[]
+5451:   }
+5452: }
+5453: function templeGuardsClearedV77(){
+5454:   return Array.from({length:10},(_,i)=>'temple_guard_'+(i+1)).every(id=>!!state.trainerWins[id])
+5455: }
+5456: function finalTempleAvailableV77(){
+5457:   return typeof v106pCitadelRequirements==='function'?v106pCitadelRequirements().ready:(v83CaughtCount()>=75&&(state.seals||[]).length>=7&&!!state.fly)
+5458: }
+5459: function altarReadyV77(){
+5460:   return templeGuardsClearedV77()&&!!state.trainerWins.final_boss
+5461: }
+5462: 
+5463: function drawFinalTempleV77(sc,camX,camY,sx,sy){
+5464:   if(window.ValdoraPolishV113?.active)return window.ValdoraPolishV113.drawCitadel(sc,camX,camY,sx,sy);
+5465:   ctx.fillStyle='#151d28';ctx.fillRect(0,0,960,600);
+5466: 
+5467:   // grand parvis de pierre
+5468:   ctx.fillStyle='#c4bdad';
+5469:   ctx.fillRect((380-camX)*sx,(80-camY)*sy,1640*sx,1940*sy);
+### line 5520: trainerWins
+5512: function tryFinalAltarV77(){
+5513:   if(state.zone!=='temple_final')return false;
+5514:   if(Math.hypot(state.x-1200,state.y-140)>150)return false;
+5515: 
+5516:   if(!templeGuardsClearedV77()){
+5517:     dialog('<b>Autel du Cœur</b><br>Les dix Gardiens du Sanctuaire doivent être vaincus avant que l’autel ne s’ouvre.');
+5518:     return true
+5519:   }
+5520:   if(!state.trainerWins.final_boss){
+5521:     dialog('<b>Autel du Cœur</b><br>Le Maître du Cœur se tient encore entre toi et l’autel.');
+5522:     return true
+5523:   }
+5524:   if((state.seals||[]).length<7){
+5525:     dialog('<b>Autel du Cœur</b><br>Il manque des Sceaux. Les sept doivent être réunis pour restaurer le Cœur de Valdora.');
+5526:     return true
+5527:   }
+5528:   if(typeof v106cAllRequiredDone==='function'&&!v106cAllRequiredDone()){
+5529:     const missing=v106cMissingRequired();
+5530:     dialog('<b>Autel du Cœur</b><br>Avant la conclusion, plusieurs engagements pris auprès des habitants doivent encore être honorés.<br><br><b>Missions essentielles restantes :</b><br>'+missing.map(q=>'• '+q.giverName+' — '+q.title).join('<br>'));
+5531:     return true
+5532:   }
+5533:   if(state.flags?.finalHeartRestored){
+5534:     dialog('<b>Cœur de Valdora</b><br>Le Cœur bat de nouveau en harmonie. Sa lumière résonne avec tes sept Sceaux.');
+5535:     return true
+### line 5648: trainerEvent
+5640:   ctx.fillStyle='#fff';ctx.font='800 13px Segoe UI';ctx.textAlign='center';
+5641:   const icon=phase==='night'?'☾':phase==='dawn'?'◒':phase==='sunset'?'◐':'☀';
+5642:   ctx.fillText(icon+' '+hh+':'+mm,69,40);
+5643:   ctx.restore();ctx.textAlign='start'
+5644: }
+5645: 
+5646: 
+5647: function drawWorld(){
+5648:   updateTownNPCs();updateRouteTrainerIdle();updateTrainerEvent();updateMegaNPCsV64();
+5649:   const sc=currentScene(),mw=sc.width||1800,mh=sc.height||1100;
+5650:   const camX=Math.max(0,Math.min(Math.max(0,mw-1600),state.x-800));
+5651:   const camY=Math.max(0,Math.min(Math.max(0,mh-1000),state.y-500));
+5652:   const sx=960/1600,sy=600/1000;
+5653: 
+5654:   if(sc.kind==='town'){
+5655:     if(sc.megacity)drawMegacityV70(sc,camX,camY,sx,sy);
+5656:     else drawTownScene(sc,camX,camY,sx,sy);
+5657:     drawExitSignsV77(sc,camX,camY,sx,sy)
+5658:   }else if(sc.kind==='temple'){
+5659:     drawFinalTempleV77(sc,camX,camY,sx,sy)
+5660:   }else if(sc.routeEngine==='V76'){
+5661:     drawRealRouteV76(sc,camX,camY,sx,sy)
+5662:   }else{
+5663:     ctx.fillStyle='#90bd79';ctx.fillRect(0,0,960,600)
+### line 5792: trainerWins
+5784:   if(sc.kind==='route')setTimeout(()=>maybeSpawnTaron(false),450);
+5785:   return true
+5786: }
+5787: 
+5788: function opposite(side){return {north:'south',south:'north',east:'west',west:'east'}[side]}
+5789: 
+5790: function routeTrainersComplete(routeIndex){
+5791:   const sc=SCENES['route'+routeIndex];if(!sc)return true;
+5792:   const tr=sc.trainers||[];return tr.length===0||tr.every(t=>state.trainerWins[t.id])
+5793: }
+5794: function playerQuestGateMessage(from,to){
+5795:   if(!PLAYER_PROGRESSION_LOCK)return null;
+5796:   if(from==='town0'&&to==='route0'&&!state.team.length)return 'Le Professeur Aurine t’attend au laboratoire. Choisis d’abord ton premier compagnon.';
+5797:   if(from.startsWith('route')){
+5798:     const ri=+from.replace('route','');
+5799:     if(to==='town'+(ri+1)&&!routeTrainersComplete(ri))return 'Avant de continuer, termine ta quête sur cette route : affronte les dresseurs qui te barrent le chemin.';
+5800:   }
+5801:   if(from.startsWith('town')){
+5802:     const ti=+from.replace('town','');
+5803:     if(ti>0&&to==='route'+ti&&!(state.seals||[]).includes(ti))return 'Ta quête dans cette ville n’est pas terminée. Obtiens d’abord son Sceau.';
+5804:   }
+5805:   return null
+5806: }
+5807: function transitionWithQuestGate(to,side){
+### line 5848: trainerEvent
+5840:     return
+5841:   }
+5842: }
+5843: 
+5844: 
+5845: 
+5846: function move(dx,dy,dir){
+5847:   state.dir=dir;
+5848:   if(scene!=='world'||trainerEvent)return;
+5849:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast('Position rétablie dans la Citadelle.')}catch(_){}}
+5850:   const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+5851:   if(collision(nx,ny,state.x,state.y)){
+5852:     lastMove=Date.now();
+5853:     const n=npcCollision(nx,ny);if(n&&Math.random()<.12)toast('E / Entrée pour parler à '+n.name);
+5854:     return
+5855:   }
+5856:   recordFollowerStep();state.x=nx;state.y=ny;lastMove=Date.now();checkPortal();
+5857: 
+5858:   // Les rencontres sauvages de Clairval font partie du déplacement normal de la ville.
+5859:   const kind=currentScene().kind;
+5860:   if(state.team.length){
+5861:     if((kind==='route'||kind==='temple')&&!trainerEvent)checkTrainerDetection();
+5862:     if((kind==='route'||state.zone==='town0')&&!trainerEvent&&typeof v104EncounterStep==='function')v104EncounterStep();
+5863:   }
+### line 5909: trainerWins
+5901: 
+5902: 
+5903: 
+5904: 
+5905: // ======================================================================
+5906: // V106E — RÉÉCRITURE : QUÊTES PNJ + HERBES SAUVAGES DE CLAIRVAL
+5907: // Les rencontres sauvages, le PC et les missions de départ sont intégrés directement aux systèmes actifs.
+5908: // ======================================================================
+5909: const V106C_QUESTS=[{"id":"v106c_lina","giver":"lina","giverName":"Lina","zone":"town0","title":"Prêt pour la Route 1","text":"Remporte au total 3 combats contre des Éclats sauvages dans Clairval pour préparer ton équipe avant le départ.","kind":"clairvalWildWins","goal":3,"money":350,"item":"Orbe","qty":3,"required":true,"startRequired":true},{"id":"v106c_marc","giver":"marc","giverName":"Marc","zone":"town0","title":"Première capture à Clairval","text":"Capture un Éclat sauvage dans les herbes de Clairval.","kind":"clairvalCaptures","goal":1,"money":260,"item":"Potion","qty":2,"required":true,"startRequired":true},{"id":"v106c_jade","giver":"jade","giverName":"Jade","zone":"town0","title":"Apprendre à utiliser le PC","text":"Au Centre de soins, dépose un Éclat dans le PC puis récupère-le. Le PC permet aussi les échanges équipe ↔ stockage.","kind":"pcRoundTrip","goal":2,"money":280,"item":"Baie","qty":2,"required":true,"startRequired":true},{"id":"v106c_cloe","giver":"cloe","giverName":"Chloé","zone":"town0","title":"Premiers combats sauvages","text":"Entre dans les herbes sauvages de Clairval et remporte un combat contre un Éclat sauvage.","kind":"clairvalWildWins","goal":1,"money":220,"item":"Orbe","qty":2,"required":true,"startRequired":true},{"id":"v106c_milo","giver":"milo","giverName":"Milo","zone":"town1","title":"Herbier vivant","text":"Capture 2 espèces de type Nature.","kind":"caughtType","goal":2,"money":420,"item":"Potion","qty":2,"required":false,"type":"Nature"},{"id":"v106c_irma","giver":"irma","giverName":"Irma","zone":"town1","title":"Observer avant d’avancer","text":"Observe 15 espèces dans le Codex.","kind":"seenTotal","goal":15,"money":430,"item":"Orbe","qty":3,"required":true},{"id":"v106c_theo","giver":"theo","giverName":"Théo","zone":"town1","title":"Le chemin des voyageurs","text":"Fais le point sur ton voyage : découvre les 2 villes accessibles à cette étape de l’aventure.","kind":"towns","goal":2,"money":450,"item":"SuperPotion","qty":1,"required":false},{"id":"v106c_nora","giver":"nora","giverName":"Nora","zone":"town2","title":"Les habitants du lac","text":"Capture 2 espèces de type Eau.","kind":"caughtType","goal":2,"money":470,"item":"Antidote","qty":2,"required":false,"type":"Eau"},{"id":"v106c_eli","giver":"eli","giverName":"Éli","zone":"town2","title":"Équipe complète","text":"Voyage avec au moins 5 créatures dans ton équipe.","kind":"teamSize","goal":5,"money":460,"item":"Potion","qty":3,"required":false},{"id":"v106c_maelle","giver":"maelle","giverName":"Maëlle","zone":"town2","title":"Électricité sur l’eau","text":"Capture une espèce de type Foudre.","kind":"caughtType","goal":1,"money":500,"item":"SuperOrbe","qty":1,"required":true,"type":"Foudre"},{"id":"v106c_sacha","giver":"sacha","giverName":"Sacha","zone":"town3","title":"Carnet des voyageurs","text":"Complète ton carnet avec les 4 villes accessibles à cette étape de l’aventure.","kind":"towns","goal":4,"money":620,"item":"SuperPotion","qty":1,"required":true},{"id":"v106c_lucie","giver":"lucie","giverName":"Lucie","zone":"town3","title":"Couleurs de Cendrebourg","text":"Capture 2 espèces de type Feu.","kind":"caughtType","goal":2,"money":520,"item":"Baie","qty":3,"required":false,"type":"Feu"},{"id":"v106c_enzo","giver":"enzo","giverName":"Enzo","zone":"town3","title":"Dresseur itinérant","text":"Remporte 8 combats de dresseurs.","kind":"trainerWins","goal":8,"money":650,"item":"Orbe","qty":3,"required":false},{"id":"v106c_hugo","giver":"hugo","giverName":"Hugo","zone":"town4","title":"Uniformes de la Team Taron","text":"Déjoue une opération de la Team Taron.","kind":"taronWins","goal":1,"money":800,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_maya","giver":"maya","giverName":"Maya","zone":"town4","title":"La preuve des Gardiens","text":"Obtiens 2 Sceaux.","kind":"seals","goal":2,"money":700,"item":"Potion","qty":3,"required":false},{"id":"v106c_romane","giver":"romane","giverName":"Romane","zone":"town4","title":"Une équipe endurante","text":"Fais atteindre le niveau 18 à au moins une créature.","kind":"maxLevel","goal":18,"money":750,"item":"SuperPotion","qty":2,"required":false},{"id":"v106c_leo","giver":"leo","giverName":"Léo","zone":"town5","title":"Échantillons minéraux","text":"Capture 2 espèces de type Roche.","kind":"caughtType","goal":2,"money":680,"item":"SuperPotion","qty":1,"required":false,"type":"Roche"},{"id":"v106c_ines","giver":"ines","giverName":"Inès","zone":"town5","title":"Voyage au long cours","text":"Découvre les 6 villes accessibles à cette étape de l’aventure.","kind":"towns","goal":6,"money":780,"item":"Orbe","qty":4,"required":true},{"id":"v106c_adam","giver":"adam","giverName":"Adam","zone":"town5","title":"Codex des dunes","text":"Capture 25 espèces différentes.","kind":"caughtTotal","goal":25,"money":820,"item":"SuperOrbe","qty":1,"required":false},{"id":"v106c_noe","giver":"noe","giverName":"Noé","zone":"town6","title":"Le froid apprivoisé","text":"Capture 2 espèces de type Glace.","kind":"caughtType","goal":2,"money":720,"item":"Antidote","qty":3,"required":false,"type":"Glace"},{"id":"v106c_mila","giver":"mila","giverName":"Mila","zone":"town6","title":"Dresseur confirmé","text":"Remporte 15 combats de dresseurs.","kind":"trainerWins","goal":15,"money":900,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_louna","giver":"louna","giverName":"Louna","zone":"town6","title":"Une équipe de spécialistes","text":"Aie au moins 4 types différents dans ton équipe.","kind":"teamTypes","goal":4,"money":760,"item":"Potion","qty":3,"required":false},{"id":"v106c_syl","giver":"syl","giverName":"Syl","zone":"town7","title":"Les quatre Sceaux","text":"Fais le point sur ton parcours à Valombre : réunis les 4 Sceaux accessibles à cette étape de l’aventure.","kind":"seals","goal":4,"money":1200,"item":"SuperPotion","qty":3,"required":true},{"id":"v106c_ana","giver":"ana","giverName":"Ana","zone":"town7","title":"Un Codex qui prend forme","text":"Capture 45 espèces différentes.","kind":"caughtTotal","goal":45,"money":1300,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106c_gabriel","giver":"gabriel","giverName":"Gabriel","zone":"town7","title":"Vingt victoires","text":"Remporte 20 combats de dresseurs.","kind":"trainerWins","goal":20,"money":1100,"item":"SuperPotion","qty":2,"required":false},{"id":"v106c_celia","giver":"celia","giverName":"Célia","zone":"town8","title":"Au-dessus des nuages","text":"Découvre les 9 villes accessibles jusqu’à cette étape de ton voyage.","kind":"towns","goal":9,"money":900,"item":"SuperOrbe","qty":1,"required":false},{"id":"v106c_nathan","giver":"nathan","giverName":"Nathan","zone":"town8","title":"Maîtrise de l’Air","text":"Capture 2 espèces de type Air.","kind":"caughtType","goal":2,"money":850,"item":"SuperPotion","qty":2,"required":false,"type":"Air"},{"id":"v106c_ambre","giver":"ambre","giverName":"Ambre","zone":"town9","title":"Le grand inventaire","text":"Capture 55 espèces différentes.","kind":"caughtTotal","goal":55,"money":1250,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106c_raphael","giver":"raphael","giverName":"Raphaël","zone":"town9","title":"Rumeurs du port","text":"Déjoue 2 opérations de la Team Taron.","kind":"taronWins","goal":2,"money":1200,"item":"SuperPotion","qty":3,"required":false},{"id":"v106c_salome","giver":"salome","giverName":"Salomé","zone":"town10","title":"Chercheuse de lumière","text":"Capture une espèce de type Lumière.","kind":"caughtType","goal":1,"money":1000,"item":"SuperOrbe","qty":2,"required":false,"type":"Lumière"},{"id":"v106c_yanis","giver":"yanis","giverName":"Yanis","zone":"town10","title":"Trente victoires","text":"Remporte 30 combats de dresseurs.","kind":"trainerWins","goal":30,"money":1500,"item":"SuperPotion","qty":3,"required":false},{"id":"v106c_margot","giver":"margot","giverName":"Margot","zone":"town11","title":"Brume et mystère","text":"Capture 65 espèces différentes.","kind":"caughtTotal","goal":65,"money":1600,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106c_paul","giver":"paul","giverName":"Paul","zone":"town11","title":"Dossier Taron","text":"Déjoue 3 opérations de la Team Taron.","kind":"taronWins","goal":3,"money":1700,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_eva","giver":"eva","giverName":"Éva","zone":"town12","title":"Le grand herbier","text":"Capture 4 espèces de type Nature.","kind":"caughtType","goal":4,"money":1200,"item":"SuperPotion","qty":3,"required":false,"type":"Nature"},{"id":"v106c_mathis","giver":"mathis","giverName":"Mathis","zone":"town12","title":"Valdora presque entière","text":"Découvre 13 villes de Valdora.","kind":"towns","goal":13,"money":1400,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_zoe","giver":"zoe","giverName":"Zoé","zone":"town13","title":"Taronis sous surveillance","text":"Déjoue 4 opérations de la Team Taron.","kind":"taronWins","goal":4,"money":2000,"item":"SuperOrbe","qty":3,"required":true},{"id":"v106c_alexis","giver":"alexis","giverName":"Alexis","zone":"town13","title":"Équipe d’élite","text":"Fais atteindre le niveau 35 à une créature.","kind":"maxLevel","goal":35,"money":1800,"item":"SuperPotion","qty":3,"required":false},{"id":"v106c_manon","giver":"manon","giverName":"Manon","zone":"town14","title":"Le Codex avancé","text":"Capture 75 espèces différentes.","kind":"caughtTotal","goal":75,"money":2200,"item":"SuperOrbe","qty":3,"required":false},{"id":"v106c_victor","giver":"victor","giverName":"Victor","zone":"town14","title":"Les sept Sceaux","text":"Réunis les 7 Sceaux de Valdora.","kind":"seals","goal":7,"money":2500,"item":"SuperPotion","qty":4,"required":true},{"id":"v106c_helene","giver":"helene","giverName":"Hélène","zone":"town14","title":"Dernier tour de région","text":"Découvre les 15 villes de Valdora.","kind":"towns","goal":15,"money":1800,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106e_bastien","giver":"bastien","giverName":"Bastien","zone":"town0","title":"Un peu plus d'entraînement","text":"Remporte 5 combats contre des Éclats sauvages dans les herbes de Clairval.","kind":"clairvalWildWins","goal":5,"money":300,"item":"Potion","qty":2,"required":false},{"id":"v106e_elodie","giver":"elodie","giverName":"Élodie","zone":"town0","title":"Carnet des espèces locales","text":"Observe au moins 4 espèces différentes dans ton Codex.","kind":"seenTotal","goal":4,"money":260,"item":"Orbe","qty":2,"required":false},{"id":"v106e_noam","giver":"noam_clairval","giverName":"Noam","zone":"town0","title":"Une petite équipe","text":"Forme une équipe d'au moins 3 Éclats.","kind":"teamSize","goal":3,"money":320,"item":"Baie","qty":3,"required":false}];
+5910: const V106C_QUEST_BY_GIVER=Object.fromEntries(V106C_QUESTS.map(q=>[q.giver,q]));
+5911: function v106cState(){state.v106c=state.v106c||{};state.v106c.quests=state.v106c.quests||{};return state.v106c}
+5912: function v106cQuestState(){return v106cState().quests}
+5913: function v108rOwnedCreatures(){return [...(state.team||[]),...(state.box||[]),...(Array.isArray(state.pc)?state.pc:[])] .filter(Boolean)}
+5914: function v108rCaughtSpeciesSet(){
+5915:   const ids=new Set(v108rOwnedCreatures().map(m=>String(Number(m.id))).filter(id=>id!=='0'));
+5916:   for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught)ids.add(String(Number(id)));
+5917:   return ids
+5918: }
+5919: function v106cCaught(){return v108rCaughtSpeciesSet().size}
+5920: function v106cSeen(){const ids=new Set(v108rCaughtSpeciesSet());for(const [id,d] of Object.entries(state.dex||{}))if(d?.seen)ids.add(String(Number(id)));return ids.size}
+5921: function v106cTypeCount(type){let n=0;for(const id of v108rCaughtSpeciesSet())if(BY?.[Number(id)]?.type===type)n++;return n}
+5922: function v106cTowns(){return new Set((state.discovered||[]).filter(z=>/^town\d+$/.test(String(z)))).size}
+5923: function v106cTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+5924: function v106cTaronWins(){try{return window.ValdoraV106A?.taronWins?.()||Number(state.taron?.wins)||0}catch(_){return Number(state.taron?.wins)||0}}
+### line 5952: trainerEvent
+5944: function v106cClearQuestVisual(q){try{const sc=SCENES[q.zone];for(const n of (typeof sceneNPCs==='function'?sceneNPCs(sc,q.zone):[])){if(n?.id===q.giver){n.exclamation=false;n.alert=false;n.detected=false;n.chasing=false;n.aggro=false}}}catch(_){}}
+5945: function v106cClaim(q){const e=v106cQuestState()[q.id];if(!e||e.status!=='active'||v106cProgress(q)<q.goal)return false;e.status='done';e.completedAt=Date.now();v106cClearQuestVisual(q);state.money=(Number(state.money)||0)+(q.money||0);state.inventory=state.inventory||{};if(q.item)state.inventory[q.item]=(Number(state.inventory[q.item])||0)+(q.qty||1);logEvent('Mission terminée : '+q.title+'.');save(false);hud();toast('Mission terminée : '+q.title);return true}
+5946: function questInteractionV106C(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return false;const e=v106cQuestState()[q.id],p=Math.min(v106cProgress(q),q.goal),important=q.zone==='town0'?'<br><small><b>Mission obligatoire de Clairval :</b> toutes les missions de la ville doivent être terminées avant de prendre la Route 1.</small>':(q.required?'<br><small><b>Mission essentielle :</b> elle compte pour la conclusion de l’aventure.</small>':'');if(!e){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Objectif : '+p+'/'+q.goal+'</b>'+important,()=>v106cAccept(q));return true}if(e.status==='active'&&p>=q.goal){dialog('<b>'+q.giverName+' — Mission accomplie</b><br>Merci pour ton aide !<br><br>Récompense : <b>'+q.money+' V'+(q.item?' + '+(q.qty||1)+' '+q.item:'')+'</b>.',()=>v106cClaim(q));return true}if(e.status==='active'){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Progression : '+p+'/'+q.goal+'</b>'+important);return true}dialog('<b>'+q.giverName+'</b><br>Merci encore pour ton aide.');return true}
+5947: function v106cQuestMarker(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return null;const e=v106cQuestState()[q.id];if(e?.status==='done'||e?.completedAt)return null;if(e?.status==='active'&&v106cProgress(q)>=q.goal)return '?';return '!'}
+5948: 
+5949: function interact(){
+5950:   if(scene==='interior'){interactInterior();return}
+5951:   if(closeDialog())return;
+5952:   if(scene!=='world'||trainerEvent)return;
+5953: 
+5954:   if(tryFinalAltarV77())return;
+5955: 
+5956:   const b=nearBuilding();
+5957:   if(b){
+5958:     if(currentScene().megacity && b.megaInterior && !['station','inn','healer','shop'].includes(b.type)){
+5959:       enterBuildingV70(b);return
+5960:     }
+5961:     building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+5962:   }
+5963: 
+5964:   const n=nearNPC();
+5965:   if(n){
+5966:     faceNPCToPlayer(n);
+5967:     if(n.taron){interactTaron(n);return}
+### line 5980: trainerWins
+5972:   if(['route','temple'].includes(currentScene().kind)){
+5973:     const t=nearTrainer();
+5974:     if(t){
+5975:       faceNPCToPlayer(t);
+5976:       if(t.finalBoss&&!templeGuardsClearedV77()){
+5977:         dialog('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');
+5978:         return
+5979:       }
+5980:       if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));
+5981:       else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));
+5982:       return
+5983:     }
+5984:   }
+5985: }
+5986: 
+5987: 
+5988: 
+5989: 
+5990: 
+5991: 
+5992: 
+5993: const HOUSE_RESIDENTS=[
+5994:   {name:'Mireille',look:3,lines:[
+5995:     'J’habite ici depuis trente ans. Clairval était beaucoup plus petit quand la gare a été construite.',
+## game/V109W_CORRECTIFS_GAMEPLAY.js
+### line 59: trainerWins
+51:   state.dir=dir;
+52:   if(window.joueurBloque)return true;
+53:   if(!Number.isFinite(+state.x)||!Number.isFinite(+state.y)||state.x<390||state.x>2010||state.y<70||state.y>2040){state.x=1200;state.y=1900}
+54:   const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+55:   let bad=false;
+56:   try{bad=typeof finalTempleCollisionV77==='function'?finalTempleCollisionV77(nx,ny):(nx<390||nx>2010||ny<70||ny>2040)}catch(_){bad=nx<390||nx>2010||ny<70||ny>2040}
+57:   if(!bad){
+58:     for(const t of (SCENES.temple_final?.trainers||[])){
+59:       if(state.trainerWins?.[t.id])continue;
+60:       const nd=Math.hypot(nx-t.x,ny-t.y),od=Math.hypot(state.x-t.x,state.y-t.y);
+61:       if(nd<34&&nd<=od+.01){bad=true;break}
+62:     }
+63:   }
+64:   if(!bad){
+65:     try{recordFollowerStep?.()}catch(_){}
+66:     state.x=nx;state.y=ny;lastMove=Date.now();
+67:     try{checkTrainerDetection?.()}catch(_){}
+68:     try{checkPortal?.()}catch(_){}
+69:   }
+70:   return true;
+71: }
+72: try{
+73:   const baseMove=typeof move==='function'?move:window.move;
+74:   const patchedMove=function(dx,dy,dir){if(templeMove(dx,dy,dir))return;return baseMove?.apply(this,arguments)};
+### line 113: trainerWins
+105: //    mais ne bloque plus l'histoire principale.
+106: // ------------------------------------------------------------------
+107: function isMandatoryRoadTrainer(t){
+108:   if(!t||!t.id)return false;
+109:   if(t.taron||t.taronBossV102Z||t.v109wVolAgent||t.v106zOpId||t.guardian||t.finalBoss||t.templeGuard||t.rematchV106Y)return false;
+110:   if(t.buildingEventV66||t.buildingEventV67||t.buildingEventV68||t.buildingEventV70||t.optional||t.questOnly)return false;
+111:   return true;
+112: }
+113: function pendingRoadTrainers(route){return (SCENES?.[route]?.trainers||[]).filter(t=>isMandatoryRoadTrainer(t)&&!state.trainerWins?.[t.id])}
+114: try{
+115:   if(typeof V106C_QUESTS!=='undefined'){
+116:     const q=V106C_QUESTS.find(x=>x?.id==='v106c_mila');if(q)q.required=false;
+117:   }
+118: }catch(_){}
+119: try{
+120:   const routeGateV109W=function(from,to){
+121:     if(typeof window.v107kIsAdvancingRouteExit==='function'&&!window.v107kIsAdvancingRouteExit(from,to))return null;
+122:     if(!/^route/.test(String(from)))return null;
+123:     const pending=pendingRoadTrainers(from);
+124:     return pending.length?`La route n’est pas encore terminée : bats les ${pending.length} dresseur${pending.length>1?'s':''} de route restant${pending.length>1?'s':''} avant d’atteindre la ville suivante.`:null;
+125:   };
+126:   window.v107kRouteGate=routeGateV109W;
+127: }catch(e){console.warn('V109W route gate',e)}
+128: try{
+### line 162: startTrainer413
+154:   let t=sc.trainers.find(x=>x?.id===VOL_AGENT_ID);
+155:   const path=Array.isArray(sc.v104Path)&&sc.v104Path.length?sc.v104Path:(Array.isArray(sc.v76Path)?sc.v76Path:[]);
+156:   const p=path[Math.max(1,Math.min(path.length-2,Math.floor(path.length*.55)))]||[(sc.width||3200)*.55,(sc.height||1800)*.5];
+157:   const data={id:VOL_AGENT_ID,zone:'route3',x:Number(p[0])+115,y:Number(p[1])+75,look:39,dir:0,level:27,moving:false,name:'Agent Team Taron',dialog:'Agent Team Taron — Gardien de la Capsule Vol',taron:true,v109wVolAgent:true,guardian:false};
+158:   if(t)Object.assign(t,data);else sc.trainers.push(data);
+159:   return true;
+160: }
+161: try{
+162:   const baseStart=typeof startTrainer413==='function'?startTrainer413:window.startTrainer413;
+163:   const patchedStart=function(t){
+164:     if(t?.v109wVolAgent){window._v109wVolAgentActive=true;window._v109wVolTrainer=t;try{dialog('<b>Agent Team Taron</b><br>Cette Capsule Vol appartient désormais à la Team Taron. Si tu la veux, viens la prendre !',()=>baseStart(t));return}catch(_){}}
+165:     else{window._v109wVolAgentActive=false;window._v109wVolTrainer=null}
+166:     return baseStart?.apply(this,arguments);
+167:   };
+168:   window.startTrainer413=patchedStart;startTrainer413=patchedStart;
+169: }catch(e){console.warn('V109W agent Vol start',e)}
+170: try{
+171:   const baseComplete=typeof completeTaronMission==='function'?completeTaronMission:window.completeTaronMission;
+172:   const patchedComplete=function(){
+173:     if(window._v109wVolAgentActive&&state.trainerWins?.[VOL_AGENT_ID]){
+174:       window._v109wVolAgentActive=false;window._v109wVolTrainer=null;
+175:       state.flags=state.flags||{};state.capsules=Array.isArray(state.capsules)?state.capsules:[];
+176:       const first=!state.flags.v109wVolReward;
+177:       if(!state.capsules.includes('vol')&&!state.flyLearned)state.capsules.push('vol');
+### line 200: battle.enemy
+192:   if(!battle)return;const p=typeof currentPlayer==='function'?currentPlayer():battle.player;if(!p||p.hp<=0)return;
+193:   battle.v109wEnemyParticipants=Array.isArray(battle.v109wEnemyParticipants)?battle.v109wEnemyParticipants:[];
+194:   if(!battle.v109wEnemyParticipants.includes(p))battle.v109wEnemyParticipants.push(p);
+195: }
+196: try{
+197:   const baseUseMove=window.useMove;
+198:   if(typeof baseUseMove==='function')window.useMove=function(playerTurn,mv){
+199:     // Un Éclat compte comme participant s'il agit OU s'il est la cible vivante de l'adversaire.
+200:     if(battle&&(playerTurn||(!playerTurn&&battle.enemy?.hp>0)))markCurrentParticipant();
+201:     return baseUseMove.apply(this,arguments);
+202:   };
+203: }catch(e){console.warn('V109W EXP useMove',e)}
+204: try{
+205:   if(typeof window.grantEnemyXP==='function')window.grantEnemyXP=function(enemy){
+206:     const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+207:     const members=uniq((battle?.v109wEnemyParticipants||[]).filter(m=>m&&m.hp>0)),xpLines=[];
+208:     battle.eventQueue=Array.isArray(battle.eventQueue)?battle.eventQueue:[];
+209:     for(const m of members){
+210:       if(m.hp<=0)continue;
+211:       const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+212:       const events=(typeof safeCall==='function'?safeCall(gainXP,m,amount):gainXP(m,amount))||[];
+213:       xpLines.push(`${nameOf(m)} : +${amount} EXP`);battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events);
+214:     }
+215:     if(!members.length)battle.eventQueue.push('Aucun Éclat encore conscient n’a participé à cet affrontement : aucune EXP distribuée.');
+### line 471: trainerWins
+463:   try{return Array.isArray(CREATURES)&&CREATURES.length?CREATURES.length:169}catch(_){return 169}
+464: }
+465: // ------------------------------------------------------------------
+466: // Installation répétée uniquement pour les scènes qu'anciens timers peuvent régénérer.
+467: // ------------------------------------------------------------------
+468: function install(){
+469:   try{completeTemple()}catch(e){console.warn(e)}
+470:   try{configureSimdor()}catch(e){console.warn(e)}
+471:   try{ensureVolAgent();if(state.trainerWins?.[VOL_AGENT_ID]&&!state.flags?.v109wVolReward){state.flags=state.flags||{};state.capsules=Array.isArray(state.capsules)?state.capsules:[];if(!state.capsules.includes('vol')&&!state.flyLearned)state.capsules.push('vol');state.flags.v109wVolReward=true}}catch(e){console.warn(e)}
+472:   try{if(typeof V106C_QUESTS!=='undefined'){const q=V106C_QUESTS.find(x=>x?.id==='v106c_mila');if(q)q.required=false}}catch(_){}
+473:   try{ensureTaronisLinkV109Y()}catch(e){console.warn(e)}
+474:   try{ensureLateQuestNpcs()}catch(e){console.warn(e)}
+475:   try{v109xClearHealLockIfDone()}catch(e){console.warn(e)}
+476:   document.documentElement.dataset.valdoraVersion=VERSION;
+477:   const b=document.querySelector('.brand b');if(b)b.textContent=`VALDORA ${VERSION} — ${creatorMode()?'CRÉATEUR':'JOUEUR'}`;
+478:   document.title=`Éclats Sauvages — Valdora ${VERSION}`;
+479: }
+480: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(install,3000);setTimeout(install,8000);setTimeout(install,11500)});else{setTimeout(install,2500);setTimeout(install,7500);setTimeout(install,11000)}
+481: 
+482: window.ValdoraGameplayV109W={
+483:   version:VERSION,install,completeTemple,configureSimdor,ensureVolAgent,shopTier,pendingRoadTrainers,ensureTaronisLinkV109Y,ensureLateQuestNpcs,totalCreatures:totalCreaturesV109W,
+484:   audit(){
+485:     const issues=[];
+486:     const temple=SCENES?.temple_final,ids=new Set((temple?.trainers||[]).map(t=>t.id));for(let i=1;i<=10;i++)if(!ids.has('temple_guard_'+i))issues.push('Citadelle : gardien '+i+' absent');
+## game/CREATEUR.html
+### line 369: trainerWins
+361: ['Port-Écume','metropole',480,7],['Luminor','metropole',650,12],['Brumelac','ville',240,1],
+362: ['Sylvaris','ville',0,1],['Taronis','metropole',700,10],['Aubeval','ville',300,1]
+363: ].map((v,i)=>({id:'city'+(i+1),name:v[0],kind:v[1],hotelPrice:v[2],floors:v[3]}));
+364: 
+365: const SIDE_QUESTS_V60=[
+366: {id:'q_pyroin',giver:'Mila',title:'Une chaleur rassurante',type:'capture',target:'Pyroin',qty:1,money:450,item:'Potion',itemQty:3},
+367: {id:'q_florin',giver:'Basile',title:'Le jardin vivant',type:'capture',target:'Florin',qty:1,money:400,item:'Baie',itemQty:5},
+368: {id:'q_rocor',giver:'Nora',title:'Un Rocor pour l’étude',type:'capture',target:'Rocor',qty:1,money:650,item:'Orbe',itemQty:4},
+369: {id:'q_trainers',giver:'Yanis',title:'Faire ses preuves',type:'trainerWins',qty:3,money:800,item:'Potion',itemQty:4},
+370: {id:'q_cities',giver:'Alma',title:'Carnet de voyage',type:'cities',qty:5,money:1000,item:'Orbe',itemQty:6}
+371: ];
+372: 
+373: function ensureV60(){
+374:  state.sideQuests=state.sideQuests||{};
+375:  state.visitedCities=state.visitedCities||[];
+376:  state.hotelStays=state.hotelStays||0;
+377: }
+378: function v60Cash(){return Number(state.money??state.gold??state.coins??0)}
+379: function v60CashSet(n){if('money'in state)state.money=n;else if('gold'in state)state.gold=n;else state.coins=n}
+380: function acceptSideQuestV60(id){
+381:  ensureV60();const q=SIDE_QUESTS_V60.find(q=>q.id===id);if(!q)return;
+382:  if(state.sideQuests[id])return toast('Cette mission est déjà dans ton journal.');
+383:  state.sideQuests[id]={status:'active',progress:0};toast('Nouvelle mission : '+q.title);save();
+384: }
+### line 988: startTrainer413
+980:  }
+981: }
+982: function handleBuildingEventV66(){
+983:  if(!megaEventV66||megaEventV66.type==='none'||megaEventV66.handled)return false;
+984:  const t=megaEventV66.type;
+985:  if(t==='taron'){
+986:    const tr={id:'bld_taron_'+megaEventV66.doneKey,level:10+megaFloorV66*2,look:12,dialog:'Cet immeuble appartient désormais à la Team Taron !',buildingEventV66:true};
+987:    window._buildingBattleContextV66={zone:megaReturnZoneV66,building:megaBuildingV66,floor:megaFloorV66,event:megaEventV66};
+988:    startTrainer413(tr);return true
+989:  }
+990:  megaEventV66.handled=true;state.flags=state.flags||{};state.flags[megaEventV66.doneKey]=true;
+991:  if(t==='lostCreature'){state.money=(state.money||0)+300;dialog('<b>Créature retrouvée !</b><br>Tu retrouves la petite créature cachée près d’une porte. Son propriétaire te récompense de 300 ✦.')}
+992:  else if(t==='blackout'){state.inventory.Potion=(state.inventory.Potion||0)+2;dialog('<b>Panne résolue</b><br>Tu aides le gardien à réarmer le tableau électrique. Il t’offre 2 Potions.')}
+993:  else if(t==='injured'){state.money=(state.money||0)+250;dialog('<b>Habitant secouru</b><br>Tu aides un résident blessé à rejoindre le hall. +250 ✦.')}
+994:  else if(t==='researcher'){state.inventory.Baie=(state.inventory.Baie||0)+3;dialog('<b>Étude terminée</b><br>Le chercheur te remercie pour ton aide et t’offre 3 Baies.')}
+995:  else if(t==='hiddenItem'){state.inventory.Orbe=(state.inventory.Orbe||0)+2;dialog('<b>Objet caché</b><br>Dans un renfoncement technique : 2 Orbes d’Éclat !')}
+996:  else if(t==='alarm'){dialog('<b>Fausse alerte</b><br>Tu découvres qu’un Éclat minuscule jouait avec un détecteur. Les habitants sont rassurés.')}
+997:  else if(t==='delivery'){state.money=(state.money||0)+350;dialog('<b>Livraison effectuée</b><br>Le colis arrive à son destinataire. +350 ✦.')}
+998:  save(false);return true
+999: }
+1000: function interactMegaInteriorV66(){
+1001:  // room coordinates mapped to screen stair positions / .8, .75
+1002:  const up=Math.hypot(state.roomX-385,state.roomY-620);
+1003:  const down=Math.hypot(state.roomX-815,state.roomY-620);
+### line 1080: trainerEvent
+1072:  }else{
+1073:    toast('La chambre est vide pour le moment.')
+1074:  }
+1075: }
+1076: 
+1077: // Le système d’entrée est désormais branché AVANT l’ancien intérieur générique.
+1078: function interactV66(){
+1079:  if(closeDialog())return;
+1080:  if(scene!=='world'||trainerEvent)return;
+1081:  const b=nearBuilding();
+1082:  if(b){
+1083:    if(currentScene().megacity && b.megaInterior && b.urbanType!=='hotel'){enterMegaBuildingV66(b);return}
+1084:    if(b.type==='inn'||b.urbanType==='hotel'){enterHotelV66(b);return}
+1085:    building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+1086:  }
+1087:  const n=nearNPC();
+1088:  if(n){faceNPCToPlayer(n);if(n.taron){interactTaron(n);return}dialog('<b>'+n.name+'</b><br>'+npcDialogue(n));return}
+1089:  if(currentScene().kind==='route'){
+1090:    const t=nearTrainer();if(t){faceNPCToPlayer(t);if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));return}
+1091:  }
+1092: }
+1093: 
+1094: // Bataille Team Taron d’immeuble : retour au même étage après victoire.
+1095: function resolveBuildingBattleV66(){
+### line 1717: trainerWins
+1709: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1710: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"},"17":{"body":"tortue","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"18":{"body":"esprit","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"19":{"body":"pangolin","ornament":"crinière de flammes","pattern":"points lumineux","accent":"or"},"20":{"body":"félin","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"21":{"body":"renard","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"22":{"body":"mouton","ornament":"rochers sur les épaules","pattern":"écailles","accent":"ivoire"},"23":{"body":"champignon vivant","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"24":{"body":"cerf","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"25":{"body":"oiseau","ornament":"plumes en éventail","pattern":"rayures","accent":"bleu"},"26":{"body":"amphibien","ornament":"nuage flottant","pattern":"dégradé","accent":"vert"},"27":{"body":"poisson","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"28":{"body":"tortue","ornament":"deux petites cornes","pattern":"plaques","accent":"violet"},"29":{"body":"esprit","ornament":"armure de pierre","pattern":"feuilles","accent":"turquoise"},"30":{"body":"pangolin","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"31":{"body":"lapin","ornament":"petit volcan dorsal","pattern":"plumes","accent":"orange"},"32":{"body":"renard","ornament":"tulipe sur la tête","pattern":"taches","accent":"rouge"},"33":{"body":"mouton","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"34":{"body":"champignon vivant","ornament":"cristaux sur le front","pattern":"dégradé","accent":"vert"},"35":{"body":"lézard","ornament":"nageoires rubanées","pattern":"points lumineux","accent":"or"},"36":{"body":"oiseau","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"37":{"body":"amphibien","ornament":"antenne lumineuse","pattern":"feuilles","accent":"turquoise"},"38":{"body":"poisson","ornament":"couronne de glace","pattern":"écailles","accent":"ivoire"},"39":{"body":"serpent","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"40":{"body":"esprit","ornament":"corne cristalline","pattern":"taches","accent":"rouge"},"41":{"body":"pangolin","ornament":"carapace épineuse","pattern":"rayures","accent":"bleu"},"42":{"body":"lapin","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"43":{"body":"dragon","ornament":"oreilles en ailes","pattern":"points lumineux","accent":"or"},"44":{"body":"mouton","ornament":"queue en spirale","pattern":"plaques","accent":"violet"},"45":{"body":"champignon vivant","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"46":{"body":"lézard","ornament":"anneau lumineux","pattern":"écailles","accent":"ivoire"},"47":{"body":"quadrupède","ornament":"coquille marine","pattern":"plumes","accent":"orange"},"48":{"body":"amphibien","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"49":{"body":"poisson","ornament":"graine géante","pattern":"rayures","accent":"bleu"},"50":{"body":"serpent","ornament":"capuchon de feuilles","pattern":"dégradé","accent":"vert"},"51":{"body":"golem","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"52":{"body":"pangolin","ornament":"ailes translucides","pattern":"plaques","accent":"violet"},"53":{"body":"lapin","ornament":"arbuste sur le dos","pattern":"feuilles","accent":"turquoise"},"54":{"body":"dragon","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"55":{"body":"grenouille","ornament":"racines visibles","pattern":"plumes","accent":"orange"},"56":{"body":"champignon vivant","ornament":"queue en feuille","pattern":"taches","accent":"rouge"},"57":{"body":"lézard","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"58":{"body":"quadrupède","ornament":"collerette de pétales","pattern":"dégradé","accent":"vert"},"59":{"body":"scarabée","ornament":"champignon dorsal","pattern":"points lumineux","accent":"or"},"60":{"body":"poisson","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"61":{"body":"serpent","ornament":"carapace bombée","pattern":"feuilles","accent":"turquoise"},"62":{"body":"golem","ornament":"lianes autour des pattes","pattern":"écailles","accent":"ivoire"},"63":{"body":"hibou","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"64":{"body":"lapin","ornament":"crinière de flammes","pattern":"taches","accent":"rouge"},"65":{"body":"dragon","ornament":"fleur clochette","pattern":"rayures","accent":"bleu"},"66":{"body":"grenouille","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"67":{"body":"félin","ornament":"rochers sur les épaules","pattern":"points lumineux","accent":"or"},"68":{"body":"lézard","ornament":"moustaches électriques","pattern":"plaques","accent":"violet"},"69":{"body":"quadrupède","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"70":{"body":"scarabée","ornament":"plumes en éventail","pattern":"écailles","accent":"ivoire"},"71":{"body":"cerf","ornament":"nuage flottant","pattern":"plumes","accent":"orange"},"72":{"body":"serpent","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"73":{"body":"golem","ornament":"deux petites cornes","pattern":"rayures","accent":"bleu"},"74":{"body":"hibou","ornament":"armure de pierre","pattern":"dégradé","accent":"vert"},"75":{"body":"tortue","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"76":{"body":"dragon","ornament":"petit volcan dorsal","pattern":"plaques","accent":"violet"},"77":{"body":"grenouille","ornament":"tulipe sur la tête","pattern":"feuilles","accent":"turquoise"},"78":{"body":"félin","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"79":{"body":"renard","ornament":"cristaux sur le front","pattern":"plumes","accent":"orange"},"80":{"body":"quadrupède","ornament":"nageoires rubanées","pattern":"taches","accent":"rouge"},"81":{"body":"scarabée","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"82":{"body":"cerf","ornament":"antenne lumineuse","pattern":"dégradé","accent":"vert"},"83":{"body":"oiseau","ornament":"couronne de glace","pattern":"points lumineux","accent":"or"},"84":{"body":"golem","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"85":{"body":"hibou","ornament":"corne cristalline","pattern":"feuilles","accent":"turquoise"},"86":{"body":"tortue","ornament":"carapace épineuse","pattern":"écailles","accent":"ivoire"},"87":{"body":"esprit","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"88":{"body":"grenouille","ornament":"oreilles en ailes","pattern":"taches","accent":"rouge"},"89":{"body":"félin","ornament":"queue en spirale","pattern":"rayures","accent":"bleu"},"90":{"body":"renard","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"91":{"body":"mouton","ornament":"anneau lumineux","pattern":"points lumineux","accent":"or"},"92":{"body":"scarabée","ornament":"coquille marine","pattern":"plaques","accent":"violet"},"93":{"body":"cerf","ornament":"queue en feuille","pattern":"feuilles","accent":"turquoise"},"94":{"body":"oiseau","ornament":"graine géante","pattern":"écailles","accent":"ivoire"},"95":{"body":"amphibien","ornament":"capuchon de feuilles","pattern":"plumes","accent":"orange"},"96":{"body":"hibou","ornament":"champignon dorsal","pattern":"taches","accent":"rouge"},"97":{"body":"tortue","ornament":"ailes translucides","pattern":"rayures","accent":"bleu"},"98":{"body":"esprit","ornament":"arbuste sur le dos","pattern":"dégradé","accent":"vert"},"99":{"body":"pangolin","ornament":"lianes autour des pattes","pattern":"points lumineux","accent":"or"},"100":{"body":"félin","ornament":"racines visibles","pattern":"plaques","accent":"violet"}};
+1711: 
+1712: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1713: 
+1714: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1715: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1716: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1717: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1718: 
+1719: 
+1720: function creatureStats(m){
+1721:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1722:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1723:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1724:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1725:   const identity=(fam%7)-3;
+1726:   return {
+1727:     hp:Math.floor(30+lvl*3.0+stage*10+(fam%6)),
+1728:     atk:Math.floor(8+lvl*1.42+stage*6+Math.max(0,identity)),
+1729:     def:Math.floor(8+lvl*1.30+stage*6+Math.max(0,-identity)),
+1730:     spd:Math.floor(7+lvl*1.12+stage*4+((fam*3)%5))
+1731:   }
+1732: }
+### line 1983: teamIndex
+1975: function v106pLearnNaturalMove(m,mid){
+1976:   if(!m||!MOVE_DB[mid]||m.moves?.includes(mid)||v106pQueuedFor(m,mid))return false;
+1977:   if((m.moves||[]).length<4){v106pApplyMove(m,mid);return true}
+1978:   v106pRequestMoveChoice(m,mid,'niveau');return true;
+1979: }
+1980: window.v106pConfirmMoveReplacement=v106pConfirmMoveReplacement;window.v106pCancelMoveReplacement=v106pCancelMoveReplacement;window.v106pProcessMoveChoiceQueue=v106pProcessMoveChoiceQueue;
+1981: 
+1982: // ----- CS/Capsules à usage unique -----
+1983: function v83TeachMove(teamIndex,mid){
+1984:   teamIndex=Number(teamIndex);mid=String(mid||'');
+1985:   const m=(state.team||[])[teamIndex],mv=MOVE_DB?.[mid],caps=state.capsules||[],idx=caps.indexOf(mid);
+1986:   if(!m){toast('Créature introuvable dans l’équipe.');return false}
+1987:   if(!mv){toast('Cette capacité est indisponible.');return false}
+1988:   if(idx<0){toast('Tu ne possèdes plus cette Capsule.');return false}
+1989:   if(!canLearnMove(m,mid)){toast((BY?.[m.id]?.name||'Cette créature')+' ne peut pas apprendre '+mv.name+'.');return false}
+1990:   m.moves=Array.isArray(m.moves)?m.moves:[];
+1991:   if(m.moves.includes(mid)){toast((BY?.[m.id]?.name||'Cette créature')+' connaît déjà '+mv.name+'.');return false}
+1992:   if(m.moves.length<4){
+1993:     if(!v106pApplyMove(m,mid)){toast('Impossible d’apprendre '+mv.name+'.');return false}
+1994:     caps.splice(idx,1);save(false);hud();toast((BY?.[m.id]?.name||'La créature')+' apprend '+mv.name+' !');setTimeout(()=>{try{openTeam()}catch(_){}},60);return true
+1995:   }
+1996:   // Quatre capacités déjà connues : choix immédiat et explicite, aucun remplacement automatique.
+1997:   window._v106pMoveChoiceCurrent={creature:m,mid,source:'capsule'};
+1998:   const power=typeof moveDisplayPowerV106U==='function'?moveDisplayPowerV106U(mid):(mv.displayPower??mv.power??'—');
+### line 2116: battle.trainer
+2108: function v82ConsumeCapsule(moveId,target){
+2109:   const ti=(state.team||[]).indexOf(target);
+2110:   if(ti<0)return false;
+2111:   return v83TeachMove(ti,moveId)
+2112: }
+2113: 
+2114: function v82EscapeGuard(e){
+2115:   if(e.key!=='Escape'||scene!=='battle'||!battle)return;
+2116:   if(battle.trainer){
+2117:     e.preventDefault();e.stopImmediatePropagation();
+2118:     toast('Impossible de fuir un combat de dresseur !')
+2119:   }
+2120: }
+2121: window.addEventListener('keydown',v82EscapeGuard,true);
+2122: 
+2123: function v82ShiftTouchPad(){
+2124:   const el=document.getElementById('touchControlsV79');
+2125:   if(el){el.style.left='18px';el.style.transform='translateX(8px)'}
+2126: }
+2127: 
+2128: function v82ExpandCreatures(){
+2129:   if(CREATURES.length>=150)return;
+2130:   const types=['Nature','Feu','Eau','Foudre','Roche','Air','Spore','Glace','Lumière','Ombre','Neutre'];
+2131:   const bodies=['félin','rapace','lézard','cerf','tortue','renard','amphibien','insecte','bélier','serpent'];
+### line 2223: battle.enemy
+2215:   if(defender.status==='gelé')evasion=0;
+2216:   const hitChance=Math.max(.50,Math.min(.975,accuracy-evasion));
+2217:   if(Math.random()<=hitChance)return {hit:true,hitChance,evasion};
+2218:   return {hit:false,dodge:(ds.spd>=as.spd&&Math.random()<.72),hitChance,evasion};
+2219: }
+2220: 
+2221: function poisonTickV81(userIsPlayer,next){
+2222:   if(!battleAlive())return;
+2223:   const m=userIsPlayer?active():battle.enemy;
+2224:   if(!m||m.hp<=0||m.status!=='empoisonné'){next();return}
+2225:   const dmg=Math.max(1,Math.floor(maxHP(m)*.10));
+2226:   m.hp=Math.max(0,m.hp-dmg);
+2227:   if(userIsPlayer)battle.playerHit=1;else battle.enemyHit=1;
+2228:   battle.message='☠ Poison : '+BY[m.id].name+' perd '+dmg+' PV !';
+2229:   hud();
+2230:   laterBattle(220,()=>{if(battle){battle.playerHit=0;battle.enemyHit=0}});
+2231:   laterBattle(650,()=>{
+2232:     if(!battleAlive())return;
+2233:     if(m.hp<=0){
+2234:       if(userIsPlayer)playerKO();else enemyKO();
+2235:       return
+2236:     }
+2237:     next()
+2238:   })
+### line 2258: battle.enemy
+2250:     setTimeout(()=>{
+2251:       if(scene==='world'&&musicOn&&typeof refreshMusicV77==='function')refreshMusicV77()
+2252:     },1750)
+2253:   }catch(e){console.warn('Victory jingle',e)}
+2254: }
+2255: 
+2256: function grantCaptureXPV81(){
+2257:   if(!battleAlive()||battle.captureXpGranted)return 0;
+2258:   const a=active(),e=battle.enemy;
+2259:   if(!a||!e)return 0;
+2260:   const xp=Math.max(8,Math.floor((e.level*11+12+(BY[e.id].stage||0)*8)*.80));
+2261:   const ev=gainXP(a,xp);
+2262:   battle.captureXpGranted=true;
+2263:   battle.captureXP=xp;
+2264:   battle.eventQueue.push(BY[a.id].name+' gagne '+xp+' EXP pour la capture.',...ev);
+2265:   logEvent('Capture de '+BY[e.id].name+' : +'+xp+' EXP.');
+2266:   return xp
+2267: }
+2268: 
+2269: function captureChanceV81(kind){
+2270:   const e=battle.enemy;
+2271:   const hpMissing=1-e.hp/maxHP(e);
+2272:   const stage=BY[e.id].stage||0;
+2273:   let chance=.20+hpMissing*.61-stage*.055;
+### line 2358: trainerWins
+2350:   st._v106tCodexMigrated=true;
+2351:   return st
+2352: }
+2353: 
+2354: 
+2355: function reset(){
+2356:   state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,
+2357:     inventory:{Potion:0,SuperPotion:0,Orbe:0,SuperOrbe:0,MegaOrbe:0,Antidote:2,Baie:3,Repas:0,FioleAttaque:0,FioleDefense:0},
+2358:     trainerWins:{},bike:false,fly:false,light:false,capsules:[],discovered:['town0'],hasDex:false,profGift:false,follow:true,
+2359:     taron:{wins:0,missions:0,active:null}};
+2360:   scene='world';save(false);hud()
+2361: }
+2362: 
+2363: 
+2364: function save(show=true){
+2365:   try{
+2366:     if(!state||typeof state!=='object')throw new Error('État de partie invalide.');
+2367:     ensureInventoryV81(state);
+2368:     state._saveMeta={version:'V96',savedAt:Date.now(),zone:state.zone||'town0',
+2369:       playerMode:typeof PLAYER_PROGRESSION_LOCK!=='undefined'?!!PLAYER_PROGRESSION_LOCK:true};
+2370:     const payload=JSON.stringify(state);
+2371:     try{
+2372:       localStorage.setItem(SAVE,payload);
+2373:       localStorage.setItem(SAVE+'_backup',payload);
+### line 2990: trainerEvent
+2982: function npcCollision(x,y){
+2983:   for(const n of currentNPCs()){
+2984:     // feet/body collision, not the whole oversized head
+2985:     if(Math.hypot(x-n.x,y-n.y)<43)return n;
+2986:   }
+2987:   return null;
+2988: }
+2989: 
+2990: let trainerEvent=null;
+2991: function currentTrainers(){return currentScene().trainers||[]}
+2992: function undefeatedTrainers(){return currentTrainers().filter(t=>!state.trainerWins[t.id])}
+2993: function trainerCollision(x,y){for(const t of currentTrainers())if(Math.hypot(x-t.x,y-t.y)<42)return t;return null}
+2994: function nearTrainer(){
+2995:   let best=null,bd=999;
+2996:   for(const t of currentTrainers()){const d=Math.hypot(state.x-t.x,state.y-t.y);if(d<bd){bd=d;best=t}}
+2997:   return best&&bd<78?best:null
+2998: }
+2999: 
+3000: function updateRouteTrainerIdle(){
+3001:   if(scene!=='world'||currentScene().kind!=='route'||trainerEvent)return;
+3002:   const sc=currentScene(),now=performance.now();
+3003: 
+3004:   function nearestPathData(px,py){
+3005:     const pts=routePathPoints(sc);let best=null,bestD=1e30;
+### line 3153: trainerEvent, trainerWins
+3145:   }
+3146:   return party
+3147: }
+3148: 
+3149: 
+3150: 
+3151: function trainerCanSee(t){
+3152:   const sc=currentScene();
+3153:   if(state.trainerWins[t.id]||trainerEvent||scene!=='world'||!['route','temple'].includes(sc.kind))return false;
+3154:   if(t.finalBoss&&!templeGuardsClearedV77())return false;
+3155:   const d=Math.hypot(state.x-t.x,state.y-t.y);
+3156:   return d<=215
+3157: }
+3158: 
+3159: 
+3160: function checkTrainerDetection(){
+3161:   if(teamAllKOV87())return;
+3162: 
+3163:   if(!trainerMayDetectPlayerV87())return;
+3164: 
+3165:   if(trainerEvent||scene!=='world'||!['route','temple'].includes(currentScene().kind))return;
+3166:   const t=undefeatedTrainers().find(trainerCanSee);
+3167:   if(!t)return;
+3168:   faceNPCToPlayer(t);
+### line 3173: trainerEvent
+3165:   if(trainerEvent||scene!=='world'||!['route','temple'].includes(currentScene().kind))return;
+3166:   const t=undefeatedTrainers().find(trainerCanSee);
+3167:   if(!t)return;
+3168:   faceNPCToPlayer(t);
+3169:   trainerEvent={trainer:t,stage:'alert',start:performance.now()};
+3170:   tone(880,.09,.025,'square',0,100);tone(1080,.10,.02,'square',.09,0)
+3171: }
+3172: 
+3173: function updateTrainerEvent(){
+3174:   if(!trainerEvent||scene!=='world')return;
+3175:   const e=trainerEvent,t=e.trainer,now=performance.now();
+3176:   if(e.stage==='alert'){
+3177:     if(now-e.start>550){e.stage='approach';e.start=now}
+3178:     return
+3179:   }
+3180:   if(e.stage==='approach'){
+3181:     const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+3182:     if(d>72){
+3183:       const step=Math.min(5,d-68);
+3184:       t.x+=dx/d*step;t.y+=dy/d*step;
+3185:       t.moving=true;faceNPCToPlayer(t);
+3186:       return
+3187:     }
+3188:     t.moving=false;e.stage='dialog';
+### line 3195: trainerEvent
+3187:     }
+3188:     t.moving=false;e.stage='dialog';
+3189:     dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t)+'<br><br><small>Équipe adverse : '+trainerPartySize(t)+' créature'+(trainerPartySize(t)>1?'s':'')+'.</small>',()=>{
+3190:       const target=t;trainerEvent=null;startTrainer413(target)
+3191:     })
+3192:   }
+3193: }
+3194: function drawTrainerAlert(t,x,y){
+3195:   if(!trainerEvent||trainerEvent.trainer!==t)return;
+3196:   const pulse=1+Math.sin(performance.now()/110)*.08;
+3197:   ctx.save();ctx.translate(x,y-104);ctx.scale(pulse,pulse);
+3198:   ctx.fillStyle='#fff';ctx.strokeStyle='#233d4b';ctx.lineWidth=3;
+3199:   ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill();ctx.stroke();
+3200:   ctx.fillStyle='#e44f4f';ctx.font='900 25px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('!',0,1);
+3201:   ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic'
+3202: }
+3203: 
+3204: function faceNPCToPlayer(n){
+3205:   const dx=state.x-n.x,dy=state.y-n.y;
+3206:   if(Math.abs(dx)>Math.abs(dy)) n.dir=dx<0?1:2;
+3207:   else n.dir=dy<0?3:0;
+3208: }
+3209: function playerInteractionPoint(){
+3210:   const dist=52;
+### line 3714: startTrainer413
+3706:  dialog('<b>Habitant</b><br>'+['Les pièces donnent sur le couloir principal.','Cet étage est surtout résidentiel.','Certaines portes mènent à des bureaux ou à des appartements.','Il y a parfois des choses étranges dans les étages supérieurs.'][v67Floor%4])
+3707: }
+3708: function resolveV67Event(){
+3709:  if(!v67Event||v67Event.done)return;
+3710:  const t=v67Event.type;
+3711:  if(t==='taron'){
+3712:    const tr={id:'v67Taron_'+v67Event.key,level:12+v67Floor*2,look:12,dialog:'Personne ne passe !',buildingEventV67:true};
+3713:    window._v67Battle={zone:v67ReturnZone,building:v67Building,floor:v67Floor,event:v67Event};
+3714:    startTrainer413(tr);return
+3715:  }
+3716:  v67Event.done=true;state.flags=state.flags||{};state.flags[v67Event.key]=true;
+3717:  if(t==='lostCreature'){state.money=(state.money||0)+300;dialog('<b>Mission improvisée</b><br>Tu retrouves la créature perdue dans une pièce. +300 ✦.')}
+3718:  else if(t==='blackout'){dialog('<b>Panne réparée</b><br>Tu aides le gardien à rétablir le courant dans l’étage.')}
+3719:  else if(t==='injured'){state.money=(state.money||0)+250;dialog('<b>Habitant secouru</b><br>Tu aides un habitant blessé. +250 ✦.')}
+3720:  else if(t==='researcher'){state.inventory.Baie=(state.inventory.Baie||0)+3;dialog('<b>Chercheur</b><br>Il te remercie pour ton aide et t’offre 3 Baies.')}
+3721:  else if(t==='hiddenItem'){state.inventory.Orbe=(state.inventory.Orbe||0)+2;dialog('<b>Objet caché</b><br>Tu trouves 2 Orbes d’Éclat.')}
+3722:  else if(t==='alarm'){dialog('<b>Alarme</b><br>La source était une petite créature coincée dans une réserve.')}
+3723:  else if(t==='delivery'){state.money=(state.money||0)+350;dialog('<b>Livraison</b><br>Le colis arrive enfin à destination. +350 ✦.')}
+3724:  else if(t==='rareCreature'){dialog('<b>Rencontre rare</b><br>Des traces indiquent qu’une créature rare fréquente cet immeuble.')}
+3725:  save(false)
+3726: }
+3727: 
+3728: // ---------- MOUNTAIN ROUTES ----------
+3729: function buildMountainRouteV67(id,name){
+### line 4127: startTrainer413
+4119: }
+4120: function interactV68Interior(){
+4121:   if(V68_INTERIOR.mode==='room'){
+4122:     const key=v69DiscoveryKey();
+4123:     if(!state.flags?.[key]){
+4124:       const t=v69DiscoveryType();
+4125:       if(t==='taron'){
+4126:         const tr={id:'v69Taron_'+key,level:12+V68_INTERIOR.floor*2,look:12,dialog:'Tu n’aurais jamais dû entrer ici !',buildingEventV68:true};
+4127:         window._v68Battle={interior:JSON.parse(JSON.stringify(V68_INTERIOR))};startTrainer413(tr);return
+4128:       }
+4129:       if(t!=='none'){
+4130:         state.flags=state.flags||{};state.flags[key]=true;
+4131:         if(t==='coins'){state.money=(state.money||0)+180;dialog('<b>Découverte</b><br>Tu trouves 180 ✦ oubliées dans un tiroir.')}
+4132:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Une Orbe d’Éclat était cachée ici.')}
+4133:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Tu récupères 2 Baies.')}
+4134:         else if(t==='lore'){dialog('<b>Document local</b><br>Un vieux dossier raconte comment ce quartier s’est développé autour des premiers Éclats.')}
+4135:         else if(t==='note'){dialog('<b>Note trouvée</b><br>« On raconte qu’une créature inhabituelle apparaît après la tombée du jour près de la gare. »')}
+4136:         else if(t==='rare'){dialog('<b>Traces étranges</b><br>Tu découvres des traces appartenant probablement à une créature rare.')}
+4137:         else if(t==='quest'){dialog('<b>Demande d’un habitant</b><br>Un résident te demande de retrouver un objet perdu dans un autre étage. Cette mission est ajoutée à ton journal.')}
+4138:         save(false);return
+4139:       }
+4140:     }
+4141: 
+4142:     const data=roomDataV69();
+### line 4835: startTrainer413
+4827: 
+4828: function interactInteriorV70(){
+4829:   if(V70_INT.mode==='room'){
+4830:     const key=v70DiscoveryKey();
+4831:     if(!state.flags?.[key]){
+4832:       const t=v70DiscoveryType();
+4833:       if(t==='taron'){
+4834:         const tr={id:'v70Taron_'+key,level:12+V70_INT.floor*2,look:12,dialog:'Cet immeuble est sous notre contrôle !',buildingEventV70:true};
+4835:         window._v70Battle={int:JSON.parse(JSON.stringify(V70_INT))};startTrainer413(tr);return
+4836:       }
+4837:       if(t!=='none'){
+4838:         state.flags=state.flags||{};state.flags[key]=true;
+4839:         if(t==='coins'){state.money=(state.money||0)+200;dialog('<b>Découverte</b><br>Tu trouves 200 ✦.')}
+4840:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Tu récupères une Orbe d’Éclat.')}
+4841:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Deux Baies étaient rangées ici.')}
+4842:         else if(t==='lore'){dialog('<b>Document</b><br>Un dossier raconte l’histoire de ce quartier et de ses premiers habitants.')}
+4843:         else if(t==='hint'){dialog('<b>Indice</b><br>Un habitant mentionne une créature rare aperçue près de la gare à la tombée du jour.')}
+4844:         else if(t==='rare'){dialog('<b>Traces rares</b><br>Ces marques semblent appartenir à une créature peu commune.')}
+4845:         else if(t==='quest'){dialog('<b>Nouvelle mission</b><br>Un habitant te demande un service. La mission est ajoutée au journal.')}
+4846:         else if(t==='gift'){state.inventory.Potion=(state.inventory.Potion||0)+1;dialog('<b>Cadeau</b><br>Un habitant t’offre une Potion pour te remercier.')}
+4847:         save(false);return
+4848:       }
+4849:     }
+4850: 
+### line 5455: trainerWins
+5447:     kind:'temple',name:'Citadelle du Cœur',width:2400,height:2100,
+5448:     trainers,exits:[
+5449:       {x:1110,y:2010,w:180,h:90,side:'south',to:'town14',label:'Aubeval'}
+5450:     ],
+5451:     obstacles:[]
+5452:   }
+5453: }
+5454: function templeGuardsClearedV77(){
+5455:   return Array.from({length:10},(_,i)=>'temple_guard_'+(i+1)).every(id=>!!state.trainerWins[id])
+5456: }
+5457: function finalTempleAvailableV77(){
+5458:   return typeof v106pCitadelRequirements==='function'?v106pCitadelRequirements().ready:(v83CaughtCount()>=75&&(state.seals||[]).length>=7&&!!state.fly)
+5459: }
+5460: function altarReadyV77(){
+5461:   return templeGuardsClearedV77()&&!!state.trainerWins.final_boss
+5462: }
+5463: 
+5464: function drawFinalTempleV77(sc,camX,camY,sx,sy){
+5465:   if(window.ValdoraPolishV113?.active)return window.ValdoraPolishV113.drawCitadel(sc,camX,camY,sx,sy);
+5466:   ctx.fillStyle='#151d28';ctx.fillRect(0,0,960,600);
+5467: 
+5468:   // grand parvis de pierre
+5469:   ctx.fillStyle='#c4bdad';
+5470:   ctx.fillRect((380-camX)*sx,(80-camY)*sy,1640*sx,1940*sy);
+### line 5521: trainerWins
+5513: function tryFinalAltarV77(){
+5514:   if(state.zone!=='temple_final')return false;
+5515:   if(Math.hypot(state.x-1200,state.y-140)>150)return false;
+5516: 
+5517:   if(!templeGuardsClearedV77()){
+5518:     dialog('<b>Autel du Cœur</b><br>Les dix Gardiens du Sanctuaire doivent être vaincus avant que l’autel ne s’ouvre.');
+5519:     return true
+5520:   }
+5521:   if(!state.trainerWins.final_boss){
+5522:     dialog('<b>Autel du Cœur</b><br>Le Maître du Cœur se tient encore entre toi et l’autel.');
+5523:     return true
+5524:   }
+5525:   if((state.seals||[]).length<7){
+5526:     dialog('<b>Autel du Cœur</b><br>Il manque des Sceaux. Les sept doivent être réunis pour restaurer le Cœur de Valdora.');
+5527:     return true
+5528:   }
+5529:   if(typeof v106cAllRequiredDone==='function'&&!v106cAllRequiredDone()){
+5530:     const missing=v106cMissingRequired();
+5531:     dialog('<b>Autel du Cœur</b><br>Avant la conclusion, plusieurs engagements pris auprès des habitants doivent encore être honorés.<br><br><b>Missions essentielles restantes :</b><br>'+missing.map(q=>'• '+q.giverName+' — '+q.title).join('<br>'));
+5532:     return true
+5533:   }
+5534:   if(state.flags?.finalHeartRestored){
+5535:     dialog('<b>Cœur de Valdora</b><br>Le Cœur bat de nouveau en harmonie. Sa lumière résonne avec tes sept Sceaux.');
+5536:     return true
+### line 5649: trainerEvent
+5641:   ctx.fillStyle='#fff';ctx.font='800 13px Segoe UI';ctx.textAlign='center';
+5642:   const icon=phase==='night'?'☾':phase==='dawn'?'◒':phase==='sunset'?'◐':'☀';
+5643:   ctx.fillText(icon+' '+hh+':'+mm,69,40);
+5644:   ctx.restore();ctx.textAlign='start'
+5645: }
+5646: 
+5647: 
+5648: function drawWorld(){
+5649:   updateTownNPCs();updateRouteTrainerIdle();updateTrainerEvent();updateMegaNPCsV64();
+5650:   const sc=currentScene(),mw=sc.width||1800,mh=sc.height||1100;
+5651:   const camX=Math.max(0,Math.min(Math.max(0,mw-1600),state.x-800));
+5652:   const camY=Math.max(0,Math.min(Math.max(0,mh-1000),state.y-500));
+5653:   const sx=960/1600,sy=600/1000;
+5654: 
+5655:   if(sc.kind==='town'){
+5656:     if(sc.megacity)drawMegacityV70(sc,camX,camY,sx,sy);
+5657:     else drawTownScene(sc,camX,camY,sx,sy);
+5658:     drawExitSignsV77(sc,camX,camY,sx,sy)
+5659:   }else if(sc.kind==='temple'){
+5660:     drawFinalTempleV77(sc,camX,camY,sx,sy)
+5661:   }else if(sc.routeEngine==='V76'){
+5662:     drawRealRouteV76(sc,camX,camY,sx,sy)
+5663:   }else{
+5664:     ctx.fillStyle='#90bd79';ctx.fillRect(0,0,960,600)
+### line 5793: trainerWins
+5785:   if(sc.kind==='route')setTimeout(()=>maybeSpawnTaron(false),450);
+5786:   return true
+5787: }
+5788: 
+5789: function opposite(side){return {north:'south',south:'north',east:'west',west:'east'}[side]}
+5790: 
+5791: function routeTrainersComplete(routeIndex){
+5792:   const sc=SCENES['route'+routeIndex];if(!sc)return true;
+5793:   const tr=sc.trainers||[];return tr.length===0||tr.every(t=>state.trainerWins[t.id])
+5794: }
+5795: function playerQuestGateMessage(from,to){
+5796:   if(!PLAYER_PROGRESSION_LOCK)return null;
+5797:   if(from==='town0'&&to==='route0'&&!state.team.length)return 'Le Professeur Aurine t’attend au laboratoire. Choisis d’abord ton premier compagnon.';
+5798:   if(from.startsWith('route')){
+5799:     const ri=+from.replace('route','');
+5800:     if(to==='town'+(ri+1)&&!routeTrainersComplete(ri))return 'Avant de continuer, termine ta quête sur cette route : affronte les dresseurs qui te barrent le chemin.';
+5801:   }
+5802:   if(from.startsWith('town')){
+5803:     const ti=+from.replace('town','');
+5804:     if(ti>0&&to==='route'+ti&&!(state.seals||[]).includes(ti))return 'Ta quête dans cette ville n’est pas terminée. Obtiens d’abord son Sceau.';
+5805:   }
+5806:   return null
+5807: }
+5808: function transitionWithQuestGate(to,side){
+### line 5849: trainerEvent
+5841:     return
+5842:   }
+5843: }
+5844: 
+5845: 
+5846: 
+5847: function move(dx,dy,dir){
+5848:   state.dir=dir;
+5849:   if(scene!=='world'||trainerEvent)return;
+5850:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast('Position rétablie dans la Citadelle.')}catch(_){}}
+5851:   const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+5852:   if(collision(nx,ny,state.x,state.y)){
+5853:     lastMove=Date.now();
+5854:     const n=npcCollision(nx,ny);if(n&&Math.random()<.12)toast('E / Entrée pour parler à '+n.name);
+5855:     return
+5856:   }
+5857:   recordFollowerStep();state.x=nx;state.y=ny;lastMove=Date.now();checkPortal();
+5858: 
+5859:   // Les rencontres sauvages de Clairval font partie du déplacement normal de la ville.
+5860:   const kind=currentScene().kind;
+5861:   if(state.team.length){
+5862:     if((kind==='route'||kind==='temple')&&!trainerEvent)checkTrainerDetection();
+5863:     if((kind==='route'||state.zone==='town0')&&!trainerEvent&&typeof v104EncounterStep==='function')v104EncounterStep();
+5864:   }
+### line 5910: trainerWins
+5902: 
+5903: 
+5904: 
+5905: 
+5906: // ======================================================================
+5907: // V106E — RÉÉCRITURE : QUÊTES PNJ + HERBES SAUVAGES DE CLAIRVAL
+5908: // Les rencontres sauvages, le PC et les missions de départ sont intégrés directement aux systèmes actifs.
+5909: // ======================================================================
+5910: const V106C_QUESTS=[{"id":"v106c_lina","giver":"lina","giverName":"Lina","zone":"town0","title":"Prêt pour la Route 1","text":"Remporte au total 3 combats contre des Éclats sauvages dans Clairval pour préparer ton équipe avant le départ.","kind":"clairvalWildWins","goal":3,"money":350,"item":"Orbe","qty":3,"required":true,"startRequired":true},{"id":"v106c_marc","giver":"marc","giverName":"Marc","zone":"town0","title":"Première capture à Clairval","text":"Capture un Éclat sauvage dans les herbes de Clairval.","kind":"clairvalCaptures","goal":1,"money":260,"item":"Potion","qty":2,"required":true,"startRequired":true},{"id":"v106c_jade","giver":"jade","giverName":"Jade","zone":"town0","title":"Apprendre à utiliser le PC","text":"Au Centre de soins, dépose un Éclat dans le PC puis récupère-le. Le PC permet aussi les échanges équipe ↔ stockage.","kind":"pcRoundTrip","goal":2,"money":280,"item":"Baie","qty":2,"required":true,"startRequired":true},{"id":"v106c_cloe","giver":"cloe","giverName":"Chloé","zone":"town0","title":"Premiers combats sauvages","text":"Entre dans les herbes sauvages de Clairval et remporte un combat contre un Éclat sauvage.","kind":"clairvalWildWins","goal":1,"money":220,"item":"Orbe","qty":2,"required":true,"startRequired":true},{"id":"v106c_milo","giver":"milo","giverName":"Milo","zone":"town1","title":"Herbier vivant","text":"Capture 2 espèces de type Nature.","kind":"caughtType","goal":2,"money":420,"item":"Potion","qty":2,"required":false,"type":"Nature"},{"id":"v106c_irma","giver":"irma","giverName":"Irma","zone":"town1","title":"Observer avant d’avancer","text":"Observe 15 espèces dans le Codex.","kind":"seenTotal","goal":15,"money":430,"item":"Orbe","qty":3,"required":true},{"id":"v106c_theo","giver":"theo","giverName":"Théo","zone":"town1","title":"Le chemin des voyageurs","text":"Fais le point sur ton voyage : découvre les 2 villes accessibles à cette étape de l’aventure.","kind":"towns","goal":2,"money":450,"item":"SuperPotion","qty":1,"required":false},{"id":"v106c_nora","giver":"nora","giverName":"Nora","zone":"town2","title":"Les habitants du lac","text":"Capture 2 espèces de type Eau.","kind":"caughtType","goal":2,"money":470,"item":"Antidote","qty":2,"required":false,"type":"Eau"},{"id":"v106c_eli","giver":"eli","giverName":"Éli","zone":"town2","title":"Équipe complète","text":"Voyage avec au moins 5 créatures dans ton équipe.","kind":"teamSize","goal":5,"money":460,"item":"Potion","qty":3,"required":false},{"id":"v106c_maelle","giver":"maelle","giverName":"Maëlle","zone":"town2","title":"Électricité sur l’eau","text":"Capture une espèce de type Foudre.","kind":"caughtType","goal":1,"money":500,"item":"SuperOrbe","qty":1,"required":true,"type":"Foudre"},{"id":"v106c_sacha","giver":"sacha","giverName":"Sacha","zone":"town3","title":"Carnet des voyageurs","text":"Complète ton carnet avec les 4 villes accessibles à cette étape de l’aventure.","kind":"towns","goal":4,"money":620,"item":"SuperPotion","qty":1,"required":true},{"id":"v106c_lucie","giver":"lucie","giverName":"Lucie","zone":"town3","title":"Couleurs de Cendrebourg","text":"Capture 2 espèces de type Feu.","kind":"caughtType","goal":2,"money":520,"item":"Baie","qty":3,"required":false,"type":"Feu"},{"id":"v106c_enzo","giver":"enzo","giverName":"Enzo","zone":"town3","title":"Dresseur itinérant","text":"Remporte 8 combats de dresseurs.","kind":"trainerWins","goal":8,"money":650,"item":"Orbe","qty":3,"required":false},{"id":"v106c_hugo","giver":"hugo","giverName":"Hugo","zone":"town4","title":"Uniformes de la Team Taron","text":"Déjoue une opération de la Team Taron.","kind":"taronWins","goal":1,"money":800,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_maya","giver":"maya","giverName":"Maya","zone":"town4","title":"La preuve des Gardiens","text":"Obtiens 2 Sceaux.","kind":"seals","goal":2,"money":700,"item":"Potion","qty":3,"required":false},{"id":"v106c_romane","giver":"romane","giverName":"Romane","zone":"town4","title":"Une équipe endurante","text":"Fais atteindre le niveau 18 à au moins une créature.","kind":"maxLevel","goal":18,"money":750,"item":"SuperPotion","qty":2,"required":false},{"id":"v106c_leo","giver":"leo","giverName":"Léo","zone":"town5","title":"Échantillons minéraux","text":"Capture 2 espèces de type Roche.","kind":"caughtType","goal":2,"money":680,"item":"SuperPotion","qty":1,"required":false,"type":"Roche"},{"id":"v106c_ines","giver":"ines","giverName":"Inès","zone":"town5","title":"Voyage au long cours","text":"Découvre les 6 villes accessibles à cette étape de l’aventure.","kind":"towns","goal":6,"money":780,"item":"Orbe","qty":4,"required":true},{"id":"v106c_adam","giver":"adam","giverName":"Adam","zone":"town5","title":"Codex des dunes","text":"Capture 25 espèces différentes.","kind":"caughtTotal","goal":25,"money":820,"item":"SuperOrbe","qty":1,"required":false},{"id":"v106c_noe","giver":"noe","giverName":"Noé","zone":"town6","title":"Le froid apprivoisé","text":"Capture 2 espèces de type Glace.","kind":"caughtType","goal":2,"money":720,"item":"Antidote","qty":3,"required":false,"type":"Glace"},{"id":"v106c_mila","giver":"mila","giverName":"Mila","zone":"town6","title":"Dresseur confirmé","text":"Remporte 15 combats de dresseurs.","kind":"trainerWins","goal":15,"money":900,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_louna","giver":"louna","giverName":"Louna","zone":"town6","title":"Une équipe de spécialistes","text":"Aie au moins 4 types différents dans ton équipe.","kind":"teamTypes","goal":4,"money":760,"item":"Potion","qty":3,"required":false},{"id":"v106c_syl","giver":"syl","giverName":"Syl","zone":"town7","title":"Les quatre Sceaux","text":"Fais le point sur ton parcours à Valombre : réunis les 4 Sceaux accessibles à cette étape de l’aventure.","kind":"seals","goal":4,"money":1200,"item":"SuperPotion","qty":3,"required":true},{"id":"v106c_ana","giver":"ana","giverName":"Ana","zone":"town7","title":"Un Codex qui prend forme","text":"Capture 45 espèces différentes.","kind":"caughtTotal","goal":45,"money":1300,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106c_gabriel","giver":"gabriel","giverName":"Gabriel","zone":"town7","title":"Vingt victoires","text":"Remporte 20 combats de dresseurs.","kind":"trainerWins","goal":20,"money":1100,"item":"SuperPotion","qty":2,"required":false},{"id":"v106c_celia","giver":"celia","giverName":"Célia","zone":"town8","title":"Au-dessus des nuages","text":"Découvre les 9 villes accessibles jusqu’à cette étape de ton voyage.","kind":"towns","goal":9,"money":900,"item":"SuperOrbe","qty":1,"required":false},{"id":"v106c_nathan","giver":"nathan","giverName":"Nathan","zone":"town8","title":"Maîtrise de l’Air","text":"Capture 2 espèces de type Air.","kind":"caughtType","goal":2,"money":850,"item":"SuperPotion","qty":2,"required":false,"type":"Air"},{"id":"v106c_ambre","giver":"ambre","giverName":"Ambre","zone":"town9","title":"Le grand inventaire","text":"Capture 55 espèces différentes.","kind":"caughtTotal","goal":55,"money":1250,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106c_raphael","giver":"raphael","giverName":"Raphaël","zone":"town9","title":"Rumeurs du port","text":"Déjoue 2 opérations de la Team Taron.","kind":"taronWins","goal":2,"money":1200,"item":"SuperPotion","qty":3,"required":false},{"id":"v106c_salome","giver":"salome","giverName":"Salomé","zone":"town10","title":"Chercheuse de lumière","text":"Capture une espèce de type Lumière.","kind":"caughtType","goal":1,"money":1000,"item":"SuperOrbe","qty":2,"required":false,"type":"Lumière"},{"id":"v106c_yanis","giver":"yanis","giverName":"Yanis","zone":"town10","title":"Trente victoires","text":"Remporte 30 combats de dresseurs.","kind":"trainerWins","goal":30,"money":1500,"item":"SuperPotion","qty":3,"required":false},{"id":"v106c_margot","giver":"margot","giverName":"Margot","zone":"town11","title":"Brume et mystère","text":"Capture 65 espèces différentes.","kind":"caughtTotal","goal":65,"money":1600,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106c_paul","giver":"paul","giverName":"Paul","zone":"town11","title":"Dossier Taron","text":"Déjoue 3 opérations de la Team Taron.","kind":"taronWins","goal":3,"money":1700,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_eva","giver":"eva","giverName":"Éva","zone":"town12","title":"Le grand herbier","text":"Capture 4 espèces de type Nature.","kind":"caughtType","goal":4,"money":1200,"item":"SuperPotion","qty":3,"required":false,"type":"Nature"},{"id":"v106c_mathis","giver":"mathis","giverName":"Mathis","zone":"town12","title":"Valdora presque entière","text":"Découvre 13 villes de Valdora.","kind":"towns","goal":13,"money":1400,"item":"SuperOrbe","qty":2,"required":true},{"id":"v106c_zoe","giver":"zoe","giverName":"Zoé","zone":"town13","title":"Taronis sous surveillance","text":"Déjoue 4 opérations de la Team Taron.","kind":"taronWins","goal":4,"money":2000,"item":"SuperOrbe","qty":3,"required":true},{"id":"v106c_alexis","giver":"alexis","giverName":"Alexis","zone":"town13","title":"Équipe d’élite","text":"Fais atteindre le niveau 35 à une créature.","kind":"maxLevel","goal":35,"money":1800,"item":"SuperPotion","qty":3,"required":false},{"id":"v106c_manon","giver":"manon","giverName":"Manon","zone":"town14","title":"Le Codex avancé","text":"Capture 75 espèces différentes.","kind":"caughtTotal","goal":75,"money":2200,"item":"SuperOrbe","qty":3,"required":false},{"id":"v106c_victor","giver":"victor","giverName":"Victor","zone":"town14","title":"Les sept Sceaux","text":"Réunis les 7 Sceaux de Valdora.","kind":"seals","goal":7,"money":2500,"item":"SuperPotion","qty":4,"required":true},{"id":"v106c_helene","giver":"helene","giverName":"Hélène","zone":"town14","title":"Dernier tour de région","text":"Découvre les 15 villes de Valdora.","kind":"towns","goal":15,"money":1800,"item":"SuperOrbe","qty":2,"required":false},{"id":"v106e_bastien","giver":"bastien","giverName":"Bastien","zone":"town0","title":"Un peu plus d'entraînement","text":"Remporte 5 combats contre des Éclats sauvages dans les herbes de Clairval.","kind":"clairvalWildWins","goal":5,"money":300,"item":"Potion","qty":2,"required":false},{"id":"v106e_elodie","giver":"elodie","giverName":"Élodie","zone":"town0","title":"Carnet des espèces locales","text":"Observe au moins 4 espèces différentes dans ton Codex.","kind":"seenTotal","goal":4,"money":260,"item":"Orbe","qty":2,"required":false},{"id":"v106e_noam","giver":"noam_clairval","giverName":"Noam","zone":"town0","title":"Une petite équipe","text":"Forme une équipe d'au moins 3 Éclats.","kind":"teamSize","goal":3,"money":320,"item":"Baie","qty":3,"required":false}];
+5911: const V106C_QUEST_BY_GIVER=Object.fromEntries(V106C_QUESTS.map(q=>[q.giver,q]));
+5912: function v106cState(){state.v106c=state.v106c||{};state.v106c.quests=state.v106c.quests||{};return state.v106c}
+5913: function v106cQuestState(){return v106cState().quests}
+5914: function v108rOwnedCreatures(){return [...(state.team||[]),...(state.box||[]),...(Array.isArray(state.pc)?state.pc:[])] .filter(Boolean)}
+5915: function v108rCaughtSpeciesSet(){
+5916:   const ids=new Set(v108rOwnedCreatures().map(m=>String(Number(m.id))).filter(id=>id!=='0'));
+5917:   for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught)ids.add(String(Number(id)));
+5918:   return ids
+5919: }
+5920: function v106cCaught(){return v108rCaughtSpeciesSet().size}
+5921: function v106cSeen(){const ids=new Set(v108rCaughtSpeciesSet());for(const [id,d] of Object.entries(state.dex||{}))if(d?.seen)ids.add(String(Number(id)));return ids.size}
+5922: function v106cTypeCount(type){let n=0;for(const id of v108rCaughtSpeciesSet())if(BY?.[Number(id)]?.type===type)n++;return n}
+5923: function v106cTowns(){return new Set((state.discovered||[]).filter(z=>/^town\d+$/.test(String(z)))).size}
+5924: function v106cTrainerWins(){return Object.values(state.trainerWins||{}).filter(Boolean).length}
+5925: function v106cTaronWins(){try{return window.ValdoraV106A?.taronWins?.()||Number(state.taron?.wins)||0}catch(_){return Number(state.taron?.wins)||0}}
+### line 5953: trainerEvent
+5945: function v106cClearQuestVisual(q){try{const sc=SCENES[q.zone];for(const n of (typeof sceneNPCs==='function'?sceneNPCs(sc,q.zone):[])){if(n?.id===q.giver){n.exclamation=false;n.alert=false;n.detected=false;n.chasing=false;n.aggro=false}}}catch(_){}}
+5946: function v106cClaim(q){const e=v106cQuestState()[q.id];if(!e||e.status!=='active'||v106cProgress(q)<q.goal)return false;e.status='done';e.completedAt=Date.now();v106cClearQuestVisual(q);state.money=(Number(state.money)||0)+(q.money||0);state.inventory=state.inventory||{};if(q.item)state.inventory[q.item]=(Number(state.inventory[q.item])||0)+(q.qty||1);logEvent('Mission terminée : '+q.title+'.');save(false);hud();toast('Mission terminée : '+q.title);return true}
+5947: function questInteractionV106C(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return false;const e=v106cQuestState()[q.id],p=Math.min(v106cProgress(q),q.goal),important=q.zone==='town0'?'<br><small><b>Mission obligatoire de Clairval :</b> toutes les missions de la ville doivent être terminées avant de prendre la Route 1.</small>':(q.required?'<br><small><b>Mission essentielle :</b> elle compte pour la conclusion de l’aventure.</small>':'');if(!e){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Objectif : '+p+'/'+q.goal+'</b>'+important,()=>v106cAccept(q));return true}if(e.status==='active'&&p>=q.goal){dialog('<b>'+q.giverName+' — Mission accomplie</b><br>Merci pour ton aide !<br><br>Récompense : <b>'+q.money+' V'+(q.item?' + '+(q.qty||1)+' '+q.item:'')+'</b>.',()=>v106cClaim(q));return true}if(e.status==='active'){dialog('<b>'+q.giverName+' — '+q.title+'</b><br>'+q.text+'<br><br><b>Progression : '+p+'/'+q.goal+'</b>'+important);return true}dialog('<b>'+q.giverName+'</b><br>Merci encore pour ton aide.');return true}
+5948: function v106cQuestMarker(n){const q=V106C_QUEST_BY_GIVER[n?.id];if(!q)return null;const e=v106cQuestState()[q.id];if(e?.status==='done'||e?.completedAt)return null;if(e?.status==='active'&&v106cProgress(q)>=q.goal)return '?';return '!'}
+5949: 
+5950: function interact(){
+5951:   if(scene==='interior'){interactInterior();return}
+5952:   if(closeDialog())return;
+5953:   if(scene!=='world'||trainerEvent)return;
+5954: 
+5955:   if(tryFinalAltarV77())return;
+5956: 
+5957:   const b=nearBuilding();
+5958:   if(b){
+5959:     if(currentScene().megacity && b.megaInterior && !['station','inn','healer','shop'].includes(b.type)){
+5960:       enterBuildingV70(b);return
+5961:     }
+5962:     building=b;scene='interior';state.roomX=600;state.roomY=690;toast(b.label);return
+5963:   }
+5964: 
+5965:   const n=nearNPC();
+5966:   if(n){
+5967:     faceNPCToPlayer(n);
+5968:     if(n.taron){interactTaron(n);return}
+### line 5981: trainerWins
+5973:   if(['route','temple'].includes(currentScene().kind)){
+5974:     const t=nearTrainer();
+5975:     if(t){
+5976:       faceNPCToPlayer(t);
+5977:       if(t.finalBoss&&!templeGuardsClearedV77()){
+5978:         dialog('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');
+5979:         return
+5980:       }
+5981:       if(state.trainerWins[t.id])dialog('<b>'+t.dialog+'</b><br>'+trainerAfterLine(t));
+5982:       else dialog('<b>'+t.dialog+'</b><br>'+trainerChallengeLine(t),()=>startTrainer413(t));
+5983:       return
+5984:     }
+5985:   }
+5986: }
+5987: 
+5988: 
+5989: 
+5990: 
+5991: 
+5992: 
+5993: 
+5994: const HOUSE_RESIDENTS=[
+5995:   {name:'Mireille',look:3,lines:[
+5996:     'J’habite ici depuis trente ans. Clairval était beaucoup plus petit quand la gare a été construite.',
+## game/V106A_QUETES_TARON_COMBATS_EQUIPE.js
+### line 41: trainerWins
+33: }
+34: function caughtTypeCountV106A(type){
+35:   let n=0;
+36:   for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught&&BY?.[id]?.type===type)n++;
+37:   return n;
+38: }
+39: function taronWinCountV106A(){
+40:   let boss=0;
+41:   for(const sc of Object.values(SCENES||{}))for(const t of sc?.trainers||[])if(t?.taron&&state.trainerWins?.[t.id])boss++;
+42:   return Math.max(Number(state.taron?.wins)||0,boss);
+43: }
+44: function questProgressV106A(q){
+45:   if(q.kind==='trainerWins')return Object.values(state.trainerWins||{}).filter(Boolean).length;
+46:   if(q.kind==='caughtType')return caughtTypeCountV106A(q.type);
+47:   if(q.kind==='towns')return new Set((state.discovered||[]).filter(z=>/^town\d+$/.test(String(z)))).size;
+48:   if(q.kind==='taronWins')return taronWinCountV106A();
+49:   return 0;
+50: }
+51: function questEntryV106A(q){return questStateV106A()[q.id]||null}
+52: function questDoneV106A(q){return questEntryV106A(q)?.status==='done'}
+53: function allVillagerQuestsDoneV106A(){return VILLAGER_QUESTS.every(questDoneV106A)}
+54: function acceptQuestV106A(q){
+55:   const qs=questStateV106A();
+56:   if(qs[q.id])return;
+### line 96: trainerEvent
+88: }
+89: 
+90: // Interception minimale : uniquement lorsque le PNJ proche est un donneur de mission.
+91: const BASE_INTERACT=window.interact;
+92: if(typeof BASE_INTERACT==='function'){
+93:   const patchedInteract=function(){
+94:     try{
+95:       if(typeof closeDialog==='function'&&closeDialog())return;
+96:       if(typeof scene!=='undefined'&&scene==='world'&&!trainerEvent){
+97:         const n=typeof nearNPC==='function'?nearNPC():null;
+98:         if(n&&!n.taron&&QUEST_BY_GIVER[n.id]){try{faceNPCToPlayer(n)}catch(_){};if(questInteractionV106A(n))return}
+99:       }
+100:     }catch(err){console.warn('V106A quête interaction',err)}
+101:     return BASE_INTERACT();
+102:   };
+103:   try{interact=patchedInteract}catch(_){}
+104:   window.interact=patchedInteract;
+105: }
+106: 
+107: // Journal/Objectifs : la progression des missions villageoises est visible en permanence.
+108: try{
+109:   const BASE_OBJECTIVES=objectivesV84;
+110:   objectivesV84=function(){
+111:     const base=BASE_OBJECTIVES();
+## game/VALDORA_ROUTES_BIOMES_V114.js
+### line 253: startTrainer413, trainerWins
+245:   if(typeof scene!=='undefined'&&scene==='world'){
+246:     const dialogBox=document.getElementById('dialog');if(dialogBox?.classList.contains('show'))return false;
+247:     try{if(typeof tryFinalAltarV77==='function'&&tryFinalAltarV77())return true}catch(_){}
+248:     const b=nearDoorV114();if(b)return enterBuildingV114(b);
+249:     const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];
+250:     try{if(sc?.kind==='town'&&typeof v107dBusStop==='function'){const stop=v107dBusStop(sc,state.zone);if(stop&&typeof near==='function'&&near(stop,125)&&window.ValdoraGameplayV106Y?.openBus){window.ValdoraGameplayV106Y.openBus();return true}}}catch(_){}
+251:     try{const o=sc?.kind==='town'&&typeof townNearest==='function'?townNearest():sc?.kind==='route'&&typeof routeNearest==='function'?routeNearest():null;if(o&&typeof interactFind==='function'){interactFind(o);return true}}catch(_){}
+252:     let n=null;try{n=typeof nearNPC==='function'?nearNPC():null}catch(_){}if(n){try{faceNPCToPlayer?.(n)}catch(_){}if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}try{if(typeof v109kTalkToOutdoorNPC==='function'&&v109kTalkToOutdoorNPC(n))return true}catch(_){}try{dialog?.('<b>'+(n.name||n.dialog||'Habitant')+'</b><br>'+(typeof npcDialogue==='function'?npcDialogue(n):'Bonjour !'));return true}catch(_){}}
+253:     if(sc&&['route','temple'].includes(sc.kind)){try{const t=typeof nearTrainer==='function'?nearTrainer():null;if(t){faceNPCToPlayer?.(t);if(t.finalBoss&&typeof templeGuardsClearedV77==='function'&&!templeGuardsClearedV77()){dialog?.('<b>Maître du Cœur</b><br>Tu n’as pas encore vaincu les dix Gardiens du Sanctuaire.');return true}if(state.trainerWins?.[t.id])dialog?.('<b>'+(t.dialog||'Dresseur')+'</b><br>'+(typeof trainerAfterLine==='function'?trainerAfterLine(t):'Bien joué pour notre dernier combat.'));else dialog?.('<b>'+(t.dialog||'Dresseur')+'</b><br>'+(typeof trainerChallengeLine==='function'?trainerChallengeLine(t):'Tu veux te mesurer à moi ?'),()=>startTrainer413?.(t));return true}}catch(_){}}
+254:   }
+255:   return false;
+256: }
+257: function collisionV114(x,y,ox,oy){
+258:   if(typeof scene!=='undefined'&&scene==='world'){
+259:     const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc)return false;Object.assign(motionDiagnostics,{zone:String(state?.zone||''),x:Math.round(x),y:Math.round(y),corridor:false,baseBlocked:false});
+260:     if(x<22||y<22||x>Number(sc.width||1800)-22||y>Number(sc.height||1100)-22)return true;
+261:     for(const ex of sc.exits||[])if(ex.v114Corridor&&pointInRect(x,y,ex.v114Corridor)){motionDiagnostics.corridor=true;return false}
+262:     if(sc.kind==='town')for(const b of sc.buildings||[])if(pointInRect(x,y,doorZone(b,sc)))return false;
+263:     if(sc.kind==='temple'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(x,y))return true;
+264:     if(sc.kind==='town'){
+265:       for(const b of sc.buildings||[]){const r={x:Number(b.x||0)-10,y:Number(b.y||0)-12,w:Number(b.w||0)+20,h:Number(b.h||0)+28};if(pointInRect(x,y,r))return true}
+266:       try{if(typeof busStopHitV107E==='function'&&busStopHitV107E(x,y,state.zone)&&!busStopHitV107E(ox,oy,state.zone))return true}catch(_){}
+267:       try{const tr=typeof trainMotion==='function'?trainMotion(sc):null;if(tr&&pointInRect(x,y,tr))return true}catch(_){}
+268:     }
+### line 289: trainerEvent
+281: function checkPortalV114(){
+282:   if(typeof scene!=='undefined'&&scene!=='world'||Date.now()<Number(state?.v114PortalLock||0))return false;const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc)return false;
+283:   const ex=(sc.exits||[]).find(e=>pointInRect(Number(state.x),Number(state.y),e));if(!ex)return false;const from=String(state.zone||''),to=exitTarget(ex);if(!to||!SCENES?.[to]){try{toast?.('Cette liaison n’est pas encore disponible.')}catch(_){}pushBack(ex);return false}
+284:   if(ex.finalTemple&&typeof finalTempleAvailableV77==='function'&&!finalTempleAvailableV77()){try{toast?.(typeof v83CitadelGateText==='function'?v83CitadelGateText():'La Citadelle est encore verrouillée.')}catch(_){}pushBack(ex);return false}
+285:   const gate=progressionGate(from,to);if(gate&&!creator()){pushBack(ex);try{toast?.(gate);dialog?.('<b>Progression verrouillée</b><br><br>'+gate)}catch(_){}return false}
+286:   state.v114PortalLock=Date.now()+520;let go=window.enterZone;try{go=window.enterZone||enterZone}catch(_){};return typeof go==='function'?go(to,sideOpposite[ex.side]):false;
+287: }
+288: function moveV114(dx,dy,dir){
+289:   state.dir=dir;if(typeof scene!=='undefined'&&scene!=='world'||typeof trainerEvent!=='undefined'&&trainerEvent)return false;
+290:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast?.('Position rétablie dans la Citadelle.')}catch(_){}}
+291:   const speed=state.bike?1.55:1,nx=Number(state.x)+Number(dx)*speed,ny=Number(state.y)+Number(dy)*speed;
+292:   if(collisionV114(nx,ny,state.x,state.y)){try{lastMove=Date.now();const n=typeof npcCollision==='function'?npcCollision(nx,ny):null;if(n&&Math.random()<.12)toast?.('E / Entrée pour parler à '+n.name)}catch(_){}return false}
+293:   try{recordFollowerStep?.()}catch(_){}state.x=nx;state.y=ny;try{lastMove=Date.now()}catch(_){}if(checkPortalV114())return true;
+294:   const kind=typeof currentScene==='function'?currentScene()?.kind:null;if(state.team?.length){if((kind==='route'||kind==='temple')&&!(typeof trainerEvent!=='undefined'&&trainerEvent))try{checkTrainerDetection?.()}catch(_){}if((kind==='route'||state.zone==='town0')&&!(typeof trainerEvent!=='undefined'&&trainerEvent))try{v104EncounterStep?.()}catch(_){}}
+295:   return true;
+296: }
+297: 
+298: function installHooks(){
+299:   const v116=window.ValdoraWorldV116;
+300:   const worldInteract=v116?.active&&typeof v116.interact==='function'?v116.interact:interactV114;
+301:   const worldCollision=v116?.active&&typeof v116.collision==='function'?v116.collision:collisionV114;
+302:   const worldMove=v116?.active&&typeof v116.move==='function'?v116.move:moveV114;
+303:   window.interact=worldInteract;try{interact=worldInteract}catch(_){}window.collision=worldCollision;try{collision=worldCollision}catch(_){}window.checkPortal=checkPortalV114;try{checkPortal=checkPortalV114}catch(_){}window.move=worldMove;try{move=worldMove}catch(_){}window.v109eNearEntryBuilding=nearDoorV114;window.nearBuilding=nearDoorV114;
+304: }
+## game/assets/v105r-combat.js
+### line 186: battle.trainer
+178: 
+179:   if(battle.menu==='bag'){
+180:     const inv=state.inventory||{};
+181:     bar.appendChild(button(`Potion (${inv.Potion||0})`,()=>useItem('Potion'),locked||!(inv.Potion>0)||p.hp>=maxHP(p)));
+182:     bar.appendChild(button(`Super Potion (${inv.SuperPotion||0})`,()=>useItem('SuperPotion'),locked||!(inv.SuperPotion>0)||p.hp>=maxHP(p)));
+183:     bar.appendChild(button(`Baie (${inv.Baie||0})`,()=>useItem('Baie'),locked||!(inv.Baie>0)||p.hp>=maxHP(p)));
+184:     bar.appendChild(button(`Antidote (${inv.Antidote||0})`,()=>useItem('Antidote'),locked||!(inv.Antidote>0)||!p.status));
+185:     bar.appendChild(button(`Rappel (${inv.Rappel||0})`,()=>openRevive(),locked||!(inv.Rappel>0)||!(state.team||[]).some(m=>m.hp<=0)));
+186:     bar.appendChild(button(`Orbe (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0)));
+187:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0)));
+188:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0)));
+189:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked));
+190:     return
+191:   }
+192: 
+193:   const moves=(p?.moves||[]).slice(0,4);
+194:   for(let i=0;i<4;i++){
+195:     const mid=moves[i],mv=MOVE_DB[mid];
+196:     bar.appendChild(button(mv?mv.name:'—',()=>chooseMoveV105R(i),locked||!mv,'v105r-move',TYPE_COLORS[mv?.type]||TYPE_COLORS.Neutre))
+197:   }
+198:   bar.appendChild(button('Sac',()=>{battle.menu='bag';buildButtons()},locked));
+199:   bar.appendChild(button(`Orbe (${state.inventory?.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(state.inventory?.Orbe>0)));
+200:   bar.appendChild(button('Changer',()=>{battle.menu='team';buildButtons()},locked||!(state.team||[]).some(m=>alive(m)&&m!==p)));
+201:   bar.appendChild(button('Fuir',runV105R,locked||!!battle.trainer));
+### line 214: partyIndex
+206:   const player=(state.team||[]).find(alive);
+207:   if(!player){safeCall(toast,'Toute ton équipe est K.O. Va la faire soigner avant de combattre.');return false}
+208:   const priorScene=scene;
+209:   const priorBuilding=building;
+210:   const foe=normalizeCreature(enemy,trainer?.level||player.level||5);
+211:   battleToken++;
+212:   battle={
+213:     engine:VERSION,token:battleToken,enemy:foe,trainer:trainer||null,
+214:     trainerParty:Array.isArray(trainer?.party)?trainer.party:null,trainerIndex:Number(trainer?.partyIndex)||0,
+215:     player,participants:[player],busy:true,phase:'intro',menu:'actions',message:'',anim:null,orb:null,
+216:     result:null,reward:0,eventQueue:[],returnScene:priorScene,returnBuilding:priorBuilding
+217:   };
+218:   scene='battle';
+219:   installInterface();
+220:   const ui=el('battleUI');if(ui){ui.dataset.combatActive='true';ui.style.setProperty('display','flex','important')}
+221:   const menu=el('menuov');if(menu)menu.style.display='none';
+222:   const dlg=el('dialog');if(dlg){dlg.classList.remove('show');dlg.style.display='none'}
+223:   setMessage(trainer?`${trainer.dialog||trainer.name||'Un dresseur'} te défie !`:`Un ${nameOf(foe)} sauvage apparaît !`);
+224:   safeCall(startBattleMusic);safeCall(battleCry,foe.id);safeCall(hud);buildButtons();
+225:   schedule(650,()=>{battle.busy=false;battle.phase='player';setMessage('À toi de jouer.');buildButtons()});
+226:   return true
+227: }
+228: 
+229: function beginTrainer(rawTrainer){
+### line 242: partyIndex
+234:     t.level=v98RoadTrainerLevel(t);t.zone=state.zone
+235:   }
+236:   if(!t.guardian&&typeof trainerDefeatedV88==='function'&&trainerDefeatedV88(t)){
+237:     safeCall(dialog,`<b>${t.dialog||'Dresseur'}</b><br>Ce combat a déjà été remporté.`);return false
+238:   }
+239:   let party=Array.isArray(t.party)&&t.party.length?t.party:safeCall(buildTrainerParty,t);
+240:   if(!Array.isArray(party)||!party.length)party=[mon(CREATURES[0].id,Math.max(3,Number(t.level)||5))];
+241:   party=party.map(m=>normalizeCreature(m,t.level||5));
+242:   t.party=party;t.partyIndex=0;
+243:   return beginBattle(party[0],t)
+244: }
+245: 
+246: function beginWild(){
+247:   let base=Math.max(3,Number(safeCall(v83AreaLevelBase))||3),pool;
+248:   if(state.zone==='route4bis'){
+249:     base=20+(state.seals||[]).length*2;
+250:     pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=base+4)
+251:   }else{
+252:     const intended=Math.max(3,base-3+Math.floor(Math.random()*7));
+253:     base=intended;pool=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=intended)
+254:   }
+255:   const c=pool?.[Math.floor(Math.random()*Math.max(1,pool.length))]||CREATURES[0];
+256:   const level=Math.max(minLevelForSpeciesV81(c.id),state.zone==='route4bis'?base-2+Math.floor(Math.random()*5):base);
+257:   const enemy=mon(c.id,level);enemy.moves=defaultMoves(enemy.id,enemy.level);
+### line 304: battle.enemy
+296:     if(mv.kind==='freeze'&&Math.random()<.24){target.status='gelé';return `${nameOf(target)} est gelé.`}
+297:     if(mv.kind==='blind'&&Math.random()<.30){target.status='aveuglé';return `${nameOf(target)} est aveuglé.`}
+298:   }
+299:   return ''
+300: }
+301: 
+302: function resolveMove(playerTurn,mv){
+303:   if(!combatReady())return;
+304:   const user=playerTurn?currentPlayer():battle.enemy;
+305:   const target=playerTurn?battle.enemy:currentPlayer();
+306:   if(!user||!target){finishV105R('error');return}
+307:   const accuracy=clamp((Number(mv.accuracy)||100)-(user.status==='aveuglé'?18:0),35,100);
+308:   let text='';
+309:   if(Math.random()*100>accuracy){text=`${nameOf(user)} manque ${mv.name} !`}
+310:   else if((Number(mv.power)||0)<=0){text=applyEffect(user,target,mv)||'La capacité agit.'}
+311:   else{
+312:     const out=damageFor(user,target,mv);target.hp=Math.max(0,target.hp-out.damage);
+313:     const effect=applyEffect(user,target,mv);
+314:     text=`${nameOf(target)} perd ${out.damage} PV.${effectivenessTextV81(out.mult)}`;
+315:     if(out.critical)text=`Coup critique ! ${text}`;
+316:     if(effect)text+=` ${effect}`;
+317:     battle.anim={...battle.anim,impact:true}
+318:   }
+319:   safeCall(hud);setMessage(text);
+### line 341: battle.enemy
+333:       playerTurn?enemyTurnV105R():returnToPlayer()
+334:     });return
+335:   }
+336:   playerTurn?enemyTurnV105R():returnToPlayer()
+337: }
+338: 
+339: function useMove(playerTurn,mv){
+340:   if(!combatReady()||battle.busy||!mv)return;
+341:   const user=playerTurn?currentPlayer():battle.enemy;if(!alive(user))return;
+342:   battle.busy=true;battle.phase=playerTurn?'player-action':'enemy-action';battle.menu='actions';
+343:   const blocked=canAct(user);
+344:   if(blocked){setMessage(blocked);buildButtons();schedule(520,()=>poisonAfterAction(user,playerTurn));return}
+345:   setMessage(`${nameOf(user)} utilise ${mv.name} !`);
+346:   safeCall(playMoveSound,mv);
+347:   battle.anim={start:performance.now(),duration:460,fromPlayer:playerTurn,move:mv,impact:false};
+348:   buildButtons();schedule(460,()=>resolveMove(playerTurn,mv))
+349: }
+350: 
+351: function chooseMoveV105R(slot){
+352:   const p=currentPlayer(),mid=p?.moves?.[slot],mv=MOVE_DB[mid];if(mv)useMove(true,{...mv,_id:mid})
+353: }
+354: 
+355: function enemyTurnV105R(){
+356:   if(!combatReady())return;
+### line 368: grantEnemyXP
+360:   battle.busy=false;useMove(false,{...pick.mv,_id:pick.id})
+361: }
+362: 
+363: function returnToPlayer(message='À toi de jouer.'){
+364:   if(!combatReady())return;
+365:   battle.busy=false;battle.phase='player';battle.menu='actions';setMessage(message);buildButtons()
+366: }
+367: 
+368: function grantEnemyXP(enemy){
+369:   const base=Math.max(10,Math.floor(enemy.level*11+12+(BY[enemy.id]?.stage||0)*8));
+370:   const members=[...new Set((battle.participants||[]).filter(Boolean))];
+371:   for(const m of members){
+372:     const amount=Math.max(6,Math.floor(base*(m===currentPlayer()?1:.72)));
+373:     const wasKO=m.hp<=0;const events=safeCall(gainXP,m,amount)||[];if(wasKO)m.hp=0;
+374:     battle.eventQueue.push(`${nameOf(m)} gagne ${amount} EXP.`,...events)
+375:   }
+376: }
+377: 
+378: function enemyDefeated(){
+379:   if(!combatReady())return;
+380:   const defeated=battle.enemy;grantEnemyXP(defeated);
+381:   if(battle.trainer&&battle.trainerParty&&battle.trainerIndex<battle.trainerParty.length-1){
+382:     battle.trainerIndex++;battle.enemy=normalizeCreature(battle.trainerParty[battle.trainerIndex],battle.trainer.level||defeated.level);
+383:     battle.busy=true;setMessage(`Le dresseur envoie ${nameOf(battle.enemy)} !`);safeCall(battleCry,battle.enemy.id);
+### line 409: battle.participants
+401:   if(!combatReady())return;
+402:   const choices=(state.team||[]).filter(m=>alive(m)&&m!==currentPlayer());
+403:   if(!choices.length){battle.result='lose';battle.busy=true;setMessage('Toute ton équipe est K.O. !');buildButtons();schedule(850,()=>finishV105R('lose'));return}
+404:   battle.busy=false;battle.phase='switch';battle.menu='team';setMessage('Choisis une créature pour poursuivre le combat.');buildButtons()
+405: }
+406: 
+407: function selectCreature(next,forced=false){
+408:   if(!combatReady()||battle.busy||!alive(next)||next===currentPlayer())return;
+409:   battle.player=next;if(!battle.participants.includes(next))battle.participants.push(next);
+410:   const index=state.team.indexOf(next);if(index>0){state.team.splice(index,1);state.team.unshift(next)}
+411:   battle.busy=true;battle.phase='switching';battle.menu='actions';setMessage(`${nameOf(next)} entre au combat !`);safeCall(hud);buildButtons();
+412:   schedule(550,()=>{if(forced)returnToPlayer();else enemyTurnV105R()})
+413: }
+414: 
+415: function useItem(kind){
+416:   if(!combatReady()||battle.busy)return;
+417:   state.inventory=state.inventory||{};if(!(state.inventory[kind]>0))return;
+418:   const p=currentPlayer();let text='';
+419:   if(kind==='Antidote'){
+420:     if(!p.status)return;state.inventory[kind]--;p.status=null;text=`${nameOf(p)} n'a plus d'altération d'état.`
+421:   }else{
+422:     const amount=kind==='SuperPotion'?65:kind==='Baie'?20:30;
+423:     const healed=Math.min(amount,maxHP(p)-p.hp);if(healed<=0)return;
+424:     state.inventory[kind]--;p.hp+=healed;text=`${nameOf(p)} récupère ${healed} PV.`
+### line 464: battle.trainer
+456:     return
+457:   }
+458:   orb.stage='shake';orb.shakeIndex=index;orb.start=performance.now();orb.duration=520;
+459:   setMessage(`La ${ORB_PROFILES[orb.kind].label} réagit... ${index+1}/${orb.shakeCount}`);safeCall(playOrbSound,'shake');
+460:   schedule(520,()=>continueOrbShakes(orb,enemy,index+1))
+461: }
+462: 
+463: function throwOrb(kind='Orbe'){
+464:   if(!combatReady()||battle.busy||battle.trainer)return;
+465:   ensureOrbInventory();
+466:   const profile=ORB_PROFILES[kind]||ORB_PROFILES.Orbe;kind=ORB_PROFILES[kind]?kind:'Orbe';
+467:   if(!(state.inventory[kind]>0)){safeCall(toast,`Tu n'as plus de ${profile.label}.`);return}
+468:   state.inventory[kind]--;battle.busy=true;battle.menu='actions';
+469:   const enemy=battle.enemy,missing=1-enemy.hp/maxHP(enemy),stage=BY[enemy.id]?.stage||0;
+470:   const base=.20+missing*.61-stage*.055-Math.max(0,enemy.level-25)*.0025+(enemy.status?.08:0);
+471:   const chance=clamp(base*profile.mult+profile.bonus,.07,profile.max),success=Math.random()<chance;
+472:   const orb={kind,stage:'throw',start:performance.now(),duration:720,success,shakeCount:success?3:1+Math.floor(Math.random()*3),shakeIndex:0};
+473:   battle.orb=orb;setMessage(`Tu lances une ${profile.label} !`);safeCall(playOrbSound,'throw');safeCall(hud);buildButtons();
+474:   schedule(720,()=>{
+475:     orb.stage='absorb';orb.start=performance.now();orb.duration=560;
+476:     setMessage(`${nameOf(enemy)} est aspiré par le noyau d'Éclat !`);safeCall(playOrbSound,'absorb');
+477:     schedule(560,()=>{
+478:       orb.stage='fall';orb.start=performance.now();orb.duration=400;
+479:       setMessage(`La ${profile.label} retombe...`);
+### line 486: battle.trainer
+478:       orb.stage='fall';orb.start=performance.now();orb.duration=400;
+479:       setMessage(`La ${profile.label} retombe...`);
+480:       schedule(400,()=>continueOrbShakes(orb,enemy,0))
+481:     })
+482:   })
+483: }
+484: 
+485: function runV105R(){
+486:   if(!combatReady()||battle.busy||battle.trainer)return;
+487:   battle.busy=true;battle.result='flee';setMessage('Tu prends la fuite !');buildButtons();schedule(380,()=>finishV105R('flee'))
+488: }
+489: 
+490: function closeCombatChrome(snapshot){
+491:   safeCall(stopBattleMusic);battleToken++;battle=null;
+492:   const ui=el('battleUI');if(ui){ui.dataset.combatActive='false';ui.style.setProperty('display','none','important')}
+493:   const bar=el('bbuttons');if(bar)bar.innerHTML='';
+494:   const msg=el('battleMessageV105R');if(msg){msg.textContent='';msg.style.setProperty('display','none','important')}
+495:   scene=snapshot.returnScene==='interior'?'interior':'world';
+496:   building=snapshot.returnBuilding||building;
+497:   document.body.classList.remove('v101-battle-mode');safeCall(hud);safeCall(save,false);safeCall(syncDefeatedTrainersV88)
+498: }
+499: 
+500: function resolveSpecialReturn(b){
+501:   const t=b.trainer;if(!t)return false;
+### line 729: battle.enemy
+721:     for(let i=0;i<10;i++){const a=i*Math.PI*2/10,r=25+125*easeOutCubic(t);drawEnergyTriangle(x+Math.cos(a)*r,y+Math.sin(a)*r*.7,11,profile.glow,1-t,a)}
+722:     ctx.save();ctx.globalAlpha=(1-t)*.7;ctx.strokeStyle=profile.glow;ctx.lineWidth=7*(1-t)+1;ctx.beginPath();ctx.arc(x,y,35+145*t,0,Math.PI*2);ctx.stroke();ctx.restore()
+723:   }
+724:   drawOrbAsset(orb.kind,x,y,size,rotation,alpha,scale)
+725: }
+726: 
+727: function drawBattleV105R(){
+728:   if(!combatReady())return;
+729:   const now=performance.now(),p=currentPlayer(),e=battle.enemy;
+730:   const grad=ctx.createLinearGradient(0,0,0,600);grad.addColorStop(0,'#7fc7d9');grad.addColorStop(.55,'#c7e8d3');grad.addColorStop(1,'#73aa75');ctx.fillStyle=grad;ctx.fillRect(0,0,960,600);
+731:   ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#fff';for(let i=0;i<8;i++){ctx.beginPath();ctx.arc(80+i*145,75+(i%3)*42,42+(i%2)*15,0,Math.PI*2);ctx.fill()}ctx.restore();
+732:   ctx.fillStyle='rgba(40,91,63,.25)';ctx.beginPath();ctx.ellipse(250,465,205,46,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(690,275,165,37,0,0,Math.PI*2);ctx.fill();
+733:   let px=115,py=270,ex=570,ey=70,ps=255,es=230;
+734:   if(battle.anim){const t=clamp((now-battle.anim.start)/battle.anim.duration,0,1),hop=Math.sin(t*Math.PI)*34;if(battle.anim.fromPlayer)px+=hop;else ex-=hop;if(battle.anim.impact&&t>.7){if(battle.anim.fromPlayer)ex+=Math.sin(now/25)*7;else px+=Math.sin(now/25)*7}}
+735:   drawSpriteSafe(p,px,py,ps,'back');
+736:   ctx.save();ctx.globalAlpha*=orbEnemyOpacity(battle.orb,now);drawSpriteSafe(e,ex,ey,es,'front');ctx.restore();
+737:   drawOrbSequence(battle.orb,now);
+738:   if(battle.anim)drawMoveAnimationV106H(battle.anim,now);
+739:   drawCard(e,525,24,380,true);drawCard(p,35,405,410,false);
+740:   ctx.save();ctx.fillStyle='rgba(18,50,68,.86)';roundRectPath(ctx,18,18,180,33,11);ctx.fill();ctx.fillStyle='#fff';ctx.font='900 13px Segoe UI';ctx.fillText('COMBAT — MOTEUR V105U',32,40);ctx.restore()
+741: }
+742: 
+743: // V105T : l'approche d'un dresseur ne peut plus rester bloquee sur « ! ».
+744: // Une collision ou une position de bord de route ne doit jamais empecher le combat.
+### line 764: trainerEvent
+756:     e.stage='approach';e.deadline=now
+757:   }
+758:   const dx=state.x-t.x,dy=state.y-t.y,d=Math.hypot(dx,dy);
+759:   if(d>72&&now<(e.deadline||now)){
+760:     const step=Math.min(7,Math.max(0,d-68));
+761:     if(d>0){t.x+=dx/d*step;t.y+=dy/d*step}
+762:     t.moving=true;safeCall(faceNPCToPlayer,t);return
+763:   }
+764:   t.moving=false;trainerEvent=null;
+765:   const partySize=Math.max(1,Number(safeCall(trainerPartySize,t))||1);
+766:   const challenge=safeCall(trainerChallengeLine,t)||'Prepare-toi au combat !';
+767:   const title=t.dialog||t.name||'Un dresseur te defie !';
+768:   safeCall(dialog,'<b>'+title+'</b><br>'+challenge+'<br><br><small>Equipe adverse : '+partySize+' creature'+(partySize>1?'s':'')+'.</small>',()=>beginTrainer(t))
+769: }
+770: 
+771: function brandV105R(){
+772:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+773:   const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${VERSION} — ${creator?'CRÉATEUR':'JOUEUR'}`;
+774:   document.title=`VALDORA ${VERSION} — combats réécrits`;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.combatEngine=VERSION
+775: }
+776: 
+777: function installOrbEconomy(){
+778:   ensureOrbInventory();preloadOrbImages();
+779:   if(typeof SHOP_ITEMS==='object'){
+### line 805: startTrainer413
+797:       if(creator||seals>=6||town>=12)ids.push('MegaOrbe');
+798:       return [...new Set(ids)]
+799:     }
+800:   }
+801: }
+802: 
+803: // Remplacement des points d'entrée historiques utilisés dans le reste du jeu.
+804: startBattle=beginBattle;window.startBattle=beginBattle;
+805: startTrainer413=beginTrainer;window.startTrainer413=beginTrainer;
+806: startWild=beginWild;window.startWild=beginWild;
+807: drawBattle=drawBattleV105R;window.drawBattle=drawBattleV105R;
+808: buildBattleButtons=buildButtons;window.buildBattleButtons=buildButtons;
+809: chooseMove=chooseMoveV105R;window.chooseMove=chooseMoveV105R;
+810: enemyTurn=enemyTurnV105R;window.enemyTurn=enemyTurnV105R;
+811: throwBattleOrb=throwOrb;window.throwBattleOrb=throwOrb;
+812: changeBattleCreature=function(){if(combatReady()&&!battle.busy){battle.menu='team';buildButtons()}};window.changeBattleCreature=changeBattleCreature;
+813: runBattle=runV105R;window.runBattle=runV105R;
+814: finishBattle=finishV105R;window.finishBattle=finishV105R;
+815: battleAlive=combatReady;window.battleAlive=combatReady;
+816: updateTrainerEvent=updateTrainerEventV105T;window.updateTrainerEvent=updateTrainerEventV105T;
+817: 
+818: window.ValdoraCombatV105R=window.ValdoraCombatV105U={
+819:   version:VERSION,
+820:   diagnostics:()=>({engine:battle?.engine||VERSION,scene,active:!!battle,phase:battle?.phase||null,busy:!!battle?.busy,enemy:battle?.enemy?.id||null,player:battle?.player?.id||null}),

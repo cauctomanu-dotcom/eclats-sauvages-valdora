@@ -1,0 +1,66 @@
+V122 FUNCTION: startHealingSequence
+==========================================================================================
+
+## game/index.html line 6094
+function startHealingSequence(){
+  if(healingSeq)return;
+  healingSeq={start:performance.now(),duration:5000,done:false};
+  dialog('<b>Soigneuse Élise</b><br>Très bien, confie-moi ton équipe.<br><br>Le soin complet va prendre quelques instants...',()=>{});
+  setTimeout(()=>closeDialog(true),900);
+
+  // soft healing loop melody
+  for(let i=0;i<10;i++){
+    const f=[440,554,659,554][i%4];
+    setTimeout(()=>tone(f,.12,.018,'sine',0,35),i*700)
+  }
+
+  setTimeout(()=>{
+    if(!healingSeq)return;
+    state.team.forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});
+    healingSeq.done=true;
+    hud();save(false);
+
+    // completion jingle
+    tone(523,.14,.035,'sine',0,40);
+    tone(659,.14,.035,'sine',.12,45);
+    tone(784,.18,.032,'sine',.24,60);
+    tone(1046,.28,.026,'sine',.39,0);
+
+    dialog('<b>Soigneuse Élise</b><br>Et voilà ! Toute ton équipe est de nouveau en pleine forme.',()=>{
+      healingSeq=null;
+      toast('Équipe entièrement soignée !')
+    })
+  },5000)
+}
+
+## game/CREATEUR.html line 6095
+function startHealingSequence(){
+  if(healingSeq)return;
+  healingSeq={start:performance.now(),duration:5000,done:false};
+  dialog('<b>Soigneuse Élise</b><br>Très bien, confie-moi ton équipe.<br><br>Le soin complet va prendre quelques instants...',()=>{});
+  setTimeout(()=>closeDialog(true),900);
+
+  // soft healing loop melody
+  for(let i=0;i<10;i++){
+    const f=[440,554,659,554][i%4];
+    setTimeout(()=>tone(f,.12,.018,'sine',0,35),i*700)
+  }
+
+  setTimeout(()=>{
+    if(!healingSeq)return;
+    state.team.forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});
+    healingSeq.done=true;
+    hud();save(false);
+
+    // completion jingle
+    tone(523,.14,.035,'sine',0,40);
+    tone(659,.14,.035,'sine',.12,45);
+    tone(784,.18,.032,'sine',.24,60);
+    tone(1046,.28,.026,'sine',.39,0);
+
+    dialog('<b>Soigneuse Élise</b><br>Et voilà ! Toute ton équipe est de nouveau en pleine forme.',()=>{
+      healingSeq=null;
+      toast('Équipe entièrement soignée !')
+    })
+  },5000)
+}

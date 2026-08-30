@@ -1,0 +1,20 @@
+V122 FUNCTION: openBusMenuV106Y
+==========================================================================================
+
+## game/index.html line 15842
+function openBusMenuV106Y(){
+  const lines=lineForZone(state.zone),dest=busDestinations(),count=lines.length;
+  let h=`<div class="quest"><b>Arrêt de ${cityName(state.zone)}</b><br><b>${count} ligne${count>1?'s':''} desservie${count>1?'s':''}</b><br>${lines.map(l=>l.name).join(' • ')||'Desserte locale'}<br><small>${SCENES?.[state.zone]?.megacity?'Mégalopole : toutes les lignes du réseau passent par cet arrêt.':'Le bus ne dessert que les villes déjà découvertes des lignes de cet arrêt.'}</small></div>`;
+  if(!dest.length)h+='<div class="quest">Aucune autre destination connue sur cette ligne pour le moment.</div>';
+  for(const d of dest){const fare=busFare(d.distance);h+=`<button class="bagitem" onclick="boardBusV106Y('${d.zone}',${fare})"><b>🚌 ${cityName(d.zone)}</b><br>${d.line}<br><small>${fare} V</small></button>`}
+  openSimpleMenu('Réseau de bus',`<div class="baggrid">${h}</div>`)
+}
+
+## game/CREATEUR.html line 15821
+function openBusMenuV106Y(){
+  const lines=lineForZone(state.zone),dest=busDestinations(),count=lines.length;
+  let h=`<div class="quest"><b>Arrêt de ${cityName(state.zone)}</b><br><b>${count} ligne${count>1?'s':''} desservie${count>1?'s':''}</b><br>${lines.map(l=>l.name).join(' • ')||'Desserte locale'}<br><small>${SCENES?.[state.zone]?.megacity?'Mégalopole : toutes les lignes du réseau passent par cet arrêt.':'Le bus ne dessert que les villes déjà découvertes des lignes de cet arrêt.'}</small></div>`;
+  if(!dest.length)h+='<div class="quest">Aucune autre destination connue sur cette ligne pour le moment.</div>';
+  for(const d of dest){const fare=busFare(d.distance);h+=`<button class="bagitem" onclick="boardBusV106Y('${d.zone}',${fare})"><b>🚌 ${cityName(d.zone)}</b><br>${d.line}<br><small>${fare} V</small></button>`}
+  openSimpleMenu('Réseau de bus',`<div class="baggrid">${h}</div>`)
+}

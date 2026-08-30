@@ -1,0 +1,60 @@
+V122 FUNCTION: playerQuestGateMessage
+==========================================================================================
+
+## game/index.html line 5794
+function playerQuestGateMessage(from,to){
+  if(!PLAYER_PROGRESSION_LOCK)return null;
+  if(from==='town0'&&to==='route0'&&!state.team.length)return 'Le Professeur Aurine t’attend au laboratoire. Choisis d’abord ton premier compagnon.';
+  if(from.startsWith('route')){
+    const ri=+from.replace('route','');
+    if(to==='town'+(ri+1)&&!routeTrainersComplete(ri))return 'Avant de continuer, termine ta quête sur cette route : affronte les dresseurs qui te barrent le chemin.';
+  }
+  if(from.startsWith('town')){
+    const ti=+from.replace('town','');
+    if(ti>0&&to==='route'+ti&&!(state.seals||[]).includes(ti))return 'Ta quête dans cette ville n’est pas terminée. Obtiens d’abord son Sceau.';
+  }
+  return null
+}
+
+## game/index.html line 16460
+window.playerQuestGateMessage=function(from,to){
+ if((to==='route_horizons'||to==='route_legends'||V107C_BY_ZONE[to])&&!v107cHasPermit()){
+   return 'La Route des Horizons est réservée aux expéditions autorisées. Remporte d’abord l’Épreuve des Horizons auprès de Solène à Aubeval.'
+ }
+ return V107C_GATE_BASE?V107C_GATE_BASE(from,to):null
+}
+
+## game/index.html line 18442
+window.playerQuestGateMessage=function(from,to){
+  const shortcut=optionalShortcutGate(from,to);if(shortcut)return shortcut;
+  return oldGate(from,to);
+}
+
+## game/CREATEUR.html line 5795
+function playerQuestGateMessage(from,to){
+  if(!PLAYER_PROGRESSION_LOCK)return null;
+  if(from==='town0'&&to==='route0'&&!state.team.length)return 'Le Professeur Aurine t’attend au laboratoire. Choisis d’abord ton premier compagnon.';
+  if(from.startsWith('route')){
+    const ri=+from.replace('route','');
+    if(to==='town'+(ri+1)&&!routeTrainersComplete(ri))return 'Avant de continuer, termine ta quête sur cette route : affronte les dresseurs qui te barrent le chemin.';
+  }
+  if(from.startsWith('town')){
+    const ti=+from.replace('town','');
+    if(ti>0&&to==='route'+ti&&!(state.seals||[]).includes(ti))return 'Ta quête dans cette ville n’est pas terminée. Obtiens d’abord son Sceau.';
+  }
+  return null
+}
+
+## game/CREATEUR.html line 16439
+window.playerQuestGateMessage=function(from,to){
+ if((to==='route_horizons'||to==='route_legends'||V107C_BY_ZONE[to])&&!v107cHasPermit()){
+   return 'La Route des Horizons est réservée aux expéditions autorisées. Remporte d’abord l’Épreuve des Horizons auprès de Solène à Aubeval.'
+ }
+ return V107C_GATE_BASE?V107C_GATE_BASE(from,to):null
+}
+
+## game/CREATEUR.html line 18403
+window.playerQuestGateMessage=function(from,to){
+  const shortcut=optionalShortcutGate(from,to);if(shortcut)return shortcut;
+  return oldGate(from,to);
+}

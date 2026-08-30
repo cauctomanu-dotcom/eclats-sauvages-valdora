@@ -1,0 +1,206 @@
+V122 FUNCTION: checkPortal
+==========================================================================================
+
+## game/index.html line 5817
+function checkPortal(){
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+
+    if(ex.finalTemple&&!finalTempleAvailableV77()){
+      toast(typeof v83CitadelGateText==='function'?v83CitadelGateText():'La Citadelle exige 75 espèces, les 7 Sceaux et la maîtrise de Vol.');
+      // repousser légèrement le joueur à l'intérieur de Taronis
+      if(ex.side==='east')state.x-=45;
+      else if(ex.side==='west')state.x+=45;
+      else if(ex.side==='north')state.y+=45;
+      else state.y-=45;
+      return
+    }
+
+    const target=ex.to;
+    if(!target||!SCENES[target]){
+      toast('Cette liaison n’est pas encore disponible.');
+      return
+    }
+
+    // En arrivant, on entre depuis le côté opposé du portail franchi.
+    transitionWithQuestGate(target,opposite(ex.side));
+    return
+  }
+}
+
+## game/index.html line 9445
+checkPortal=function(){
+  if(Date.now()<Number(state.v78PortalLock||0))return;
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+    const from=state.zone,target=ex.to;
+
+    if(sc.kind==='town'&&V78_BY_ROUTE[target]){
+      const end=ex.v78Enter;
+      if(!end){toast('Liaison V78 invalide');return}
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceOnRoute(target,end);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      setTimeout(()=>maybeSpawnTaron(false),450);
+      return;
+    }
+
+    if(sc.kind==='route'&&V78_BY_ROUTE[from]&&ex.v78End){
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceInCity(target,from);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      return;
+    }
+
+    // Sanctuaire et autres transitions restent gérés par le système précédent.
+    return V78_OLD_CHECK();
+  }
+}
+
+## game/index.html line 12830
+window.checkPortal=function(){
+ if(typeof PLAYER_PROGRESSION_LOCK!=='undefined'&&PLAYER_PROGRESSION_LOCK&&state.zone==='town0'&&!v101fHasStarter()){
+   const sc=currentScene();
+   const touching=(sc.exits||[]).some(ex=>pointIn(state.x,state.y,ex));
+   if(touching){
+     // Repousse physiquement le joueur au centre de Clairval : aucune transition ne peut passer.
+     state.x=Math.min((sc.width||1800)-160,Math.max(160,state.x));
+     state.y=Math.min((sc.height||1100)-190,Math.max(160,state.y-90));
+     toast('Impossible de quitter Clairval sans ton premier Éclat.');
+     dialog('<b>Le voyage ne peut pas encore commencer.</b><br>Rends-toi au laboratoire du Professeur Aurine et choisis ton premier compagnon.');
+     return false
+   }
+ }
+ return _checkPortalV101F()
+}
+
+## game/index.html line 17039
+checkPortal=function(){
+    if(!v107kCreator()&&scene==='world'){
+      const sc=currentScene?.(),ex=(sc?.exits||[]).find(e=>pointIn(state.x,state.y,e)),to=ex?.to||ex?.target;
+      if(ex&&to){
+        const msg=v107kProgressionGate(state.zone,to);
+        if(msg){
+          v107kPushBack(ex);
+          const now=Date.now();
+          if(now-Number(state._v107kGateShown||0)>900){
+            state._v107kGateShown=now;toast(msg);
+            try{logEvent('Progression bloquée : '+msg)}catch(_){}
+            try{dialog('<b>Progression verrouillée</b><br><br>'+msg)}catch(_){}
+          }
+          return false;
+        }
+      }
+    }
+    return V107K_CHECK_BASE();
+  }
+
+## game/CREATEUR.html line 5818
+function checkPortal(){
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+
+    if(ex.finalTemple&&!finalTempleAvailableV77()){
+      toast(typeof v83CitadelGateText==='function'?v83CitadelGateText():'La Citadelle exige 75 espèces, les 7 Sceaux et la maîtrise de Vol.');
+      // repousser légèrement le joueur à l'intérieur de Taronis
+      if(ex.side==='east')state.x-=45;
+      else if(ex.side==='west')state.x+=45;
+      else if(ex.side==='north')state.y+=45;
+      else state.y-=45;
+      return
+    }
+
+    const target=ex.to;
+    if(!target||!SCENES[target]){
+      toast('Cette liaison n’est pas encore disponible.');
+      return
+    }
+
+    // En arrivant, on entre depuis le côté opposé du portail franchi.
+    transitionWithQuestGate(target,opposite(ex.side));
+    return
+  }
+}
+
+## game/CREATEUR.html line 9446
+checkPortal=function(){
+  if(Date.now()<Number(state.v78PortalLock||0))return;
+  const sc=currentScene();
+  for(const ex of (sc.exits||[])){
+    if(!pointIn(state.x,state.y,ex))continue;
+    const from=state.zone,target=ex.to;
+
+    if(sc.kind==='town'&&V78_BY_ROUTE[target]){
+      const end=ex.v78Enter;
+      if(!end){toast('Liaison V78 invalide');return}
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceOnRoute(target,end);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      setTimeout(()=>maybeSpawnTaron(false),450);
+      return;
+    }
+
+    if(sc.kind==='route'&&V78_BY_ROUTE[from]&&ex.v78End){
+      state.zone=target;
+      if(!state.discovered.includes(target))state.discovered.push(target);
+      v78PlaceInCity(target,from);
+      state.v78PortalLock=Date.now()+400;
+      resetFollowerTrail();zoneTransitionSoundV77();refreshMusicV77();
+      toast(SCENES[target].name);logEvent('Arrivée : '+SCENES[target].name+'.');
+      return;
+    }
+
+    // Sanctuaire et autres transitions restent gérés par le système précédent.
+    return V78_OLD_CHECK();
+  }
+}
+
+## game/CREATEUR.html line 12831
+window.checkPortal=function(){
+ if(typeof PLAYER_PROGRESSION_LOCK!=='undefined'&&PLAYER_PROGRESSION_LOCK&&state.zone==='town0'&&!v101fHasStarter()){
+   const sc=currentScene();
+   const touching=(sc.exits||[]).some(ex=>pointIn(state.x,state.y,ex));
+   if(touching){
+     // Repousse physiquement le joueur au centre de Clairval : aucune transition ne peut passer.
+     state.x=Math.min((sc.width||1800)-160,Math.max(160,state.x));
+     state.y=Math.min((sc.height||1100)-190,Math.max(160,state.y-90));
+     toast('Impossible de quitter Clairval sans ton premier Éclat.');
+     dialog('<b>Le voyage ne peut pas encore commencer.</b><br>Rends-toi au laboratoire du Professeur Aurine et choisis ton premier compagnon.');
+     return false
+   }
+ }
+ return _checkPortalV101F()
+}
+
+## game/CREATEUR.html line 17002
+checkPortal=function(){
+    if(!v107kCreator()&&scene==='world'){
+      const sc=currentScene?.(),ex=(sc?.exits||[]).find(e=>pointIn(state.x,state.y,e)),to=ex?.to||ex?.target;
+      if(ex&&to){
+        const msg=v107kProgressionGate(state.zone,to);
+        if(msg){
+          v107kPushBack(ex);
+          const now=Date.now();
+          if(now-Number(state._v107kGateShown||0)>900){
+            state._v107kGateShown=now;toast(msg);
+            try{logEvent('Progression bloquée : '+msg)}catch(_){}
+            try{dialog('<b>Progression verrouillée</b><br><br>'+msg)}catch(_){}
+          }
+          return false;
+        }
+      }
+    }
+    return V107K_CHECK_BASE();
+  }

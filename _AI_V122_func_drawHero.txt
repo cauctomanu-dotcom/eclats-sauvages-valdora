@@ -1,0 +1,32 @@
+V122 FUNCTION: drawHero
+==========================================================================================
+
+## game/index.html line 2577
+function drawHero(x,y,dir,moving){
+  const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+  const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+  if(v102eDrawGrounded(im,x,y,62,.22))return;
+  // Secours uniquement pendant le chargement de l'image.
+  v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+}
+
+## game/index.html line 18604
+window.drawHero=function(x,y,dir,moving){HERO_BASE(x,y,dir,moving);if(state.zone!=='route4bis'||scene!=='world')return;ctx.save();ctx.strokeStyle='#ffd83d';ctx.lineWidth=9;ctx.beginPath();ctx.ellipse(x,y-12,28,13,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffd83d';ctx.beginPath();ctx.arc(x+24,y-22,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff8b28';ctx.beginPath();ctx.moveTo(x+32,y-22);ctx.lineTo(x+44,y-18);ctx.lineTo(x+32,y-15);ctx.closePath();ctx.fill();ctx.fillStyle='#1e3442';ctx.beginPath();ctx.arc(x+27,y-24,1.7,0,Math.PI*2);ctx.fill();ctx.restore()}
+
+## game/VALDORA_PRO_V111.js line 163
+window.drawHero=function(x,y,dir,moving){
+      if(state?.bike&&typeof ctx!=='undefined'){ctx.save();ctx.strokeStyle='#172e38';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x-17,y+11,13,0,Math.PI*2);ctx.arc(x+19,y+11,13,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#43d5e8';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-17,y+11);ctx.lineTo(x-2,y-7);ctx.lineTo(x+19,y+11);ctx.lineTo(x-7,y+11);ctx.lineTo(x+9,y-7);ctx.stroke();ctx.fillStyle='#ffd84a';ctx.fillRect(x+5,y-11,17,4);ctx.restore()}
+      return base.apply(this,arguments)
+    }
+
+## game/CREATEUR.html line 2578
+function drawHero(x,y,dir,moving){
+  const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+  const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+  if(v102eDrawGrounded(im,x,y,62,.22))return;
+  // Secours uniquement pendant le chargement de l'image.
+  v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+}
+
+## game/CREATEUR.html line 18565
+window.drawHero=function(x,y,dir,moving){HERO_BASE(x,y,dir,moving);if(state.zone!=='route4bis'||scene!=='world')return;ctx.save();ctx.strokeStyle='#ffd83d';ctx.lineWidth=9;ctx.beginPath();ctx.ellipse(x,y-12,28,13,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#ffd83d';ctx.beginPath();ctx.arc(x+24,y-22,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff8b28';ctx.beginPath();ctx.moveTo(x+32,y-22);ctx.lineTo(x+44,y-18);ctx.lineTo(x+32,y-15);ctx.closePath();ctx.fill();ctx.fillStyle='#1e3442';ctx.beginPath();ctx.arc(x+27,y-24,1.7,0,Math.PI*2);ctx.fill();ctx.restore()}

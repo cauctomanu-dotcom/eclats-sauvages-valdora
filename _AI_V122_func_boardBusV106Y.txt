@@ -1,0 +1,14 @@
+V122 FUNCTION: boardBusV106Y
+==========================================================================================
+
+## game/index.html line 15860
+function boardBusV106Y(zone,fare){
+  if(!townDiscovered(zone)){toast('Cette ville n’est pas encore découverte.');return}if((state.money||0)<fare){toast('Pas assez de Voltrons pour le billet.');return}
+  $('menuov').style.display='none';state.money-=fare;yState().busTrips++;const from=cityName(state.zone),to=cityName(zone);travelOverlay('bus',`${from} → ${to}`,'Ligne régionale',2600,()=>placeAtBusStop(zone))
+}
+
+## game/CREATEUR.html line 15839
+function boardBusV106Y(zone,fare){
+  if(!townDiscovered(zone)){toast('Cette ville n’est pas encore découverte.');return}if((state.money||0)<fare){toast('Pas assez de Voltrons pour le billet.');return}
+  $('menuov').style.display='none';state.money-=fare;yState().busTrips++;const from=cityName(state.zone),to=cityName(zone);travelOverlay('bus',`${from} → ${to}`,'Ligne régionale',2600,()=>placeAtBusStop(zone))
+}
