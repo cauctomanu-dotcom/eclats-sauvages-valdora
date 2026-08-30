@@ -1,0 +1,22 @@
+name: Temporary V122 focused extraction
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-v122-focus.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract focused code
+        run: python tools/extract_v122_focus.py
+      - name: Commit focused reports
+        run: |
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add _AI_V122_*.txt
+          git commit -m "chore: add V122 focused code reports" || exit 0
+          git push origin HEAD:main
