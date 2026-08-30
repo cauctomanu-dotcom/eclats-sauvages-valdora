@@ -202,3 +202,27 @@
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
+
+// V126 — fiche de nouveautés actuelle. Le marquage temporaire V118 empêche
+// l’ancienne popup mobile de s’ouvrir quelques millisecondes avant la nouvelle.
+(function loadValdoraV126(){
+  if(document.getElementById('valdoraV126UpdateNotesLoader'))return;
+  try{
+    const key='valdora_last_seen_update';
+    const previous=localStorage.getItem(key)||'';
+    window.__valdoraUpdatePreviousSeenV126=previous;
+    localStorage.setItem(key,'v118-mobile-5');
+  }catch(_){
+    try{
+      const key='valdora_last_seen_update';
+      const previous=sessionStorage.getItem(key)||'';
+      window.__valdoraUpdatePreviousSeenV126=previous;
+      sessionStorage.setItem(key,'v118-mobile-5');
+    }catch(__){}
+  }
+  const script=document.createElement('script');
+  script.id='valdoraV126UpdateNotesLoader';
+  script.src='V126_UPDATE_NOTES.js?v=126-notes-1';
+  script.async=false;
+  (document.head||document.documentElement).appendChild(script);
+})();
