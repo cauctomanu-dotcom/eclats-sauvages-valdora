@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-GAMEPLAY-FIXES-2';
+const VERSION='V1.0.1-GAMEPLAY-FIXES-3';
 let lastFrame=performance.now();
 let lastZone='';
 
@@ -120,7 +120,8 @@ function patchObjectiveText(){
     return list.map(item=>{
       if(!item||typeof item!=='object')return item;
       const txt=String(item.txt||'');
-      if(/trois\s+Éclats?\s+de\s+niveau\s+10|3\s+créatures?\s+de\s+niveau\s+10|au moins trois/i.test(txt)){
+      const oldClairvalRule=/((trois|3)\s+(Éclats?|créatures?)[^.!]{0,55}niveau\s*10)|(niveau\s*10[^.!]{0,55}(trois|3)\s+(Éclats?|créatures?))/i.test(txt);
+      if(oldClairvalRule){
         return {...item,txt:'Prépare deux créatures : une au niveau 9 minimum et une deuxième au niveau 7 minimum, puis poursuis l’enquête vers la Route 1.'};
       }
       return item;
