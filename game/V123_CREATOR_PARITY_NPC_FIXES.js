@@ -4,6 +4,7 @@
 const VERSION='V123-CREATOR-PARITY-NPC-1';
 const HERO_SENTINEL='v123_hero_home_population_guard';
 let lastTownKey='';
+let creatorParityReady=false;
 
 function isCreator(){
   try{return /CREATEUR/i.test(location.pathname)||window.CREATOR_MODE===true||window.creatorMode===true||(typeof v61CreatorMode==='function'&&v61CreatorMode())}catch(_){return /CREATEUR/i.test(location.pathname)}
@@ -115,9 +116,12 @@ function loadCreatorSaveParity(){
 function ensureCreatorParity(){
   if(!isCreator())return;
   loadCreatorSaveParity();
+  if(creatorParityReady)return;
+  if(!window.ValdoraLivingWorldV118||!window.ValdoraRegressionV122)return;
   try{window.ValdoraStableV110?.repair?.()}catch(_){}
-  try{window.ValdoraLivingWorldV118?.install?.()}catch(_){}
-  try{window.ValdoraRegressionV122?.install?.();window.ValdoraRegressionV122?.ensureCreatorCompletion?.()}catch(_){}
+  try{window.ValdoraLivingWorldV118.install?.()}catch(_){}
+  try{window.ValdoraRegressionV122.install?.();window.ValdoraRegressionV122.ensureCreatorCompletion?.()}catch(_){}
+  creatorParityReady=true;
   document.documentElement.dataset.valdoraCreatorParity=VERSION;
 }
 function maintain(){
@@ -127,7 +131,7 @@ function maintain(){
   const result=normalizeTownNpcs(sc,s.zone);if(key!==lastTownKey){lastTownKey=key;try{console.info('V123 implantation PNJ',result)}catch(_){}}
 }
 function audit(){
-  const s=currentState(),sc=currentScene();return {version:VERSION,creator:isCreator(),saveParity:!!window.ValdoraSaveV118,zone:s?.zone||null,townPlacement:sc?._v123NpcPlacement||null,heroHomeSanitized:!!(()=>{try{return interiorApi()?.session?.()?._v123HeroHomeSanitized}catch(_){return false}})()};
+  const s=currentState(),sc=currentScene();return {version:VERSION,creator:isCreator(),creatorParityReady,saveParity:!!window.ValdoraSaveV118,zone:s?.zone||null,townPlacement:sc?._v123NpcPlacement||null,heroHomeSanitized:!!(()=>{try{return interiorApi()?.session?.()?._v123HeroHomeSanitized}catch(_){return false}})()};
 }
 window.ValdoraV123={version:VERSION,maintain,audit,normalizeTownNpcs,sanitizeHeroHome,ensureCreatorParity};
 [80,450,1200,2600,5200,9000,15000].forEach(ms=>setTimeout(maintain,ms));
