@@ -124,8 +124,6 @@
   }
 
   function audit() {
-    // Un audit est aussi un point de synchronisation : les anciennes couches peuvent
-    // encore reconstruire une route entre deux passages, donc on normalise d'abord.
     normalizeWorldCollections();
     ensureLegendaryNetwork();
     ensureReciprocalLinks();
@@ -170,8 +168,6 @@
 
   install();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
-  // Ces passages précèdent volontairement les reconstructions historiques V109P
-  // (2,8 s / 7,6 s / 10,5 s) afin qu'elles travaillent toujours sur un réseau complet.
   [2200, 7200, 10200, 11800].forEach(delay => setTimeout(install, delay));
 })();
 
@@ -193,6 +189,16 @@
   const script=document.createElement('script');
   script.id='valdoraV124TouchLoader';
   script.src='V124_TOUCH_DIRECT.js?v=124-touch-1';
+  script.async=false;
+  (document.head||document.documentElement).appendChild(script);
+})();
+
+// V125 — nouveau Chapitre I commun Joueur / Créateur.
+(function loadValdoraV125(){
+  if(document.getElementById('valdoraV125StoryLoader'))return;
+  const script=document.createElement('script');
+  script.id='valdoraV125StoryLoader';
+  script.src='V125_STORY_FIRST_HOURS.js?v=125-story-1';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
