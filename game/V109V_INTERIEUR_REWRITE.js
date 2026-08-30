@@ -153,11 +153,43 @@ function updateNpcs(){
 }
 function drawNpcExact(n){const p=toScreen(n.x,n.y),g=geometry();ctx.save();ctx.translate(p.x,p.y);ctx.scale(g.scale,g.scale);drawNpc(n.look,0,0,n.dir||0,!!n.moving);ctx.restore()}
 function drawHeroExact(){const p=toScreen(state.roomX,state.roomY),g=geometry();ctx.save();ctx.translate(p.x,p.y);ctx.scale(g.scale,g.scale);drawHero(0,0,state.dir,Date.now()-lastMove<190);ctx.restore()}
-function nearestNpcWithDistance(){let best=null,bd=1e9;for(const n of session?.npcs||[]){const d=Math.hypot(state.roomX-n.x,state.roomY-n.y);if(d<bd){bd=d;best=n}}return {target:best,distance:bd}}
-function nearestFurnitureWithDistance(max=150){let best=null,bd=Infinity,bs=Infinity;for(const m of furn()){if(!userInteractable(m))continue;const d=pointRectDistance(state.roomX,state.roomY,rectOf(m));if(d>max)continue;const fn=String(m.fonction||'decor'),functional=fn!=='decor'&&fn!=='collision_mur';const score=d-(functional?80:0);if(score<bs||(score===bs&&d<bd)){bs=score;bd=d;best=m}}return {target:best,distance:bd,score:bs}}
-function nearNpc(){const q=nearestNpcWithDistance();return q.target&&q.distance<=92?q.target:null}
-function nearFurniture(max=150){return nearestFurnitureWithDistance(max).target}
-function nearestInteractionTarget(){const nq=nearestNpcWithDistance(),fq=nearestFurnitureWithDistance(150);const n=(nq.target&&nq.distance<=92)?nq.target:null,m=fq.target;if(n&&m)return fq.score<=nq.distance?{kind:'furniture',target:m}:{kind:'npc',target:n};if(m)return{kind:'furniture',target:m};if(n)return{kind:'npc',target:n};return null}
+function facingVector(){
+  const d=((Number(state.dir)||0)%4+4)%4;
+  return d===1?{x:-1,y:0}:d===2?{x:1,y:0}:d===3?{x:0,y:-1}:{x:0,y:1}
+}
+function targetMetrics(x,y,maxDistance){
+  const dx=Number(x)-Number(state.roomX),dy=Number(y)-Number(state.roomY),dist=Math.hypot(dx,dy);
+  if(!Number.isFinite(dist)||dist>maxDistance)return null;
+  if(dist<1)return{distance:0,forward:0,side:0,score:0};
+  const f=facingVector(),forward=dx*f.x+dy*f.y,side=Math.abs(dx*f.y-dy*f.x);
+  if(dist>24&&(forward<3||side>Math.max(42,forward*.82+18)))return null;
+  return{distance:dist,forward,side,score:dist+side*.58-Math.max(0,forward)*.08}
+}
+function furnitureAimPoint(m){
+  const r=rectOf(m),px=Number(state.roomX),py=Number(state.roomY),x=Math.max(r.x,Math.min(r.x+r.w,px)),y=Math.max(r.y,Math.min(r.y+r.h,py));
+  if(Math.hypot(x-px,y-py)>1)return{x,y};
+  return{x:r.x+r.w/2,y:r.y+r.h/2}
+}
+function nearestNpcWithDistance(){
+  let best=null,bm=null;for(const n of session?.npcs||[]){const m=targetMetrics(n.x,n.y,84);if(!m)continue;if(!bm||m.score<bm.score){best=n;bm=m}}
+  return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
+}
+function nearestFurnitureWithDistance(max=96){
+  let best=null,bm=null;for(const m of furn()){
+    if(!userInteractable(m))continue;const d=pointRectDistance(state.roomX,state.roomY,rectOf(m));if(d>max)continue;
+    const p=furnitureAimPoint(m),metrics=targetMetrics(p.x,p.y,max+8);if(!metrics)continue;
+    const fn=String(m.fonction||'decor'),functional=fn!=='decor'&&fn!=='collision_mur',score=metrics.score+(functional?-4:7);
+    if(!bm||score<bm.score){best=m;bm={...metrics,score}}
+  }
+  return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
+}
+function nearNpc(){const q=nearestNpcWithDistance();return q.target||null}
+function nearFurniture(max=96){return nearestFurnitureWithDistance(max).target}
+function nearestInteractionTarget(){
+  const nq=nearestNpcWithDistance(),fq=nearestFurnitureWithDistance(96),n=nq.target,m=fq.target;
+  if(n&&m)return fq.score<=nq.score+6?{kind:'furniture',target:m,score:fq.score}:{kind:'npc',target:n,score:nq.score};
+  if(m)return{kind:'furniture',target:m,score:fq.score};if(n)return{kind:'npc',target:n,score:nq.score};return null
+}
 function prompt(){
   const q=nearestInteractionTarget();if(!q)return;const n=q.kind==='npc'?q.target:null,m=q.kind==='furniture'?q.target:null;
   const label=n?n.name:(m.label||m.nom||m.id||'Interagir');
@@ -260,7 +292,7 @@ function worldMove(dx,dy,dir){if(scene==='world'&&state.zone==='temple_final'){
 
 function recover(){if(scene==='interior'&&!session&&building){try{enter(building)}catch(e){console.warn('V109V restauration intérieur',e)}}if(scene==='world'&&state.zone==='temple_final'){if(!Number.isFinite(Number(state.x))||!Number.isFinite(Number(state.y))||Number(state.x)<390||Number(state.x)>2010||Number(state.y)<70||Number(state.y)>2040){state.x=1200;state.y=1900}}}
 function audit(){const functions=new Set(),rooms=[];for(const [bk,b] of Object.entries(REF().buildings||{}))for(const [fk,f] of Object.entries(b.floors||{}))for(const [rk,r] of Object.entries(f.rooms||{})){rooms.push({building:bk,floor:fk,room:rk,w:r.width,h:r.height,count:(r.furniture||[]).length});for(const m of r.furniture||[])functions.add(String(m.fonction||'decor'))}return{version:VERSION,rooms,functions:[...functions].sort(),unhandled:[...functions].filter(x=>!HANDLED.has(x)).sort()}}
-const api={version:VERSION,enter,leave,move:moveInteriorNew,draw,interact,interactFurniture,nearFurniture,nearNpc,nearDoor,blocked,moveToRoom,destinations,session:()=>session,rawRoom,furniture:furn,audit};
+const api={version:VERSION,enter,leave,move:moveInteriorNew,draw,interact,interactFurniture,nearFurniture,nearNpc,nearDoor,blocked,moveToRoom,destinations,session:()=>session,rawRoom,furniture:furn,interactionTarget:nearestInteractionTarget,audit};
 window.ValdoraInteriorV109V=api;window.ValdoraBuildingV109I=api;
 window.drawInterior=draw;try{drawInterior=draw}catch(_){}window.moveInterior=moveInteriorNew;try{moveInterior=moveInteriorNew}catch(_){}window.interactInterior=interact;try{interactInterior=interact}catch(_){}window.interiorBlocked=blocked;try{interiorBlocked=blocked}catch(_){}window.interiorCollision=(x,y)=>blocked(x,y);try{interiorCollision=window.interiorCollision}catch(_){}window.nearInteriorNPC=nearNpc;try{nearInteriorNPC=nearNpc}catch(_){}window.interact=worldInteract;try{interact=worldInteract}catch(_){}window.move=worldMove;try{move=worldMove}catch(_){}window.v109eNearEntryBuilding=nearDoor;window.v109eEnterBuilding=enter;window.enterBuildingV67=enter;window.enterBuildingV68=enter;window.enterBuildingV70=enter;window.V109OFurnitureAction=interactFurniture;window.declencherInteraction=interactFurniture;try{triggerFurniture=interactFurniture}catch(_){}
 function stampVersion(){try{document.title=String(document.title||'Éclats Sauvages — Valdora').replace(/V108T|V109[O-U]/g,VERSION);document.documentElement.dataset.valdoraVersion=VERSION;for(const el of document.querySelectorAll('h1,h2,.title,.game-title'))if(/VALDORA/i.test(el.textContent||''))el.textContent=String(el.textContent).replace(/V108T|V109[O-U]/g,VERSION)}catch(_){}}

@@ -33,6 +33,81 @@ function rectHit(a,b,p=0){return a.x-p<b.x+b.w+p&&a.x+a.w+p>b.x-p&&a.y-p<b.y+b.h
 function overlapArea(a,b){const w=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)),h=Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y));return w*h}
 function sceneFor(zone){return typeof SCENES==='object'?SCENES?.[zone]:null}
 function current(){try{return typeof currentScene==='function'?currentScene():sceneFor(state.zone)}catch(_){return sceneFor(state?.zone)}}
+// ---------------------------------------------------------------------
+// V119 — Réseau cyclable. La bicyclette est débloquée après 4 Sceaux,
+// mais n'est utilisable que sur les pistes explicitement matérialisées.
+// ---------------------------------------------------------------------
+const CYCLE_TOWNS_V119=new Set(['town0','town2','town4','town6','town9','town10','town13']);
+const CYCLE_ROUTES_V119=new Set(['route0','route2','route3','route4','route6','route8','route10','route12']);
+let bikeNoticeAtV119=0;
+function bikeUnlockedV119(){return creator()||!!state?.flags?.v119BikeUnlocked||(Array.isArray(state?.seals)&&state.seals.length>=4)}
+function ensureBikeUnlockV119(){
+  state.flags=state.flags||{};
+  if(Array.isArray(state.seals)&&state.seals.length>=4&&!state.flags.v119BikeUnlocked){
+    state.flags.v119BikeUnlocked=true;state.bike=false;
+    if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! Elle s’utilise uniquement sur les pistes cyclables.')}catch(_){} }
+    try{save?.(false)}catch(_){}
+  }
+  if(!bikeUnlockedV119()&&state.bike)state.bike=false;
+  return bikeUnlockedV119()
+}
+function cycleRoutePathV119(sc,zone){
+  if(!CYCLE_ROUTES_V119.has(zone)||sc?.kind!=='route'||sc?.v116Sanctuary)return[];
+  const p=Array.isArray(sc.v104Path)&&sc.v104Path.length?sc.v104Path:Array.isArray(sc.v76Path)&&sc.v76Path.length?sc.v76Path:Array.isArray(sc.kPath)?sc.kPath:[];
+  return p.map(q=>Array.isArray(q)?{x:Number(q[0]),y:Number(q[1])}:{x:Number(q?.x),y:Number(q?.y)}).filter(q=>Number.isFinite(q.x)&&Number.isFinite(q.y))
+}
+function cycleSegmentsV119(sc=current(),zone=state?.zone){
+  if(!sc)return[];const out=[];
+  if(CYCLE_ROUTES_V119.has(zone)){
+    const p=cycleRoutePathV119(sc,zone);for(let i=0;i<p.length-1;i++)out.push([p[i],p[i+1]]);return out
+  }
+  if(CYCLE_TOWNS_V119.has(zone)&&sc.kind==='town'){
+    const g=roadNodes(sc);for(const n of g.list||[])for(const k of n.neighbors||[]){const o=g.map.get(k);if(o&&String(n.key)<String(o.key))out.push([{x:n.x,y:n.y},{x:o.x,y:o.y}])}
+  }
+  return out
+}
+function pointSegmentDistanceV119(px,py,a,b){
+  const vx=b.x-a.x,vy=b.y-a.y,wx=px-a.x,wy=py-a.y,l2=vx*vx+vy*vy;if(l2<1)return Math.hypot(wx,wy);
+  const t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/l2)),x=a.x+t*vx,y=a.y+t*vy;return Math.hypot(px-x,py-y)
+}
+function onCycleTrackV119(zone=state?.zone,x=state?.x,y=state?.y){
+  const sc=sceneFor(zone);if(!sc||typeof scene!=='undefined'&&scene!=='world')return false;
+  const px=Number(x),py=Number(y);if(!Number.isFinite(px)||!Number.isFinite(py))return false;
+  return cycleSegmentsV119(sc,zone).some(([a,b])=>pointSegmentDistanceV119(px,py,a,b)<=62)
+}
+function cycleCameraV119(sc){
+  const vw=1600,vh=1000,w=Number(sc?.width)||vw,h=Number(sc?.height)||vh;
+  const maxX=Math.max(0,w-vw),maxY=Math.max(0,h-vh),camX=Math.max(0,Math.min(maxX,Number(state?.x||0)-vw/2)),camY=Math.max(0,Math.min(maxY,Number(state?.y||0)-vh/2));
+  return{camX,camY,sx:960/vw,sy:600/vh}
+}
+function drawCycleTracksV119(){
+  if(typeof scene==='undefined'||scene!=='world')return;const sc=current(),segments=cycleSegmentsV119(sc,state?.zone);if(!segments.length)return;
+  const c=cycleCameraV119(sc);ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=.82;
+  for(const [a,b] of segments){const x1=(a.x-c.camX)*c.sx,y1=(a.y-c.camY)*c.sy,x2=(b.x-c.camX)*c.sx,y2=(b.y-c.camY)*c.sy;if(Math.max(x1,x2)<-40||Math.min(x1,x2)>1000||Math.max(y1,y2)<-40||Math.min(y1,y2)>640)continue;ctx.strokeStyle='#2f8d73';ctx.lineWidth=10;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.strokeStyle='rgba(240,255,249,.92)';ctx.lineWidth=2;ctx.setLineDash([10,10]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+  ctx.setLineDash([]);ctx.restore()
+}
+function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1300)return;bikeNoticeAtV119=now;try{toast?.(msg)}catch(_){}}
+function refreshBikeUiV119(){
+  ensureBikeUnlockV119();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;
+  let panel=document.getElementById('v119CyclePanel'),btn=document.getElementById('v119BikeBtn');
+  if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Bicyclette : après 4 Sceaux, uniquement sur les pistes cyclables.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
+  if(!btn)return;const unlocked=bikeUnlockedV119(),track=onCycleTrackV119();btn.disabled=false;btn.textContent=!unlocked?'🔒 Bicyclette — 4 Sceaux':state.bike?'🚲 Descendre du vélo':track?'🚲 Monter à bicyclette':'🚲 Cherche une piste cyclable';btn.onclick=toggleBikeV119
+}
+function toggleBikeV119(){
+  if(!ensureBikeUnlockV119()){state.bike=false;bikeNoticeV119('La bicyclette sera débloquée après le 4e Sceau.');refreshBikeUiV119();return false}
+  if(state.bike){state.bike=false;bikeNoticeV119('Tu descends de la bicyclette.');refreshBikeUiV119();return true}
+  if(!onCycleTrackV119()){bikeNoticeV119('La bicyclette ne peut être utilisée que sur une piste cyclable.');refreshBikeUiV119();return false}
+  state.bike=true;bikeNoticeV119('Bicyclette en route !');refreshBikeUiV119();return true
+}
+function cycleMoveV119(dx,dy,dir){
+  ensureBikeUnlockV119();
+  if(typeof scene!=='undefined'&&scene==='world'&&state.bike&&!onCycleTrackV119()){state.bike=false;bikeNoticeV119('Tu dois être sur une piste cyclable pour utiliser la bicyclette.')}
+  const result=typeof BASE.move==='function'?BASE.move.apply(this,arguments):false;
+  if(typeof scene!=='undefined'&&scene==='world'&&state.bike&&!onCycleTrackV119()){state.bike=false;bikeNoticeV119('Tu quittes la piste cyclable : bicyclette rangée.')}
+  refreshBikeUiV119();return result
+}
+window.ValdoraCycleV119={version:'V119-CYCLE',unlocked:bikeUnlockedV119,onTrack:onCycleTrackV119,toggle:toggleBikeV119,segments:cycleSegmentsV119,refresh:refreshBikeUiV119};
+
 function stateV118(){
   state.v118Living=state.v118Living||{};const s=state.v118Living;
   s.version=VERSION;s.towns=s.towns||{};s.rewards=s.rewards||{};s.region=s.region||{};
@@ -293,7 +368,12 @@ function ensureInteriorPopulation(record=false){
 function nearInteriorResident(){const s=interiorSession();if(!s)return null;let best=null,bd=Infinity;for(const n of s.npcs||[]){if(!n.v118Resident)continue;const d=Math.hypot(Number(state.roomX)-n.x,Number(state.roomY)-n.y);if(d<bd){bd=d;best=n}}return best&&bd<=102?best:null}
 function faceInterior(n){const dx=state.roomX-n.x,dy=state.roomY-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.moving=false;n.pauseUntil=Date.now()+3600;n.nextDecision=performance.now()+3900}
 function interactInteriorV118(){
-  ensureInteriorPopulation(true);const n=nearInteriorResident();if(n){faceInterior(n);const s=interiorSession(),zone=s?.zone||state.zone,name=n.name||'Habitant';if(typeof dialog==='function')dialog(`<b>${name}</b><br>${talkLine(n,zone,s?.key||'intérieur')}`);return true}
+  ensureInteriorPopulation(true);
+  const q=BASE.interior?.interactionTarget?.();
+  if(q?.kind==='npc'&&q.target?.v118Resident){
+    const n=q.target;faceInterior(n);const s=interiorSession(),zone=s?.zone||state.zone,name=n.name||'Habitant';
+    if(typeof dialog==='function')dialog(`<b>${name}</b><br>${talkLine(n,zone,s?.key||'intérieur')}`);return true
+  }
   return typeof BASE.interactInterior==='function'?BASE.interactInterior.apply(this,arguments):false
 }
 function drawInteriorV118(){ensureInteriorPopulation(true);return typeof BASE.drawInterior==='function'?BASE.drawInterior.apply(this,arguments):undefined}
@@ -344,11 +424,13 @@ function drawTownAmbience(){
 function drawWorldV118(){
   const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;
   if(typeof scene!=='undefined'&&scene==='world'){
+    try{drawCycleTracksV119()}catch(e){console.warn('V119 pistes cyclables',e)}
     try{if(window.ValdoraChestV118Bridge){window.ValdoraChestV118Bridge.ownedByV118=true;window.ValdoraChestV118Bridge.drawNow?.()}}catch(e){console.warn('V118 coffre Valdora',e)}
     if(current()?.kind==='town'){
       try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
       drawTownAmbience()
     }
+    refreshBikeUiV119()
   }
   return result
 }
@@ -393,7 +475,7 @@ function previewHouse(){
   if(!creator())return false;const panel=document.getElementById('v118-living-panel');if(panel)panel.style.display='none';for(const zone of TOWNS){const sc=sceneFor(zone),b=(sc?.buildings||[]).find(x=>/home|maison|residence|appartement/i.test([x.type,x.urbanType,x.id,x.label].join(' ')))||(sc?.buildings||[])[0];if(!b)continue;state.zone=zone;try{scene='world';building=null}catch(_){}const ok=enterInteriorV118(b);if(ok){for(const id of['title','prologue','menuov','starterov','battleUI']){const el=document.getElementById(id);if(el)el.style.display='none'}ensureInteriorPopulation(true);const s=interiorSession(),n=(s?.npcs||[]).find(x=>x.v118Resident);if(n){state.roomX=n.x;state.roomY=n.y+64;state.dir=3}try{hud?.();drawInteriorV118();toast?.(`${zoneName(zone)} — maison habitée V118`)}catch(_){}return true}}return false
 }
 function installHooks(){
-  window.sceneNPCs=allWorldCitizens;try{sceneNPCs=allWorldCitizens}catch(_){}window.updateTownNPCs=updateWorldCitizens;try{updateTownNPCs=updateWorldCitizens}catch(_){}window.updateNPCsD=updateWorldCitizens;try{updateNPCsD=updateWorldCitizens}catch(_){}window.nearNPC=nearWorldNpc;try{nearNPC=nearWorldNpc}catch(_){}window.interact=worldInteractV118;try{interact=worldInteractV118}catch(_){}window.drawWorld=drawWorldV118;try{drawWorld=drawWorldV118}catch(_){}window.move=BASE.move;try{move=BASE.move}catch(_){}window.collision=BASE.collision;try{collision=BASE.collision}catch(_){}window.startWild=BASE.startWild;try{startWild=BASE.startWild}catch(_){}window.drawInterior=drawInteriorV118;try{drawInterior=drawInteriorV118}catch(_){}window.interactInterior=interactInteriorV118;try{interactInterior=interactInteriorV118}catch(_){};
+  window.sceneNPCs=allWorldCitizens;try{sceneNPCs=allWorldCitizens}catch(_){}window.updateTownNPCs=updateWorldCitizens;try{updateTownNPCs=updateWorldCitizens}catch(_){}window.updateNPCsD=updateWorldCitizens;try{updateNPCsD=updateWorldCitizens}catch(_){}window.nearNPC=nearWorldNpc;try{nearNPC=nearWorldNpc}catch(_){}window.interact=worldInteractV118;try{interact=worldInteractV118}catch(_){}window.drawWorld=drawWorldV118;try{drawWorld=drawWorldV118}catch(_){}window.move=cycleMoveV119;try{move=cycleMoveV119}catch(_){}window.collision=BASE.collision;try{collision=BASE.collision}catch(_){}window.startWild=BASE.startWild;try{startWild=BASE.startWild}catch(_){}window.drawInterior=drawInteriorV118;try{drawInterior=drawInteriorV118}catch(_){}window.interactInterior=interactInteriorV118;try{interactInterior=interactInteriorV118}catch(_){};
   if(BASE.interior){BASE.interior.enter=enterInteriorV118;BASE.interior.moveToRoom=moveInteriorRoomV118;BASE.interior.draw=drawInteriorV118;BASE.interior.interact=interactInteriorV118;window.ValdoraInteriorV109V=BASE.interior;window.ValdoraBuildingV109I=BASE.interior}
   window.v109eEnterBuilding=enterInteriorV118;window.enterBuildingV67=enterInteriorV118;window.enterBuildingV68=enterInteriorV118;window.enterBuildingV70=enterInteriorV118;return true
 }
@@ -404,7 +486,7 @@ let lastBuildingRepair=Date.now();
 function refreshBuildings(){const now=Date.now();if(now-lastBuildingRepair<9000)return 0;lastBuildingRepair=now;const moved=repairAllBuildings();if(moved)scheduleTownPopulation(false,80);return moved}
 function install(){configureCurrent(false);installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}
 
-const api={version:VERSION,active:true,dialogues:DIALOGUE_BANK,contracts:CONTRACTS,install,installHooks,configure:configureAll,stabilizeSidebar,enforceIdentity,openPanel,previewHouse,publishAudit,audit,allWorldCitizens,nearWorldNpc,ensureInteriorPopulation,repairAllBuildings};
+const api={version:VERSION,active:true,dialogues:DIALOGUE_BANK,contracts:CONTRACTS,install,installHooks,configure:configureAll,stabilizeSidebar,enforceIdentity,openPanel,previewHouse,publishAudit,audit,allWorldCitizens,nearWorldNpc,ensureInteriorPopulation,repairAllBuildings,cycle:window.ValdoraCycleV119};
 window.ValdoraLivingWorldV118=api;stateV118();install();scheduleTownPopulation(false,320);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[80,420,1100,2400,4200,7200,10800,17600].forEach(ms=>setTimeout(install,ms));setTimeout(()=>{try{lastBuildingRepair=0;refreshBuildings();install();}catch(e){console.warn('V118 implantation',e)}},11800);setInterval(()=>{try{installHooks();stabilizeSidebar();enforceIdentity();configureCurrent(false);refreshBuildings();publishAudit()}catch(e){console.warn('V118 maintenance',e)}},3500);
 console.log('V118 : monde vivant actif — 1 440 dialogues, 60 activités locales et intérieurs habités.');
 })();
