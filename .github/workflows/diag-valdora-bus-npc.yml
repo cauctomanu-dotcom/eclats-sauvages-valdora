@@ -14,42 +14,53 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect current game source
+      - name: Inspect bus stop ownership and draw hooks
         shell: python
         run: |
           from pathlib import Path
           import re
-          p=Path('game/index.html')
-          s=p.read_text(encoding='utf-8')
-          print('INDEX_CHARS',len(s),'LINES',s.count('\n')+1)
-          needles=[
-            'function setupNPCs','v105dStreetNPCs','function activate','setTimeout(activate',
-            'busStops','busStop','BUS_STOPS','drawBus','openBus','busTravel','busMenu',
-            'Fluo','Val d’Ora','Val d\'Ora','arrêt','arret','Arrêt','gare routière','bus'
-          ]
-          seen=set()
-          for needle in needles:
+          s=Path('game/index.html').read_text(encoding='utf-8')
+
+          def show_function(name):
+            anchor='function '+name+'('
+            start=s.find(anchor)
+            print('\n===== FUNCTION',name,'@',start,'=====')
+            if start<0:return
+            brace=s.find('{',start)
+            depth=0; quote=None; esc=False; template=False; i=brace
+            while i<len(s):
+              ch=s[i]
+              if esc: esc=False; i+=1; continue
+              if quote:
+                if ch=='\\': esc=True
+                elif ch==quote: quote=None
+                i+=1; continue
+              if ch in ('"',"'"): quote=ch; i+=1; continue
+              if ch=='`': template=not template; i+=1; continue
+              if template: i+=1; continue
+              if ch=='{': depth+=1
+              elif ch=='}':
+                depth-=1
+                if depth==0:
+                  print(s[start:i+1]);return
+              i+=1
+          for fn in ['healer','v107dBusStop','drawBus','installDraw','installInteract','setupNPCs','activate']:
+            show_function(fn)
+
+          for needle in ["bus_stop","ASSET_TYPES","type==='healer'",'urbanType===\'clinic\'','drawWorld=','window.drawWorld=','drawWorld =','window.drawWorld =']:
             print('\n===== NEEDLE',repr(needle),'=====')
-            count=0
-            start=0
-            while True:
-              i=s.find(needle,start)
-              if i<0: break
-              count+=1
-              if count<=10:
-                a=max(0,i-900); b=min(len(s),i+1800)
-                snippet=s[a:b].replace('\r','')
-                print(f'--- match {count} at char {i} ---')
-                print(snippet)
-              start=i+max(1,len(needle))
-            print('COUNT',count)
-          # Function names containing bus/stop/transit-ish words
-          funcs=re.findall(r'function\s+([A-Za-z0-9_$]+)\s*\(',s)
-          print('\n===== TRANSIT FUNCTION NAMES =====')
-          for f in funcs:
-            if re.search(r'bus|stop|arret|gare|transport|travel|route|ligne',f,re.I): print(f)
-          # const/let/var identifiers around bus occurrences
-          print('\n===== BUS IDENTIFIER CONTEXT =====')
-          for m in list(re.finditer(r'bus',s,re.I))[:80]:
-            a=max(0,m.start()-180); b=min(len(s),m.start()+300)
-            print(s[a:b].replace('\n',' '))
+            pos=[m.start() for m in re.finditer(re.escape(needle),s)]
+            print('COUNT',len(pos))
+            for i in pos[:25]: print(s[max(0,i-500):min(len(s),i+900)].replace('\r',''))
+
+          print('\n===== EXTERNAL DRAW/HEALER REFERENCES =====')
+          for p in sorted(Path('game').glob('*.js')):
+            txt=p.read_text(encoding='utf-8',errors='ignore')
+            hits=[]
+            for needle in ['drawWorld=','window.drawWorld','healer','urbanType','type=\'healer\'','type:\'healer\'']:
+              if needle in txt:hits.append(needle)
+            if hits:
+              print('\n---',p.name,hits,'---')
+              for needle in hits:
+                for m in list(re.finditer(re.escape(needle),txt))[:8]:
+                  i=m.start();print(txt[max(0,i-350):min(len(txt),i+800)])
