@@ -4,7 +4,7 @@
 (function(){
 'use strict';
 const VERSION='V118-MONDE-VIVANT';
-window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;
+window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;if(window.ValdoraChestV118Bridge)window.ValdoraChestV118Bridge.ownedByV118=true;
 const TOWNS=Array.from({length:15},(_,i)=>'town'+i);
 const BASE={
   drawWorld:window.drawWorld,
@@ -244,6 +244,10 @@ function worldInteractV118(){
       const bus=window.ValdoraBusV118Bridge;
       if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}
     }catch(e){console.warn('V118 interaction arrêt Fluo Valdora',e)}
+    try{
+      const chest=window.ValdoraChestV118Bridge;
+      if(chest){chest.ownedByV118=true;if(chest.interact?.(110))return true}
+    }catch(e){console.warn('V118 interaction coffre Valdora',e)}
     const n=nearWorldNpc();if(n&&distance(n,state)<=88)return talkWorldNpc(n);
     const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;
     if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);
@@ -276,9 +280,13 @@ function interiorCandidates(g,furniture){
 function ensureInteriorPopulation(record=false){
   const s=interiorSession();if(!s)return false;const g=roomGeometry(),key=`${s.zone}|${buildingId(s.source,s)}|${s.floorId}|${s.roomId}`;if(record)recordInterior(s);if(s._v118PopulationKey===key&&s.npcs?.some(n=>n.v118Resident))return true;
   const base=(s.npcs||[]).filter(n=>!n.v118Resident),roles=INTERIOR_ROLES[s.key]||INTERIOR_ROLES.maison,count=INTERIOR_COUNT[s.key]||3,candidates=interiorCandidates(g,BASE.interior?.furniture?.()||[]),random=rng(hash(key)),used=base.map(n=>({x:n.x,y:n.y})),people=[];
+  const reservedLooks=new Set(base.filter(n=>n?.service).map(n=>Number(n.look)).filter(Number.isFinite));
+  const reservedNames=new Set(base.filter(n=>n?.service).map(n=>String(n.name||'').trim().toLowerCase()).filter(Boolean));
   for(let i=0;i<count&&candidates.length;i++){
     let pick=-1;for(let tries=0;tries<candidates.length;tries++){const at=Math.floor(random()*candidates.length),p=candidates[at];if(used.every(o=>distance(p,o)>=76)){pick=at;break}}if(pick<0)pick=0;const p=candidates.splice(pick,1)[0],id=npcIdentity(s.zone||state.zone,i,key),role=roles[i%roles.length];
-    const n={id:`v118_inside_${hash(key).toString(36)}_${i}`,name:id.name,look:id.look,x:p.x,y:p.y,homeX:p.x,homeY:p.y,targetX:p.x,targetY:p.y,dir:hash(id.name+key)%4,moving:false,service:false,v118Resident:true,v118Role:role,nextDecision:0,pauseUntil:0};people.push(n);used.push(p)
+    let look=Number(id.look);if(!Number.isFinite(look))look=0;while(reservedLooks.has(look))look=(look+7)%41;
+    let name=String(id.name||'Habitant');if(reservedNames.has(name.trim().toLowerCase()))name=`${name} — visiteur`;
+    const n={id:`v118_inside_${hash(key).toString(36)}_${i}`,name,look,x:p.x,y:p.y,homeX:p.x,homeY:p.y,targetX:p.x,targetY:p.y,dir:hash(name+key)%4,moving:false,service:false,v118Resident:true,v118Role:role,nextDecision:0,pauseUntil:0};people.push(n);used.push(p)
   }
   s.npcs=[...base,...people];s._v118PopulationKey=key;return true
 }
@@ -335,9 +343,12 @@ function drawTownAmbience(){
 }
 function drawWorldV118(){
   const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;
-  if(typeof scene!=='undefined'&&scene==='world'&&current()?.kind==='town'){
-    try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
-    drawTownAmbience()
+  if(typeof scene!=='undefined'&&scene==='world'){
+    try{if(window.ValdoraChestV118Bridge){window.ValdoraChestV118Bridge.ownedByV118=true;window.ValdoraChestV118Bridge.drawNow?.()}}catch(e){console.warn('V118 coffre Valdora',e)}
+    if(current()?.kind==='town'){
+      try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
+      drawTownAmbience()
+    }
   }
   return result
 }

@@ -16716,10 +16716,18 @@ window.ValdoraBusV118Bridge={
   drawNow:function(){const sc=scNow();if(!sc||sc.kind!=='town')return false;const c=camera(sc)||{};drawBus(sc,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return !!v107dBusStop(sc,state?.zone)},
   open:function(){if(typeof window.ValdoraGameplayV106Y?.openBus==='function'){window.ValdoraGameplayV106Y.openBus();return true}return false}
 };
+window.ValdoraChestV118Bridge={
+  ownedByV118:false,
+  list:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return[];const all=sc.kind==='town'?townObjects(sc,state?.zone):sc.kind==='route'?routeObjects(sc,state?.zone):[];return all.filter(o=>o?.type==='chest')},
+  nearest:function(range=110){let best=null,bd=Number(range)||110;for(const o of this.list()){const d=Math.hypot(Number(state?.x||0)-o.x,Number(state?.y||0)-o.y);if(d<=bd){bd=d;best=o}}return best},
+  drawNow:function(){const sc=scNow();if(!sc||typeof scene!=='undefined'&&scene!=='world')return false;const c=camera(sc)||{};const list=this.list();for(const o of list)drawObject(o,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return list.length>0},
+  interact:function(range=110){const o=this.nearest(range);if(!o)return false;return !!interactFind(o)}
+};
+
 
 function drawOverlay(){
   if(typeof scene!=='undefined'&&scene!=='world')return;const sc=scNow();if(!sc)return;const {camX,camY,sx,sy}=camera(sc);
-  if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}
+  if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}
   else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy)}
 }
 
