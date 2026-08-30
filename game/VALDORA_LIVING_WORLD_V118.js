@@ -4,6 +4,7 @@
 (function(){
 'use strict';
 const VERSION='V118-MONDE-VIVANT';
+window.__VALDORA_V118_LIVING_ACTIVE__=true;if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true;
 const TOWNS=Array.from({length:15},(_,i)=>'town'+i);
 const BASE={
   drawWorld:window.drawWorld,
@@ -239,8 +240,14 @@ function talkWorldNpc(n){
 }
 function worldInteractV118(){
   if(typeof scene!=='undefined'&&scene==='world'){
+    try{
+      const bus=window.ValdoraBusV118Bridge;
+      if(bus){bus.ownedByV118=true;if(bus.near?.(125)&&bus.open?.())return true}
+    }catch(e){console.warn('V118 interaction arrêt Fluo Valdora',e)}
     const n=nearWorldNpc();if(n&&distance(n,state)<=88)return talkWorldNpc(n);
-    const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);return result
+    const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;
+    if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);
+    return result
   }
   return typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false
 }
@@ -326,7 +333,14 @@ function drawTownAmbience(){
   const people=allWorldCitizens(sc,state.zone);for(const n of people){const phase=(t+hash(n.id||n.name)%11)%9;if(phase>1.15||n.moving)continue;const x=(n.x-camX)*sx,y=(n.y-camY)*sy-39;if(x<0||x>960||y<0||y>600)continue;ctx.globalAlpha=.78;ctx.fillStyle='rgba(255,255,255,.92)';ctx.strokeStyle='rgba(24,55,72,.72)';ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(x-12,y-14,24,20,8);ctx.fill();ctx.stroke();ctx.fillStyle='#28485c';ctx.font='900 12px Segoe UI';ctx.textAlign='center';ctx.fillText(['…','♪','!','?'][hash(n.id+'emote')%4],x,y+1)}
   const near=nearWorldNpc();if(near&&distance(near,state)<90){const label=`E / Entrée — ${near.name||'Habitant'}`,w=Math.min(520,ctx.measureText(label).width+34);ctx.globalAlpha=1;ctx.fillStyle='rgba(13,34,47,.93)';ctx.beginPath();ctx.roundRect((960-w)/2,539,w,38,12);ctx.fill();ctx.strokeStyle='rgba(255,222,129,.75)';ctx.stroke();ctx.fillStyle='#fff';ctx.font='800 13px Segoe UI';ctx.fillText(label,480,563)}ctx.restore();ctx.textAlign='start';ctx.globalAlpha=1
 }
-function drawWorldV118(){const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;if(typeof scene!=='undefined'&&scene==='world'&&current()?.kind==='town')drawTownAmbience();return result}
+function drawWorldV118(){
+  const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;
+  if(typeof scene!=='undefined'&&scene==='world'&&current()?.kind==='town'){
+    try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
+    drawTownAmbience()
+  }
+  return result
+}
 drawWorldV118.__v107dDraw=true;
 drawWorldV118.__v112World=true;
 

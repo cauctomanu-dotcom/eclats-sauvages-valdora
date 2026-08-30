@@ -14092,7 +14092,29 @@ function drawQuestMarkerV106C(n,x,y,sx,sy){if(typeof v106cQuestMarker!=='functio
 function drawEntities(sc,camX,camY,sx,sy){const e=[];if(sc.kind==='town')for(const b of sc.buildings||[])e.push({y:b.y+b.h,k:'b',o:b});for(const t of sc.v105dTrees||[])e.push({y:t.y,k:'tree',o:t});for(const n of sceneNPCs(sc,state.zone))e.push({y:n.y,k:'npc',o:n});for(const t of currentTrainers())e.push({y:t.y,k:'trainer',o:t});const tr=sc.kind==='town'?trainMotion(sc):null;if(tr)e.push({y:sc.rail.y,k:'train',o:tr});e.push({y:state.y,k:'hero'});e.sort((a,b)=>a.y-b.y);for(const q of e){if(q.k==='b')drawBuilding(sc,q.o,camX,camY,sx,sy);else if(q.k==='tree')tree(q.o,camX,camY,sx,sy);else if(q.k==='train')drawTrain(sc,q.o,camX,camY,sx,sy);else if(q.k==='npc'){const n=q.o,x=(n.x-camX)*sx,y=(n.y-camY)*sy;try{if(n.taron&&typeof drawTaronNpcV68==='function')drawTaronNpcV68(x,y,n.dir||0,!!n.moving);else drawNpc(n.look??0,x,y,n.dir||0,!!n.moving);drawQuestMarkerV106C(n,x,y,sx,sy)}catch(_){}}else if(q.k==='trainer'){const t=q.o,x=(t.x-camX)*sx,y=(t.y-camY)*sy;try{drawNpc(t.look??0,x,y,t.dir||0,!!t.moving);drawTrainerAlert(t,x,y)}catch(_){}}else{try{drawHero((state.x-camX)*sx,(state.y-camY)*sy,state.dir,Date.now()-lastMove<190)}catch(_){}}}try{drawFollower(camX,camY,sx,sy)}catch(_){}}
 function drawWorldD(){try{updateTownNPCs()}catch(_){}try{updateRouteTrainerIdle()}catch(_){}try{updateTrainerEvent()}catch(_){}const sc=currentScene(),mw=sc.width||1800,mh=sc.height||1100,camX=Math.max(0,Math.min(Math.max(0,mw-1600),state.x-800)),camY=Math.max(0,Math.min(Math.max(0,mh-1000),state.y-500)),sx=960/1600,sy=600/1000;if(sc.kind==='town')drawTownBase(sc,camX,camY,sx,sy);else if(sc.kind==='route'){drawRouteBase(sc,camX,camY,sx,sy);try{if(typeof drawRouteObjectsV93==='function')drawRouteObjectsV93(sc,camX,camY,sx,sy)}catch(_){}}else if(sc.kind==='temple'&&typeof drawFinalTempleV77==='function')drawFinalTempleV77(sc,camX,camY,sx,sy);else{ctx.fillStyle='#8fc274';ctx.fillRect(0,0,960,600)}drawEntities(sc,camX,camY,sx,sy);try{$('location').textContent=sc.name}catch(_){}}
 // ---------------- PNJ SUR LE GRAPHE REEL DES RUES ----------------
-function setupNPCs(sc,zone){sc.v105dGraph=graph(sc);sc.v105dStreetNPCs=[];const existing=[];if(typeof NPCDATA!=='undefined')existing.push(...NPCDATA.filter(n=>n.zone===zone));if(Array.isArray(sc.megaNPCs))existing.push(...sc.megaNPCs);const need=Math.max(0,(sc.megacity?15:7)-existing.length),cells=[...sc.v105dRoad];for(let i=0;i<need&&cells.length;i++){const p=pkey(cells[(i*11+5)%cells.length]),x=cc(p.x,sc.v105dCell),y=cc(p.y,sc.v105dCell);sc.v105dStreetNPCs.push({id:'d105_'+zone+'_'+i,zone,x,y,homeX:x,homeY:y,look:(i*7+zone.length)%41,dir:i%4,moving:false,name:['Lina','Milo','Zoé','Noah','Anna','Yanis','Léo'][i%7],text:'Les rues de '+sc.name+' sont animées aujourd’hui.'})}for(const n of [...existing,...sc.v105dStreetNPCs]){const q=nearestRoad(sc,n.x,n.y);if(q){n.x=q.x;n.y=q.y;n.homeX=q.x;n.homeY=q.y}n._v105dInit=''}}
+function setupNPCs(sc,zone){
+  sc.v105dGraph=graph(sc);
+  sc.v105dStreetNPCs=Array.isArray(sc.v105dStreetNPCs)?sc.v105dStreetNPCs:[];
+  const existing=[];
+  if(typeof NPCDATA!=='undefined')existing.push(...NPCDATA.filter(n=>n.zone===zone));
+  if(Array.isArray(sc.megaNPCs))existing.push(...sc.megaNPCs);
+  const target=Math.max(0,(sc.megacity?15:7)-existing.length),cells=[...sc.v105dRoad];
+  const generated=new Map(sc.v105dStreetNPCs.map(n=>[n.id,n]));
+  for(let i=0;i<target&&cells.length;i++){
+    const id='d105_'+zone+'_'+i;
+    if(generated.has(id))continue;
+    const p=pkey(cells[(i*11+5)%cells.length]),x=cc(p.x,sc.v105dCell),y=cc(p.y,sc.v105dCell);
+    const n={id,zone,x,y,homeX:x,homeY:y,look:(i*7+zone.length)%41,dir:i%4,moving:false,name:['Lina','Milo','Zoé','Noah','Anna','Yanis','Léo'][i%7],text:'Les rues de '+sc.name+' sont animées aujourd’hui.'};
+    sc.v105dStreetNPCs.push(n);generated.set(id,n)
+  }
+  for(const n of [...existing,...sc.v105dStreetNPCs]){
+    if(n._v105dWorldPlaced)continue;
+    const q=nearestRoad(sc,n.x,n.y);
+    if(q){n.x=q.x;n.y=q.y;n.homeX=q.x;n.homeY=q.y}
+    n._v105dInit='';n._v105dWorldPlaced=true
+  }
+  sc._v105dNPCSetup=true
+}
 function npcFree(sc,n,x,y,all){
   if(!pointOnRoad(sc,x,y))return false;
   // Les entrées/sorties de ville sont des zones de sécurité : aucun PNJ errant ne peut s'y arrêter.
@@ -14131,7 +14153,7 @@ function collisionD(x,y){
 }
 function nearBuildingD(){const sc=currentScene();if(!sc||sc.kind!=='town')return null;let best=null,bd=1e20;for(const b of sc.buildings||[]){const d=Math.hypot(state.x-(b.doorX??b.x+b.w/2),state.y-(b.doorY??b.y+b.h));if(d<bd){bd=d;best=b}}return best&&bd<92?best:null}
 function migrate(){try{const sc=currentScene();if(!sc)return;if(state.x<25||state.y<25||state.x>sc.width-25||state.y>sc.height-25){const q=nearestRoad(sc,sc.width/2,sc.height/2);if(q){state.x=q.x;state.y=q.y}}}catch(_){}}
-function activate(){applyWorld();for(const k of ALL_TOWNS){const sc=SCENES[k];if(sc)setupNPCs(sc,k)}window.drawRouteBase=drawRouteBase;window.drawTownBaseV105D=drawTownBase;window.drawWorld=drawWorldD;try{drawWorld=drawWorldD}catch(_){}window.updateTownNPCs=updateNPCsD;try{updateTownNPCs=updateNPCsD}catch(_){}window.updateMegaNPCsV64=function(){};try{updateMegaNPCsV64=window.updateMegaNPCsV64}catch(_){}window.townRoadWalkable=(x,y)=>{const sc=currentScene();return !!(sc&&sc.kind==='town'&&pointOnRoad(sc,x,y))};try{townRoadWalkable=window.townRoadWalkable}catch(_){}window.nearNPC=nearNPCD;try{nearNPC=nearNPCD}catch(_){}window.nearBuilding=nearBuildingD;try{nearBuilding=nearBuildingD}catch(_){}window.collision=collisionD;try{collision=collisionD}catch(_){}window.trainWorldRect=()=>trainMotion(currentScene());document.documentElement.dataset.worldEngine='V105D';window.__VALDORA_WORLD_ENGINE__='V105D';migrate();try{const brand=document.querySelector('.brand b');if(brand)brand.textContent='VALDORA V105D — '+(brand.textContent.includes('CRÉATEUR')?'CRÉATEUR':'JOUEUR')}catch(_){}}
+function activate(){if(window.__VALDORA_V118_LIVING_ACTIVE__)return;applyWorld();for(const k of ALL_TOWNS){const sc=SCENES[k];if(sc)setupNPCs(sc,k)}window.drawRouteBase=drawRouteBase;window.drawTownBaseV105D=drawTownBase;window.drawWorld=drawWorldD;try{drawWorld=drawWorldD}catch(_){}window.updateTownNPCs=updateNPCsD;try{updateTownNPCs=updateNPCsD}catch(_){}window.updateMegaNPCsV64=function(){};try{updateMegaNPCsV64=window.updateMegaNPCsV64}catch(_){}window.townRoadWalkable=(x,y)=>{const sc=currentScene();return !!(sc&&sc.kind==='town'&&pointOnRoad(sc,x,y))};try{townRoadWalkable=window.townRoadWalkable}catch(_){}window.nearNPC=nearNPCD;try{nearNPC=nearNPCD}catch(_){}window.nearBuilding=nearBuildingD;try{nearBuilding=nearBuildingD}catch(_){}window.collision=collisionD;try{collision=collisionD}catch(_){}window.trainWorldRect=()=>trainMotion(currentScene());document.documentElement.dataset.worldEngine='V105D';window.__VALDORA_WORLD_ENGINE__='V105D';migrate();try{const brand=document.querySelector('.brand b');if(brand)brand.textContent='VALDORA V105D — '+(brand.textContent.includes('CRÉATEUR')?'CRÉATEUR':'JOUEUR')}catch(_){}}
 window.auditWorldV105D=function(){const issues=[],rows=[];for(const k of ALL_TOWNS){const sc=SCENES[k];if(!sc)continue;const bs=sc.buildings||[];for(let i=0;i<bs.length;i++){const b=bs[i],v=visual(b);if(!b.v105dPlaced)issues.push(k+': bâtiment non placé '+(b.id||b.label||b.type));for(let j=i+1;j<bs.length;j++)if(rectHit(v,visual(bs[j]),8))issues.push(k+': chevauchement bâtiment/bâtiment '+(b.id||b.label||b.type)+' / '+(bs[j].id||bs[j].label||bs[j].type));for(const s of sc.v105dRoad){const g=pkey(s);if(roadRect(sc,g.x,g.y).some(r=>rectHit(v,r,3)))issues.push(k+': bâtiment/rue '+(b.id||b.label||b.type))}if(!pointOnRoad(sc,b.doorX,b.v105dRoadY))issues.push(k+': porte sans rue '+(b.id||b.label||b.type))}for(const ex of sc.exits||[]){if(!pointOnRoad(sc,ex.x+ex.w/2,ex.y+ex.h/2))issues.push(k+': sortie non raccordée '+(ex.label||ex.to||ex.target||ex.side))}if(sc.rail&&sc.v105dStation){const rr=sc.v105dStationRoad;if(!rr||!has(sc,Math.round((sc.v105dStation.doorX-CELLZERO())/sc.v105dCell),rr.gy)){/* audit station via pointOnRoad below */}if(!pointOnRoad(sc,sc.v105dStation.doorX,sc.v105dStation.v105dRoadY))issues.push(k+': gare sans rue le long de la voie')}rows.push({zone:k,batiments:bs.length,roadTiles:sc.v105dRoad.size,npc:sceneNPCs(sc,k).length})}for(let i=0;i<14;i++){const sc=SCENES['route'+i];if(!sc)continue;if(!sc.v105dRoad?.size)issues.push('route'+i+': route absente');for(const ex of sc.exits||[])if(!pointOnRoad(sc,ex.x+ex.w/2,ex.y+ex.h/2))issues.push('route'+i+': portail non raccordé '+(ex.label||ex.side));for(const g of sc.grass||[]){for(const s of sc.v105dRoad){const p=pkey(s);if(roadRect(sc,p.x,p.y).some(r=>rectHit(g,r,0))){issues.push('route'+i+': herbes sur chemin');break}}}const gg=graph(sc);if(gg.size){const st=[...gg.keys()][0],seen=new Set([st]),q=[st];while(q.length){const a=q.shift();for(const n of gg.get(a)||[])if(!seen.has(n)){seen.add(n);q.push(n)}}if(seen.size!==gg.size)issues.push('route'+i+': chemin discontinu')}}return{issues,rows}}
 function CELLZERO(){return 0}
 activate();window.addEventListener('DOMContentLoaded',()=>{setTimeout(activate,160);setTimeout(activate,1600)});setTimeout(activate,450);setTimeout(activate,2400);setTimeout(()=>{try{const a=auditWorldV105D();document.documentElement.dataset.worldAuditD=String(a.issues.length);if(a.issues.length)console.warn('V105D audit géométrique (hors périmètre V108M)',a.issues);else console.log('V105D audit : 0 anomalie géométrique.')}catch(e){console.error('V105D audit error',e)}},3200);console.log('V105D actif — monde, routes, PNJ et train réécrits.');
@@ -14234,7 +14256,7 @@ function prepareBuildings(sc,zone){
 function placeRow(sc,list,gy){const gap=45,total=list.reduce((n,b)=>n+b.w,0)+Math.max(0,list.length-1)*gap;let x=(sc.width-total)/2,bottom=(gy+.5)*C-CORE/2-48;for(const b of list){b.x=Math.round(x);b.y=Math.round(bottom-b.h);b.doorX=Math.round(b.x+b.w/2);b.doorY=Math.round(bottom);b.v105dRoadY=(gy+.5)*C;b.v105dPlaced=true;b.v105dMega=true;x+=b.w+gap}}
 function rebuild(zone){const sc=SCENES[zone];if(!sc||sc._v105mCompact)return;sc._v105mCompact=true;sc.kind='town';sc.megacity=true;sc.v105dCell=C;sc.v105dCore=CORE;sc.v105dCols=COLS;sc.v105dRows=22;sc.width=COLS*C;sc.height=22*C;sc.v105dRoad=new Set;sc.v105dRowsInfo=ROW_GYS.map(gy=>({gy,start:0,end:COLS-1}));for(const gy of [...ROW_GYS,STATION_GY])addH(sc,gy,0,COLS-1);addV(sc,1,0,STATION_GY);addV(sc,COLS-2,ROW_GYS[0],21);
  const buildings=prepareBuildings(sc,zone),station=buildings.pop();for(let r=0,i=0;r<ROW_GYS.length;r++){const count=r<4?6:5;placeRow(sc,buildings.slice(i,i+count),ROW_GYS[r]);i+=count}placeRow(sc,[station],STATION_GY);sc.buildings=[...buildings,station];sc.v105dStation=station;sc.v105dStationRoad={gy:STATION_GY,start:0,end:COLS-1};sc.rail={...(sc.rail||{}),y:(RAIL_GY+.5)*C,platformY:(RAIL_GY-.5)*C};sc.v105dGraph=makeGraph(sc);sc.v104RoadSegments=[];
- const actors=[...(sc.megaNPCs||[]),...(sc.v105dStreetNPCs||[])];if(typeof NPCDATA!=='undefined')actors.push(...NPCDATA.filter(n=>n.zone===zone));for(const n of actors){const q=closestRoad(sc,n.x,n.y);if(q){n.x=q.x;n.y=q.y;n.homeX=q.x;n.homeY=q.y}n._v105dInit=''}
+ const actors=[...(sc.megaNPCs||[]),...(sc.v105dStreetNPCs||[])];if(typeof NPCDATA!=='undefined')actors.push(...NPCDATA.filter(n=>n.zone===zone));for(const n of actors){if(window.__VALDORA_V118_LIVING_ACTIVE__&&n._v105dWorldPlaced)continue;const q=closestRoad(sc,n.x,n.y);if(q){n.x=q.x;n.y=q.y;n.homeX=q.x;n.homeY=q.y}n._v105dInit=''}
  for(const ex of sc.exits||[]){const side=ex.side||'south';if(side==='west')Object.assign(ex,{x:0,y:(ROW_GYS[2]+.1)*C,w:C*.5,h:C*.8});else if(side==='east')Object.assign(ex,{x:sc.width-C*.5,y:(ROW_GYS[2]+.1)*C,w:C*.5,h:C*.8});else if(side==='north')Object.assign(ex,{x:C*.75,y:0,w:C*.8,h:C*.5});else Object.assign(ex,{x:sc.width-C*1.75,y:sc.height-C*.5,w:C*.8,h:C*.5})}
  sc.v105dTrees=[];sc.v105dBushes=[];sc.v105dDots=[];
 }
@@ -16550,7 +16572,7 @@ function drawSprite(type,dir,wx,wy,worldH,camX,camY,sx,sy,alpha=1){
 function zoneIndex(zone){const m=String(zone||'').match(/\d+/);return m?Number(m[0]):0}
 function hash(s){let h=2166136261>>>0;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function scNow(){try{return currentScene()}catch(_){return null}}
-function healer(sc){return (sc?.buildings||[]).find(b=>b&&(b.type==='healer'||b.type==='care'||b.urbanType==='clinic'))||null}
+function healer(sc){return (sc?.buildings||[]).find(b=>b&&(b.type==='healer'||b.type==='care'||b.urbanType==='clinic'||/centre\s*(de\s*)?soins|soins|clinique|dispensaire/i.test(String(b.label||b.name||''))))||null}
 function v107dBusStop(sc=scNow(),zone=state?.zone){
   if(!sc||sc.kind!=='town')return null;const h=healer(sc);if(!h)return null;
   const w=Number(sc.width)||1800,hh=Number(sc.height)||1100,core=Math.max(70,Number(sc.v105dCore)||100);
@@ -16687,9 +16709,17 @@ function drawBus(sc,camX,camY,sx,sy){
   }catch(_){}
 }
 function camera(sc){const mw=sc.width||1800,mh=sc.height||1100;return {camX:Math.max(0,Math.min(Math.max(0,mw-1600),state.x-800)),camY:Math.max(0,Math.min(Math.max(0,mh-1000),state.y-500)),sx:960/1600,sy:600/1000}}
+window.ValdoraBusV118Bridge={
+  ownedByV118:false,
+  stop:function(){const sc=scNow();return v107dBusStop(sc,state?.zone)},
+  near:function(range=125){const b=this.stop();if(!b)return null;return Math.hypot(Number(state?.x||0)-b.x,Number(state?.y||0)-b.y)<=range?b:null},
+  drawNow:function(){const sc=scNow();if(!sc||sc.kind!=='town')return false;const c=camera(sc)||{};drawBus(sc,Number(c.camX)||0,Number(c.camY)||0,Number(c.sx)||(960/1600),Number(c.sy)||(600/1000));return !!v107dBusStop(sc,state?.zone)},
+  open:function(){if(typeof window.ValdoraGameplayV106Y?.openBus==='function'){window.ValdoraGameplayV106Y.openBus();return true}return false}
+};
+
 function drawOverlay(){
   if(typeof scene!=='undefined'&&scene!=='world')return;const sc=scNow();if(!sc)return;const {camX,camY,sx,sy}=camera(sc);
-  if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy);drawBus(sc,camX,camY,sx,sy)}
+  if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}
   else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy)}
 }
 
