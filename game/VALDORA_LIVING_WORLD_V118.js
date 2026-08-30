@@ -34,16 +34,16 @@ function overlapArea(a,b){const w=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(
 function sceneFor(zone){return typeof SCENES==='object'?SCENES?.[zone]:null}
 function current(){try{return typeof currentScene==='function'?currentScene():sceneFor(state.zone)}catch(_){return sceneFor(state?.zone)}}
 // ---------------------------------------------------------------------
-// V119 — Réseau cyclable. La bicyclette est débloquée après 4 Sceaux,
+// V119 — Réseau cyclable. La bicyclette est débloquée après 3 Sceaux,
 // mais n'est utilisable que sur les pistes explicitement matérialisées.
 // ---------------------------------------------------------------------
 const CYCLE_TOWNS_V119=new Set(['town0','town2','town4','town6','town9','town10','town13']);
 const CYCLE_ROUTES_V119=new Set(['route0','route2','route3','route4','route6','route8','route10','route12']);
 let bikeNoticeAtV119=0;
-function bikeUnlockedV119(){return creator()||!!state?.flags?.v119BikeUnlocked||(Array.isArray(state?.seals)&&state.seals.length>=4)}
+function bikeUnlockedV119(){return creator()||!!state?.flags?.v119BikeUnlocked||(Array.isArray(state?.seals)&&state.seals.length>=3)}
 function ensureBikeUnlockV119(){
   state.flags=state.flags||{};
-  if(Array.isArray(state.seals)&&state.seals.length>=4&&!state.flags.v119BikeUnlocked){
+  if(Array.isArray(state.seals)&&state.seals.length>=3&&!state.flags.v119BikeUnlocked){
     state.flags.v119BikeUnlocked=true;state.bike=false;
     if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! Elle s’utilise uniquement sur les pistes cyclables.')}catch(_){} }
     try{save?.(false)}catch(_){}
@@ -90,11 +90,11 @@ function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1300)r
 function refreshBikeUiV119(){
   ensureBikeUnlockV119();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;
   let panel=document.getElementById('v119CyclePanel'),btn=document.getElementById('v119BikeBtn');
-  if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Bicyclette : après 4 Sceaux, uniquement sur les pistes cyclables.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
-  if(!btn)return;const unlocked=bikeUnlockedV119(),track=onCycleTrackV119();btn.disabled=false;btn.textContent=!unlocked?'🔒 Bicyclette — 4 Sceaux':state.bike?'🚲 Descendre du vélo':track?'🚲 Monter à bicyclette':'🚲 Cherche une piste cyclable';btn.onclick=toggleBikeV119
+  if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Bicyclette : après 3 Sceaux, uniquement sur les pistes cyclables.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
+  if(!btn)return;const unlocked=bikeUnlockedV119(),track=onCycleTrackV119();btn.disabled=false;btn.textContent=!unlocked?'🔒 Bicyclette — 3 Sceaux':state.bike?'🚲 Descendre du vélo':track?'🚲 Monter à bicyclette':'🚲 Cherche une piste cyclable';btn.onclick=toggleBikeV119
 }
 function toggleBikeV119(){
-  if(!ensureBikeUnlockV119()){state.bike=false;bikeNoticeV119('La bicyclette sera débloquée après le 4e Sceau.');refreshBikeUiV119();return false}
+  if(!ensureBikeUnlockV119()){state.bike=false;bikeNoticeV119('La bicyclette sera débloquée après le 3e Sceau.');refreshBikeUiV119();return false}
   if(state.bike){state.bike=false;bikeNoticeV119('Tu descends de la bicyclette.');refreshBikeUiV119();return true}
   if(!onCycleTrackV119()){bikeNoticeV119('La bicyclette ne peut être utilisée que sur une piste cyclable.');refreshBikeUiV119();return false}
   state.bike=true;bikeNoticeV119('Bicyclette en route !');refreshBikeUiV119();return true
@@ -377,8 +377,8 @@ function interactInteriorV118(){
   return typeof BASE.interactInterior==='function'?BASE.interactInterior.apply(this,arguments):false
 }
 function drawInteriorV118(){ensureInteriorPopulation(true);return typeof BASE.drawInterior==='function'?BASE.drawInterior.apply(this,arguments):undefined}
-function enterInteriorV118(b){const ok=typeof BASE.interiorEnter==='function'?BASE.interiorEnter(b):false;if(ok)ensureInteriorPopulation(true);return ok}
-function moveInteriorRoomV118(){const ok=typeof BASE.interiorMoveToRoom==='function'?BASE.interiorMoveToRoom(...arguments):false;if(ok)ensureInteriorPopulation(true);return ok}
+function enterInteriorV118(b){state.bike=false;const ok=typeof BASE.interiorEnter==='function'?BASE.interiorEnter(b):false;if(ok)ensureInteriorPopulation(true);return ok}
+function moveInteriorRoomV118(){state.bike=false;const ok=typeof BASE.interiorMoveToRoom==='function'?BASE.interiorMoveToRoom(...arguments):false;if(ok)ensureInteriorPopulation(true);return ok}
 
 // ---------------------------------------------------------------------
 // Implantation : détection et déplacement conservateur des bâtiments qui

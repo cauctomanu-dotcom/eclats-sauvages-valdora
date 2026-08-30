@@ -160,10 +160,10 @@ function facingVector(){
 function targetMetrics(x,y,maxDistance){
   const dx=Number(x)-Number(state.roomX),dy=Number(y)-Number(state.roomY),dist=Math.hypot(dx,dy);
   if(!Number.isFinite(dist)||dist>maxDistance)return null;
-  if(dist<1)return{distance:0,forward:0,side:0,score:0};
+  if(dist<=20)return{distance:dist,forward:0,side:0,score:dist};
   const f=facingVector(),forward=dx*f.x+dy*f.y,side=Math.abs(dx*f.y-dy*f.x);
-  if(dist>24&&(forward<3||side>Math.max(42,forward*.82+18)))return null;
-  return{distance:dist,forward,side,score:dist+side*.58-Math.max(0,forward)*.08}
+  if(forward<2||side>Math.max(24,forward*.55+8))return null;
+  return{distance:dist,forward,side,score:dist+side*.72-Math.max(0,forward)*.05}
 }
 function furnitureAimPoint(m){
   const r=rectOf(m),px=Number(state.roomX),py=Number(state.roomY),x=Math.max(r.x,Math.min(r.x+r.w,px)),y=Math.max(r.y,Math.min(r.y+r.h,py));
@@ -171,24 +171,24 @@ function furnitureAimPoint(m){
   return{x:r.x+r.w/2,y:r.y+r.h/2}
 }
 function nearestNpcWithDistance(){
-  let best=null,bm=null;for(const n of session?.npcs||[]){const m=targetMetrics(n.x,n.y,84);if(!m)continue;if(!bm||m.score<bm.score){best=n;bm=m}}
+  let best=null,bm=null;for(const n of session?.npcs||[]){const m=targetMetrics(n.x,n.y,68);if(!m)continue;if(!bm||m.score<bm.score){best=n;bm=m}}
   return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
 }
-function nearestFurnitureWithDistance(max=96){
+function nearestFurnitureWithDistance(max=72){
   let best=null,bm=null;for(const m of furn()){
     if(!userInteractable(m))continue;const d=pointRectDistance(state.roomX,state.roomY,rectOf(m));if(d>max)continue;
-    const p=furnitureAimPoint(m),metrics=targetMetrics(p.x,p.y,max+8);if(!metrics)continue;
-    const fn=String(m.fonction||'decor'),functional=fn!=='decor'&&fn!=='collision_mur',score=metrics.score+(functional?-4:7);
+    const p=furnitureAimPoint(m),metrics=targetMetrics(p.x,p.y,max+4);if(!metrics)continue;
+    const fn=String(m.fonction||'decor'),functional=fn!=='decor'&&fn!=='collision_mur',score=metrics.score+(functional?-3:8);
     if(!bm||score<bm.score){best=m;bm={...metrics,score}}
   }
   return{target:best,distance:bm?.distance??Infinity,score:bm?.score??Infinity,metrics:bm}
 }
 function nearNpc(){const q=nearestNpcWithDistance();return q.target||null}
-function nearFurniture(max=96){return nearestFurnitureWithDistance(max).target}
+function nearFurniture(max=72){return nearestFurnitureWithDistance(max).target}
 function nearestInteractionTarget(){
-  const nq=nearestNpcWithDistance(),fq=nearestFurnitureWithDistance(96),n=nq.target,m=fq.target;
-  if(n&&m)return fq.score<=nq.score+6?{kind:'furniture',target:m,score:fq.score}:{kind:'npc',target:n,score:nq.score};
-  if(m)return{kind:'furniture',target:m,score:fq.score};if(n)return{kind:'npc',target:n,score:nq.score};return null
+  const fq=nearestFurnitureWithDistance(72);if(fq.target)return{kind:'furniture',target:fq.target,score:fq.score};
+  const nq=nearestNpcWithDistance();if(nq.target)return{kind:'npc',target:nq.target,score:nq.score};
+  return null
 }
 function prompt(){
   const q=nearestInteractionTarget();if(!q)return;const n=q.kind==='npc'?q.target:null,m=q.kind==='furniture'?q.target:null;
@@ -275,7 +275,11 @@ function interactFurniture(m){
   }return true;
 }
 function faceNpc(n){if(!n)return;const dx=state.roomX-n.x,dy=state.roomY-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.pauseUntil=Date.now()+2600;n.moving=false}
-function serviceNpcInteract(n){faceNpc(n);switch(session?.key){case 'centre_soins':return interactFurniture(furn().find(m=>m.fonction==='soins_centre')||{fonction:'soins_centre',label:'Centre de soins'});case 'laboratoire':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe('Professeur Aurine','Continue ton enquête sur Valdora.');return true;case 'boutique':if(typeof openShop==='function')openShop();return true;case 'gare':window.ValdoraTrainV109D?.open?.();return true;case 'musee':if(typeof window.openMuseumDirectorV109A==='function')window.openMuseumDirectorV109A();else dialogSafe(n.name,'Bienvenue au musée.');return true;case 'gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));return true;default:dialogSafe(n.name,'Bonjour !');return true}}
+function serviceNpcInteract(n){
+  faceNpc(n);
+  if(!n?.service){dialogSafe(n?.name||'Habitant','Bonjour !');return true}
+  switch(session?.key){case 'centre_soins':return interactFurniture(furn().find(m=>m.fonction==='soins_centre')||{fonction:'soins_centre',label:'Centre de soins'});case 'laboratoire':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe('Professeur Aurine','Continue ton enquête sur Valdora.');return true;case 'boutique':if(typeof openShop==='function')openShop();return true;case 'gare':window.ValdoraTrainV109D?.open?.();return true;case 'musee':if(typeof window.openMuseumDirectorV109A==='function')window.openMuseumDirectorV109A();else dialogSafe(n.name,'Bienvenue au musée.');return true;case 'gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));return true;default:dialogSafe(n.name,'Bonjour !');return true}
+}
 function interact(){if(!session)return;const q=nearestInteractionTarget();if(q?.kind==='furniture')return interactFurniture(q.target);if(q?.kind==='npc')return serviceNpcInteract(q.target);try{toast('Approche-toi d’un élément ou d’un personnage : E / Entrée.')}catch(_){}}
 
 // Interaction monde : la porte du bâtiment utilise exclusivement ce nouveau moteur.

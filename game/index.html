@@ -1876,7 +1876,7 @@ function v83AwardGuardianSeal(t){
   if(!(state.seals||[]).includes(seal)){
     state.seals.push(seal);
     state.seals.sort((a,b)=>a-b);
-    if(state.seals.length>=4){state.flags=state.flags||{};state.flags.v119BikeUnlocked=true;}
+    if(state.seals.length>=3){state.flags=state.flags||{};state.flags.v119BikeUnlocked=true;}
     logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
     return true
   }
