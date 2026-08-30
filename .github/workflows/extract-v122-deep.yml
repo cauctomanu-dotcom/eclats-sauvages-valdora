@@ -1,0 +1,20 @@
+name: Temporary V122 deep extraction
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-v122-deep.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tools/extract_v122_deep.py
+      - run: |
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add _AI_V122_deep.txt
+          git commit -m "chore: add V122 deep subsystem report" || exit 0
+          git push origin HEAD:main
