@@ -23,19 +23,25 @@ jobs:
           idx=(g/'index.html').read_text(encoding='utf-8')
           cre=(g/'CREATEUR.html').read_text(encoding='utf-8')
           live=(g/'VALDORA_LIVING_WORLD_V118.js').read_text(encoding='utf-8')
+          v122=(g/'V122_REGRESSION_FIXES.js').read_text(encoding='utf-8')
           interior=(g/'V109V_INTERIEUR_REWRITE.js').read_text(encoding='utf-8')
           legacy=(g/'V105Y_REFERENCE_INTERIEURS.js').read_text(encoding='utf-8')
           assert idx.count('V122_REGRESSION_FIXES.js')==1
           assert cre.count('V122_REGRESSION_FIXES.js')==1
           assert "'route_simdor','town8'" in idx and "'route_simdor','town8'" in cre
           assert 'party,partyIndex:0' in idx and 'party,partyIndex:0' in cre
+          assert '_v122Participants' in idx and '_v122Participants' in cre
           assert '_bus_v122' in idx and '_bus_v122' in cre
           assert "const SAVE='valdora_v41_creator';" in cre
           assert 'const PLAYER_PROGRESSION_LOCK=false;' in cre
+          assert 'V122 interaction Team Taron' in live
           assert 'if(d>72)continue;' in live and 'bd<=68' in live
           assert 'worldInteractV118.__v107dInteract=true;worldInteractV118.__v118StableInteract=true;' in live
           assert 'function nearFurniture(max=52)' in interior and 'targetMetrics(n.x,n.y,56)' in interior
           assert 'const reach=42,' in legacy and 'bd<40' in legacy and 'bd<68' in legacy
+          assert 'v61CreatorMode' in legacy and 'passageLocked' in legacy
+          assert 'markCollection' in v122 and 's.boxes' in v122 and 'seals:11' in v122
+          assert 'ensureVolAgent' in v122 and 'ensureTaronisLinkV109Y' in v122 and 'ensureLateQuestNpcs' in v122
           print('V122 static validation OK')
           PY
       - name: Commit final game fixes
@@ -46,4 +52,4 @@ jobs:
           git commit -m "fix: complete V122 regressions and creator mode" || exit 0
           git pull --rebase origin main
           git push origin HEAD:main
-# apply-final-v122-20260830
+# apply-final-v122-repaired-20260830
