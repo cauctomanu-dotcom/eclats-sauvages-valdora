@@ -1,0 +1,2061 @@
+V122 REMAINING DIAGNOSTIC — SEALS
+====================================================================================================
+### game/CREATEUR.html line 163 — seal, sceau
+158: .v108t-battle-description{display:block;font-size:10px;line-height:1.25;opacity:.88;margin-top:3px}.v108s-battle-effect{display:block;font-size:10px;line-height:1.15;font-weight:600;opacity:.85;margin-top:3px;white-space:normal}
+159: button.v105r-move{white-space:normal!important;line-height:1.15!important;min-height:62px!important}
+160: @media(max-width:560px){.v108s-team-click,.v108s-creature-detail{grid-template-columns:82px minmax(0,1fr)}}
+161: </style>
+162: </head><body>
+163: <div id="app"><header><div class="brand">ÉCLATS SAUVAGES <b>VALDORA V106Z — JOUEUR</b></div><div class="top"><div class="pill" id="money">₽ 500</div><div class="pill" id="seals">Sceaux 0/7</div></div></header><main>
+164: <section id="gamewrap"><canvas id="game" width="960" height="600"></canvas><div id="hud"><div class="hudb" id="teamh"></div><div class="hudb" id="dexh"></div></div><div id="location">Clairval</div><div id="toast"></div>
+165: <div id="title"><div class="v101uTitleVisual"><svg class="v101uTitleArt" viewBox="0 0 1000 680" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+166: <defs>
+167:   <linearGradient id="skyTitle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e2a48"/><stop offset="0.48" stop-color="#2f5e88"/><stop offset="1" stop-color="#7fc7b9"/></linearGradient>
+168:   <linearGradient id="sunset" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b1"/><stop offset="1" stop-color="#ffb061"/></linearGradient>
+169:   <linearGradient id="roadTitle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ead9b2"/><stop offset="1" stop-color="#c7a878"/></linearGradient>
+170:   <linearGradient id="railTitle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a737c"/><stop offset="1" stop-color="#1c2730"/></linearGradient>
+171:   <linearGradient id="trainBody" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f4f69"/><stop offset="0.55" stop-color="#4785a6"/><stop offset="1" stop-color="#d7eef9"/></linearGradient>
+172:   <filter id="shadowT" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#071320" flood-opacity="0.28"/></filter>
+### game/CREATEUR.html line 219 — sept sceaux, sceau
+214:     <rect x="-36" y="-82" width="72" height="14" rx="4" fill="#d34e40"/><rect x="-22" y="-92" width="44" height="12" rx="4" fill="#d34e40"/><ellipse cx="28" cy="-76" rx="20" ry="5" fill="#f5efe6"/>
+215:   </g>
+216:   <g transform="translate(607 432)" opacity=".98"><path d="M0-30L24 0L0 30L-24 0Z" fill="#78efd2" stroke="#fff" stroke-width="4"/><path d="M0-18L12 0L0 18L-12 0Z" fill="#d9fff6" opacity=".85"/></g>
+217: </g>
+218: <g fill="#ffffff" opacity=".85"><circle cx="713" cy="92" r="4"/><circle cx="662" cy="204" r="3.2"/><circle cx="823" cy="246" r="2.8"/><circle cx="768" cy="286" r="2.2"/></g>
+219: </svg></div><div class="titlecard"><div><h1>ÉCLATS SAUVAGES <span>VALDORA</span></h1><p>Une aventure dans une région traversée par les trains, les mystères et l’énergie des Éclats. Enquête sur la Team Taron, complète ton Codex et découvre les sept Sceaux de Valdora.</p></div><button id="new">Nouvelle partie</button><button id="continue">Continuer</button></div></div>
+220: 
+221: <div id="prologue"><div class="prologueShell">
+222:   <div id="prologueVisual"></div>
+223:   <div class="prologueCopy">
+224:     <div class="prologueKicker" id="prologueKicker"></div>
+225:     <h2 id="prologueTitle"></h2>
+226:     <p id="prologueText"></p>
+227:     <div class="prologueControls">
+228:       <button id="prologuePrev" onclick="prologuePrev()">Précédent</button>
+### game/CREATEUR.html line 260 — aubeval
+255:     ['city5','Belrive',52,56,'ville'],['city6','Soléria',58,42,'metropole'],
+256:     ['city7','Nova-Cité',75,46,'metropole'],['city8','Valombre',19,43,'ville'],
+257:     ['city9','Cimes-d’Or',48,11,'ville'],['city10','Port-Écume',86,70,'metropole'],
+258:     ['city11','Luminor',70,27,'metropole'],['city12','Brumelac',45,47,'ville'],
+259:     ['city13','Sylvaris',12,32,'ville'],['city14','Taronis',84,20,'metropole'],
+260:     ['city15','Aubeval',31,80,'ville']
+261:   ].map(v=>({id:v[0],name:v[1],x:v[2],y:v[3],kind:v[4]})),
+262:   routes:[
+263:     ['city1','city15'],['city1','city2'],['city2','city5'],['city2','city8'],
+264:     ['city8','city13'],['city8','city4'],['city4','city9'],['city4','city12'],
+265:     ['city12','city5'],['city5','city6'],['city6','city7'],['city6','city11'],
+266:     ['city11','city14'],['city7','city14'],['city7','city10'],['city10','city3'],
+267:     ['city5','city3'],['city15','city3']
+268:   ],
+269:   rail:[
+### game/CREATEUR.html line 362 — aubeval
+357: const VALDORA_CITIES_V60=[
+358: ['Clairval','bourg',0,1],['Rochebrune','ville',0,1],['Azurive','ville',180,1],
+359: ['Montfaucon','ville',0,1],['Belrive','ville',220,1],['Soléria','metropole',420,6],
+360: ['Nova-Cité','metropole',520,9],['Valombre','ville',260,1],['Cimes-d’Or','ville',0,1],
+361: ['Port-Écume','metropole',480,7],['Luminor','metropole',650,12],['Brumelac','ville',240,1],
+362: ['Sylvaris','ville',0,1],['Taronis','metropole',700,10],['Aubeval','ville',300,1]
+363: ].map((v,i)=>({id:'city'+(i+1),name:v[0],kind:v[1],hotelPrice:v[2],floors:v[3]}));
+364: 
+365: const SIDE_QUESTS_V60=[
+366: {id:'q_pyroin',giver:'Mila',title:'Une chaleur rassurante',type:'capture',target:'Pyroin',qty:1,money:450,item:'Potion',itemQty:3},
+367: {id:'q_florin',giver:'Basile',title:'Le jardin vivant',type:'capture',target:'Florin',qty:1,money:400,item:'Baie',itemQty:5},
+368: {id:'q_rocor',giver:'Nora',title:'Un Rocor pour l’étude',type:'capture',target:'Rocor',qty:1,money:650,item:'Orbe',itemQty:4},
+369: {id:'q_trainers',giver:'Yanis',title:'Faire ses preuves',type:'trainerWins',qty:3,money:800,item:'Potion',itemQty:4},
+370: {id:'q_cities',giver:'Alma',title:'Carnet de voyage',type:'cities',qty:5,money:1000,item:'Orbe',itemQty:6}
+371: ];
+### game/CREATEUR.html line 1533 — sceau
+1528:   hotel:v102eLoadImage('ASSETS_BATIMENTS_V103C/hotel_face.png'),
+1529:   musee:v102eLoadImage('ASSETS_BATIMENTS_V103C/musee_face.png'),
+1530:   petit_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/petit_immeuble_face.png'),
+1531:   moyen_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/moyen_immeuble_face.png'),
+1532:   grand_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/grand_immeuble_face.png'),
+1533:   sceau_aube:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_aube_face.png'),
+1534:   sceau_roche:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_roche_face.png'),
+1535:   sceau_brumes:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_brumes_face.png'),
+1536:   sceau_vent:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_vent_face.png'),
+1537:   sceau_marees:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_marees_face.png'),
+1538:   sceau_eclat:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_eclat_face.png'),
+1539:   sceau_coeur:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_coeur_face.png')
+1540: };
+1541: function v103cTownNumber(){
+1542:   const m=String(state.zone||'').match(/^town(\d+)/);return m?Number(m[1]):0
+### game/CREATEUR.html line 1559 — seal, sceau
+1554:   if(type==='station')return 'gare';
+1555:   if(type==='inn')return 'hotel';
+1556:   if(type==='museum')return 'musee';
+1557:   if(type==='school')return (Number(b?.floors||0)>=4?'moyen_immeuble':'petit_immeuble');
+1558:   if(type==='arena'){
+1559:     const seals=['sceau_aube','sceau_roche','sceau_brumes','sceau_vent','sceau_marees','sceau_eclat','sceau_coeur'];
+1560:     const sealIndex=Math.max(1,Math.min(7,v103cTownNumber()));
+1561:     return seals[sealIndex-1]
+1562:   }
+1563:   // V104A : les mégalopoles utilisent bien les petits/moyens/grands immeubles
+1564:   // et les bâtiments de service, au lieu de retomber sur une maison de village.
+1565:   if(['urban','office','library','market','atelier','cafe','restaurant','brasserie','v70building','megabuilding66','mFrenchBlock'].includes(type)){
+1566:     return v103cUrbanAssetKey(b)
+1567:   }
+1568:   if(b?.urbanType)return v103cUrbanAssetKey(b);
+### game/CREATEUR.html line 1592 — sceau
+1587:   if(!v102eImageReady(im))return false;
+1588:   const x=(b.x-camX)*sx,y=(b.y-camY)*sy,w=b.w*sx,h=b.h*sy;
+1589:   const naturalRatio=im.naturalWidth/im.naturalHeight;
+1590:   // V103D : la porte visible est ancrée sur le vrai point doorX/doorY du bâtiment.
+1591:   // Ainsi la zone d'entrée ne se décale plus quand le nouveau sprite a une silhouette différente.
+1592:   const tall=String(key).startsWith('sceau_');
+1593:   const boxW=w*(tall?1.04:1.06),boxH=h*(tall?1.30:1.10);
+1594:   const scale=Math.min(boxW/im.naturalWidth,boxH/im.naturalHeight);
+1595:   const dw=im.naturalWidth*scale,dh=im.naturalHeight*scale;
+1596:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1597:   const doorAnchors={
+1598:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1599:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1600:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1601:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+### game/CREATEUR.html line 1601 — sceau
+1596:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1597:   const doorAnchors={
+1598:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1599:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1600:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1601:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+1602:     sceau_marees:[.50,.95],sceau_eclat:[.50,.95],sceau_coeur:[.50,.95]
+1603:   };
+1604:   const a=doorAnchors[key]||[.50,.95];
+1605:   const targetDoorX=((Number.isFinite(b.doorX)?b.doorX:b.x+b.w/2)-camX)*sx;
+1606:   const targetDoorY=((Number.isFinite(b.doorY)?b.doorY:b.y+b.h)-camY)*sy;
+1607:   dx+=targetDoorX-(dx+dw*a[0]);
+1608:   dy+=targetDoorY-(dy+dh*a[1]);
+1609:   if(dx>960||dx+dw<0||dy>600||dy+dh<0)return true;
+1610:   ctx.save();
+### game/CREATEUR.html line 1717 — seal
+1712: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1713: 
+1714: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1715: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1716: const SAVE='valdora_v41_creator'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1717: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1718: 
+1719: 
+1720: function creatureStats(m){
+1721:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1722:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1723:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1724:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1725:   const identity=(fam%7)-3;
+1726:   return {
+### game/CREATEUR.html line 1793 — citadel
+1788: 
+1789: // ======================================================================
+1790: // VALDORA V83 — SYSTEMES V82 REELLEMENT BRANCHES
+1791: // ======================================================================
+1792: const V83_TOTAL_CREATURES=169;
+1793: const V83_CITADEL_CAPTURE_REQUIRED=75;
+1794: 
+1795: function v83CaughtCount(){
+1796:   return Object.values(state.dex||{}).filter(v=>v&&v.caught).length
+1797: }
+1798: 
+1799: // ----- 150 créatures réellement présentes dès l'initialisation -----
+1800: function v83ExpandCreatures150(){
+1801:   if(CREATURES.length>=150)return;
+1802:   const types=['Nature','Feu','Eau','Foudre','Roche','Air','Spore','Glace','Lumière','Ombre','Neutre'];
+### game/CREATEUR.html line 1827 — seal
+1822: 
+1823: // ----- Progression de niveau selon zone -----
+1824: function v83RouteIndex(){
+1825:   if((state.zone||'').startsWith('route'))return Math.max(0,Number(state.zone.replace('route',''))||0);
+1826:   if((state.zone||'').startsWith('town'))return Math.max(0,Number(state.zone.replace('town',''))||0);
+1827:   return Math.max(0,(state.seals||[]).length)
+1828: }
+1829: function v83AreaLevelBase(){
+1830:   const z=Math.max(0,Math.min(13,v83RouteIndex())),seals=(state.seals||[]).length;
+1831:   // V106R : courbe plus progressive. Après Belrive (zone 4), la faune tourne
+1832:   // autour de N.15-17 au lieu de grimper brutalement au-delà de N.20.
+1833:   const curve=[5,7,9,12,15,18,21,24,27,30,33,36,40,44];
+1834:   return Math.min(52,Math.max(4,curve[z]+Math.floor(seals/2)))
+1835: }
+1836: function v83MovePowerCap(level){
+### game/CREATEUR.html line 1845 — sceau
+1840:   if(level<40)return 90;
+1841:   if(level<55)return 110;
+1842:   return 140
+1843: }
+1844: 
+1845: // ----- Gardiens : sceaux 1..7 -----
+1846: function v83GuardianPartySize(sealIndex){
+1847:   return Math.max(2,Math.min(7,sealIndex+1))
+1848: }
+1849: 
+1850: function v83GuardianBaseLevel(sealIndex){
+1851:   const levels={1:12,2:19,3:27,4:36,5:46,6:57,7:68};
+1852:   return levels[Math.max(1,Math.min(7,sealIndex))]||8
+1853: }
+1854: 
+### game/CREATEUR.html line 1857 — seal
+1852:   return levels[Math.max(1,Math.min(7,sealIndex))]||8
+1853: }
+1854: 
+1855: 
+1856: function v83BuildGuardianParty(t){
+1857:   const count=v83GuardianPartySize(t.sealIndex);
+1858:   const base=v83GuardianBaseLevel(t.sealIndex);
+1859:   const party=[];
+1860:   for(let i=0;i<count;i++){
+1861:     const lvl=Math.min(70,base+i);
+1862:     const legal=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+1863:     const maxStage=Math.max(...legal.map(c=>Number(c.stage)||0));
+1864:     const pool=legal.filter(c=>(Number(c.stage)||0)===maxStage);
+1865:     const c=pool[(t.sealIndex*23+i*17)%pool.length]||pool[0]||legal[0]||CREATURES[0];
+1866:     const m=mon(c.id,lvl);
+### game/CREATEUR.html line 1865 — seal
+1860:   for(let i=0;i<count;i++){
+1861:     const lvl=Math.min(70,base+i);
+1862:     const legal=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+1863:     const maxStage=Math.max(...legal.map(c=>Number(c.stage)||0));
+1864:     const pool=legal.filter(c=>(Number(c.stage)||0)===maxStage);
+1865:     const c=pool[(t.sealIndex*23+i*17)%pool.length]||pool[0]||legal[0]||CREATURES[0];
+1866:     const m=mon(c.id,lvl);
+1867:     m.moves=defaultMoves(m.id,m.level);
+1868:     party.push(m)
+1869:   }
+1870:   return party
+1871: }
+1872: 
+1873: 
+1874: function v83AwardGuardianSeal(t){
+### game/CREATEUR.html line 1874 — seal
+1869:   }
+1870:   return party
+1871: }
+1872: 
+1873: 
+1874: function v83AwardGuardianSeal(t){
+1875:   if(!t?.guardian||!t.sealIndex)return false;
+1876:   const seal=t.sealIndex;
+1877:   if(!(state.seals||[]).includes(seal)){
+1878:     state.seals.push(seal);
+1879:     state.seals.sort((a,b)=>a-b);
+1880:     if(state.seals.length>=4)state.bike=true;
+1881:     logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+1882:     return true
+1883:   }
+### game/CREATEUR.html line 1887 — 7 sceaux, sceau, citadel, citadelle
+1882:     return true
+1883:   }
+1884:   return false
+1885: }
+1886: 
+1887: // ----- Citadelle : 75 captures + 7 Sceaux + maîtrise de Vol -----
+1888: function v108mSeal5Beaten(){return (typeof creator==='function'&&creator())||(state.seals||[]).includes(5)}
+1889: function v108mCanUseVolNow(){if(!v108mSeal5Beaten())return false;return (state.team||[]).some(m=>(m?.moves||[]).includes('vol'))}
+1890: window.v108mCanUseVolNow=v108mCanUseVolNow
+1891: function v106pHasVolMastery(){
+1892:   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
+1893: }
+1894: function v106pCitadelRequirements(){
+1895:   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
+1896:   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
+### game/CREATEUR.html line 1895 — seal
+1890: window.v108mCanUseVolNow=v108mCanUseVolNow
+1891: function v106pHasVolMastery(){
+1892:   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
+1893: }
+1894: function v106pCitadelRequirements(){
+1895:   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
+1896:   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
+1897: }
+1898: function finalTempleAvailableV77(){return v106pCitadelRequirements().ready}
+1899: function v83CitadelGateText(){
+1900:   const r=v106pCitadelRequirements();
+1901:   if(r.ready)return 'La Citadelle est accessible.';
+1902:   const missing=[];
+1903:   if(r.caught<75)missing.push(`capturer 75 espèces (${r.caught}/75)`);
+1904:   if(r.seals<7)missing.push(`réunir les 7 Sceaux (${r.seals}/7)`);
+### game/CREATEUR.html line 1904 — 7 sceaux, seal, sceau
+1899: function v83CitadelGateText(){
+1900:   const r=v106pCitadelRequirements();
+1901:   if(r.ready)return 'La Citadelle est accessible.';
+1902:   const missing=[];
+1903:   if(r.caught<75)missing.push(`capturer 75 espèces (${r.caught}/75)`);
+1904:   if(r.seals<7)missing.push(`réunir les 7 Sceaux (${r.seals}/7)`);
+1905:   if(!r.vol)missing.push('apprendre Vol à une créature de type Air');
+1906:   return 'Accès à la Citadelle bloqué : '+missing.join(' • ')+'.';
+1907: }
+1908: window.v106pHasVolMastery=v106pHasVolMastery;
+1909: window.v106pCitadelRequirements=v106pCitadelRequirements;
+1910: 
+1911: // ----- Apprentissage des capacités : choix manuel si les 4 emplacements sont occupés -----
+1912: window._v106pMoveChoiceQueue=window._v106pMoveChoiceQueue||[];
+1913: window._v106pMoveChoiceCurrent=window._v106pMoveChoiceCurrent||null;
+### game/CREATEUR.html line 1916 — seal
+1911: // ----- Apprentissage des capacités : choix manuel si les 4 emplacements sont occupés -----
+1912: window._v106pMoveChoiceQueue=window._v106pMoveChoiceQueue||[];
+1913: window._v106pMoveChoiceCurrent=window._v106pMoveChoiceCurrent||null;
+1914: function v106pUnlockFieldMove(mid){
+1915:   state.fieldAbilitiesV104=state.fieldAbilitiesV104||{};
+1916:   if(mid==='vol'){state.flyLearned=true;state.fieldAbilitiesV104.VolLearned=true;if(v108mSeal5Beaten()){state.fly=true;state.fieldAbilitiesV104.Vol=true}}
+1917:   if(mid==='lumiere'){state.light=true;state.fieldAbilitiesV104.Lumière=true}
+1918:   if(mid==='surf')state.surf=true;
+1919:   if(mid==='nage'){state.nageUnlocked=true;state.fieldAbilitiesV104.Nage=true}
+1920: }
+1921: function v106pApplyMove(m,mid,replaceIndex=-1){
+1922:   if(!m||!MOVE_DB[mid])return false;
+1923:   m.moves=Array.isArray(m.moves)?m.moves:[];
+1924:   if(m.moves.includes(mid))return true;
+1925:   if(replaceIndex>=0&&replaceIndex<m.moves.length)m.moves.splice(replaceIndex,1,mid);
+### game/CREATEUR.html line 2036 — citadel
+2031: }
+2032: window.addEventListener('DOMContentLoaded',()=>setTimeout(v83PositionTouchPad,180));
+2033: 
+2034: // ====================== VALDORA V82 ======================
+2035: const V82_TOTAL_CREATURES=169;
+2036: const V82_CITADEL_REQUIRED=75;
+2037: 
+2038: function v82CaughtCount(){return Object.values(state.dex||{}).filter(v=>v&&v.caught).length}
+2039: function v82CitadelUnlocked(){return v82CaughtCount()>=V82_CITADEL_REQUIRED}
+2040: 
+2041: function v82ProgressTier(){
+2042:   const s=Number(state.story||0), seals=(state.seals||[]).length;
+2043:   return Math.max(0,Math.min(6,Math.max(seals,Math.floor(s/2))));
+2044: }
+2045: function v82ExpectedLevel(extra=0){
+### game/CREATEUR.html line 2058 — seal
+2053:   const count=v82GuardianPartySize(), base=v82ExpectedLevel(3);
+2054:   const party=[];
+2055:   for(let i=0;i<count;i++){
+2056:     const lvl=Math.min(75,base+i*2);
+2057:     const pool=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+2058:     const c=pool[(guardian?.sealIndex*19+i*13+lvl)%pool.length]||pool[0]||CREATURES[0];
+2059:     party.push(mon(c.id,lvl));
+2060:   }
+2061:   return party
+2062: }
+2063: 
+2064: function v82StatScale(m){
+2065:   const c=BY[m.id]||{}, lvl=Math.max(1,m.level||1), stage=c.stage||0;
+2066:   return {
+2067:     hp:Math.floor(26+lvl*2.35+stage*9),
+### game/CREATEUR.html line 2356 — seal
+2351:   return st
+2352: }
+2353: 
+2354: 
+2355: function reset(){
+2356:   state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,
+2357:     inventory:{Potion:0,SuperPotion:0,Orbe:0,SuperOrbe:0,MegaOrbe:0,Antidote:2,Baie:3,Repas:0,FioleAttaque:0,FioleDefense:0},
+2358:     trainerWins:{},bike:false,fly:false,light:false,capsules:[],discovered:['town0'],hasDex:false,profGift:false,follow:true,
+2359:     taron:{wins:0,missions:0,active:null}};
+2360:   scene='world';save(false);hud()
+2361: }
+2362: 
+2363: 
+2364: function save(show=true){
+2365:   try{
+### game/CREATEUR.html line 2925 — aubeval, town14
+2920: {id:'paul',zone:'town11',x:1080,y:690,look:17,dir:2,name:'Paul',text:'Je note les passages de la Team Taron dans mon carnet.'},
+2921: {id:'eva',zone:'town12',x:720,y:560,look:8,dir:0,name:'Éva',text:'Sylvaris est idéal pour observer les espèces Nature.'},
+2922: {id:'mathis',zone:'town12',x:1070,y:690,look:24,dir:1,name:'Mathis',text:'Je guide les voyageurs qui veulent explorer les bois.'},
+2923: {id:'zoe',zone:'town13',x:720,y:570,look:5,dir:0,name:'Zoé',text:'À Taronis, tout le monde parle des opérations de la Team Taron.'},
+2924: {id:'alexis',zone:'town13',x:1080,y:690,look:33,dir:2,name:'Alexis',text:'La métropole ne dort jamais, et les dresseurs non plus.'},
+2925: {id:'manon',zone:'town14',x:720,y:560,look:10,dir:0,name:'Manon',text:'Aubeval marque souvent la dernière étape avant de grands départs.'},
+2926: {id:'victor',zone:'town14',x:1070,y:690,look:37,dir:1,name:'Victor',text:'Je collectionne les récits des dresseurs qui ont parcouru Valdora.'},
+2927: {id:'helene',zone:'town14',x:900,y:620,look:12,dir:0,name:'Hélène',text:'J’aide les voyageurs à préparer leur dernière étape à Aubeval.'}
+2928: ];
+2929: function currentScene(){return SCENES[state.zone]}function pointIn(x,y,r){return x>r.x&&x<r.x+r.w&&y>r.y&&y<r.y+r.h}
+2930: 
+2931: 
+2932: function currentNPCs(){
+2933:   const list=NPCDATA.filter(n=>n.zone===state.zone);
+2934:   const t=currentTaronNPC();
+### game/CREATEUR.html line 3393 — aubeval, town14
+3388:  {id:'city10',scene:'town9',name:'Port-Écume',kind:'megacity',x:12,y:83,station:true,identity:'harbor'},
+3389:  {id:'city11',scene:'town10',name:'Luminor',kind:'islandMegacity',x:61,y:49,station:true,identity:'island'},
+3390:  {id:'city12',scene:'town11',name:'Brumelac',kind:'islandTown',x:48,y:47,station:false},
+3391:  {id:'city13',scene:'town12',name:'Sylvaris',kind:'town',x:10,y:31,station:false},
+3392:  {id:'city14',scene:'town13',name:'Taronis',kind:'megacity',x:87,y:82,station:true,identity:'industrial'},
+3393:  {id:'city15',scene:'town14',name:'Aubeval',kind:'town',x:31,y:79,station:false}
+3394: ];
+3395: 
+3396: // Simdor is a route hub / mountain crossroads, not a full city.
+3397: const V67_HUBS=[
+3398:  {id:'simdor',name:'Carrefour de Simdor',kind:'mountainHub',x:61,y:20}
+3399: ];
+3400: 
+3401: const V67_ROUTE_DEFS=[
+3402:  {a:'city12',b:'city4',type:'mountain',name:'Route des Brumes'},
+### game/CREATEUR.html line 4256 — sceau
+4251: 
+4252:       // Quartier central inférieur
+4253:       {id:'taronis_cafe',x:120,y:1135,w:470,h:200,type:'urban',urbanType:'cafe',label:'Café du Rail',floors:2,doorX:355,doorY:1335,megaInterior:true,eventSeed:19},
+4254:       {id:'taronis_school',x:880,y:1135,w:500,h:200,type:'urban',urbanType:'school',label:'Académie Taronis',floors:4,doorX:1130,doorY:1335,megaInterior:true,eventSeed:20},
+4255:       {id:'taronis_office_e',x:2200,y:1135,w:460,h:200,type:'urban',urbanType:'office',label:'Maison des Guildes',floors:6,doorX:2430,doorY:1335,megaInterior:true,eventSeed:21},
+4256:       {id:'taronis_restaurant',x:3030,y:1135,w:420,h:200,type:'urban',urbanType:'restaurant',label:'Le Septième Sceau',floors:3,doorX:3240,doorY:1335,megaInterior:true,eventSeed:22},
+4257: 
+4258:       // Gare UNIQUE au centre du quartier ferroviaire
+4259:       {
+4260:         id:'taronis_station',
+4261:         x:1320,y:1745,w:960,h:300,
+4262:         type:'station',urbanType:'station',label:'Gare Centrale de Taronis',floors:2,
+4263:         doorX:1800,doorY:2045,megaInterior:false
+4264:       }
+4265:     ];
+### game/CREATEUR.html line 5147 — aubeval, town14
+5142:  {scene:'town9',name:'Port-Écume',mega:true,identity:'harbor'},
+5143:  {scene:'town10',name:'Luminor',mega:true,identity:'island'},
+5144:  {scene:'town11',name:'Brumelac',mega:false,biome:'lake'},
+5145:  {scene:'town12',name:'Sylvaris',mega:false,biome:'forest'},
+5146:  {scene:'town13',name:'Taronis',mega:true,identity:'industrial'},
+5147:  {scene:'town14',name:'Aubeval',mega:false,biome:'prairie'}
+5148: ];
+5149: 
+5150: // Plus aucun "route_next / route_prev" implicite.
+5151: // Chaque liaison indique explicitement ses DEUX destinations et ses deux portes.
+5152: const V77_LINKS=[
+5153:  {route:'route0', name:'Route 1',a:'town0',sideA:'south',b:'town1',sideB:'north',kind:'prairie'},
+5154:  {route:'route1', name:'Route 2',a:'town1',sideA:'east', b:'town2',sideB:'west',kind:'forest'},
+5155:  {route:'route2', name:'Route 3',a:'town2',sideA:'south',b:'town3',sideB:'north',kind:'lake'},
+5156:  {route:'route3', name:'Route 4',a:'town3',sideA:'west', b:'town4',sideB:'east',kind:'autumn'},
+### game/CREATEUR.html line 5166 — town14
+5161:  {route:'route8', name:'Route du Littoral',a:'town8',sideA:'south',b:'town9',sideB:'north',kind:'coast'},
+5162:  {route:'route9', name:'Détroit de Luminor',a:'town9',sideA:'east', b:'town10',sideB:'west',kind:'lake'},
+5163:  {route:'route10',name:'Route des Brumes',a:'town10',sideA:'south',b:'town11',sideB:'north',kind:'lake'},
+5164:  {route:'route11',name:'Route Sylvestre',a:'town11',sideA:'east',b:'town12',sideB:'west',kind:'forest'},
+5165:  {route:'route12',name:'Route de Taronis',a:'town12',sideA:'south',b:'town13',sideB:'north',kind:'autumn'},
+5166:  {route:'route13',name:'Route d’Aube',a:'town13',sideA:'east',b:'town14',sideB:'west',kind:'prairie'}
+5167: ];
+5168: 
+5169: const V77_LINK_BY_ROUTE=Object.fromEntries(V77_LINKS.map(l=>[l.route,l]));
+5170: const V77_CITY=Object.fromEntries(V77_CITIES.map(c=>[c.scene,c]));
+5171: 
+5172: function simpleTownV77(name,biome){
+5173:   return {
+5174:     kind:'town',name,biome,width:1800,height:1100,megacity:false,
+5175:     buildings:[
+### game/CREATEUR.html line 5278 — town14
+5273:     cityLinks[l.a].push({link:l,side:l.sideA,to:l.route});
+5274:     cityLinks[l.b].push({link:l,side:l.sideB,to:l.route});
+5275:   }
+5276: 
+5277:   // Taronis possède également le portail du Sanctuaire final.
+5278:   cityLinks.town14.push({
+5279:     link:{name:'Citadelle du Cœur'},
+5280:     side:'east',to:'temple_final',finalTemple:true
+5281:   });
+5282: 
+5283:   for(const [cityKey,arr] of Object.entries(cityLinks)){
+5284:     const sc=SCENES[cityKey];if(!sc)continue;
+5285:     const counts={north:0,south:0,east:0,west:0};
+5286:     arr.forEach(x=>counts[x.side]++);
+5287:     const used={north:0,south:0,east:0,west:0};
+### game/V105W_INTERIEURS.js line 107 — sceau
+102:     },
+103:     guardian:{
+104:       label:'Bâtiment du Gardien',wall:'#e7e0d4',floor:'#88765e',accent:'#0d7c83',
+105:       items:[
+106:         item('gardien','pupitre_gardien',410,105,380,175,'guardian','Pupitre du Gardien'),
+107:         item('gardien','autel_sceau',455,290,290,230,'guardian','Autel du Sceau'),
+108:         item('gardien','banniere_gardien',90,130,170,245,'guardian','Bannière'),
+109:         item('gardien','presentoir_trophees',840,160,270,255,'guardian','Trophées'),
+110:         item('gardien','banc_defi',175,490,300,140,'rest','Banc du défi'),
+111:         plant(65,505),plant(1030,505)
+112:       ]
+113:     },
+114:     hotel_lobby:{
+115:       label:'Hall de l’hôtel',wall:'#f4eadb',floor:'#bd9364',accent:'#0b797d',
+116:       items:[
+### game/V105W_INTERIEURS.js line 219 — citadel
+214:         item('boutique','etagere_produits',820,180,280,300,'storage','Étagères'),
+215:         item('residence','armoire',470,150,260,310,'storage','Armoire de réserve'),
+216:         plant(65,505),plant(1035,505)
+217:       ]
+218:     },
+219:     citadel:{
+220:       label:'Citadelle',wall:'#dfe4e2',floor:'#5d6970',accent:'#0c8a91',
+221:       items:[
+222:         item('citadelle','trone_citadelle',420,90,360,250,'citadel','Trône'),
+223:         item('citadelle','autel_coeur',440,335,320,235,'citadel','Autel du Cœur'),
+224:         item('citadelle','brasero_sacre',90,315,230,210,'citadel','Brasero sacré'),
+225:         item('citadelle','pilier_eclat',885,285,210,250,'citadel','Pilier d’Éclat'),
+226:         item('citadelle','table_strategique',380,500,440,170,'map','Table stratégique'),
+227:         plant(65,505),plant(1035,505)
+228:       ]
+### game/V105W_INTERIEURS.js line 236 — citadel
+231: 
+232:   const KIND_TEMPLATE={
+233:     home:'house',lab:'lab',healer:'healer',clinic:'healer',shop:'shop',station:'station',
+234:     museum:'museum',school:'school',arena:'guardian',guardian:'guardian',inn:'hotel_lobby',hotel:'hotel_lobby',
+235:     apartments:'apartment',apartment:'apartment',urban:'apartment',office:'office',library:'library',
+236:     cafe:'restaurant',restaurant:'restaurant',brasserie:'restaurant',citadel:'citadel'
+237:   };
+238: 
+239:   function imageFor(src){
+240:     if(!IMG_CACHE.has(src)){
+241:       const img=new Image(); img.decoding='async'; img.src=src; IMG_CACHE.set(src,img);
+242:     }
+243:     return IMG_CACHE.get(src);
+244:   }
+245:   function sourceBuilding(){
+### game/V105W_INTERIEURS.js line 257 — citadel, citadelle
+252:     return building;
+253:   }
+254:   function kindOf(b){
+255:     const raw=String(b?.urbanType||b?.type||'home').toLowerCase();
+256:     const label=String(b?.label||'').toLowerCase();
+257:     if(label.includes('citadelle'))return 'citadel';
+258:     if(label.includes('hôtel')||label.includes('hotel'))return 'hotel';
+259:     if(label.includes('restaurant')||label.includes('café'))return 'restaurant';
+260:     if(label.includes('biblioth'))return 'library';
+261:     if(label.includes('gardien'))return 'guardian';
+262:     return raw;
+263:   }
+264:   function supported(){
+265:     if(typeof scene==='undefined'||scene!=='interior'||typeof building==='undefined'||!building||building.type==='playerhome')return false;
+266:     const k=kindOf(sourceBuilding());
+### game/V105W_INTERIEURS.js line 510 — citadel
+505:       desk:'Les documents sont rangés avec soin.',archive:'Des dossiers classés retracent la vie du bâtiment.',storage:'Tout le matériel utile est rangé ici.',
+506:       wardrobe:'L’armoire est propre et bien organisée.',meeting:'Cette table sert aux réunions et aux projets collectifs.',missions:'Plusieurs avis et missions locales sont affichés.',
+507:       museum:'La fiche présente l’origine et l’histoire de cette pièce de collection.',school:'Le matériel de cours est prêt pour la prochaine leçon.',
+508:       guardian:'L’objet porte l’emblème du Gardien de la ville.',hotel:'Le personnel veille à l’accueil et au confort des voyageurs.',studio:'Le matériel est installé pour travailler et créer.',
+509:       medical_info:'La borne permet de consulter des conseils de soins.',research:'Des notes et des schémas de recherche couvrent le tableau.',egg:'Les capteurs de l’incubateur indiquent une activité stable.',
+510:       citadel:'Une énergie ancienne semble vibrer autour de cet objet.',map:'La carte montre les principales régions et routes de Valdora.'
+511:     };
+512:     dialog(`<b>${m.label}</b><br>${texts[m.action]||'Cet objet fait partie de l’aménagement du bâtiment.'}`)
+513:   }
+514:   function useItem(m){
+515:     switch(m.action){
+516:       case 'heal':
+517:         if(typeof startHealingSequence==='function')startHealingSequence();else rest('Les machines terminent le soin.');break;
+518:       case 'shop': if(typeof openShop==='function')openShop();else describe(m);break;
+519:       case 'station': dialog('<b>Gare</b><br>Choisis ta destination.',()=>typeof v62StationMasterDialog==='function'&&v62StationMasterDialog());break;
+### game/V106A_QUETES_TARON_COMBATS_EQUIPE.js line 124 — citadel, citadelle
+119:     return [...village,...base];
+120:   };
+121:   window.objectivesV84=objectivesV84;
+122: }catch(err){console.warn('V106A objectifs',err)}
+123: 
+124: // Les missions sont réellement obligatoires pour CONCLURE le jeu, pas pour explorer la Citadelle.
+125: try{
+126:   const BASE_ALTAR=tryFinalAltarV77;
+127:   tryFinalAltarV77=function(){
+128:     if(state.zone==='temple_final'&&Math.hypot(state.x-1200,state.y-140)<150&&!allVillagerQuestsDoneV106A()){
+129:       const missing=VILLAGER_QUESTS.filter(q=>!questDoneV106A(q)).map(q=>'• '+q.giverName+' : '+q.title).join('<br>');
+130:       dialog('<b>Autel du Cœur</b><br>Le Cœur ne peut pas être restauré tant que les engagements pris auprès des habitants ne sont pas honorés.<br><br><b>Missions restantes :</b><br>'+missing);
+131:       return true;
+132:     }
+133:     return BASE_ALTAR();
+### game/V109V_INTERIEUR_REWRITE.js line 15 — citadel, citadelle
+10: 
+11: function norm(v){return String(v??'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+12: function textOf(b){return [b?.type,b?.urbanType,b?.role,b?.kind,b?.id,b?.label,b?.name].map(norm).join('|')}
+13: function refKeyFor(b){
+14:   const s=textOf(b);
+15:   if(/citadelle|citadel/.test(s))return 'citadelle';
+16:   if(/musee|museum/.test(s))return 'musee';
+17:   if(/centre.?de.?soins|healer|clinic|dispensaire|medical|secours/.test(s))return 'centre_soins';
+18:   if(/laboratoire|\blab\b/.test(s))return 'laboratoire';
+19:   if(/gare|station/.test(s))return 'gare';
+20:   if(/bibliotheque.?publique|public.?library/.test(s))return 'bibliotheque_publique';
+21:   if(/guilde|guild/.test(s))return 'bureau_guilde';
+22:   if(/grand.?immeuble|highrise/.test(s))return 'grand_immeuble';
+23:   if(/immeuble.?moyen|midrise/.test(s))return 'immeuble_moyen';
+24:   if(/residence|appartement/.test(s))return 'residence';
+### game/V109V_INTERIEUR_REWRITE.js line 80 — citadel, citadelle
+75:   boutique:{wall:'#d5c49f',wall2:'#8d7651',a:'#e5dcc2',b:'#d6cbaa',line:'#c2b58f',kind:'tile',border:'#735d3e'},
+76:   gare:{wall:'#8aa5bd',wall2:'#425a72',a:'#eed79f',b:'#e5cb91',line:'#c4ad78',kind:'station',border:'#46586a'},
+77:   musee:{wall:'#d8c2aa',wall2:'#755940',a:'#e7d2bd',b:'#ddc4a9',line:'#c4a98b',kind:'museum',border:'#654d39'},
+78:   ecole:{wall:'#d7cfab',wall2:'#5f725b',a:'#e7dfbd',b:'#d9d0aa',line:'#bbb081',kind:'tile',border:'#536650'},
+79:   gardien:{wall:'#b9aa9a',wall2:'#60483d',a:'#cec1b3',b:'#b5a494',line:'#8f7a6a',kind:'stone',border:'#5c473e'},
+80:   citadelle:{wall:'#8e8170',wall2:'#40362e',a:'#b7aa94',b:'#9f927d',line:'#786b5a',kind:'citadel',border:'#372f29'},
+81:   bureau_guilde:{wall:'#b8aa9a',wall2:'#5f5148',a:'#cfc2b2',b:'#b9aa97',line:'#948572',kind:'carpet',border:'#5a4b42'},
+82:   immeuble_moyen:{wall:'#c6c8c7',wall2:'#616b70',a:'#d6d2cb',b:'#c5c0b7',line:'#a7a097',kind:'tile',border:'#555f63'},
+83:   grand_immeuble:{wall:'#bcc7c6',wall2:'#526466',a:'#d1d8d6',b:'#bdc8c5',line:'#98a8a5',kind:'tile',border:'#4d5d5f'}
+84: };
+85: function drawFloor(){
+86:   const g=geometry(),t=FLOOR_THEMES[session?.key]||FLOOR_THEMES.maison;
+87:   const X=g.ox,Y=g.oy,W=g.w*g.scale,H=g.h*g.scale,wall=Math.max(5,Math.min(18,22*g.scale));
+88:   ctx.save();
+89:   // Hors pièce sombre, comme dans les intérieurs de référence.
+### game/V109V_INTERIEUR_REWRITE.js line 97 — citadel
+92:   // Bande de mur périphérique puis sol : aucune modification des coordonnées du JSON.
+93:   ctx.fillStyle=t.wall;ctx.fillRect(X+wall*.18,Y+wall*.18,W-wall*.36,H-wall*.36);
+94:   const fx=X+wall,fy=Y+wall,fw=Math.max(1,W-wall*2),fh=Math.max(1,H-wall*2);
+95:   ctx.fillStyle=t.a;ctx.fillRect(fx,fy,fw,fh);
+96:   ctx.save();ctx.beginPath();ctx.rect(fx,fy,fw,fh);ctx.clip();
+97:   const unit=(t.kind==='wood'?34:t.kind==='medical'?42:t.kind==='station'?48:t.kind==='museum'?58:t.kind==='tile'?50:t.kind==='stone'?62:t.kind==='citadel'?58:60)*g.scale;
+98:   ctx.lineWidth=Math.max(.65,g.scale*1.05);ctx.strokeStyle=t.line;
+99:   if(t.kind==='wood'){
+100:     // Lames de parquet en quinconce, proches du rendu Maison/Hôtel de la planche V105X.
+101:     let row=0;for(let y=fy;y<=fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke();const off=(row++%2)*unit*1.7;for(let x=fx-off;x<fx+fw;x+=unit*3.4){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+unit);ctx.stroke()}}
+102:     ctx.fillStyle='rgba(255,224,169,.08)';for(let y=fy+unit*.3;y<fy+fh;y+=unit*2){ctx.fillRect(fx,y,fw,unit*.18)}
+103:   }else if(t.kind==='medical'){
+104:     // Petits carreaux blancs/bleutés de Centre de soins/Laboratoire.
+105:     ctx.fillStyle=t.b;ctx.globalAlpha=.34;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+106:     for(let x=fx;x<=fx+fw;x+=unit){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+fh);ctx.stroke()}
+### game/V109V_INTERIEUR_REWRITE.js line 126 — citadel
+121:     ctx.fillStyle=t.b;ctx.globalAlpha=.52;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;for(let y=fy;y<fy+fh;y+=unit*.45){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke()}
+122:   }else{
+123:     ctx.fillStyle=t.b;ctx.globalAlpha=.30;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+124:     for(let x=fx;x<=fx+fw;x+=unit){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+fh);ctx.stroke()}
+125:     for(let y=fy;y<=fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke()}
+126:     if(t.kind==='citadel'){ctx.strokeStyle='rgba(61,48,36,.34)';ctx.lineWidth=Math.max(1,g.scale*2);for(let y=fy+unit/2;y<fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke()}}
+127:   }
+128:   ctx.restore();
+129:   ctx.strokeStyle=t.border;ctx.lineWidth=Math.max(2,g.scale*5);ctx.strokeRect(X,Y,W,H);
+130:   ctx.restore();
+131: }
+132: function img(src){if(!src)return null;if(imgs.has(src))return imgs.get(src);const im=new Image();im.decoding='async';im.src=src;imgs.set(src,im);return im}
+133: function drawFurniture(m){
+134:   const src=m?.assets?.[m.view]||m?.asset||m?.assets?.front; const im=img(src); if(!im||!im.complete||!im.naturalWidth)return;
+135:   const g=geometry(),cx=g.ox+(Number(m.x)+Number(m.w)/2)*g.scale,cy=g.oy+(Number(m.y)+Number(m.h)/2)*g.scale;
+### game/V109V_INTERIEUR_REWRITE.js line 240 — sceau, citadel, citadelle
+235: function rummage(m){state.flags=state.flags||{};state.inventory=state.inventory||{};const k='v109v_search_'+(m.instanceId||m.id);if(state.flags[k])return dialogSafe(m.label||'Rangement','Tu l’as déjà fouillé.');state.flags[k]=true;state.inventory.Baie=(state.inventory.Baie||0)+1;try{hud();save(false)}catch(_){}dialogSafe(m.label||'Rangement','Tu trouves une Baie.')}
+236: function study(m){if(state.team?.length){state.team[0].xp=(state.team[0].xp||0)+15;try{hud();save(false)}catch(_){}dialogSafe(m.label||'Étude','La première créature de ton équipe gagne 15 EXP.')}else dialogSafe(m.label||'Étude',m.description||'Tu étudies les documents.')}
+237: function archives(m){dialogSafe(m.label||m.nom||'Archives',m.description||'Des documents anciens racontent l’histoire de Valdora.')}
+238: function roomAction(m){return moveToRoom(m.targetFloor||session.floorId,m.targetRoom||session.roomId,m.arrivalX,m.arrivalY)}
+239: function elevator(){const list=destinations();if(!list.length)return dialogSafe('Ascenseur','Aucune destination.');let html='<div class="quest"><b>Ascenseur</b><br>Choisis une destination.</div><div class="baggrid">'+list.map(x=>`<button class="bagitem" onclick="ValdoraInteriorV109V.moveToRoom('${x.floorId}','${x.roomId}')">${x.label}</button>`).join('')+'</div>';if(typeof openSimpleMenu==='function')openSimpleMenu('Ascenseur',html);else dialogSafe('Ascenseur',list.map(x=>x.label).join(' • '))}
+240: const HANDLED=new Set(['acheter_dessert','ascenseur_etages','carte_citadelle','choix_starters','collision_mur','commander_repas','consulter_archives','consulter_reunion','controle_ticket','cuisiner','decor','dialogue_citadelle','dialogue_direction','distributeur_boissons','emprunter_livre','etudier','horaires_train','infos_carte_region','infos_oeuf','infos_valdora','interaction_finale','lancer_defi_gardien','lecon','lire_lore_indices','lore_citadelle','lore_gardien','lore_musee','lore_recherche','missions_guilde','ouvrir_boutique','ouvrir_casier','ouvrir_rangement','ouvrir_stockage','parler_professeur','passage_etage','passage_piece_sol','prendre_repas','recevoir_sceau','recherche_codex','repas_recup_pv','repos_15s_soin_complet','reservation_hotel','s_asseoir','soins_centre','voir_trophees','voyage_train']);
+241: function interactFurniture(m){
+242:   if(!m)return false;const fn=String(m.fonction||'decor'),title=m.label||m.nom||m.id||'Mobilier';state.mobilierInstanceIdV102Y=m.instanceId;
+243:   switch(fn){
+244:     case 'ouvrir_stockage': if(typeof window.openPC==='function')window.openPC(); else dialogSafe('PC','Le stockage est indisponible.'); break;
+245:     case 'soins_centre': if(typeof startHealingSequence==='function')startHealingSequence();else{healAll();dialogSafe('Centre de soins','Ton équipe est soignée.')}break;
+246:     case 'ouvrir_boutique': if(typeof openShop==='function')openShop();else dialogSafe('Boutique','Le service est indisponible.');break;
+247:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dialogSafe(title,'Ton équipe récupère complètement.')}break;
+248:     case 's_asseoir': if(typeof sitAt==='function')sitAt(m);else dialogSafe(title,m.description||'Tu t’assois un instant.');break;
+249:     case 'repas_recup_pv':case 'prendre_repas':case 'commander_repas':case 'cuisiner':case 'acheter_dessert':partialHeal(.25);dialogSafe(title,m.description||'Ton équipe récupère un peu d’énergie.');break;
+### game/V109V_INTERIEUR_REWRITE.js line 251 — citadel, citadelle
+246:     case 'ouvrir_boutique': if(typeof openShop==='function')openShop();else dialogSafe('Boutique','Le service est indisponible.');break;
+247:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dialogSafe(title,'Ton équipe récupère complètement.')}break;
+248:     case 's_asseoir': if(typeof sitAt==='function')sitAt(m);else dialogSafe(title,m.description||'Tu t’assois un instant.');break;
+249:     case 'repas_recup_pv':case 'prendre_repas':case 'commander_repas':case 'cuisiner':case 'acheter_dessert':partialHeal(.25);dialogSafe(title,m.description||'Ton équipe récupère un peu d’énergie.');break;
+250:     case 'infos_valdora':dialogSafe(title,m.description||'Informations sur Valdora.');break;
+251:     case 'lire_lore_indices':case 'consulter_archives':case 'consulter_reunion':case 'lore_recherche':case 'lore_musee':case 'lore_gardien':case 'lore_citadelle':case 'emprunter_livre':archives(m);break;
+252:     case 'infos_carte_region':dialogSafe(title,m.description||'Une carte détaillée de Valdora.');break;
+253:     case 'reservation_hotel': if(typeof reserveHotel==='function')reserveHotel();else dialogSafe(title,m.description||'Réception.');break;
+254:     case 'voyage_train':case 'controle_ticket':window.ValdoraTrainV109D?.open?.();break;
+255:     case 'horaires_train':if(typeof stationBoard==='function')stationBoard();else dialogSafe(title,m.description||'Horaires des trains.');break;
+256:     case 'distributeur_boissons':if(typeof vending==='function')vending();else dialogSafe(title,m.description||'Distributeur.');break;
+257:     case 'choix_starters':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe(title,'Ton premier compagnon a déjà été choisi.');break;
+258:     case 'recherche_codex':if(typeof superComputer==='function')superComputer();else dialogSafe(title,m.description||'Recherche Codex.');break;
+259:     case 'infos_oeuf':dialogSafe(title,m.description||'Les capteurs surveillent l’œuf.');break;
+260:     case 'passage_piece_sol':case 'passage_etage':roomAction(m);break;
+### game/V109V_INTERIEUR_REWRITE.js line 266 — sceau
+261:     case 'ascenseur_etages':elevator();break;
+262:     case 'ouvrir_casier':case 'ouvrir_rangement':rummage(m);break;
+263:     case 'etudier':case 'lecon':study(m);break;
+264:     case 'parler_professeur':dialogSafe('Professeure Emma',m.description||'Le professeur te parle du cours.');break;
+265:     case 'lancer_defi_gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));else dialogSafe(title,m.description||'Le défi du Gardien.');break;
+266:     case 'recevoir_sceau':dialogSafe(title,'Le Sceau est remis après la victoire contre le Gardien.');break;
+267:     case 'voir_trophees':dialogSafe(title,m.description||'Les trophées des anciens défis.');break;
+268:     case 'missions_guilde':if(typeof openObjectivesV84==='function')openObjectivesV84();else dialogSafe(title,m.description||'Missions de la Guilde.');break;
+269:     case 'dialogue_direction':dialogSafe(title,m.description||'Bureau de direction.');break;
+270:     case 'carte_citadelle':dialogSafe(title,m.description||'Carte stratégique de la Citadelle.');break;
+271:     case 'dialogue_citadelle':dialogSafe(title,m.description||'Le trône domine la salle.');break;
+272:     case 'interaction_finale':if(state.zone==='temple_final'&&typeof tryFinalAltarV77==='function')tryFinalAltarV77();else dialogSafe(title,m.description||'Une énergie intense émane de l’autel.');break;
+273:     case 'collision_mur':return false;
+274:     case 'decor':default:dialogSafe(title,m.description||'Tu observes cet élément.');break;
+275:   }return true;
+### game/V109V_INTERIEUR_REWRITE.js line 289 — citadel, citadelle
+284: 
+285: // Interaction monde : la porte du bâtiment utilise exclusivement ce nouveau moteur.
+286: const WORLD_INTERACT_BEFORE=window.interact;
+287: function worldInteract(){if(scene==='world'){const b=nearDoor();if(b)return enter(b)}return WORLD_INTERACT_BEFORE?.apply(this,arguments)}
+288: 
+289: // Citadelle monde : déplacement dédié, sans dépendance au réseau routier des villes.
+290: const WORLD_MOVE_BEFORE=window.move;
+291: function worldMove(dx,dy,dir){if(scene==='world'&&state.zone==='temple_final'){
+292:   state.dir=dir;const sc=currentScene(),speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;let bad=false;if(typeof finalTempleCollisionV77==='function')bad=finalTempleCollisionV77(nx,ny);else bad=nx<390||nx>2010||ny<70||ny>2040;
+293:   if(!bad){for(const t of (typeof currentTrainers==='function'?currentTrainers():[])){const nd=Math.hypot(nx-t.x,ny-t.y),od=Math.hypot(state.x-t.x,state.y-t.y);if(nd<36&&nd<=od+.01){bad=true;break}}}
+294:   if(!bad){try{recordFollowerStep?.()}catch(_){}state.x=nx;state.y=ny;lastMove=Date.now();try{checkPortal?.()}catch(_){}}return;
+295:  }return WORLD_MOVE_BEFORE?.apply(this,arguments)}
+296: 
+297: function recover(){if(scene==='interior'&&!session&&building){try{enter(building)}catch(e){console.warn('V109V restauration intérieur',e)}}if(scene==='world'&&state.zone==='temple_final'){if(!Number.isFinite(Number(state.x))||!Number.isFinite(Number(state.y))||Number(state.x)<390||Number(state.x)>2010||Number(state.y)<70||Number(state.y)>2040){state.x=1200;state.y=1900}}}
+298: function audit(){const functions=new Set(),rooms=[];for(const [bk,b] of Object.entries(REF().buildings||{}))for(const [fk,f] of Object.entries(b.floors||{}))for(const [rk,r] of Object.entries(f.rooms||{})){rooms.push({building:bk,floor:fk,room:rk,w:r.width,h:r.height,count:(r.furniture||[]).length});for(const m of r.furniture||[])functions.add(String(m.fonction||'decor'))}return{version:VERSION,rooms,functions:[...functions].sort(),unhandled:[...functions].filter(x=>!HANDLED.has(x)).sort()}}
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 1 — citadel, citadelle
+1: // VALDORA V109W — Citadelle, réseau Simdor/Hautes Brumes, Vol, EXP et boutiques
+2: (function(){
+3: 'use strict';
+4: const VERSION='V109Y';
+5: 
+6: function creatorMode(){
+7:   try{return /CREATEUR/i.test(location.pathname)||window.CREATOR_MODE===true||(typeof v61CreatorMode==='function'&&v61CreatorMode())}catch(_){return false}
+8: }
+9: function uniq(a){return [...new Set(a)]}
+10: function dest(e){return String(e?.to||e?.target||'')}
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 20 — citadel, citadelle
+15:   if(side==='west')return{x:0,y:h*p-90,w:90,h:180,side};
+16:   return{x:w-90,y:h*p-90,w:90,h:180,side:'east'};
+17: }
+18: 
+19: // ------------------------------------------------------------------
+20: // 1) CITADELLE : les 10 gardiens existent réellement + mouvement dédié.
+21: // ------------------------------------------------------------------
+22: const TEMPLE_POS=[
+23:   [950,1850],[1450,1710],[950,1510],[1450,1370],[950,1170],
+24:   [1450,1030],[950,830],[1450,690],[950,490],[1450,390]
+25: ];
+26: function completeTemple(){
+27:   const sc=window.SCENES?.temple_final;if(!sc)return false;
+28:   sc.kind='temple';sc.name='Citadelle du Cœur';sc.width=2400;sc.height=2100;
+29:   sc.trainers=Array.isArray(sc.trainers)?sc.trainers:[];
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 28 — citadel, citadelle
+23:   [950,1850],[1450,1710],[950,1510],[1450,1370],[950,1170],
+24:   [1450,1030],[950,830],[1450,690],[950,490],[1450,390]
+25: ];
+26: function completeTemple(){
+27:   const sc=window.SCENES?.temple_final;if(!sc)return false;
+28:   sc.kind='temple';sc.name='Citadelle du Cœur';sc.width=2400;sc.height=2100;
+29:   sc.trainers=Array.isArray(sc.trainers)?sc.trainers:[];
+30:   for(let i=0;i<10;i++){
+31:     const id='temple_guard_'+(i+1),p=TEMPLE_POS[i];
+32:     let t=sc.trainers.find(x=>x?.id===id);
+33:     const data={id,x:p[0],y:p[1],look:(i+5)%41,level:64+i*2,dir:0,moving:false,templeGuard:true,guardian:false,dialog:'Gardien du Sanctuaire '+(i+1)};
+34:     if(t)Object.assign(t,data);else sc.trainers.push(data);
+35:   }
+36:   let boss=sc.trainers.find(x=>x?.id==='final_boss');
+37:   if(!boss)sc.trainers.push({id:'final_boss',x:1200,y:245,look:15,level:78,dir:0,moving:false,finalBoss:true,dialog:'Maître du Cœur'});
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 38 — aubeval, town14
+33:     const data={id,x:p[0],y:p[1],look:(i+5)%41,level:64+i*2,dir:0,moving:false,templeGuard:true,guardian:false,dialog:'Gardien du Sanctuaire '+(i+1)};
+34:     if(t)Object.assign(t,data);else sc.trainers.push(data);
+35:   }
+36:   let boss=sc.trainers.find(x=>x?.id==='final_boss');
+37:   if(!boss)sc.trainers.push({id:'final_boss',x:1200,y:245,look:15,level:78,dir:0,moving:false,finalBoss:true,dialog:'Maître du Cœur'});
+38:   sc.exits=[{x:1110,y:2010,w:180,h:90,side:'south',to:'town14',label:'Aubeval'}];
+39:   return true;
+40: }
+41: try{
+42:   if(typeof ensureFinalTempleV77==='function'){
+43:     const baseEnsure=ensureFinalTempleV77;
+44:     ensureFinalTempleV77=function(){const r=baseEnsure.apply(this,arguments);completeTemple();return r};
+45:     window.ensureFinalTempleV77=ensureFinalTempleV77;
+46:   }
+47: }catch(e){console.warn('V109W ensure temple',e)}
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 76 — citadel, citadelle
+71: }
+72: try{
+73:   const baseMove=typeof move==='function'?move:window.move;
+74:   const patchedMove=function(dx,dy,dir){if(templeMove(dx,dy,dir))return;return baseMove?.apply(this,arguments)};
+75:   window.move=patchedMove;move=patchedMove;
+76: }catch(e){console.warn('V109W mouvement Citadelle',e)}
+77: 
+78: // ------------------------------------------------------------------
+79: // 2) SIMDOR <-> SENTIER DES HAUTES BRUMES <-> CIMES-D'OR.
+80: // ------------------------------------------------------------------
+81: function removeExit(sc,to){if(sc?.exits)sc.exits=sc.exits.filter(e=>dest(e)!==to)}
+82: function configureSimdor(){
+83:   const sim=SCENES?.route_simdor,m1=SCENES?.route_m1,m2=SCENES?.route_m2,cimes=SCENES?.town8,mont=SCENES?.town3;
+84:   if(!sim||!m1||!cimes)return false;
+85:   sim.kind='town';sim.name='Simdor';
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 135 — sceau
+130:   const cleanPlayerGate=function(from,to){
+131:     let msg=basePlayerGate?basePlayerGate(from,to):null;
+132:     if(msg&&/^route/.test(String(from))&&/dresseur|quête sur cette route|route n.est pas encore terminée/i.test(String(msg))){
+133:       const pending=pendingRoadTrainers(from);msg=pending.length?`Avant de continuer, bats les ${pending.length} dresseur${pending.length>1?'s':''} de route encore présent${pending.length>1?'s':''}.`:null;
+134:     }
+135:     // Correctif V109Y : l'ancien moteur assimilait le numéro de ville au numéro de Sceau.
+136:     // Exemple : town12 -> route12 réclamait un impossible « Sceau 12 ».
+137:     if(msg&&/^town\d+$/.test(String(from))&&/^route\d+$/.test(String(to))&&/Sceau/i.test(String(msg))){
+138:       const actualSeal=Number(window.V106U_GUARDS?.[from]||0);
+139:       if(!actualSeal||(state.seals||[]).includes(actualSeal))msg=null;
+140:       else msg=`Le passage vers la suite est verrouillé : bats d’abord le Gardien de ${SCENES?.[from]?.name||'la ville'} et obtiens le Sceau ${actualSeal}.`;
+141:     }
+142:     return msg;
+143:   };
+144:   window.playerQuestGateMessage=cleanPlayerGate;playerQuestGateMessage=cleanPlayerGate;
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 180 — sceau
+175:       state.flags=state.flags||{};state.capsules=Array.isArray(state.capsules)?state.capsules:[];
+176:       const first=!state.flags.v109wVolReward;
+177:       if(!state.capsules.includes('vol')&&!state.flyLearned)state.capsules.push('vol');
+178:       state.flags.v109wVolReward=true;state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;
+179:       try{save(false);hud();logEvent('Route 4 : Capsule Vol récupérée après la victoire contre la Team Taron.')}catch(_){}
+180:       try{dialog(`<b>Agent Team Taron vaincu</b><br>${first?'Tu récupères la <b>Capsule Vol</b>.':'La Capsule Vol est déjà en ta possession.'}<br><br>Elle peut être enseignée à une créature de type <b>Air</b>. Son utilisation comme déplacement reste liée à ta progression dans les Sceaux.`)}catch(_){}
+181:       return true;
+182:     }
+183:     return baseComplete?.apply(this,arguments);
+184:   };
+185:   window.completeTaronMission=patchedComplete;completeTaronMission=patchedComplete;
+186: }catch(e){console.warn('V109W agent Vol reward',e)}
+187: 
+188: // ------------------------------------------------------------------
+189: // 5) EXP : participation PAR adversaire + aucun gain pour un Éclat K.O.
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 230 — seal
+225: function highestTown(){
+226:   const vals=(state.discovered||[]).map(z=>{const m=String(z).match(/^town(\d+)$/);return m?+m[1]:-1}).filter(n=>n>=0);
+227:   const cur=String(state.zone||'').match(/^town(\d+)$/);if(cur)vals.push(+cur[1]);return Math.max(0,...vals)
+228: }
+229: function shopTier(){
+230:   if(creatorMode())return 6;const town=highestTown(),seals=(state.seals||[]).length;
+231:   if(town>=13||seals>=7)return 6;if(town>=11||seals>=6)return 5;if(town>=9||seals>=5)return 4;if(town>=6||seals>=3)return 3;if(town>=3||seals>=1)return 2;if(town>=1)return 1;return 0;
+232: }
+233: window.pShopTierV101P=shopTier;
+234: window.pNormalShopIdsV101P=function(){
+235:   const t=shopTier(),ids=['Potion','Orbe','Antidote','Baie'];
+236:   if(t>=1)ids.push('SuperPotion','FioleAttaque','FioleDefense','Rappel');
+237:   if(t>=2)ids.push('SuperOrbe','FioleGuerison','ElixirVital','Artefact1');
+238:   if(t>=3)ids.push('Artefact2');
+239:   if(t>=4)ids.push('MegaOrbe','Artefact3');
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 348 — sceau
+343: }catch(e){console.warn('V109W KO transfer legacy',e)}
+344: setInterval(()=>{try{v109xClearHealLockIfDone()}catch(_){ }},350);
+345: 
+346: // ------------------------------------------------------------------
+347: // 8) SYLVARIS -> ROUTE DE TARONIS -> TARONIS : liaison explicite.
+348: //    La mission de Mathis reste le verrou narratif ; aucun Sceau fantôme
+349: //    ne doit se substituer à cette mission.
+350: // ------------------------------------------------------------------
+351: function v109yRoadCells(sc){
+352:   const C=Number(sc?.v105dCell)||220,out=[];
+353:   for(const k of sc?.v105dRoad||[]){const [gx,gy]=String(k).split(',').map(Number);out.push({x:(gx+.5)*C,y:(gy+.5)*C})}
+354:   return out;
+355: }
+356: function v109yNearRoad(sc,x,y,pad=120){
+357:   const cells=v109yRoadCells(sc);return cells.some(p=>Math.hypot(Number(x)-p.x,Number(y)-p.y)<=pad)
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 438 — aubeval
+433:   window.v107kTownGate=patchedTownGate;
+434: }catch(e){console.warn('V109Y gate Taronis',e)}
+435: 
+436: // ------------------------------------------------------------------
+437: // 10) QUÊTES FINALES : sécurise la présence des PNJ clés de Sylvaris,
+438: //    Taronis et Aubeval pour éviter tout blocage de progression.
+439: // ------------------------------------------------------------------
+440: function upsertNpcV109W(data){
+441:   if(typeof NPCDATA==='undefined'||!Array.isArray(NPCDATA)||!data?.id)return false;
+442:   let n=NPCDATA.find(x=>x&&x.id===data.id);
+443:   if(n)Object.assign(n,data);else NPCDATA.push({...data});
+444:   return true;
+445: }
+446: const V109W_LATE_NPCS=[
+447:   {id:'eva',zone:'town12',x:720,y:560,look:8,dir:0,name:'Éva',text:'Sylvaris est idéal pour observer les espèces Nature.'},
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 451 — aubeval, town14
+446: const V109W_LATE_NPCS=[
+447:   {id:'eva',zone:'town12',x:720,y:560,look:8,dir:0,name:'Éva',text:'Sylvaris est idéal pour observer les espèces Nature.'},
+448:   {id:'mathis',zone:'town12',x:1070,y:690,look:24,dir:1,name:'Mathis',text:'Je guide les voyageurs qui veulent explorer les bois.'},
+449:   {id:'zoe',zone:'town13',x:720,y:570,look:5,dir:0,name:'Zoé',text:'À Taronis, tout le monde parle des opérations de la Team Taron.'},
+450:   {id:'alexis',zone:'town13',x:1070,y:690,look:27,dir:1,name:'Alexis',text:'Seule une équipe d’élite peut tenir la distance jusque-là.'},
+451:   {id:'manon',zone:'town14',x:720,y:560,look:10,dir:0,name:'Manon',text:'Aubeval marque souvent la dernière étape avant de grands départs.'},
+452:   {id:'victor',zone:'town14',x:1070,y:690,look:37,dir:1,name:'Victor',text:'Je collectionne les récits des dresseurs qui ont parcouru Valdora.'},
+453:   {id:'helene',zone:'town14',x:900,y:620,look:12,dir:0,name:'Hélène',text:'J’aide les voyageurs à préparer leur dernière étape à Aubeval.'},
+454:   {id:'solene_aubeval',zone:'town14',x:1240,y:555,look:40,dir:1,name:'Solène',text:'Je dirige les expéditions vers les sanctuaires légendaires.'}
+455: ];
+456: function ensureLateQuestNpcs(){for(const npc of V109W_LATE_NPCS)upsertNpcV109W(npc);return V109W_LATE_NPCS.length}
+457: 
+458: // ------------------------------------------------------------------
+459: // 11) CODEX / suivi : garantit 169 espèces reconnues dans les compteurs
+460: //    synthétiques utilisés par les menus additionnels.
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 486 — citadel, citadelle
+481: 
+482: window.ValdoraGameplayV109W={
+483:   version:VERSION,install,completeTemple,configureSimdor,ensureVolAgent,shopTier,pendingRoadTrainers,ensureTaronisLinkV109Y,ensureLateQuestNpcs,totalCreatures:totalCreaturesV109W,
+484:   audit(){
+485:     const issues=[];
+486:     const temple=SCENES?.temple_final,ids=new Set((temple?.trainers||[]).map(t=>t.id));for(let i=1;i<=10;i++)if(!ids.has('temple_guard_'+i))issues.push('Citadelle : gardien '+i+' absent');
+487:     const pairs=[['route_simdor','route_m1'],['route_m1','town8']];for(const [a,b] of pairs){if(!(SCENES?.[a]?.exits||[]).some(e=>dest(e)===b)||!(SCENES?.[b]?.exits||[]).some(e=>dest(e)===a))issues.push(`${a} <-> ${b} non réciproque`)}
+488:     if(!(SCENES?.route3?.trainers||[]).some(t=>t.id===VOL_AGENT_ID))issues.push('Route 4 : agent Vol absent');
+489:     const tiers={rappel:window.pNormalShopIdsV101P().includes('Rappel'),elixir:shopTier()>=2?window.pNormalShopIdsV101P().includes('ElixirVital'):true};if(!tiers.rappel&&shopTier()>=1)issues.push('Rappel absent du palier attendu');if(!tiers.elixir)issues.push('Élixir Vital absent du palier attendu');
+490:     if(typeof NPCDATA!=='undefined'){for(const npc of V109W_LATE_NPCS)if(!NPCDATA.some(n=>n?.id===npc.id))issues.push('PNJ final absent : '+npc.id)}
+491:     if(!(SCENES?.town12?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Sylvaris -> Route de Taronis absent');
+492:     if(!(SCENES?.route12?.exits||[]).some(e=>dest(e)==='town13'))issues.push('Route de Taronis -> Taronis absent');
+493:     if(!(SCENES?.town13?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Taronis -> Route de Taronis absent');
+494:     return{ok:issues.length===0,issues,templeGuards:(temple?.trainers||[]).filter(t=>t.templeGuard).length,simdorToBrumes:(SCENES?.route_simdor?.exits||[]).some(e=>dest(e)==='route_m1'),brumesToCimes:(SCENES?.route_m1?.exits||[]).some(e=>dest(e)==='town8'),mustHealAfterKO:!!state?.flags?.v109xForceHeal,totalCreatures:totalCreaturesV109W()};
+495:   }
+### game/V122_REGRESSION_FIXES.js line 53 — citadel, citadelle
+48:   if(Array.isArray(s.boxes)){
+49:     if(!s.boxes.length)s.boxes.push([]);
+50:     const target=Array.isArray(s.boxes[0])?s.boxes[0]:s.boxes;
+51:     for(const c of all)addToFlatBox(target,c);
+52:   }
+53:   // Conditions Citadelle : le créateur est considéré comme ayant tout accompli.
+54:   if(s.seals instanceof Set){for(let i=1;i<=11;i++)s.seals.add(i)}
+55:   else if(Array.isArray(s.seals)){for(let i=1;i<=11;i++)if(!s.seals.some(v=>Number(v)===i))s.seals.push(i)}
+56:   else{s.seals={};for(let i=1;i<=11;i++)s.seals[i]=true}
+57:   s.flags.v122CreatorComplete=true;
+58:   s.flags.v61CitadelGateOverride=true;
+59:   s.flags.v104GuardianCircuitUnlocked=true;
+60:   s.flags.v109wCityMasteryBypass=true;
+61:   s.flags.v109yTaronisPermit=true;
+62:   s.flags.v109wVolReward=true;
+### game/V122_REGRESSION_FIXES.js line 82 — seal
+77:   w.__v122CreatorAware=true;w.__v122Base=base;window[name]=w;
+78: }
+79: function installCreatorMode(){
+80:   ensureCreatorCompletion();
+81:   ['openPC','openDex','openCodex','openEcladex','openDexV83','openCodexV106Z'].forEach(wrapCreatorMenu);
+82:   creatorAware('v108mSeal5Beaten',true);
+83:   creatorAware('v108mCanUseVolNow',true);
+84:   creatorAware('v106pHasVolMastery',true);
+85:   creatorAware('v106pCitadelRequirements',()=>({caught:speciesCount(),seals:11,vol:true,ready:true,creator:true}));
+86:   creatorAware('finalTempleAvailableV77',true);
+87:   creatorAware('v83CitadelGateText','La Citadelle est accessible — mode créateur.');
+88: }
+89: function pendingRoad(route){try{return window.ValdoraGameplayV109W?.pendingRoadTrainers?.(route)||[]}catch(_){return []}}
+90: function installProgressionRepair(){
+91:   const pg=window.playerQuestGateMessage;
+### game/V122_REGRESSION_FIXES.js line 100 — sceau, town14
+95:       let msg=pg.apply(this,arguments);if(!msg)return msg;const text=String(msg);
+96:       if(/^route/.test(String(from))&&/dresseur|quête sur cette route|route n.est pas encore terminée/i.test(text)){
+97:         const left=pendingRoad(from);return left.length?`Avant de continuer, bats les ${left.length} dresseur${left.length>1?'s':''} de route encore présent${left.length>1?'s':''}.`:null;
+98:       }
+99:       if(from==='town12'&&/mission|quête/i.test(text))return null;
+100:       if(from==='town14'&&to!=='temple_final'&&/7\s*sceaux|sceau|gardien/i.test(text))return null;
+101:       if(to==='town13'&&/team\s*taron|mission|quête/i.test(text))return null;
+102:       if(from==='town6'&&to==='route_littoral'&&/mission|quête/i.test(text))return null;
+103:       return msg;
+104:     };w.__v122Gate=true;w.__v122Base=pg;window.playerQuestGateMessage=w;try{playerQuestGateMessage=w}catch(_){}
+105:   }
+106:   for(const name of ['v107kTownGate','v107kRouteGate','v107kBiomesGate']){
+107:     const fn=window[name];if(typeof fn!=='function'||fn.__v122CreatorGate)continue;
+108:     const w=function(){if(creatorModeV122())return null;return fn.apply(this,arguments)};w.__v122CreatorGate=true;w.__v122Base=fn;window[name]=w;
+109:   }
+### game/V122_REGRESSION_FIXES.js line 138 — citadel
+133:   try{installProgressionRepair()}catch(e){console.warn('V122 progression',e)}
+134:   try{document.documentElement.dataset.valdoraVersion=VERSION}catch(_){}
+135: }
+136: function audit(){
+137:   const s=gameState(),all=species(),boxIds=new Set((s?.box||[]).map(m=>Number(m?.id))),missingBox=all.filter(c=>!boxIds.has(Number(c.id))).map(c=>c.id),missingDex=all.filter(c=>!s?.dex?.[c.id]?.caught).map(c=>c.id);
+138:   let citadel=null,v109=null;try{citadel=window.v106pCitadelRequirements?.()}catch(_){}try{v109=window.ValdoraGameplayV109W?.audit?.()}catch(_){}
+139:   return {version:VERSION,creator:creatorModeV122(),species:all.length,dexMissing:missingDex,pcMissing:missingBox,citadel,v109};
+140: }
+141: window.ValdoraRegressionV122={version:VERSION,install,audit,ensureCreatorCompletion,creatorMode:creatorModeV122};
+142: setInterval(trackBattleParticipant,120);
+143: if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{install();setTimeout(install,500);setTimeout(install,2000);setTimeout(install,6000)});else{install();setTimeout(install,500);setTimeout(install,2000);setTimeout(install,6000)}
+144: })();
+### game/VALDORA_BIOMES_AUDIO_V115.js line 163 — sceau
+158: function routeNode(node,wet=.22,delay=.04){node.connect(audio.dry);if(wet>0){const g=audio.ctx.createGain();g.gain.value=wet;node.connect(g);g.connect(audio.reverb)}if(delay>0){const g=audio.ctx.createGain();g.gain.value=delay;node.connect(g);g.connect(audio.delay)}}
+159: function tone(f,when,dur,vol,cut,mode='soft',detune=0){const ac=audio.ctx;if(!ac)return;const o1=ac.createOscillator(),o2=ac.createOscillator(),filter=ac.createBiquadFilter(),gain=ac.createGain();o1.type='sine';o2.type='triangle';o1.frequency.setValueAtTime(Math.max(34,f),when);o2.frequency.setValueAtTime(Math.max(34,f),when);o1.detune.value=detune-4;o2.detune.value=detune+5;filter.type='lowpass';filter.frequency.setValueAtTime(Math.max(260,cut*.58),when);filter.frequency.exponentialRampToValueAtTime(Math.max(420,cut),when+Math.min(.8,dur*.35));filter.Q.value=mode==='pluck'?1.8:.72;const attack=mode==='pad'?Math.min(.8,dur*.28):mode==='pluck'?.025:.08;gain.gain.setValueAtTime(.0001,when);gain.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),when+attack);gain.gain.exponentialRampToValueAtTime(.0001,when+dur);o1.connect(filter);o2.connect(filter);filter.connect(gain);routeNode(gain,mode==='pad'?.34:.2,mode==='pluck'?.1:.035);o1.start(when);o2.start(when);o1.stop(when+dur+.08);o2.stop(when+dur+.08)}
+160: function noiseVoice(when,dur,vol,type='air'){const ac=audio.ctx;if(!ac||!audio.noise)return;const src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();src.buffer=audio.noise;f.type=type==='thunder'?'lowpass':type==='brush'?'bandpass':'highpass';f.frequency.value=type==='thunder'?160:type==='brush'?3200:5200;f.Q.value=type==='brush'?.8:.45;g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(vol,when+.02);g.gain.exponentialRampToValueAtTime(.0001,when+dur);src.connect(f);f.connect(g);routeNode(g,type==='thunder'?.32:.12,type==='thunder'?.08:0);src.start(when,Math.random()*1.3);src.stop(when+dur)}
+161: function kick(when,vol=.026){const ac=audio.ctx,o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(92,when);o.frequency.exponentialRampToValueAtTime(42,when+.18);g.gain.setValueAtTime(vol,when);g.gain.exponentialRampToValueAtTime(.0001,when+.22);o.connect(g);routeNode(g,.04,0);o.start(when);o.stop(when+.24)}
+162: function currentProfile(){
+163:   if(typeof scene!=='undefined'&&scene==='battle'){let trainer=null;try{trainer=battle?.trainer}catch(_){};if(trainer?.taron||trainer?.taronBossV102Z||/taron/i.test(String(trainer?.name||trainer?.dialog||'')))return['taron',MUSIC.taron];if(trainer?.guardian||trainer?.templeGuard||trainer?.finalBoss||/gardien|sceau|maître/i.test(String(trainer?.name||trainer?.dialog||'')))return['guardian',MUSIC.guardian];return trainer?['trainer',MUSIC.trainer]:['wild',MUSIC.wild]}
+164:   const z=zone();if(MUSIC[z])return[z,MUSIC[z]];const k=themeKey(sceneData());if(['forest','nature','spore'].includes(k))return['forest',MUSIC.forest];if(['lake','azure','river','coast','luminous','eau','harbor','island'].includes(k))return['water',MUSIC.water];if(['mountain','redrock','goldpeaks','simdor','mistpeak','roche','glace','mist'].includes(k))return['mountain',MUSIC.mountain];if(['shadow','ombre','capital'].includes(k))return['shadow',MUSIC.shadow];if(['modern'].includes(k))return['city',MUSIC.city];if(['industrial','feu'].includes(k))return['industrial',MUSIC.industrial];if(['dawn','solar','lumiere'].includes(k))return['dawn',MUSIC.dawn];return['prairie',MUSIC.prairie]
+165: }
+166: function scheduleStep(key,p,when){
+167:   const step=audio.step++,slot=step%16,bar=Math.floor(step/16),ch=p.chords[bar%p.chords.length],beat=60/p.bpm;
+168:   if(slot===0||slot===8){for(let i=0;i<ch.length;i++)tone(freq(p.root,ch[i]+(i===0?-12:0)),when,beat*7.2,p.battle?.0105:.0075,p.cut,'pad',(i-1)*5)}
+169:   if(slot%8===0)tone(freq(p.root,ch[0]-12),when,beat*1.55,p.battle?.021:.012,Math.min(p.cut,900),'soft',-5);
+170:   const melodic=(slot+bar*3)%p.scale.length;if([2,5,10,13].includes(slot)||(p.battle&&slot%2===1))tone(freq(p.root,p.scale[melodic]+12),when+.015,beat*(p.battle?.48:.82),p.battle?.0085:.0058,p.cut*1.15,'pluck',slot%4?4:-4);
+171:   if(slot%4===0&&(p.battle||['city','factory','storm','fire'].includes(p.color)))kick(when,p.battle?.031:.017);
+172:   if((p.battle||['city','factory','storm'].includes(p.color))&&slot%2===1)noiseVoice(when,beat*.18,p.battle?.007:.0045,'brush');
+### game/VALDORA_BIOMES_V112.js line 33 — aubeval, town14
+28:     {id:'town9',name:'Port-Écume',x:70,y:85,theme:'coast',biome:'Littoral d’Écume',desc:'Plages turquoise, embruns, palmiers et quais blancs.'},
+29:     {id:'town10',name:'Luminor',x:78,y:70,theme:'luminous',biome:'Détroit lumineux',desc:'Eaux scintillantes, îlots clairs et balises solaires.'},
+30:     {id:'town11',name:'Brumelac',x:69,y:57,theme:'mist',biome:'Lac des brumes',desc:'Pins bleutés, nappes de brouillard et eau silencieuse.'},
+31:     {id:'town12',name:'Sylvaris',x:72,y:42,theme:'forest',biome:'Forêt sylvestre',desc:'Canopée émeraude, lianes et clairières anciennes.'},
+32:     {id:'town13',name:'Taronis',x:72,y:24,theme:'industrial',biome:'Bastion industriel',desc:'Métal sombre, lumières ambrées et installations de la Team Taron.'},
+33:     {id:'town14',name:'Aubeval',x:83,y:18,theme:'dawn',biome:'Vallée de l’aurore',desc:'Cerisiers roses, roches claires et horizon baigné d’aube.'}
+34:   ];
+35: 
+36:   const LINKS = [
+37:     {id:'route0',a:'town0',b:'town1',name:'Route 1',kind:'main',theme:'prairie',as:'east',bs:'west',ra:'west',rb:'east'},
+38:     {id:'route1',a:'town1',b:'town2',name:'Route 2',kind:'main',theme:'redrock',as:'east',bs:'west',ra:'west',rb:'east'},
+39:     {id:'route2',a:'town2',b:'town3',name:'Route 3',kind:'main',theme:'azure',as:'east',bs:'west',ra:'west',rb:'east'},
+40:     {id:'route3',a:'town3',b:'town4',name:'Route 4',kind:'main',theme:'autumn',as:'east',bs:'west',ra:'west',rb:'east'},
+41:     {id:'route4',a:'town4',b:'town5',name:'Route 5',kind:'main',theme:'river',as:'east',bs:'west',ra:'west',rb:'east',ly:-2},
+42:     {id:'route4bis',a:'town4',b:'town5',name:'Route 4 bis — Lac des Reflets',kind:'lake',theme:'lake',as:'south',bs:'south',ra:'west',rb:'east',curve:9,ly:4},
+### game/VALDORA_BIOMES_V112.js line 56 — town14
+51:     {id:'route8',a:'town8',b:'town9',name:'Route du Littoral',kind:'main',theme:'coast',as:'east',bs:'west',ra:'west',rb:'east',ly:-2},
+52:     {id:'route9',a:'town9',b:'town10',name:'Détroit de Luminor',kind:'main',theme:'coast',as:'east',bs:'west',ra:'west',rb:'east',lx:4},
+53:     {id:'route10',a:'town10',b:'town11',name:'Route des Brumes',kind:'main',theme:'mist',as:'east',bs:'west',ra:'west',rb:'east',lx:4},
+54:     {id:'route11',a:'town11',b:'town12',name:'Route Sylvestre',kind:'main',theme:'forest',as:'east',bs:'west',ra:'west',rb:'east',lx:4},
+55:     {id:'route12',a:'town12',b:'town13',name:'Route de Taronis',kind:'main',theme:'industrial',as:'east',bs:'west',ra:'west',rb:'east',lx:5},
+56:     {id:'route13',a:'town13',b:'town14',name:'Route des Aubes',kind:'main',theme:'dawn',as:'east',bs:'west',ra:'west',rb:'east',ly:-3}
+57:   ];
+58: 
+59:   const LEGEND_TYPES = {
+60:     legend_nature:'Nature', legend_feu:'Feu', legend_eau:'Eau', legend_foudre:'Foudre',
+61:     legend_ombre:'Ombre', legend_roche:'Roche', legend_air:'Air', legend_spore:'Spore',
+62:     legend_glace:'Glace', legend_lumiere:'Lumière', legend_neutre:'Neutre'
+63:   };
+64:   const THEME = {
+65:     prairie:['#76c55f','#d5f3a5'],redrock:['#9e593b','#e7a165'],azure:['#258dc1','#a4eff7'],autumn:['#9b552c','#f0ad49'],
+### game/VALDORA_BIOMES_V112.js line 133 — citadel
+128:     if(document.getElementById('v112-style'))return;const style=document.createElement('style');style.id='v112-style';style.textContent=`
+129:       .v112-overlay{position:fixed;inset:0;z-index:90000;background:rgba(3,10,20,.9);backdrop-filter:blur(11px);display:grid;place-items:center;padding:18px;font-family:Inter,Segoe UI,sans-serif;color:#f1fbff}
+130:       .v112-shell{width:min(1410px,98vw);height:min(880px,96vh);border-radius:24px;overflow:hidden;border:1px solid #8beaff77;background:#071a25;box-shadow:0 30px 110px #000c;display:flex;flex-direction:column}
+131:       .v112-head{height:68px;display:flex;align-items:center;padding:0 20px;background:linear-gradient(90deg,#164e68,#122b3b);border-bottom:1px solid #8beaff44}.v112-head h2{margin:0;font-size:22px}.v112-head small{display:block;color:#b9dae5}.v112-head button{margin-left:auto;border:1px solid #a8ebff88;background:#174a60;color:white;border-radius:12px;padding:10px 15px;font-weight:900;cursor:pointer}
+132:       .v112-body{display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:0;flex:1}.v112-stage{position:relative;overflow:hidden;background:#04121b}.v112-mapimage{width:100%;height:100%;object-fit:cover;display:block}.v112-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.v112-route path{fill:none;stroke:#ffe099;stroke-width:.55;stroke-linecap:round;stroke-dasharray:1.3 1;filter:drop-shadow(0 0 2px #3a1f00)}.v112-route.simdor path{stroke:#8fe7ff}.v112-route.lake path{stroke:#50d7ff;stroke-width:.8;stroke-dasharray:.6 .7}.v112-route text{display:none}.v112-route.simdor text{fill:#bdf3ff}.v112-route.lake text{fill:#b6f4ff}
+133:       .v112-node{position:absolute;transform:translate(-50%,-50%);background:none;border:0;color:white;text-align:center;cursor:pointer;filter:drop-shadow(0 3px 5px #000)}.v112-node i{display:grid;place-items:center;width:21px;height:21px;margin:auto;border-radius:50%;background:#21aecd;border:3px solid #fff;box-shadow:0 0 0 4px #07566faa,0 0 14px #7bf1ff}.v112-node span{display:block;margin-top:4px;padding:3px 6px;border-radius:7px;background:#061924e8;font-size:10px;font-weight:900;white-space:nowrap}.v112-node.locked i{background:#59666c;box-shadow:none}.v112-node.locked span{display:none}.v112-node.current i{background:#ffe45e;box-shadow:0 0 0 5px #ffaf2688,0 0 22px #fff09a}.v112-node.tracked i{background:#ff625f;animation:v112pulse 1s infinite alternate}.v112-special{position:absolute;transform:translate(-50%,-50%);padding:6px 8px;border-radius:10px;background:#321f57dd;border:1px solid #dfc2ff;color:#fff;font-size:10px;font-weight:900;text-align:center;box-shadow:0 0 18px #a966ff99}.v112-special.citadel{background:#6b3442dd;border-color:#ffd3b3}
+134:       .v112-side{padding:18px;background:linear-gradient(180deg,#0b2836,#071821);overflow:auto}.v112-side h3{font-size:25px;margin:0 0 4px}.v112-biome{display:inline-block;border-radius:20px;padding:5px 10px;background:#ffffff12;border:1px solid #ffffff26;color:#a8edff;font-size:12px;font-weight:900}.v112-side p{line-height:1.5;color:#cfe1e7}.v112-kpi{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:13px 0}.v112-kpi div{padding:10px;border-radius:12px;background:#ffffff0c;border:1px solid #ffffff17}.v112-kpi b{display:block;font-size:19px;color:#78e7ff}.v112-linklist{display:grid;gap:7px;margin:12px 0}.v112-link{padding:8px 10px;border-radius:10px;background:#ffffff0a;border-left:3px solid #55cfe9;font-size:12px}.v112-link button{float:right;margin-top:-3px;border:1px solid #8de1f066;background:#143d50;color:#fff;border-radius:7px;padding:4px 7px;font-size:10px;font-weight:900;cursor:pointer}.v112-actions{display:grid;gap:8px;margin-top:14px}.v112-actions button{border:1px solid #9be6ff66;background:#174c62;color:white;border-radius:11px;padding:10px 12px;font-weight:900;cursor:pointer}.v112-actions button:hover{background:#26748e}.v112-actions button[disabled]{opacity:.38;cursor:not-allowed}.v112-key{font-size:11px;color:#92adb7;margin-top:14px}
+135:       body:has(#v112-map) #v76routes{display:none!important}
+136:       @keyframes v112pulse{to{transform:scale(1.27);box-shadow:0 0 0 8px #ff6b6544,0 0 25px #ff9b79}}@media(max-width:850px){.v112-body{grid-template-columns:1fr}.v112-side{position:absolute;right:8px;bottom:8px;width:min(310px,82vw);max-height:48%;border-radius:15px}.v112-route text{font-size:2px}}
+137:     `;document.head.appendChild(style)
+138:   }
+139:   function closeMap(){document.getElementById('v112-map')?.remove()}
+140:   function renderSide(root,id){
+141:     const row=place(id)||LOCATIONS[0],side=root.querySelector('.v112-side'),seen=discovered(row.id),tracked=bookState().trackedZone===row.id,links=connections(row.id),canFly=seen&&row.id!==state.zone&&(creator()||state.fly||window.v108mCanUseVolNow?.()),canBus=seen&&/^town\d+$/.test(row.id)&&row.id!==state.zone;
+142:     const lakePreview=creator()&&['town4','town5'].includes(row.id)?'<button data-lake-preview>◉ Aperçu Créateur : Lac des Reflets</button>':'';
+### game/VALDORA_BIOMES_V112.js line 144 — seal, sceau
+139:   function closeMap(){document.getElementById('v112-map')?.remove()}
+140:   function renderSide(root,id){
+141:     const row=place(id)||LOCATIONS[0],side=root.querySelector('.v112-side'),seen=discovered(row.id),tracked=bookState().trackedZone===row.id,links=connections(row.id),canFly=seen&&row.id!==state.zone&&(creator()||state.fly||window.v108mCanUseVolNow?.()),canBus=seen&&/^town\d+$/.test(row.id)&&row.id!==state.zone;
+142:     const lakePreview=creator()&&['town4','town5'].includes(row.id)?'<button data-lake-preview>◉ Aperçu Créateur : Lac des Reflets</button>':'';
+143:     const zonePreview=creator()?`<button data-zone-preview>▶ Aperçu Créateur : ${esc(row.name)}</button>`:'';
+144:     side.innerHTML=`<h3>${seen?esc(row.name):'Territoire inconnu'}</h3><span class="v112-biome">${seen?esc(row.biome):'Biome à découvrir'}</span><p>${seen?esc(row.desc):'Explore les routes adjacentes pour révéler ce territoire.'}</p><div class="v112-kpi"><div><b>${LOCATIONS.filter(x=>discovered(x.id)).length}/${LOCATIONS.length}</b>lieux</div><div><b>${(state.seals||[]).length}/7</b>Sceaux</div></div>${seen?`<div class="v112-linklist">${links.map(link=>`<div class="v112-link"><b>${esc(link.route)}</b>${creator()?`<button data-route-preview="${esc(link.id)}">Aperçu</button>`:''}<br>vers ${esc(place(link.to)?.name||SCENES?.[link.to]?.name||link.to)}</div>`).join('')}</div>`:''}<div class="v112-actions"><button data-track ${seen?'':'disabled'}>${tracked?'✓ Destination suivie':'Suivre cette destination'}</button><button data-bus ${canBus?'':'disabled'}>🚌 Bus régional — 40 V</button><button data-fly ${canFly?'':'disabled'}>✦ Utiliser Vol</button>${zonePreview}${lakePreview}<button data-book>Ouvrir le Livret secret</button></div><div class="v112-key">Ligne dorée : itinéraire principal<br>Ligne bleue : accès à Simdor<br>Ligne cyan : traversée du Lac des Reflets<br>Sélectionnez un lieu pour afficher le nom exact de ses routes.</div>`;
+145:     side.querySelector('[data-track]').onclick=()=>{if(!seen)return;bookState().trackedZone=row.id;persist();openMap(row.id)};
+146:     side.querySelector('[data-bus]').onclick=()=>{if(!canBus)return;root.remove();window.ValdoraProV111?.busTravel?.(row.id)};
+147:     side.querySelector('[data-fly]').onclick=()=>{if(!canFly)return;root.remove();window.flyTo?.(row.id)};
+148:     side.querySelector('[data-book]').onclick=()=>{root.remove();window.ValdoraProV111?.openBook?.()};
+149:     side.querySelectorAll('[data-route-preview]').forEach(button=>button.onclick=()=>{root.remove();creatorPreviewZone(button.dataset.routePreview)});
+150:     const zoneButton=side.querySelector('[data-zone-preview]');if(zoneButton)zoneButton.onclick=()=>{root.remove();creatorPreviewZone(row.id)};
+151:     const preview=side.querySelector('[data-lake-preview]');if(preview)preview.onclick=()=>{root.remove();creatorPreviewZone('route4bis')};
+152:   }
+153:   function renderLegendSide(root){
+### game/VALDORA_BIOMES_V112.js line 154 — aubeval
+149:     side.querySelectorAll('[data-route-preview]').forEach(button=>button.onclick=()=>{root.remove();creatorPreviewZone(button.dataset.routePreview)});
+150:     const zoneButton=side.querySelector('[data-zone-preview]');if(zoneButton)zoneButton.onclick=()=>{root.remove();creatorPreviewZone(row.id)};
+151:     const preview=side.querySelector('[data-lake-preview]');if(preview)preview.onclick=()=>{root.remove();creatorPreviewZone('route4bis')};
+152:   }
+153:   function renderLegendSide(root){
+154:     const side=root.querySelector('.v112-side'),permit=creator()||!!state.flags?.aubevalExpeditionLicense;
+155:     side.innerHTML=`<h3>Biomes légendaires</h3><span class="v112-biome">Onze sanctuaires thématiques</span><p>Depuis Aubeval, la Route des Horizons mène au Carrefour des Sanctuaires. Chaque biome possède désormais sa propre palette, son atmosphère animée et ses monuments.</p><div class="v112-linklist">${Object.entries(LEGEND_TYPES).map(([zone,type])=>`<div class="v112-link"><b>${esc(type)}</b> — ${esc(SCENES?.[zone]?.name||zone)}${creator()?`<div class="v112-actions"><button data-legend="${zone}">Prévisualiser</button></div>`:''}</div>`).join('')}</div>${!permit?'<p><small>Obtenez le Permis des Horizons à Aubeval pour ouvrir ces expéditions.</small></p>':''}`;
+156:     side.querySelectorAll('[data-legend]').forEach(button=>button.onclick=()=>{root.remove();creatorPreviewZone(button.dataset.legend)});
+157:   }
+158:   function openMap(selected){
+159:     injectMapStyle();document.getElementById('v111-map')?.remove();closeMap();const root=document.createElement('div');root.id='v112-map';root.className='v112-overlay';const current=selected||bookState().trackedZone||state.zone||'town0';
+160:     root.innerHTML=`<div class="v112-shell"><header class="v112-head"><div><h2>Carte vivante de Valdora</h2><small>Réseau canonique V114 — sorties distinctes, routes alignées et accès finaux</small></div><button data-close>Fermer ✕</button></header><div class="v112-body"><section class="v112-stage"><img class="v112-mapimage" src="${MAP_IMAGE}" alt="Nouvelle carte illustrée de Valdora"><svg class="v112-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${LINKS.map(lineMarkup).join('')}<path d="M 83 18 L 92 11" style="stroke:#ffd3b3;stroke-width:.7;stroke-dasharray:1 1"/><path d="M 83 18 Q 91 35 89 64" style="fill:none;stroke:#d6a5ff;stroke-width:.7;stroke-dasharray:1 1"/></svg>${mapNodes()}<div class="v112-special citadel" style="left:92%;top:11%">♥ Citadelle du Cœur</div><button class="v112-special" data-legends style="left:89%;top:64%">✦ Biomes légendaires</button></section><aside class="v112-side"></aside></div></div>`;
+161:     root.querySelector('[data-close]').onclick=()=>root.remove();root.addEventListener('click',event=>{if(event.target===root)root.remove()});root.querySelectorAll('[data-zone]').forEach(button=>button.onclick=()=>renderSide(root,button.dataset.zone));root.querySelector('[data-legends]').onclick=()=>renderLegendSide(root);document.body.appendChild(root);renderSide(root,current);return root
+162:   }
+163: 
+### game/VALDORA_LIVING_WORLD_V118.js line 50 — seal
+45:   {id:'cycle_town9_town10',a:'town9',b:'town10'},
+46:   {id:'cycle_route9_route11',a:'route8',b:'route10'},
+47:   {id:'cycle_route11_route13',a:'route10',b:'route12'}
+48: ];
+49: let bikeNoticeAtV119=0;
+50: function bikeUnlockedV119(){return creator()||!!state?.flags?.v119BikeUnlocked||(Array.isArray(state?.seals)&&state.seals.length>=3)}
+51: function cycleZoneV121(zone=state?.zone){return CYCLE_LINKS_V121.some(l=>l.id===zone)}
+52: function cycleKnownV121(zone){
+53:   if(creator()||state?.zone===zone)return true;
+54:   const lists=[state?.discovered,state?.visited,state?.visitedZones,state?.visitedCities];
+55:   return lists.some(a=>Array.isArray(a)&&a.includes(zone))
+56: }
+57: function cycleSceneV121(link){
+58:   const width=2800,height=1400,path=[[130,700],[480,560],[850,760],[1220,610],[1580,790],[1950,590],[2320,750],[2670,700]];
+59:   return{name:`Voie cyclable — ${sceneFor(link.a)?.name||link.a} / ${sceneFor(link.b)?.name||link.b}`,kind:'route',cycleOnlyV121:true,routeEngine:'V121-CYCLE',width,height,buildings:[],trainers:[],objects:[],obstacles:[],mObstacles:[],grass:[],v105dTrees:[],v105dBushes:[],v105dCell:220,v105dCore:118,v105dRoad:new Set(),v76Path:path,v104Path:path,kPath:path,exits:[
+### game/VALDORA_LIVING_WORLD_V118.js line 90 — seal
+85:   }
+86:   return true
+87: }
+88: function ensureBikeUnlockV119(){
+89:   state.flags=state.flags||{};
+90:   if(Array.isArray(state.seals)&&state.seals.length>=3&&!state.flags.v119BikeUnlocked){
+91:     state.flags.v119BikeUnlocked=true;state.bike=false;
+92:     if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! De nouvelles voies cyclables permettent maintenant de relier rapidement des zones déjà découvertes.')}catch(_){} }
+93:     try{save?.(false)}catch(_){}
+94:   }
+95:   if(!bikeUnlockedV119()&&state.bike)state.bike=false;ensureCycleNetworkV121();return bikeUnlockedV119()
+96: }
+97: function cycleSegmentsV119(){return[]}
+98: function onCycleTrackV119(zone=state?.zone){return cycleZoneV121(zone)}
+99: function drawCycleTracksV119(){/* V121 : aucun marquage superposé aux routes normales. */}
+### game/VALDORA_LIVING_WORLD_V118.js line 104 — sceau
+99: function drawCycleTracksV119(){/* V121 : aucun marquage superposé aux routes normales. */}
+100: function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1200)return;bikeNoticeAtV119=now;try{toast?.(msg)}catch(_){}}
+101: function refreshBikeUiV119(){
+102:   const unlocked=ensureBikeUnlockV119(),onPath=cycleZoneV121();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;if(onPath)state.bike=true;else if(state.bike)state.bike=false;
+103:   let panel=document.getElementById('v119CyclePanel'),btn=document.getElementById('v119BikeBtn');
+104:   if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Après 3 Sceaux, la bicyclette ouvre des voies dédiées servant de raccourcis entre des zones déjà découvertes.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
+105:   if(!btn)return;btn.disabled=true;btn.textContent=!unlocked?'🔒 Bicyclette — 3 Sceaux':onPath?'🚲 Voie cyclable — vitesse ×2':'🚲 Bicyclette débloquée — cherche les voies cyclables'
+106: }
+107: function toggleBikeV119(){if(cycleZoneV121()){state.bike=true;bikeNoticeV119('La bicyclette est utilisée automatiquement sur cette voie.');return true}bikeNoticeV119('La bicyclette s’utilise sur les voies cyclables dédiées.');return false}
+108: function cycleMoveV119(dx,dy,dir){
+109:   ensureBikeUnlockV119();const startZone=state?.zone,onPath=cycleZoneV121(startZone);state.bike=!!onPath;let result=false,passes=onPath?2:1;
+110:   for(let i=0;i<passes;i++){const r=typeof BASE.move==='function'?BASE.move.apply(this,arguments):false;result=!!r||result;if(state?.zone!==startZone)break}
+111:   if(!cycleZoneV121(state?.zone))state.bike=false;refreshBikeUiV119();return result
+112: }
+113: window.ValdoraCycleV119={version:'V121-CYCLE-ROUTES',unlocked:bikeUnlockedV119,onTrack:onCycleTrackV119,toggle:toggleBikeV119,segments:cycleSegmentsV119,refresh:refreshBikeUiV119,links:CYCLE_LINKS_V121,repair:ensureCycleNetworkV121};
+### game/VALDORA_LIVING_WORLD_V118.js line 123 — aubeval, town14
+118:   s.version=VERSION;s.towns=s.towns||{};s.rewards=s.rewards||{};s.region=s.region||{};
+119:   for(const zone of TOWNS)s.towns[zone]=s.towns[zone]||{talks:0,uniqueNpcs:{},interiors:{},visits:0,contracts:{}};
+120:   return s
+121: }
+122: function townState(zone=state.zone){return stateV118().towns[zone]||(stateV118().towns[zone]={talks:0,uniqueNpcs:{},interiors:{},visits:0,contracts:{}})}
+123: function zoneName(zone){return sceneFor(zone)?.name||({town0:'Clairval',town1:'Rochebrune',town2:'Azurive',town3:'Montfaucon',town4:'Belrive',town5:'Soleria',town6:'Novacité',town7:'Valombre',town8:"Cimes d’Or",town9:'Port-Écume',town10:'Luminon',town11:'Brumlac',town12:'Silvaris',town13:'Taronis',town14:'Aubeval'}[zone]||'Valdora')}
+124: 
+125: // ---------------------------------------------------------------------
+126: // Banque narrative : 96 dialogues différents par ville, soit 1 440
+127: // compositions contextuelles avant même les variantes de rôle/progression.
+128: // ---------------------------------------------------------------------
+129: const OPENERS=[
+130:   'Bonjour, voyageur.','Tiens, te voilà !','Hé, une petite minute.','Bienvenue dans le quartier.','On se croise enfin.','Je faisais justement une pause.','Tu arrives au bon moment.','Entre voyageurs, on peut partager une information.','Quel plaisir de voir une nouvelle tête.','Tu as l’air d’avoir beaucoup marché.','Je surveille souvent les allées et venues.','Approche, j’ai peut-être quelque chose d’utile à te dire.','La journée est animée, pas vrai ?','J’aime prendre le temps de parler aux dresseurs.','On n’apprend jamais autant qu’en discutant.','Les nouvelles circulent vite à Valdora.'
+131: ];
+132: const CONTEXTS=[
+### game/VALDORA_LIVING_WORLD_V118.js line 163 — sceau
+158:   'Le journal de vie locale récompense les dresseurs qui visitent réellement chaque ville.',
+159:   'Les transports font gagner du temps, mais marcher permet de rencontrer davantage d’habitants.',
+160:   'Une équipe variée résiste mieux aux longues séries de combats qu’un groupe spécialisé dans un seul type.',
+161:   'Les meubles interactifs ne sont pas tous décoratifs : certains donnent accès à des services ou à des fragments d’histoire.',
+162:   'Les missions facultatives peuvent fournir les ressources nécessaires avant un Gardien exigeant.',
+163:   'Revenir après avoir gagné un Sceau change parfois le regard que les habitants portent sur toi.'
+164: ];
+165: const ENDINGS=[
+166:   'Bonne route, et reviens donner de tes nouvelles.','Prends ton temps : Valdora récompense la curiosité.','On se reparlera sûrement avec d’autres nouvelles.','Que ton équipe reste soudée.','Garde les yeux ouverts sur le prochain chemin.','J’espère que ce conseil te servira.','Profite de la ville avant de repartir.','Les meilleures aventures ne sont pas toujours les plus rapides.','À bientôt, voyageur.','Je serai curieux de voir comment ton histoire évolue.','Passe saluer les autres habitants, chacun a son point de vue.'
+167: ];
+168: const LOCAL={
+169:   town0:['À Clairval, tout commence par de petites habitudes : soigner, observer puis oser prendre la Route 1','Les herbes de Clairval sont un terrain idéal pour apprendre sans brûler les étapes','Le laboratoire attire des curieux depuis que le Professeur étudie la Résonance','Les habitants protègent l’atmosphère paisible de la place tout en préparant les nouveaux départs','La Route 1 paraît familière, mais elle teste déjà la préparation des jeunes équipes','Les maisons de Clairval conservent des souvenirs des toutes premières expéditions'],
+170:   town1:['Rochebrune vit au rythme de la pierre, des sentiers et des voyageurs venus de la Route 1','Les habitants savent lire les fissures de la roche comme d’autres lisent une carte','Les bois voisins abritent des espèces qui n’aiment pas les passages trop bruyants','Les artisans locaux échangent volontiers des conseils contre une bonne histoire de voyage','La Route 2 demande plus d’attention qu’elle n’en donne l’impression','Les pierres anciennes autour de la ville portent encore des marques difficiles à dater'],
+171:   town2:['Azurive change d’humeur avec le vent qui traverse le lac','Les pêcheurs observent les remous pour prévoir l’activité des Éclats Eau','La Route 3 longe des zones où les traces disparaissent très vite','Les habitants entretiennent des pontons et des chemins pour protéger les rives','Les chercheurs comparent la couleur de l’eau aux phénomènes de Résonance','Les nuits calmes d’Azurive sont parfois interrompues par des lueurs sous la surface'],
+172:   town3:['Montfaucon est un carrefour où l’on hésite souvent entre la corniche et la Route 4','Les hauteurs donnent une vue superbe, mais le vent peut fatiguer une équipe mal préparée','Les habitants connaissent des histoires différentes selon le chemin par lequel on arrive','La corniche de Simdor attire les marcheurs qui aiment les itinéraires exigeants','Les oiseaux et les Éclats Air utilisent les courants qui longent les falaises','Le marché local mélange produits des montagnes et marchandises venues de Belrive'],
+### game/VALDORA_LIVING_WORLD_V118.js line 182 — aubeval
+177:   town8:["Les Cimes d’Or dominent une grande partie de Valdora et changent de couleur au coucher du soleil","La Route du littoral commence après des reliefs où le vent devient imprévisible","Les habitants savent reconnaître les signes annonçant un changement brutal de météo","Les ponts de montagne sont surveillés avec soin pour rester praticables","Les Éclats Air et Roche se croisent souvent autour des hauteurs","Les voyageurs racontent que la vue aide à comprendre la forme entière de la région"],
+178:   town9:['Port-Écume vit au rythme des marées, des départs et des cargaisons','La Route du littoral laisse le sel jusque sur les vêtements des voyageurs','Le détroit de Luminon attire des espèces marines difficiles à observer ailleurs','Les marins échangent des rumeurs venues de régions très éloignées','Les maisons proches de la plage sont conçues pour résister aux vents forts','Les quais s’animent davantage lorsque les transports arrivent ensemble'],
+179:   town10:['Luminon éclaire ses rues jusque tard et attire de nombreux chercheurs','Le détroit apporte chaque jour des voyageurs et des histoires différentes','La Route des Brumes commence dans une lumière trompeusement douce','Les habitants étudient les phénomènes lumineux sans négliger les créatures de l’ombre','Les ateliers testent des matériaux capables de réagir aux Éclats','Les places de Luminon accueillent souvent des démonstrations de combat'],
+180:   town11:['Brumlac se découvre lentement, entre eau calme et nappes de brume','La Route Sylvestre commence là où les roseaux laissent place aux arbres','Les habitants connaissent des repères invisibles aux voyageurs pressés','Les sons portent très loin au-dessus du lac lorsque la brume tombe','Les chercheurs surveillent les variations d’humidité autour des habitats sauvages','Les anciennes maisons conservent des cartes dessinées avant les routes modernes'],
+181:   town12:['Silvaris est une véritable porte vers les forêts profondes','La végétation change rapidement dès qu’on quitte les rues entretenues','La Route de Taronis est surveillée depuis les dernières opérations ennemies','Les habitants savent reconnaître les plantes utiles sans abîmer les sous-bois','Les espèces Nature et Spore partagent des territoires très différents','Les sentiers forestiers révèlent davantage de détails à ceux qui reviennent plusieurs fois'],
+182:   town13:['Taronis porte encore les traces des opérations de la Team Taron','La métropole réunit des habitants venus de toutes les étapes du voyage','La Route des Aubes est surveillée comme un passage stratégique','Les bâtiments publics restent animés jusque tard à cause des enquêtes en cours','Les dresseurs échangent des informations avant de poursuivre vers Aubeval','Les quartiers rénovés côtoient des zones où l’histoire récente reste visible'],
+183:   town14:['Aubeval est la dernière grande halte avant la Citadelle du Cœur et les expéditions légendaires','Les voyageurs viennent ici vérifier une dernière fois leur équipe et leurs réserves','La Route des Aubes donne à chaque arrivée une impression de nouveau départ','Les habitants collectionnent les récits de ceux qui ont parcouru toute Valdora','Les biomes légendaires ne s’ouvrent qu’aux équipes réellement préparées','La lumière du matin donne à la ville une atmosphère différente de toutes les autres']
+184: };
+185: const DIALOGUE_BANK={};
+186: function buildDialogueBank(){
+187:   for(const [zi,zone] of TOWNS.entries()){
+188:     const local=LOCAL[zone]||['Cette partie de Valdora a développé ses propres habitudes'];
+189:     DIALOGUE_BANK[zone]=Array.from({length:96},(_,i)=>{
+190:       const op=OPENERS[(i*5+zi)%OPENERS.length],loc=local[(i*7+zi)%local.length],ctx=CONTEXTS[(i*11+zi*3)%CONTEXTS.length],tip=TIPS[(i*13+zi*5)%TIPS.length],end=ENDINGS[(i*17+zi)%ENDINGS.length];
+191:       return `${op} ${loc}. ${ctx} ${tip} ${end}`
+### game/VALDORA_LIVING_WORLD_V118.js line 227 — seal
+222: function buildingId(b,session){return String(b?.id||b?.label||b?.name||`${session?.key||'batiment'}:${Math.round(b?.x||0)}:${Math.round(b?.y||0)}`)}
+223: function recordInterior(session){
+224:   const zone=session?.zone;if(!TOWNS.includes(zone))return;const key=buildingId(session.source,session);if(session._v118RecordedVisitKey===key)return;session._v118RecordedVisitKey=key;const t=townState(zone);t.visits=Number(t.visits||0)+1;t.interiors[key]=true;checkContracts(zone)
+225: }
+226: function talkLine(n,zone=state.zone,context='extérieur'){
+227:   const t=townState(zone),key=String(n?.id||n?.name||n?.look||'habitant');n._v118Talk=Number(n._v118Talk||0)+1;const bank=DIALOGUE_BANK[zone]||DIALOGUE_BANK.town0,stage=Math.min(4,(state.seals||[]).length),index=(hash(`${zone}|${key}|${context}`)+n._v118Talk*37+stage*19)%bank.length;
+228:   recordTalk(n,zone);const role=n.v118Role?`<small>${n.v118Role}</small><br>`:'';return role+bank[index]
+229: }
+230: 
+231: // ---------------------------------------------------------------------
+232: // Population extérieure : génération, placement sans chevauchement et
+233: // trajectoires réservées sur le graphe réel des rues.
+234: // ---------------------------------------------------------------------
+235: function roadNodes(sc){
+236:   if(sc?._v118RoadNodes&&sc._v118RoadNodes.sig===`${sc.v105dCell}|${sc.v105dRoad?.size}`)return sc._v118RoadNodes;
+### game/VALDORA_LIVING_WORLD_V118.js line 339 — seal
+334: function talkWorldNpc(n){
+335:   if(!n)return false;faceWorldNpc(n);recordTalk(n,state.zone);
+336:   if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}
+337:   try{if(questStillActive(n)&&typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}
+338:   try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}
+339:   n._v118Talk=Number(n._v118Talk||0)+1;const bank=DIALOGUE_BANK[state.zone]||DIALOGUE_BANK.town0,index=(hash(`${state.zone}|${n.id||n.name}`)+n._v118Talk*37+(state.seals||[]).length*19)%bank.length,role=n.v118Role?`<small>${n.v118Role}</small><br>`:'';
+340:   if(typeof dialog==='function')dialog(`<b>${n.name||n.dialog||'Habitant'}</b><br>${role}${bank[index]}`);return true
+341: }
+342: function worldInteractV118(){
+343:   if(typeof scene!=='undefined'&&scene==='world'){
+344:     // V122 : les agents Team Taron vivent sur les routes et ne font pas partie de nearWorldNpc().
+345:     try{
+346:       const taron=typeof currentTaronNPC==='function'?currentTaronNPC():null;
+347:       const d=taron?Math.hypot(Number(state?.x||0)-Number(taron.x||0),Number(state?.y||0)-Number(taron.y||0)):Infinity;
+348:       if(taron&&d<=72){
+### game/VALDORA_LIVING_WORLD_V118.js line 381 — citadel, citadelle
+376: // Intérieurs habités : plusieurs personnes par pièce, placement sur les
+377: // zones réellement libres du mobilier V105X et interactions individuelles.
+378: // ---------------------------------------------------------------------
+379: const INTERIOR_ROLES={
+380:   maison:['habitante','parent','jeune dresseuse','voisin en visite'],residence:['résidente','voisin','gardienne de l’immeuble','livreur'],immeuble_moyen:['résidente','employé de bureau','technicienne','visiteur'],grand_immeuble:['résidente','agent d’entretien','consultante','visiteur'],
+381:   centre_soins:['patient','accompagnatrice','stagiaire médicale','dresseur en convalescence'],laboratoire:['assistante de recherche','étudiant','technicienne','observateur du Codex'],boutique:['cliente','fournisseur','apprentie marchande','collectionneur'],gare:['voyageuse','contrôleur','employée des quais','touriste'],musee:['visiteuse','archiviste','guide','chercheuse'],ecole:['élève','professeur invité','surveillante','parent'],gardien:['aspirante','arbitre','supporter','dresseur local'],hotel:['cliente','concierge','voyageuse','bagagiste'],restaurant_cafe:['cliente','cuisinier','serveuse','habitué'],bureau_guilde:['éclaireuse','cartographe','contractuelle','responsable de mission'],bibliotheque_publique:['lectrice','archiviste','étudiante','bibliothécaire adjointe'],citadelle:['gardienne','érudit','émissaire','stratège']
+382: };
+383: const INTERIOR_COUNT={maison:3,residence:4,immeuble_moyen:4,grand_immeuble:5,centre_soins:4,laboratoire:4,boutique:3,gare:5,musee:5,ecole:5,gardien:4,hotel:4,restaurant_cafe:5,bureau_guilde:4,bibliotheque_publique:5,citadelle:4};
+384: function interiorSession(){try{return BASE.interior?.session?.()||null}catch(_){return null}}
+385: function roomGeometry(){const rr=BASE.interior?.rawRoom?.(),room=rr?.room||{};return{rr,w:Math.max(1,Number(room.width)||1200),h:Math.max(1,Number(room.height)||800)}}
+386: function furnRect(m){if(m?.collision)return{x:Number(m.collision.x)||0,y:Number(m.collision.y)||0,w:Number(m.collision.w)||0,h:Number(m.collision.h)||0};return{x:Number(m?.x)||0,y:Number(m?.y)||0,w:Number(m?.w)||0,h:Number(m?.h)||0}}
+387: function interiorCandidates(g,furniture){
+388:   const out=[];for(let y=92;y<g.h-92;y+=72)for(let x=74;x<g.w-74;x+=84){if(y>g.h-150&&Math.abs(x-g.w/2)<150)continue;const p={x,y};if(furniture.some(m=>{const r=furnRect(m);return x>r.x-36&&x<r.x+r.w+36&&y>r.y-42&&y<r.y+r.h+38}))continue;out.push(p)}return out
+389: }
+390: function ensureInteriorPopulation(record=false){
+### game/VALDORA_LIVING_WORLD_V118.js line 645 — seal
+640:   if(!document.getElementById('v118-living-style')){const st=document.createElement('style');st.id='v118-living-style';st.textContent='#v118-living-panel{position:fixed;inset:0;z-index:100080;background:rgba(3,12,21,.88);display:none;place-items:center;padding:16px}#v118-living-card{width:min(1040px,97vw);max-height:94vh;overflow:auto;background:#f4f0e5;color:#173548;border:4px solid #173548;border-radius:24px;padding:22px;box-shadow:0 30px 100px #000c}.v118hero h2{margin:0}.v118summary{display:flex;gap:9px;flex-wrap:wrap;margin:13px 0}.v118summary b{background:#173548;color:#fff;padding:8px 12px;border-radius:999px}.v118towns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.v118towns section{background:#fff;border:2px solid #b9c8c4;border-radius:15px;padding:12px}.v118towns h3{margin:0 0 8px}.v118contract{border-top:1px solid #d8dfda;padding:8px 0}.v118contract span{float:right;font-size:11px;color:#52666e}.v118contract.done{color:#287653}.v118bar{height:6px;background:#dce5e2;border-radius:99px;overflow:hidden;margin-top:5px}.v118bar i{display:block;height:100%;background:linear-gradient(90deg,#46a978,#e7bd56)}.v118creator{display:flex;gap:8px;margin-top:14px}.v118creator button,#v118-living-close{padding:11px 15px;border:2px solid #173548;border-radius:10px;background:#fff;color:#173548;font-weight:900;cursor:pointer}@media(max-width:780px){.v118towns{grid-template-columns:1fr}}aside .grid[data-v118-stable="1"]{grid-auto-rows:minmax(42px,auto);align-con …[truncated]
+641:   let panel=document.getElementById('v118-living-panel');if(!panel){panel=document.createElement('div');panel.id='v118-living-panel';panel.innerHTML='<div id="v118-living-card"><div data-content></div><button id="v118-living-close">Fermer</button></div>';document.body.appendChild(panel);panel.querySelector('#v118-living-close').onclick=()=>panel.style.display='none';panel.addEventListener('click',e=>{if(e.target===panel)panel.style.display='none'})}
+642:   return panel
+643: }
+644: function openPanel(){const p=installPanel();p.querySelector('[data-content]').innerHTML=panelHtml();p.style.display='grid'}
+645: const MENU_ORDER=['objectivesBtnV84','teamBtn','dexBtn','journalBtn','v118LivingBtn','bag','musicBtn','save','flyBtnV106Y','challengeBtnV106Y','adventurePlusV106Z','v107fSaveMenu','v107fHelp','v111MapBtn','v109aLivretBtn','voiceBtn','v96ImportSave','sealCaseBtnV93','creatorNavV105N'];
+646: function stabilizeSidebar(){
+647:   const grid=document.getElementById('musicBtn')?.parentElement||document.querySelector('aside .grid');if(!grid)return false;let btn=document.getElementById('v118LivingBtn');if(!btn){btn=document.createElement('button');btn.id='v118LivingBtn';btn.textContent='Vie locale V118';btn.onclick=openPanel;grid.appendChild(btn)}
+648:   const map=document.getElementById('v111MapBtn');if(map&&map.textContent!=='Carte du monde V118')map.textContent='Carte du monde V118';const shrine=document.getElementById('v117-sanctuaries');if(shrine&&shrine.textContent!=='Sanctuaires V118')shrine.textContent='Sanctuaires V118';
+649:   for(const b of [...grid.querySelectorAll('button')])if(!b.id&&!String(b.textContent||'').trim())b.remove();const desired=MENU_ORDER.map(id=>document.getElementById(id)).filter(el=>el?.parentElement===grid),currentButtons=[...grid.children].filter(el=>el.tagName==='BUTTON'),extras=currentButtons.filter(el=>!desired.includes(el)),wanted=[...desired,...extras];if(wanted.length===currentButtons.length&&wanted.some((el,i)=>el!==currentButtons[i]))for(const el of wanted)grid.appendChild(el);grid.dataset.v117Stable='1';grid.dataset.v118Stable='1';installPanel();return true
+650: }
+651: function enforceIdentity(){
+652:   const label='Éclats Sauvages — Valdora V118 Monde Vivant';if(document.title!==label)document.title=label;const brand=document.querySelector('.brand'),wanted=`ÉCLATS SAUVAGES — VALDORA V118 — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==wanted)brand.textContent=wanted;const map=document.getElementById('v111MapBtn');if(map&&map.textContent!=='Carte du monde V118')map.textContent='Carte du monde V118';document.documentElement.dataset.valdoraV118=VERSION;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.valdoraPolish=VERSION
+653: }
+654: 
+### game/VALDORA_POLISH_V113.js line 14 — citadel, citadelle
+9:  swimmerRight:'assets/v113/swimmer_npc_right_v113.png',
+10:  swimmerBack:'assets/v113/swimmer_npc_back_v113.png',
+11:  playerFront:'assets/v113/player_buoy_front_v113.png',
+12:  playerRight:'assets/v113/player_buoy_right_v113.png',
+13:  playerBack:'assets/v113/player_buoy_back_v113.png',
+14:  citadel:'assets/v113/citadelle_coeur_canon_v113.png',
+15:  citadelSource:'ASSETS_BATIMENTS_V103C/sceau_coeur_face.png'
+16: };
+17: const IMG={};
+18: for(const [key,src] of Object.entries(ASSET_PATHS)){const image=new Image();image.decoding='async';image.src=src;IMG[key]=image}
+19: const ready=image=>!!(image?.complete&&image.naturalWidth&&image.naturalHeight);
+20: const creator=()=>/CREATEUR/i.test(location.pathname);
+21: const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+22: function hash(value){let h=2166136261>>>0;for(const c of String(value||'')){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+23: function camera(sc){const mw=sc?.width||1800,mh=sc?.height||1100;return{camX:Math.max(0,Math.min(Math.max(0,mw-1600),(state?.x||800)-800)),camY:Math.max(0,Math.min(Math.max(0,mh-1000),(state?.y||500)-500)),sx:.6,sy:.6}}
+### game/VALDORA_POLISH_V113.js line 67 — citadel
+62: }
+63: function drawGrass(sc,camX,camY,sx,sy){
+64:  ctx.save();for(const patch of sc.grass||[]){const x=(patch.x-camX)*sx,y=(patch.y-camY)*sy,w=patch.w*sx,h=patch.h*sy;if(x+w<0||x>960||y+h<0||y>600)continue;const wild=!!(patch.v106eClairval||patch.wild),grad=ctx.createLinearGradient(x,y,x,y+h);grad.addColorStop(0,wild?'rgba(84,174,72,.82)':'rgba(79,160,72,.68)');grad.addColorStop(1,wild?'rgba(37,111,54,.76)':'rgba(45,119,58,.62)');ctx.fillStyle='rgba(19,66,38,.22)';roundRect(x+3,y+6,w,h,12);ctx.fill();ctx.fillStyle=grad;roundRect(x,y,w,h,12);ctx.fill();ctx.strokeStyle='rgba(210,247,150,.35)';ctx.lineWidth=2;roundRect(x+1,y+1,w-2,h-2,11);ctx.stroke();const gap=wild?17:23;for(let wy=patch.y+11;wy<patch.y+patch.h-4;wy+=gap)for(let wx=patch.x+11;wx<patch.x+patch.w-4;wx+=gap){const n=hash(wx+'|'+wy),xx=(wx-camX)*sx,yy=(wy-camY)*sy,lean=(n%7)-3;ctx.strokeStyle='rgba(20,88,40,.78)';ctx.lineWidth=wild?2.4:1.8;ctx.beginPath();ctx.moveTo(xx,yy+8);ctx.quadraticCurveTo(xx-2,yy,xx-6+lean,yy-8);ctx.moveTo(xx,yy+8);ctx.quadraticCurveTo(xx+2,yy,xx+6+lean,yy-9);ctx.moveTo(xx,yy+6);ctx.quadraticCurveTo(xx+lean,yy-2,xx+lean,yy-11);ctx.stroke();ctx.strokeStyle='rgba(202,246,130,.48)';ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(xx+1,yy+5);ctx.lineTo(xx+lean+1,yy-7);ctx.stroke()}}ctx.restore();
+65: }
+66: 
+67: function drawCitadel(sc,camX,camY,sx,sy){
+68:  const old=sc.v112Theme;sc.v112Theme='forest';drawGround(sc);sc.v112Theme=old;
+69:  ctx.save();const pathX=(930-camX)*sx,pathY=(300-camY)*sy,pathW=540*sx,pathH=1750*sy;ctx.fillStyle='rgba(31,62,45,.28)';roundRect(pathX+8,pathY+10,pathW,pathH,36);ctx.fill();const pg=ctx.createLinearGradient(0,pathY,0,pathY+pathH);pg.addColorStop(0,'#e8dfc5');pg.addColorStop(1,'#a9a38e');ctx.fillStyle=pg;roundRect(pathX,pathY,pathW,pathH,32);ctx.fill();ctx.strokeStyle='#716f63';ctx.lineWidth=5;roundRect(pathX,pathY,pathW,pathH,32);ctx.stroke();
+70:  for(let wy=340,i=0;wy<2020;wy+=95,i++){const y=(wy-camY)*sy;if(y<-40||y>640)continue;ctx.strokeStyle=i%2?'rgba(98,94,80,.28)':'rgba(255,250,224,.25)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pathX+12,y);ctx.lineTo(pathX+pathW-12,y);ctx.stroke();for(let wx=990+(i%2)*64;wx<1425;wx+=128){const x=(wx-camX)*sx;ctx.beginPath();ctx.moveTo(x,y-54*sy);ctx.lineTo(x,y);ctx.stroke()}}
+71:  const grove=[];for(let wy=360;wy<1970;wy+=235){grove.push({x:650,y:wy,s:1.18,v:0},{x:1750,y:wy+80,s:1.18,v:1})}for(const t of grove)drawTree(t,camX,camY,sx,sy);
+72:  if(ready(IMG.citadel)){const ww=1120,wh=ww*(IMG.citadel.naturalHeight/IMG.citadel.naturalWidth),x=(1200-ww/2-camX)*sx,y=(-45-camY)*sy;ctx.save();ctx.shadowColor='rgba(4,31,22,.55)';ctx.shadowBlur=22;ctx.shadowOffsetY=10;ctx.drawImage(IMG.citadel,x,y,ww*sx,wh*sy);ctx.restore()}
+73:  if(typeof templeGuardsClearedV77==='function'&&!templeGuardsClearedV77()){const y=(330-camY)*sy;ctx.strokeStyle='#d6b95c';ctx.lineWidth=8;ctx.shadowColor='#ffeaa3';ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo((900-camX)*sx,y);ctx.lineTo((1500-camX)*sx,y);ctx.stroke();ctx.shadowBlur=0}
+74:  ctx.fillStyle='rgba(8,30,23,.88)';roundRect(18,16,234,42,12);ctx.fill();ctx.strokeStyle='#9ee7a8';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#f3fff1';ctx.font='900 15px Segoe UI';ctx.fillText('CITADELLE DU CŒUR',36,43);ctx.restore();
+75: }
+76: 
+### game/VALDORA_POLISH_V113.js line 113 — citadel
+108:  mountain:{root:196,scale:[0,2,4,7,9,12],ch:[[0,4,7],[7,11,14],[5,9,12],[0,4,9]],bpm:92,wave:'triangle',lead:'sawtooth',filter:1450},
+109:  shadow:{root:174.61,scale:[0,3,5,6,10,12],ch:[[0,3,6],[3,6,10],[5,10,12],[0,5,10]],bpm:108,wave:'sawtooth',lead:'sine',filter:1100},
+110:  city:{root:261.63,scale:[0,2,4,7,11,12],ch:[[0,4,7],[5,9,12],[7,11,14],[0,7,11]],bpm:120,wave:'triangle',lead:'square',filter:2600},
+111:  industrial:{root:164.81,scale:[0,3,5,7,10,12],ch:[[0,3,7],[3,7,10],[5,10,12],[0,5,10]],bpm:124,wave:'sawtooth',lead:'square',filter:1300},
+112:  dawn:{root:293.66,scale:[0,2,4,7,9,12],ch:[[0,4,9],[2,7,11],[5,9,12],[0,4,7]],bpm:108,wave:'sine',lead:'triangle',filter:3200},
+113:  citadel:{root:130.81,scale:[0,1,5,7,8,12],ch:[[0,5,8],[1,5,10],[5,8,12],[0,7,8]],bpm:84,wave:'sine',lead:'triangle',filter:1200},
+114:  wild:{root:146.83,scale:[0,3,5,7,10,12],ch:[[0,3,7],[5,8,12],[7,10,14],[0,5,10]],bpm:146,wave:'sawtooth',lead:'triangle',filter:1900,battle:true},
+115:  trainer:{root:123.47,scale:[0,4,7,9,11,12],ch:[[0,4,7],[5,9,12],[7,11,14],[2,7,11]],bpm:158,wave:'sawtooth',lead:'square',filter:2100,battle:true},
+116:  taron:{root:110,scale:[0,3,5,6,8,12],ch:[[0,3,6],[3,6,8],[5,8,12],[0,5,8]],bpm:168,wave:'sawtooth',lead:'square',filter:1300,battle:true},
+117:  guardian:{root:130.81,scale:[0,2,5,7,10,12],ch:[[0,5,7],[2,7,10],[5,10,12],[0,7,10]],bpm:176,wave:'sawtooth',lead:'triangle',filter:2300,battle:true}
+118: };
+119: const audio={ctx:null,master:null,compressor:null,timer:null,next:0,step:0,key:'',noise:null};
+120: function worldTheme(){const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone],key=themeKey(sc);if(state?.zone==='temple_final'||sc?.kind==='temple')return['citadel',THEMES.citadel];if(['forest','nature','spore'].includes(key))return['forest',THEMES.forest];if(['lake','azure','river','coast','luminous','eau'].includes(key))return['water',THEMES.water];if(['mountain','redrock','goldpeaks','simdor','mistpeak','roche','glace'].includes(key))return['mountain',THEMES.mountain];if(['shadow','ombre'].includes(key))return['shadow',THEMES.shadow];if(['modern','capital'].includes(key))return['city',THEMES.city];if(['industrial','feu'].includes(key))return['industrial',THEMES.industrial];if(['dawn','solar','lumiere'].includes(key))return['dawn',THEMES.dawn];return['prairie',THEMES.prairie]}
+121: function battleTheme(){const t=typeof battle!=='undefined'?battle?.trainer:null;if(t?.taron||t?.taronBossV102Z||/taron/i.test(String(t?.name||t?.dialog||'')))return['taron',THEMES.taron];if(t?.guardian||t?.templeGuard||t?.finalBoss||/gardien|sceau|maître/i.test(String(t?.name||t?.dialog||'')))return['guardian',THEMES.guardian];if(t)return['trainer',THEMES.trainer];return['wild',THEMES.wild]}
+122: function activeTheme(){return(typeof scene!=='undefined'&&scene==='battle')?battleTheme():worldTheme()}
+### game/VALDORA_POLISH_V113.js line 121 — sceau
+116:  taron:{root:110,scale:[0,3,5,6,8,12],ch:[[0,3,6],[3,6,8],[5,8,12],[0,5,8]],bpm:168,wave:'sawtooth',lead:'square',filter:1300,battle:true},
+117:  guardian:{root:130.81,scale:[0,2,5,7,10,12],ch:[[0,5,7],[2,7,10],[5,10,12],[0,7,10]],bpm:176,wave:'sawtooth',lead:'triangle',filter:2300,battle:true}
+118: };
+119: const audio={ctx:null,master:null,compressor:null,timer:null,next:0,step:0,key:'',noise:null};
+120: function worldTheme(){const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone],key=themeKey(sc);if(state?.zone==='temple_final'||sc?.kind==='temple')return['citadel',THEMES.citadel];if(['forest','nature','spore'].includes(key))return['forest',THEMES.forest];if(['lake','azure','river','coast','luminous','eau'].includes(key))return['water',THEMES.water];if(['mountain','redrock','goldpeaks','simdor','mistpeak','roche','glace'].includes(key))return['mountain',THEMES.mountain];if(['shadow','ombre'].includes(key))return['shadow',THEMES.shadow];if(['modern','capital'].includes(key))return['city',THEMES.city];if(['industrial','feu'].includes(key))return['industrial',THEMES.industrial];if(['dawn','solar','lumiere'].includes(key))return['dawn',THEMES.dawn];return['prairie',THEMES.prairie]}
+121: function battleTheme(){const t=typeof battle!=='undefined'?battle?.trainer:null;if(t?.taron||t?.taronBossV102Z||/taron/i.test(String(t?.name||t?.dialog||'')))return['taron',THEMES.taron];if(t?.guardian||t?.templeGuard||t?.finalBoss||/gardien|sceau|maître/i.test(String(t?.name||t?.dialog||'')))return['guardian',THEMES.guardian];if(t)return['trainer',THEMES.trainer];return['wild',THEMES.wild]}
+122: function activeTheme(){return(typeof scene!=='undefined'&&scene==='battle')?battleTheme():worldTheme()}
+123: function ensureAudio(){
+124:  if(audio.ctx)return audio.ctx;try{if(typeof musicCtx!=='undefined'&&!musicCtx)musicCtx=new (window.AudioContext||window.webkitAudioContext)();audio.ctx=typeof musicCtx!=='undefined'?musicCtx:new (window.AudioContext||window.webkitAudioContext)()}catch(_){return null}const ac=audio.ctx;audio.master=ac.createGain();audio.master.gain.value=.62;audio.compressor=ac.createDynamicsCompressor();audio.compressor.threshold.value=-20;audio.compressor.knee.value=18;audio.compressor.ratio.value=5;audio.compressor.attack.value=.012;audio.compressor.release.value=.24;audio.master.connect(audio.compressor);audio.compressor.connect(ac.destination);const buffer=ac.createBuffer(1,ac.sampleRate*.35,ac.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,1.5);audio.noise=buffer;return ac
+125: }
+126: function freq(root,n){return root*Math.pow(2,n/12)}
+127: function voice(f,when,dur,vol,wave='sine',cut=2200,detune=0){const ac=audio.ctx;if(!ac||!audio.master)return;const o=ac.createOscillator(),filter=ac.createBiquadFilter(),g=ac.createGain();o.type=wave;o.frequency.setValueAtTime(Math.max(35,f),when);o.detune.setValueAtTime(detune,when);filter.type='lowpass';filter.frequency.setValueAtTime(cut,when);filter.Q.value=.6;g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.0002,vol),when+.018);g.gain.exponentialRampToValueAtTime(.0001,when+dur);o.connect(filter);filter.connect(g);g.connect(audio.master);o.start(when);o.stop(when+dur+.05)}
+128: function kick(when,vol=.035){const ac=audio.ctx;if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(120,when);o.frequency.exponentialRampToValueAtTime(45,when+.11);g.gain.setValueAtTime(vol,when);g.gain.exponentialRampToValueAtTime(.0001,when+.13);o.connect(g);g.connect(audio.master);o.start(when);o.stop(when+.14)}
+129: function hat(when,vol=.009){const ac=audio.ctx;if(!ac||!audio.noise)return;const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=audio.noise;f.type='highpass';f.frequency.value=4800;g.gain.setValueAtTime(vol,when);g.gain.exponentialRampToValueAtTime(.0001,when+.045);s.connect(f);f.connect(g);g.connect(audio.master);s.start(when);s.stop(when+.055)}
+130: function scheduleStep(key,th,when){const step=audio.step++,slot=step%16,bar=Math.floor(step/16),ch=th.ch[bar%th.ch.length],beat=slot%8,route=(typeof currentScene==='function'&&currentScene()?.kind==='route');if(slot===0){for(const [i,n] of ch.entries())voice(freq(th.root,n),when,Math.max(.65,60/th.bpm*3.2),.0072,th.wave,th.filter,(i-1)*4)}if(slot%4===0)voice(freq(th.root,ch[(slot/4)%ch.length]-12),when,.34,th.battle?.017:.012,th.wave,Math.min(1200,th.filter),-5);if(slot%2===0){const n=th.scale[(bar+slot/2)%th.scale.length]+(th.battle?12:12);voice(freq(th.root,n),when+.018,.13,th.battle?.011:.0075,th.lead,th.filter*1.25,slot%4?5:-5)}if(slot===6||slot===14){const n=th.scale[(bar+3+slot)%th.scale.length]+24;voice(freq(th.root,n),when,.28,th.battle?.009:.0058,'sine',3400,8)}if(slot%4===0)kick(when,th.battle?.032:(route?.018:.012));if(th.battle||route||key==='industrial'||key==='city')hat(when+(60/th.bpm)/4,th.battle?.011:.006);if(th.battle&&beat===7)voice(freq(th.root,ch[0]+12),when,.1,.009,'square',1500,-18)}
+### game/VALDORA_POLISH_V113.js line 143 — citadel
+138:  window.startMusic=startAdaptiveMusic;window.refreshMusicV77=refreshAdaptiveMusic;window.startBattleMusic=startAdaptiveBattle;window.stopBattleMusic=stopAdaptiveBattle;
+139:  try{startMusic=startAdaptiveMusic}catch(_){}try{refreshMusicV77=refreshAdaptiveMusic}catch(_){}try{startBattleMusic=startAdaptiveBattle}catch(_){}try{stopBattleMusic=stopAdaptiveBattle}catch(_){}
+140: }
+141: 
+142: function enforceIdentity(){const title='Éclats Sauvages — Valdora V113 Professionnel';if(document.title!==title)document.title=title;const brand=document.querySelector('.brand'),label=`ÉCLATS SAUVAGES — VALDORA V113 — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==label)brand.textContent=label;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.valdoraPolish=VERSION}
+143: function audit(){const issues=[],assetState={};for(const [k,img] of Object.entries(IMG)){assetState[k]=ready(img);if(!assetState[k])issues.push('asset '+k+' indisponible')}const museum={menu:typeof window.openMuseumDirectorV109A==='function',worldHook:!!window.interact?.__v113Museum,interiorHook:!!window.interactInterior?.__v113Museum};if(!museum.menu)issues.push('menu directeur musée indisponible');if(!museum.worldHook&&!museum.interiorHook)issues.push('interaction musée non branchée');const music={themes:Object.keys(THEMES).length,start:window.startMusic===startAdaptiveMusic,battle:window.startBattleMusic===startAdaptiveBattle,scheduler:!!audio.timer||true};if(!music.start||!music.battle)issues.push('moteur musical non prioritaire');return{version:VERSION,ok:issues.length===0,issues,assets:assetState,directionalSprites:{player:['front','right','left-mirror','back'],npc:['front','right','left-mirror','back']},renderers:{ground:true,roads:true,grass:true,trees:true,bushes:true,lake:true,citadel:true},museum,music,canonicalCitadelSource:ASSET_PATHS.citadelSource,baseAudit:window.ValdoraProV112?.audit?.()||null}}
+144: function publishAudit(){try{document.documentElement.dataset.valdoraV113Audit=JSON.stringify(audit())}catch(_){} }
+145: function fixCitadelActors(){const boss=SCENES?.temple_final?.trainers?.find(t=>t.finalBoss||t.id==='final_boss');if(boss){boss.x=1200;boss.y=560;boss.homeX=1200;boss.homeY=560}}
+146: function install(){if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;fixCitadelActors();hookInteraction();hookMusic();installCreatorTool();enforceIdentity();publishAudit()}
+147: 
+148: const api={active:true,version:VERSION,assets:ASSET_PATHS,drawGround,drawRoads,drawTree,drawBush,drawGrass,drawCitadel,overlay,tryMuseumDirector,creatorEnterMuseum,enforceIdentity,startMusic:startAdaptiveMusic,audit};
+149: window.ValdoraPolishV113=api;
+150: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[350,1100,2800,6200,10500].forEach(ms=>setTimeout(install,ms));setInterval(()=>{try{if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;hookInteraction();enforceIdentity();publishAudit()}catch(_){}},1200);
+151: console.log('V113 : rendu chibi 3D, nageurs directionnels, Citadelle canonique, musée et musique adaptative actifs.');
+152: })();
+### game/VALDORA_POLISH_V113.js line 151 — citadel, citadelle
+146: function install(){if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;fixCitadelActors();hookInteraction();hookMusic();installCreatorTool();enforceIdentity();publishAudit()}
+147: 
+148: const api={active:true,version:VERSION,assets:ASSET_PATHS,drawGround,drawRoads,drawTree,drawBush,drawGrass,drawCitadel,overlay,tryMuseumDirector,creatorEnterMuseum,enforceIdentity,startMusic:startAdaptiveMusic,audit};
+149: window.ValdoraPolishV113=api;
+150: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[350,1100,2800,6200,10500].forEach(ms=>setTimeout(install,ms));setInterval(()=>{try{if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;hookInteraction();enforceIdentity();publishAudit()}catch(_){}},1200);
+151: console.log('V113 : rendu chibi 3D, nageurs directionnels, Citadelle canonique, musée et musique adaptative actifs.');
+152: })();
+### game/VALDORA_PRO_V111.js line 12 — aubeval, town14
+7:   const TOWNS = [
+8:     ['town0','Clairval',49,48],['town1','Rochebrune',38,43],['town2','Azurive',55,39],
+9:     ['town3','Montfaucon',28,31],['town4','Belrive',46,62],['town5','Soléria',37,74],
+10:     ['town6','Nova-Cité',65,48],['town7','Valombre',77,46],['town8','Cimes-d’Or',51,15],
+11:     ['town9','Port-Écume',25,74],['town10','Luminor',55,58],['town11','Brumelac',61,31],
+12:     ['town12','Sylvaris',84,24],['town13','Taronis',70,62],['town14','Aubeval',82,72]
+13:   ];
+14:   const ROUTE_CHAIN = TOWNS.slice(0, -1).map((town, index) => [town[0], TOWNS[index + 1][0], `route${index}`]);
+15:   const DOSSIERS = [
+16:     {id:'egg',icon:'◉',title:'L’œuf inconnu',subtitle:'Signatures environnementales',zones:['town2','town4','town6'],
+17:       intro:'Un œuf ancien réagit à l’eau, à la roche et au froid. Les relevés de terrain permettent de trianguler son origine.',
+18:       ready:s=>s.egg?.status==='done',progress:s=>Math.min(3,s.egg?.zones?.length||0),goal:3,reward:{MegaOrbe:1},rewardText:'1 Méga Orbe d’analyse'},
+19:     {id:'archives',icon:'▤',title:'Les archives disparues',subtitle:'Témoignages recoupés',zones:['town1','town3','town5'],
+20:       intro:'Une page du Projet Résonance a été volée. Trois témoignages indépendants doivent être comparés avant toute conclusion.',
+21:       ready:s=>s.archives?.status==='done',progress:s=>Math.min(3,s.archives?.witnesses?.length||0),goal:3,reward:{money:900},rewardText:'900 Voltrons'},
+### game/VALDORA_PRO_V111.js line 31 — town14
+26:       intro:'Quatre fragments radio forment une instruction. Le Livret place automatiquement les zones non fouillées sur la carte.',
+27:       ready:s=>(s.fragments?.length||0)>=4,progress:s=>Math.min(4,s.fragments?.length||0),goal:4,reward:{SuperPotion:3},rewardText:'3 Super Potions'},
+28:     {id:'taron',icon:'⚠',title:'Le convoi perdu',subtitle:'Opération Team Taron',zones:['route5'],
+29:       intro:'Un convoi transporte du matériel de Résonance. Son dernier signal provient de la Route 6.',
+30:       ready:()=>{try{return !!zOpState('convoi_resonance')?.done}catch(_){return false}},progress:()=>{try{return zOpState('convoi_resonance')?.done?1:0}catch(_){return 0}},goal:1,reward:{Antidote:3,money:600},rewardText:'600 Voltrons et 3 Antidotes'},
+31:     {id:'mastery',icon:'◆',title:'Maîtrise de Valdora',subtitle:'Synthèse finale',zones:['town14','route_horizons','route_legends'],
+32:       intro:'La synthèse relie les Sceaux, les légendaires et le réseau de transport. Elle révèle les accès finaux sans supprimer les épreuves.',
+33:       ready:()=>DOSSIERS.slice(0,5).every(d=>book().claimed[d.id]),progress:()=>DOSSIERS.slice(0,5).filter(d=>book().claimed[d.id]).length,goal:5,reward:{MegaOrbe:2,money:1500},rewardText:'1 500 Voltrons et 2 Méga Orbes'}
+34:   ];
+35: 
+36:   function esc(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+37:   function creator() { return /CREATEUR/i.test(location.pathname); }
+38:   function discovered(zone) { return creator() || (state?.discovered || []).includes(zone); }
+39:   function book() {
+40:     state.v111 = state.v111 && typeof state.v111 === 'object' ? state.v111 : {};
+### game/VALDORA_PRO_V111.js line 54 — seal
+49:     catch (_) { return state.v109a || {}; }
+50:   }
+51:   function unlocked() {
+52:     if (creator()) return true;
+53:     const old = legacy();
+54:     return !!old.livret?.unlocked && (state.seals || []).length >= 3;
+55:   }
+56:   function persist() { try { save(false); hud(); } catch (_) {} }
+57:   function toastSafe(text) { try { toast(text); } catch (_) {} }
+58:   function close(id) { document.getElementById(id)?.remove(); }
+59: 
+60:   function injectStyle() {
+61:     if (document.getElementById('v111-style')) return;
+62:     const style = document.createElement('style'); style.id = 'v111-style';
+63:     style.textContent = `
+### game/VALDORA_PRO_V111.js line 107 — seal, sceau
+102:   function renderMapSide(root, zone) {
+103:     const side=root.querySelector('.v111-side'),row=TOWNS.find(t=>t[0]===zone)||TOWNS[0],seen=discovered(zone),sceneData=SCENES?.[zone],tracked=book().trackedZone===zone;
+104:     const connected=ROUTE_CHAIN.filter(r=>r[0]===zone||r[1]===zone).map(r=>SCENES?.[r[2]]?.name||r[2]);
+105:     const canFly=seen&&(creator()||state.fly||(typeof v108mCanUseVolNow==='function'&&v108mCanUseVolNow()));
+106:     const canBus=seen&&zone!==state.zone;
+107:     side.innerHTML=`<h3>${seen?esc(row[1]):'Territoire inconnu'}</h3><p>${seen?esc(sceneData?.name||row[1])+' fait partie du réseau continu de Valdora. Sélectionne un mode de voyage ou marque cette destination pour tes prochaines recherches.':'Explore les routes voisines pour révéler ce territoire et ses services.'}</p><div class="v111-kpi"><div><b>${(state.discovered||[]).filter(z=>/^town\d+$/.test(z)).length}/15</b>villes</div><div><b>${(state.seals||[]).length}/7</b>Sceaux</div></div>${seen?`<p><b>Liaisons :</b><br>${connected.map(esc).join(' • ')||'Accès spécial'}</p>`:''}<div class="v111-actions"><button class="v111-action" data-track ${seen?'':'disabled'}>${tracked?'✓ Destination suivie':'Suivre cette destination'}</button><button class="v111-action" data-bus ${canBus?'':'disabled'}>🚌 Bus régional — 40 V</button><button class="v111-action" data-fly ${canFly&&zone!==state.zone?'':'disabled'}>✦ Utiliser Vol</button><button class="v111-action" data-book>Ouvrir le Livret secret</button></div><div class="v111-legend">● jaune : position actuelle<br>● rouge : objectif suivi<br>● gris : zone encore inconnue</div>`;
+108:     side.querySelector('[data-track]').onclick=()=>{if(!seen)return;book().trackedZone=zone;persist();openMap(zone)};
+109:     side.querySelector('[data-bus]').onclick=()=>busTravel(zone);
+110:     side.querySelector('[data-fly]').onclick=()=>{root.remove();if(typeof flyTo==='function')flyTo(zone);else playTransport('flight',row[1],()=>enterZone(zone))};
+111:     side.querySelector('[data-book]').onclick=()=>{root.remove();openBook()};
+112:   }
+113:   function openMap(selected) {
+114:     injectStyle(); const current=selected||book().trackedZone||state.zone||'town0';
+115:     const root=overlay('v111-map','Carte vivante de Valdora','Exploration, itinéraires et voyages rapides',`<div class="v111-mapbody"><section class="v111-mapstage"><img class="v111-mapimage" src="${MAP_IMAGE}" alt="Carte illustrée de Valdora"><svg class="v111-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${routeLines()}</svg>${mapNodes()}</section><aside class="v111-side"></aside></div>`);
+116:     root.querySelectorAll('[data-zone]').forEach(button=>button.onclick=()=>renderMapSide(root,button.dataset.zone)); renderMapSide(root,current);
+### game/VALDORA_PRO_V111.js line 134 — sceau
+129:     const foundSet=new Set([...(legacy().inscriptions||[]),...(legacy().fragments||[]),...(legacy().egg?.zones||[]),...(legacy().archives?.witnesses||[])]);
+130:     return `<div class="subtitle">${esc(d.subtitle)}</div><h1>${d.icon} ${esc(d.title)}</h1><p>${esc(d.intro)}</p><div class="v111-progress"><i style="width:${pct}%"></i></div><p><b>Progression : ${progress}/${d.goal}</b> — ${ready?'Analyse complète.':'Des éléments restent à découvrir.'}</p><div class="v111-clues">${d.zones.map(zone=>`<div class="v111-clue ${foundSet.has(zone)||discovered(zone)?'found':''}"><b>${foundSet.has(zone)?'✓':'◇'} ${esc(SCENES?.[zone]?.name||zone)}</b><br><small>${foundSet.has(zone)?'Indice enregistré':'À examiner sur le terrain'}</small></div>`).join('')}</div><div class="v111-reward"><b>Récompense d’analyse</b><br>${esc(d.rewardText)}${claimed?' — ✓ obtenue':''}</div><div class="v111-actions"><button class="v111-action" data-track-dossier>Afficher la prochaine piste sur la carte</button><button class="v111-action" data-claim ${ready&&!claimed?'':'disabled'}>${claimed?'Analyse déjà validée':'Valider l’analyse et recevoir la récompense'}</button>${d.id==='mastery'?'<button class="v111-action" data-pdf>Consulter le fac-similé PDF</button>':''}</div>`;
+131:   }
+132:   function selectBookPage(root,id) { const d=DOSSIERS.find(x=>x.id===id)||DOSSIERS[0];book().active=d.id;book().opened[d.id]=true;root.querySelectorAll('.v111-tab').forEach(x=>x.classList.toggle('active',x.dataset.id===d.id));const page=root.querySelector('.v111-page');page.innerHTML=bookPage(d);page.querySelector('[data-track-dossier]').onclick=()=>trackDossier(d.id);page.querySelector('[data-claim]').onclick=()=>claim(d.id);const pdf=page.querySelector('[data-pdf]');if(pdf)pdf.onclick=()=>window.open('LIVRET_SECRET_VALDORA.pdf','_blank');persist(); }
+133:   function openBook(id) {
+134:     if(!unlocked()){toastSafe('Le Livret secret est remis après le troisième Sceau.');return}
+135:     injectStyle(); const active=id||book().active||DOSSIERS[0].id;
+136:     const nav=DOSSIERS.map(d=>`<button class="v111-tab ${book().claimed[d.id]?'done':''}" data-id="${d.id}"><span class="mark">${d.icon}</span><span><b>${esc(d.title)}</b><br><small>${dossierProgress(d)}/${d.goal}${book().claimed[d.id]?' • Validé':''}</small></span></button>`).join('');
+137:     const root=overlay('v111-book','Livret secret des Éclats','Journal d’enquête interactif — les découvertes modifient la carte et accordent des récompenses',`<div class="v111-bookbody"><nav class="v111-booknav">${nav}</nav><main class="v111-page"></main></div>`);
+138:     root.querySelectorAll('.v111-tab').forEach(tab=>tab.onclick=()=>selectBookPage(root,tab.dataset.id));selectBookPage(root,active);
+139:   }
+140: 
+141:   function playTransport(kind,label,done) {
+142:     injectStyle();close('v111-transport');const root=document.createElement('div');root.id='v111-transport';root.className='v111-transport';
+143:     const visual=kind==='bus'?`<div class="v111-vehicle bus"><img src="${BUS_IMAGE}" alt="Bus régional de Valdora"></div>`:kind==='train'?'<div class="v111-vehicle train"></div>':kind==='bike'?'<div class="v111-bike">🚴</div>':'<div class="v111-flight">🪽</div>';
+### game/VALDORA_ROUTES_BIOMES_V114.js line 228 — citadel
+223: function overlay(){
+224:   if(typeof scene!=='undefined'&&scene!=='world')return;const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc)return;
+225:   if(state.zone==='route4bis'){if(typeof LEGACY.overlay==='function')LEGACY.overlay();return}
+226:   if(typeof LEGACY.overlay==='function')LEGACY.overlay();ctx.save();drawBiomeProps(sc);ctx.restore();
+227: }
+228: function drawCitadel(sc,camX,camY,sx,sy){return typeof LEGACY.drawCitadel==='function'?LEGACY.drawCitadel(sc,camX,camY,sx,sy):undefined}
+229: 
+230: function doorPoint(b){return{x:Number(b?.doorX??(Number(b?.x||0)+Number(b?.w||0)/2)),y:Number(b?.doorY??(Number(b?.y||0)+Number(b?.h||0))),roadY:Number(b?.v105dRoadY)}}
+231: function doorZone(b,sc){
+232:   if(b?.v114DoorZone)return b.v114DoorZone;const d=doorPoint(b),core=Number(sc?.v105dCore)||140,roadY=Number.isFinite(d.roadY)?d.roadY:d.y+Math.max(80,core*.75);return{x:d.x-Math.max(76,core*.48),y:d.y-30,w:Math.max(152,core*.96),h:Math.max(100,roadY-d.y+core*.55)};
+233: }
+234: function pointInRect(x,y,r){return x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h}
+235: function nearDoorV114(){
+236:   if(typeof scene!=='undefined'&&scene!=='world')return null;const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc||sc.kind!=='town')return null;let best=null,score=Infinity;
+237:   for(const b of sc.buildings||[]){const zone=doorZone(b,sc),d=doorPoint(b);if(!pointInRect(Number(state.x),Number(state.y),zone))continue;const s=Math.abs(Number(state.x)-d.x)+Math.abs(Number(state.y)-d.y)*.22;if(s<score){score=s;best=b}}
+### game/VALDORA_ROUTES_BIOMES_V114.js line 284 — citadel, citadelle
+279: function progressionGate(from,to){try{return window.ValdoraProgressionV107K?.gate?.(from,to)||null}catch(_){return null}}
+280: function pushBack(ex){const d=58;if(ex.side==='north')state.y+=d;else if(ex.side==='south')state.y-=d;else if(ex.side==='west')state.x+=d;else state.x-=d}
+281: function checkPortalV114(){
+282:   if(typeof scene!=='undefined'&&scene!=='world'||Date.now()<Number(state?.v114PortalLock||0))return false;const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];if(!sc)return false;
+283:   const ex=(sc.exits||[]).find(e=>pointInRect(Number(state.x),Number(state.y),e));if(!ex)return false;const from=String(state.zone||''),to=exitTarget(ex);if(!to||!SCENES?.[to]){try{toast?.('Cette liaison n’est pas encore disponible.')}catch(_){}pushBack(ex);return false}
+284:   if(ex.finalTemple&&typeof finalTempleAvailableV77==='function'&&!finalTempleAvailableV77()){try{toast?.(typeof v83CitadelGateText==='function'?v83CitadelGateText():'La Citadelle est encore verrouillée.')}catch(_){}pushBack(ex);return false}
+285:   const gate=progressionGate(from,to);if(gate&&!creator()){pushBack(ex);try{toast?.(gate);dialog?.('<b>Progression verrouillée</b><br><br>'+gate)}catch(_){}return false}
+286:   state.v114PortalLock=Date.now()+520;let go=window.enterZone;try{go=window.enterZone||enterZone}catch(_){};return typeof go==='function'?go(to,sideOpposite[ex.side]):false;
+287: }
+288: function moveV114(dx,dy,dir){
+289:   state.dir=dir;if(typeof scene!=='undefined'&&scene!=='world'||typeof trainerEvent!=='undefined'&&trainerEvent)return false;
+290:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast?.('Position rétablie dans la Citadelle.')}catch(_){}}
+291:   const speed=state.bike?1.55:1,nx=Number(state.x)+Number(dx)*speed,ny=Number(state.y)+Number(dy)*speed;
+292:   if(collisionV114(nx,ny,state.x,state.y)){try{lastMove=Date.now();const n=typeof npcCollision==='function'?npcCollision(nx,ny):null;if(n&&Math.random()<.12)toast?.('E / Entrée pour parler à '+n.name)}catch(_){}return false}
+293:   try{recordFollowerStep?.()}catch(_){}state.x=nx;state.y=ny;try{lastMove=Date.now()}catch(_){}if(checkPortalV114())return true;
+### game/VALDORA_ROUTES_BIOMES_V114.js line 340 — citadel
+335:   panel.querySelectorAll('button').forEach(el=>el.style.cssText='padding:12px;border:2px solid #173548;border-radius:11px;background:#fff;color:#173548;font-weight:900;cursor:pointer');panel.querySelector('[data-v114-close]').onclick=()=>panel.style.display='none';panel.querySelectorAll('[data-v114-portal]').forEach(el=>el.onclick=()=>{const [zone,to]=el.dataset.v114Portal.split('|');panel.style.display='none';previewPortal(zone,to)});panel.querySelectorAll('[data-v114-building]').forEach(el=>el.onclick=()=>{const [zone,kind]=el.dataset.v114Building.split('|');panel.style.display='none';previewBuilding(zone,kind)});
+336:   const button=document.createElement('button');button.id='v114-diagnostic';button.type='button';button.textContent='Diagnostic V114';button.style.cssText='position:fixed;left:14px;bottom:60px;z-index:85000;border:2px solid #ffd77c;background:#473817;color:#fff;border-radius:12px;padding:10px 14px;font:900 12px Segoe UI;box-shadow:0 7px 22px #0018;cursor:pointer';button.onclick=()=>panel.style.display='grid';document.body.appendChild(button);
+337: }
+338: function install(){repairTopology();installHooks();if(!document.documentElement.dataset.valdoraV115&&!window.ValdoraWorldV115?.active)window.ValdoraPolishV113=api;enforceIdentity();installCreatorTool();publishAudit()}
+339: 
+340: const api={active:true,version:VERSION,assets:ASSETS,repairTopology,drawGround,drawRoads,drawTree,drawBush,drawGrass,drawCitadel,overlay,nearDoor:nearDoorV114,enterBuilding:enterBuildingV114,checkPortal:checkPortalV114,previewPortal,previewBuilding,enforceIdentity,audit};
+341: window.ValdoraWorldV114=api;window.ValdoraPolishV113=api;
+342: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[300,950,2200,4800,8200,11200,15000].forEach(ms=>setTimeout(install,ms));setInterval(()=>{try{repairTopology();installHooks();if(!document.documentElement.dataset.valdoraV115&&!window.ValdoraWorldV115?.active)window.ValdoraPolishV113=api;enforceIdentity();installCreatorTool();publishAudit()}catch(e){console.warn('V114 maintenance',e)}},2400);
+343: console.log('V114 : sorties alignées, bâtiments accessibles et biomes chibi 3D actifs.');
+344: })();
+### game/VALDORA_SANCTUARIES_V117.js line 184 — aubeval
+179: function drawTree(t,camX,camY,sx,sy){ctx.save();const k=META[zone()]?.kind;if(k==='storm')ctx.filter='saturate(.72) brightness(.82)';else if(k==='spore')ctx.filter='hue-rotate(28deg) saturate(1.12)';else if(k==='ice')ctx.filter='hue-rotate(18deg) saturate(.48) brightness(1.15)';else if(k==='air')ctx.filter='saturate(.6) brightness(1.08)';if(typeof BASE.drawTree==='function')BASE.drawTree(t,camX,camY,sx,sy);ctx.restore()}
+180: function drawBush(b,camX,camY,sx,sy){ctx.save();const k=META[zone()]?.kind;if(k==='spore')ctx.filter='hue-rotate(34deg) saturate(1.18)';else if(k==='ice')ctx.filter='saturate(.45) brightness(1.16)';if(typeof BASE.drawBush==='function')BASE.drawBush(b,camX,camY,sx,sy);ctx.restore()}
+181: function overlay(){const sc=current(),meta=META[zone()];if(!meta){if(typeof BASE.overlay==='function')BASE.overlay();return}if(typeof BASE.overlay==='function')BASE.overlay();if(!sc?.v116Lair)return;const near=Math.hypot(state.x-sc.v116Lair.x,state.y-sc.v116Lair.y)<215;if(near&&!state.dex?.[meta.id]?.caught&&typeof scene!=='undefined'&&scene==='world'){ctx.save();ctx.fillStyle='rgba(12,29,40,.88)';ctx.beginPath();ctx.roundRect(314,535,332,42,12);ctx.fill();ctx.strokeStyle='#f1d274';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='800 13px Segoe UI';ctx.textAlign='center';ctx.fillText('E / Entrée — éveiller '+meta.name,480,561);ctx.restore();ctx.textAlign='start'}}
+182: 
+183: function startWildV116(){const meta=META[zone()];if(meta&&!state.v116LegendArmed){try{toast?.('Le légendaire ne peut être affronté qu’au sanctuaire, au bout du biome.')}catch(_){}return false}try{return typeof BASE_START_WILD==='function'?BASE_START_WILD():false}finally{state.v116LegendArmed=false}}
+184: function awaken(meta){if(!state.flags?.aubevalExpeditionLicense&&!creator()){dialog?.('<b>Sanctuaire scellé</b><br>Le Permis des Horizons est requis avant d’éveiller ce légendaire.');return true}if(!state.team?.length||(state.team||[]).every(m=>Number(m.hp)<=0)){dialog?.('<b>Sanctuaire silencieux</b><br>Ton équipe doit pouvoir combattre. Passe d’abord par un Centre de soins.');return true}if(state.dex?.[meta.id]?.caught){dialog?.(`<b>${meta.name}</b><br>Le sanctuaire est apaisé. Le lien qui vous unit reste perceptible.`);return true}dialog?.(`<b>Sanctuaire de ${meta.name}</b><br>La présence légendaire répond. Approche confirmée : aucun autre endroit du biome ne peut déclencher ce combat.<br><br>Prépare-toi.`,()=>{state.v116LegendArmed=true;startWildV116()});return true}
+185: function interactV116(){if(typeof scene!=='undefined'&&scene==='world'){const meta=META[zone()],sc=current();if(meta&&sc?.v116Lair&&Math.hypot(state.x-sc.v116Lair.x,state.y-sc.v116Lair.y)<215)return awaken(meta)}return typeof BASE_INTERACT==='function'?BASE_INTERACT.apply(this,arguments):false}
+186: interactV116.__v107dInteract=true;interactV116.__v113Museum=true;collisionV116.__v107eBusCollision=true;
+187: 
+188: function hideOverlays(){for(const id of['title','menuov','starterov','dialog','battleUI']){const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important')}}
+189: function preview(id,where='entry'){if(!creator()||!SCENES?.[id])return false;configureScene(id);const sc=SCENES[id],meta=META[id],l=sc.v116Lair;state.zone=id;try{scene='world';building=null}catch(_){}if(where==='lair'||where==='fight'){if(meta.entry==='south'){state.x=l.x;state.y=l.y+175;state.dir=3}else if(meta.entry==='west'){state.x=l.x-175;state.y=l.y;state.dir=2}else{state.x=l.x+175;state.y=l.y;state.dir=1}}else if(where==='river'){state.x=1310;state.y=700;state.dir=2}else if(where==='bridge'){state.x=1310;state.y=1100;state.dir=2}else{const ex=sc.exits?.find(e=>String(e.to||e.target||'')==='route_legends');if(ex){state.x=ex.x+ex.w/2;state.y=meta.entry==='south'?sc.height-210:sc.height/2}else{state.x=1500;state.y=1700}}hideOverlays();try{resetFollowerTrail?.();hud?.();drawWorld?.();BASE.startMusic?.();toast?.(`${meta.title} — ${where==='lair'||where==='fight'?'sanctuaire':where==='river'?'rive bloquée':where==='bridge'?'pont praticable':'entrée du parcours'}`)}catch(_){}if(where==='fight'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;state.dex=state.dex||{};state.dex[meta.id]={...(state.dex[meta.id]||{}),caught:false};if(!state.team?.length&&typeof mon==='function'){state.team=[mon(1,70)];state.team[0].hp=maxHP(state.team[0])}setTimeout(()=>awaken(meta),160)}publishAudit();return true}
+190: function runMotionTest(kind){preview('legend_foudre',kind);const start=state.x;for(let i=0;i<42;i++)moveV116(12,0,2);const end=state.x,pass=kind==='river'?end<1390:end>1650;motionDiagnostics[kind]={start:Math.round(start),end:Math.round(end),pass};document.documentElement.dataset['v116'+(kind==='river'?'RiverMotion':'BridgeMotion')]=JSON.stringify(motionDiagnostics[kind]);try{drawWorld?.();toast?.(kind==='river'?(pass?'Rive testée : le joueur est bien bloqué.':'Échec du blocage de la rive.'):(pass?'Pont testé : traversée réussie.':'Échec de la traversée du pont.'))}catch(_){}publishAudit();return motionDiagnostics[kind]}
+191: function installCreatorTool(){if(!creator())return;const old=document.getElementById('v115-biomes');if(old&&old.style.display!=='none')old.style.display='none';if(document.getElementById('v117-sanctuaries'))return;const panel=document.createElement('div');panel.id='v117-sanctuaries-panel';panel.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(2,9,18,.86);display:none;place-items:center;padding:18px';panel.innerHTML='<div style="width:min(900px,96vw);max-height:92vh;overflow:auto;background:#f7f1e4;color:#173548;border:4px solid #173548;border-radius:22px;padding:22px;box-shadow:0 28px 90px #000b"><h2 style="margin:0 0 7px">Sanctuaires stables V117</h2><p>Chaque biome possède un repaire permanent, une composition propre et quatre familles d’assets thématiques.</p><div data-list style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px"></div><h3>Tests du Plateau des Orages</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><button data-test="river">Tester la rive infranchissable</button><button data-test="bridge">Tester le pont praticable</button></div><button data-close style="margin-top:14px;width:100%">Fermer</button></div>';document.body.appendChild(panel);const list=panel.querySelector('[data-list]');for(const id of ZONES){const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto auto;gap:5px';row.innerHTML=`<button data-zone="${id}">${META[id].title}</button><button data-lair …[truncated]
+192: 
+193: const MENU_ORDER=['objectivesBtnV84','teamBtn','dexBtn','journalBtn','bag','musicBtn','save','flyBtnV106Y','challengeBtnV106Y','adventurePlusV106Z','v107fSaveMenu','v107fHelp','v111MapBtn','v109aLivretBtn','voiceBtn','v96ImportSave','sealCaseBtnV93','creatorNavV105N'];
+### game/VALDORA_SANCTUARIES_V117.js line 193 — seal
+188: function hideOverlays(){for(const id of['title','menuov','starterov','dialog','battleUI']){const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important')}}
+189: function preview(id,where='entry'){if(!creator()||!SCENES?.[id])return false;configureScene(id);const sc=SCENES[id],meta=META[id],l=sc.v116Lair;state.zone=id;try{scene='world';building=null}catch(_){}if(where==='lair'||where==='fight'){if(meta.entry==='south'){state.x=l.x;state.y=l.y+175;state.dir=3}else if(meta.entry==='west'){state.x=l.x-175;state.y=l.y;state.dir=2}else{state.x=l.x+175;state.y=l.y;state.dir=1}}else if(where==='river'){state.x=1310;state.y=700;state.dir=2}else if(where==='bridge'){state.x=1310;state.y=1100;state.dir=2}else{const ex=sc.exits?.find(e=>String(e.to||e.target||'')==='route_legends');if(ex){state.x=ex.x+ex.w/2;state.y=meta.entry==='south'?sc.height-210:sc.height/2}else{state.x=1500;state.y=1700}}hideOverlays();try{resetFollowerTrail?.();hud?.();drawWorld?.();BASE.startMusic?.();toast?.(`${meta.title} — ${where==='lair'||where==='fight'?'sanctuaire':where==='river'?'rive bloquée':where==='bridge'?'pont praticable':'entrée du parcours'}`)}catch(_){}if(where==='fight'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;state.dex=state.dex||{};state.dex[meta.id]={...(state.dex[meta.id]||{}),caught:false};if(!state.team?.length&&typeof mon==='function'){state.team=[mon(1,70)];state.team[0].hp=maxHP(state.team[0])}setTimeout(()=>awaken(meta),160)}publishAudit();return true}
+190: function runMotionTest(kind){preview('legend_foudre',kind);const start=state.x;for(let i=0;i<42;i++)moveV116(12,0,2);const end=state.x,pass=kind==='river'?end<1390:end>1650;motionDiagnostics[kind]={start:Math.round(start),end:Math.round(end),pass};document.documentElement.dataset['v116'+(kind==='river'?'RiverMotion':'BridgeMotion')]=JSON.stringify(motionDiagnostics[kind]);try{drawWorld?.();toast?.(kind==='river'?(pass?'Rive testée : le joueur est bien bloqué.':'Échec du blocage de la rive.'):(pass?'Pont testé : traversée réussie.':'Échec de la traversée du pont.'))}catch(_){}publishAudit();return motionDiagnostics[kind]}
+191: function installCreatorTool(){if(!creator())return;const old=document.getElementById('v115-biomes');if(old&&old.style.display!=='none')old.style.display='none';if(document.getElementById('v117-sanctuaries'))return;const panel=document.createElement('div');panel.id='v117-sanctuaries-panel';panel.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(2,9,18,.86);display:none;place-items:center;padding:18px';panel.innerHTML='<div style="width:min(900px,96vw);max-height:92vh;overflow:auto;background:#f7f1e4;color:#173548;border:4px solid #173548;border-radius:22px;padding:22px;box-shadow:0 28px 90px #000b"><h2 style="margin:0 0 7px">Sanctuaires stables V117</h2><p>Chaque biome possède un repaire permanent, une composition propre et quatre familles d’assets thématiques.</p><div data-list style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px"></div><h3>Tests du Plateau des Orages</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><button data-test="river">Tester la rive infranchissable</button><button data-test="bridge">Tester le pont praticable</button></div><button data-close style="margin-top:14px;width:100%">Fermer</button></div>';document.body.appendChild(panel);const list=panel.querySelector('[data-list]');for(const id of ZONES){const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto auto;gap:5px';row.innerHTML=`<button data-zone="${id}">${META[id].title}</button><button data-lair …[truncated]
+192: 
+193: const MENU_ORDER=['objectivesBtnV84','teamBtn','dexBtn','journalBtn','bag','musicBtn','save','flyBtnV106Y','challengeBtnV106Y','adventurePlusV106Z','v107fSaveMenu','v107fHelp','v111MapBtn','v109aLivretBtn','voiceBtn','v96ImportSave','sealCaseBtnV93','creatorNavV105N'];
+194: function stabilizeSidebar(){
+195:   if(window.ValdoraLivingWorldV118?.stabilizeSidebar)return window.ValdoraLivingWorldV118.stabilizeSidebar();
+196:   const grid=document.getElementById('musicBtn')?.parentElement||document.querySelector('aside .grid');if(!grid)return false;
+197:   if(creator()&&!document.documentElement.dataset.v117CreatorReady){document.documentElement.dataset.v117CreatorReady='1';try{typeof unlockCreator==='function'&&unlockCreator()}catch(_){} }
+198:   if(creator()&&!document.getElementById('creatorNavV105N')){const nav=document.createElement('button');nav.id='creatorNavV105N';nav.textContent='Navigation Créateur';nav.onclick=()=>{try{return typeof openCreatorNavigator==='function'?openCreatorNavigator():false}catch(_){return false}};grid.appendChild(nav)}
+199:   for(const b of [...grid.querySelectorAll('button')])if(!b.id&&!String(b.textContent||'').trim())b.remove();
+200:   const map=document.getElementById('v111MapBtn');if(map&&map.textContent!=='Carte du monde V117')map.textContent='Carte du monde V117';
+201:   const livret=document.getElementById('v109aLivretBtn');if(livret){const allowed=creator()||((state?.v109a?.livret?.unlocked)&&Array.isArray(state?.seals)&&state.seals.some(v=>Number(v)===3));const wanted=allowed?'':'none';if(livret.style.display!==wanted)livret.style.display=wanted}
+202:   const desired=MENU_ORDER.map(id=>document.getElementById(id)).filter(el=>el?.parentElement===grid),current=[...grid.children].filter(el=>el.tagName==='BUTTON');if(desired.length===current.length&&desired.some((el,i)=>el!==current[i]))for(const el of desired)grid.appendChild(el);
+### game/VALDORA_SANCTUARIES_V117.js line 201 — seal
+196:   const grid=document.getElementById('musicBtn')?.parentElement||document.querySelector('aside .grid');if(!grid)return false;
+197:   if(creator()&&!document.documentElement.dataset.v117CreatorReady){document.documentElement.dataset.v117CreatorReady='1';try{typeof unlockCreator==='function'&&unlockCreator()}catch(_){} }
+198:   if(creator()&&!document.getElementById('creatorNavV105N')){const nav=document.createElement('button');nav.id='creatorNavV105N';nav.textContent='Navigation Créateur';nav.onclick=()=>{try{return typeof openCreatorNavigator==='function'?openCreatorNavigator():false}catch(_){return false}};grid.appendChild(nav)}
+199:   for(const b of [...grid.querySelectorAll('button')])if(!b.id&&!String(b.textContent||'').trim())b.remove();
+200:   const map=document.getElementById('v111MapBtn');if(map&&map.textContent!=='Carte du monde V117')map.textContent='Carte du monde V117';
+201:   const livret=document.getElementById('v109aLivretBtn');if(livret){const allowed=creator()||((state?.v109a?.livret?.unlocked)&&Array.isArray(state?.seals)&&state.seals.some(v=>Number(v)===3));const wanted=allowed?'':'none';if(livret.style.display!==wanted)livret.style.display=wanted}
+202:   const desired=MENU_ORDER.map(id=>document.getElementById(id)).filter(el=>el?.parentElement===grid),current=[...grid.children].filter(el=>el.tagName==='BUTTON');if(desired.length===current.length&&desired.some((el,i)=>el!==current[i]))for(const el of desired)grid.appendChild(el);
+203:   grid.dataset.v117Stable='1';
+204:   if(!document.getElementById('v117-sidebar-style')){const style=document.createElement('style');style.id='v117-sidebar-style';style.textContent='aside .grid[data-v117-stable="1"]{grid-auto-rows:minmax(42px,auto);align-content:start}aside .grid[data-v117-stable="1"]>button{contain:layout paint}#v76routes{display:none!important}';document.head.appendChild(style)}
+205:   if(!grid.__v117Observer){grid.__v117Observer=new MutationObserver(()=>queueMicrotask(stabilizeSidebar));grid.__v117Observer.observe(grid,{childList:true})}
+206:   return true
+207: }
+208: function sidebarAudit(){const grid=document.getElementById('musicBtn')?.parentElement||document.querySelector('aside .grid'),buttons=grid?[...grid.querySelectorAll('button')]:[],visible=buttons.filter(b=>getComputedStyle(b).display!=='none');return{stable:grid?.dataset.v117Stable==='1',emptyButtons:buttons.filter(b=>!b.id&&!String(b.textContent||'').trim()).length,mapLabel:document.getElementById('v111MapBtn')?.textContent||'',livretVisible:!!document.getElementById('v109aLivretBtn')&&getComputedStyle(document.getElementById('v109aLivretBtn')).display!=='none',visibleCount:visible.length}}
+209: 
+210: function connected(sc){const roads=sc?.v105dRoad;if(!(roads instanceof Set)||!roads.size)return false;const start=[...roads][0],seen=new Set([start]),q=[start];while(q.length){const cur=q.shift(),[x,y]=cur.split(',').map(Number);for(const [dx,dy] of[[1,0],[-1,0],[0,1],[0,-1]]){const n=(x+dx)+','+(y+dy);if(roads.has(n)&&!seen.has(n)){seen.add(n);q.push(n)}}}return seen.size===roads.size}
+### game/VALDORA_STABLE_V110.js line 35 — aubeval, town14
+30:     };
+31:   }
+32: 
+33:   function ensureLegendaryNetwork() {
+34:     if (typeof SCENES !== 'object' || !SCENES) return;
+35:     const aubeval = SCENES.town14;
+36:     if (!aubeval) return;
+37: 
+38:     if (!SCENES.route_horizons) {
+39:       SCENES.route_horizons = routeScene('Route des Horizons', 3200, 2000,
+40:         [[1600, 1920], [1600, 1600], [1450, 1280], [1730, 960], [1500, 620], [1600, 80]]);
+41:     }
+42:     if (!SCENES.route_legends) {
+43:       SCENES.route_legends = routeScene('Carrefour des Sanctuaires', 3600, 2500,
+44:         [[1800, 2420], [1800, 1700], [1800, 1250]]);
+### game/VALDORA_STABLE_V110.js line 49 — aubeval
+44:         [[1800, 2420], [1800, 1700], [1800, 1250]]);
+45:     }
+46: 
+47:     const horizons = SCENES.route_horizons;
+48:     const crossroad = SCENES.route_legends;
+49:     upsertExit(aubeval, 'route_horizons', {
+50:       x: Math.max(0, aubeval.width / 2 - 110), y: 0, w: 220, h: 120,
+51:       side: 'north', label: 'Route des Horizons', v110Stable: true
+52:     });
+53:     upsertExit(horizons, 'town14', {
+54:       x: 1490, y: 1880, w: 220, h: 120, side: 'south', label: 'Aubeval', v110Stable: true
+55:     });
+56:     upsertExit(horizons, 'route_legends', {
+57:       x: 1490, y: 0, w: 220, h: 120, side: 'north', label: 'Carrefour des Sanctuaires', v110Stable: true
+58:     });
+### game/VALDORA_STABLE_V110.js line 143 — town14
+138:         else if (!SCENES[to]) issues.push(`${from} -> ${to}: destination absente`);
+139:         else if (!SCENES[to].exits?.some(candidate => target(candidate) === from)) issues.push(`${from} -> ${to}: retour absent`);
+140:       }
+141:     }
+142:     const required = [
+143:       ['town14', 'route_horizons'], ['route_horizons', 'town14'],
+144:       ['route_horizons', 'route_legends'], ['route_legends', 'route_horizons'],
+145:       ...LEGEND_ZONES.flatMap(zone => [['route_legends', zone], [zone, 'route_legends']])
+146:     ];
+147:     for (const [from, to] of required) {
+148:       if (!SCENES[from]?.exits?.some(exit => target(exit) === to)) issues.push(`${from} -> ${to}: liaison absente`);
+149:     }
+150:     const creatures = typeof CREATURES !== 'undefined' ? CREATURES : [];
+151:     const ids = new Set();
+152:     for (const creature of creatures) {
+### game/assets/v105r-combat.js line 249 — seal
+244: }
+245: 
+246: function beginWild(){
+247:   let base=Math.max(3,Number(safeCall(v83AreaLevelBase))||3),pool;
+248:   if(state.zone==='route4bis'){
+249:     base=20+(state.seals||[]).length*2;
+250:     pool=CREATURES.filter(c=>c.type==='Eau'&&minLevelForSpeciesV81(c.id)<=base+4)
+251:   }else{
+252:     const intended=Math.max(3,base-3+Math.floor(Math.random()*7));
+253:     base=intended;pool=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=intended)
+254:   }
+255:   const c=pool?.[Math.floor(Math.random()*Math.max(1,pool.length))]||CREATURES[0];
+256:   const level=Math.max(minLevelForSpeciesV81(c.id),state.zone==='route4bis'?base-2+Math.floor(Math.random()*5):base);
+257:   const enemy=mon(c.id,level);enemy.moves=defaultMoves(enemy.id,enemy.level);
+258:   state.dex=state.dex||{};state.dex[c.id]={...(state.dex[c.id]||{}),seen:true};
+### game/assets/v105r-combat.js line 448 — seal
+443: 
+444: function continueOrbShakes(orb,enemy,index=0){
+445:   if(!combatReady()||battle.orb!==orb)return;
+446:   if(index>=orb.shakeCount){
+447:     if(orb.success){
+448:       orb.stage='sealed';orb.start=performance.now();orb.duration=850;
+449:       setMessage(`Le noyau de la ${ORB_PROFILES[orb.kind].label} se stabilise...`);safeCall(playOrbSound,'caught');
+450:       schedule(850,()=>completeOrbCapture(enemy))
+451:     }else{
+452:       orb.stage='break';orb.start=performance.now();orb.duration=650;
+453:       setMessage(`${nameOf(enemy)} brise le flux de la ${ORB_PROFILES[orb.kind].label} !`);safeCall(playOrbSound,'break');
+454:       schedule(650,()=>{battle.orb=null;setMessage(`${nameOf(enemy)} ressort de l'Orbe !`);schedule(520,enemyTurnV105R)})
+455:     }
+456:     return
+457:   }
+### game/assets/v105r-combat.js line 565 — seal
+560:     const captured=deepCopy(enemy);normalizeCreature(captured,enemy.level);captured.hp=Math.max(1,captured.hp);
+561:     if((state.team||[]).length<7){state.team.push(captured);b.capturedTo='équipe'}else{state.box=state.box||[];state.box.push(captured);b.capturedTo='boîte'}
+562:     safeCall(logEvent,`Capture de ${nameOf(enemy)}.`)
+563:   }
+564:   const won=result==='win'&&!!b.trainer;
+565:   let sealObtained=false;
+566:   if(won&&b.trainer.guardian)sealObtained=!!safeCall(v83AwardGuardianSeal,b.trainer);
+567:   if(won)safeCall(markTrainerDefeatedV88,b.trainer);
+568:   if(result==='win')safeCall(playVictoryJingleV81);
+569:   closeCombatChrome(b);
+570: 
+571:   if(result==='lose'){
+572:     scheduleOutside(420,()=>{if((state.team||[]).length&&(state.team||[]).every(m=>m.hp<=0))transferAfterDefeat()});return
+573:   }
+574:   if(result==='flee'){safeCall(toast,'Tu as quitté le combat.');return}
+### game/assets/v105r-combat.js line 576 — seal, sceau
+571:   if(result==='lose'){
+572:     scheduleOutside(420,()=>{if((state.team||[]).length&&(state.team||[]).every(m=>m.hp<=0))transferAfterDefeat()});return
+573:   }
+574:   if(result==='flee'){safeCall(toast,'Tu as quitté le combat.');return}
+575:   if(won&&b.trainer.guardian){
+576:     scheduleOutside(150,()=>safeCall(dialog,`<b>Gardien vaincu !</b><br>${sealObtained?`Tu remportes le <b>Sceau ${b.trainer.sealIndex}</b>.`:'Tu avais déjà remporté ce Sceau.'}<br><br>Récompense : ${voltronLabelV85(b.reward||0)}.${typeof window.v104GuardianRewardHtml==='function'?window.v104GuardianRewardHtml(b.trainer):''}`));return
+577:   }
+578:   if(won&&resolveSpecialReturn(b))return;
+579:   if(won&&b.trainer.taron){scheduleOutside(150,()=>safeCall(completeTaronMission));return}
+580:   if(won){
+581:     scheduleOutside(150,()=>safeCall(dialog,`<b>${b.trainer.dialog||'Dresseur vaincu'}</b><br>${safeCall(trainerAfterBattleTextV88,b.trainer)||'Combat remporté.'}${events.length?'<br><br>'+events.join('<br>'):''}`));return
+582:   }
+583:   if(result==='capture'){
+584:     const destination=b.capturedTo==='équipe'?'dans ton équipe':'dans ta Boîte';
+585:     safeCall(dialog,`<b>Capture réussie !</b><br>${nameOf(enemy)} rejoint ${destination}.${b.captureXP?`<br>${b.captureXP} EXP gagnés.`:''}${events.length?'<br><br>'+events.join('<br>'):''}`);return
+### game/assets/v105r-combat.js line 693 — seal
+688: 
+689: function orbEnemyOpacity(orb,now){
+690:   if(!orb)return 1;
+691:   const t=orbProgress(orb,now);
+692:   if(orb.stage==='absorb')return 1-easeInOut(t);
+693:   if(['fall','shake','sealed'].includes(orb.stage))return 0;
+694:   if(orb.stage==='break')return easeOutCubic(t);
+695:   return 1
+696: }
+697: 
+698: function drawOrbSequence(orb,now){
+699:   if(!orb)return;
+700:   const t=orbProgress(orb,now),profile=ORB_PROFILES[orb.kind]||ORB_PROFILES.Orbe;
+701:   let x=690,y=322,size=84,rotation=0,alpha=1,scale=1;
+702:   if(orb.stage==='throw'){
+### game/assets/v105r-combat.js line 715 — seal
+710:   }else if(orb.stage==='fall'){
+711:     const e=easeInOut(t);x=690;y=230+(322-230)*e-Math.sin(Math.PI*t)*24;size=88;rotation=(1-t)*1.4;
+712:   }else if(orb.stage==='shake'){
+713:     const side=(orb.shakeIndex||0)%2===0?1:-1;x=690+side*Math.sin(Math.PI*t)*28;y=322-Math.sin(Math.PI*t)*11;rotation=side*Math.sin(Math.PI*t)*.38;
+714:     ctx.save();ctx.globalAlpha=.28*(1-t);ctx.fillStyle=profile.glow;ctx.beginPath();ctx.ellipse(690,338,55+18*t,12+5*t,0,0,Math.PI*2);ctx.fill();ctx.restore()
+715:   }else if(orb.stage==='sealed'){
+716:     const pulse=Math.sin(t*Math.PI*4);scale=1+pulse*.045;rotation=pulse*.035;
+717:     for(let i=0;i<9;i++){const a=i*Math.PI*2/9+t*.8,r=48+38*t;drawEnergyTriangle(x+Math.cos(a)*r,y+Math.sin(a)*r*.55,7,profile.glow,(1-t)*.8,a+t)}
+718:     drawEnergyTriangle(x,y,48+22*t,profile.glow,(1-t)*.85,t*Math.PI)
+719:   }else if(orb.stage==='break'){
+720:     x=690;y=300-28*easeOutCubic(t);rotation=t*Math.PI*1.6;scale=1+t*.45;alpha=1-t;
+721:     for(let i=0;i<10;i++){const a=i*Math.PI*2/10,r=25+125*easeOutCubic(t);drawEnergyTriangle(x+Math.cos(a)*r,y+Math.sin(a)*r*.7,11,profile.glow,1-t,a)}
+722:     ctx.save();ctx.globalAlpha=(1-t)*.7;ctx.strokeStyle=profile.glow;ctx.lineWidth=7*(1-t)+1;ctx.beginPath();ctx.arc(x,y,35+145*t,0,Math.PI*2);ctx.stroke();ctx.restore()
+723:   }
+724:   drawOrbAsset(orb.kind,x,y,size,rotation,alpha,scale)
+### game/assets/v105r-combat.js line 789 — seal
+784:   if(!window.__v105uShopInstalled){
+785:     window.__v105uShopInstalled=true;
+786:     const priorNormal=window.pNormalShopIdsV101P;
+787:     window.pNormalShopIdsV101P=function(){
+788:       const ids=priorNormal?priorNormal():['Potion','Orbe','Antidote','Baie'];
+789:       const seals=(state.seals||[]).length,town=Number(String(state.zone||'').match(/\d+/)?.[0]||0),creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+790:       if(creator||seals>=3||town>=7)ids.push('SuperOrbe');
+791:       if(creator||seals>=6||town>=12)ids.push('MegaOrbe');
+792:       return [...new Set(ids)]
+793:     };
+794:     const priorMarket=window.pMarketItemIdsV101P;
+795:     if(priorMarket)window.pMarketItemIdsV101P=function(){
+796:       const ids=priorMarket(),seals=(state.seals||[]).length,town=Number(String(state.zone||'').match(/\d+/)?.[0]||0),creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+797:       if(creator||seals>=6||town>=12)ids.push('MegaOrbe');
+798:       return [...new Set(ids)]
+### game/assets/v105r-combat.js line 797 — seal
+792:       return [...new Set(ids)]
+793:     };
+794:     const priorMarket=window.pMarketItemIdsV101P;
+795:     if(priorMarket)window.pMarketItemIdsV101P=function(){
+796:       const ids=priorMarket(),seals=(state.seals||[]).length,town=Number(String(state.zone||'').match(/\d+/)?.[0]||0),creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+797:       if(creator||seals>=6||town>=12)ids.push('MegaOrbe');
+798:       return [...new Set(ids)]
+799:     }
+800:   }
+801: }
+802: 
+803: // Remplacement des points d'entrée historiques utilisés dans le reste du jeu.
+804: startBattle=beginBattle;window.startBattle=beginBattle;
+805: startTrainer413=beginTrainer;window.startTrainer413=beginTrainer;
+806: startWild=beginWild;window.startWild=beginWild;
+### game/index.html line 162 — seal, sceau
+157: .v108t-battle-description{display:block;font-size:10px;line-height:1.25;opacity:.88;margin-top:3px}.v108s-battle-effect{display:block;font-size:10px;line-height:1.15;font-weight:600;opacity:.85;margin-top:3px;white-space:normal}
+158: button.v105r-move{white-space:normal!important;line-height:1.15!important;min-height:62px!important}
+159: @media(max-width:560px){.v108s-team-click,.v108s-creature-detail{grid-template-columns:82px minmax(0,1fr)}}
+160: </style>
+161: </head><body>
+162: <div id="app"><header><div class="brand">ÉCLATS SAUVAGES <b>VALDORA V118 — JOUEUR</b></div><div class="top"><div class="pill" id="money">₽ 500</div><div class="pill" id="seals">Sceaux 0/7</div></div></header><main>
+163: <section id="gamewrap"><canvas id="game" width="960" height="600"></canvas><div id="hud"><div class="hudb" id="teamh"></div><div class="hudb" id="dexh"></div></div><div id="location">Clairval</div><div id="toast"></div>
+164: <div id="title"><div class="v101uTitleVisual"><svg class="v101uTitleArt" viewBox="0 0 1000 680" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+165: <defs>
+166:   <linearGradient id="skyTitle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e2a48"/><stop offset="0.48" stop-color="#2f5e88"/><stop offset="1" stop-color="#7fc7b9"/></linearGradient>
+167:   <linearGradient id="sunset" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2b1"/><stop offset="1" stop-color="#ffb061"/></linearGradient>
+168:   <linearGradient id="roadTitle" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ead9b2"/><stop offset="1" stop-color="#c7a878"/></linearGradient>
+169:   <linearGradient id="railTitle" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a737c"/><stop offset="1" stop-color="#1c2730"/></linearGradient>
+170:   <linearGradient id="trainBody" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f4f69"/><stop offset="0.55" stop-color="#4785a6"/><stop offset="1" stop-color="#d7eef9"/></linearGradient>
+171:   <filter id="shadowT" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#071320" flood-opacity="0.28"/></filter>
+### game/index.html line 218 — sept sceaux, sceau
+213:     <rect x="-36" y="-82" width="72" height="14" rx="4" fill="#d34e40"/><rect x="-22" y="-92" width="44" height="12" rx="4" fill="#d34e40"/><ellipse cx="28" cy="-76" rx="20" ry="5" fill="#f5efe6"/>
+214:   </g>
+215:   <g transform="translate(607 432)" opacity=".98"><path d="M0-30L24 0L0 30L-24 0Z" fill="#78efd2" stroke="#fff" stroke-width="4"/><path d="M0-18L12 0L0 18L-12 0Z" fill="#d9fff6" opacity=".85"/></g>
+216: </g>
+217: <g fill="#ffffff" opacity=".85"><circle cx="713" cy="92" r="4"/><circle cx="662" cy="204" r="3.2"/><circle cx="823" cy="246" r="2.8"/><circle cx="768" cy="286" r="2.2"/></g>
+218: </svg></div><div class="titlecard"><div><h1>ÉCLATS SAUVAGES <span>VALDORA</span></h1><p>Une aventure dans une région traversée par les trains, les mystères et l’énergie des Éclats. Enquête sur la Team Taron, complète ton Codex et découvre les sept Sceaux de Valdora.</p></div><button id="new">Nouvelle partie</button><button id="continue">Continuer</button></div></div>
+219: 
+220: <div id="prologue"><div class="prologueShell">
+221:   <div id="prologueVisual"></div>
+222:   <div class="prologueCopy">
+223:     <div class="prologueKicker" id="prologueKicker"></div>
+224:     <h2 id="prologueTitle"></h2>
+225:     <p id="prologueText"></p>
+226:     <div class="prologueControls">
+227:       <button id="prologuePrev" onclick="prologuePrev()">Précédent</button>
+### game/index.html line 259 — aubeval
+254:     ['city5','Belrive',52,56,'ville'],['city6','Soléria',58,42,'metropole'],
+255:     ['city7','Nova-Cité',75,46,'metropole'],['city8','Valombre',19,43,'ville'],
+256:     ['city9','Cimes-d’Or',48,11,'ville'],['city10','Port-Écume',86,70,'metropole'],
+257:     ['city11','Luminor',70,27,'metropole'],['city12','Brumelac',45,47,'ville'],
+258:     ['city13','Sylvaris',12,32,'ville'],['city14','Taronis',84,20,'metropole'],
+259:     ['city15','Aubeval',31,80,'ville']
+260:   ].map(v=>({id:v[0],name:v[1],x:v[2],y:v[3],kind:v[4]})),
+261:   routes:[
+262:     ['city1','city15'],['city1','city2'],['city2','city5'],['city2','city8'],
+263:     ['city8','city13'],['city8','city4'],['city4','city9'],['city4','city12'],
+264:     ['city12','city5'],['city5','city6'],['city6','city7'],['city6','city11'],
+265:     ['city11','city14'],['city7','city14'],['city7','city10'],['city10','city3'],
+266:     ['city5','city3'],['city15','city3']
+267:   ],
+268:   rail:[
+### game/index.html line 361 — aubeval
+356: const VALDORA_CITIES_V60=[
+357: ['Clairval','bourg',0,1],['Rochebrune','ville',0,1],['Azurive','ville',180,1],
+358: ['Montfaucon','ville',0,1],['Belrive','ville',220,1],['Soléria','metropole',420,6],
+359: ['Nova-Cité','metropole',520,9],['Valombre','ville',260,1],['Cimes-d’Or','ville',0,1],
+360: ['Port-Écume','metropole',480,7],['Luminor','metropole',650,12],['Brumelac','ville',240,1],
+361: ['Sylvaris','ville',0,1],['Taronis','metropole',700,10],['Aubeval','ville',300,1]
+362: ].map((v,i)=>({id:'city'+(i+1),name:v[0],kind:v[1],hotelPrice:v[2],floors:v[3]}));
+363: 
+364: const SIDE_QUESTS_V60=[
+365: {id:'q_pyroin',giver:'Mila',title:'Une chaleur rassurante',type:'capture',target:'Pyroin',qty:1,money:450,item:'Potion',itemQty:3},
+366: {id:'q_florin',giver:'Basile',title:'Le jardin vivant',type:'capture',target:'Florin',qty:1,money:400,item:'Baie',itemQty:5},
+367: {id:'q_rocor',giver:'Nora',title:'Un Rocor pour l’étude',type:'capture',target:'Rocor',qty:1,money:650,item:'Orbe',itemQty:4},
+368: {id:'q_trainers',giver:'Yanis',title:'Faire ses preuves',type:'trainerWins',qty:3,money:800,item:'Potion',itemQty:4},
+369: {id:'q_cities',giver:'Alma',title:'Carnet de voyage',type:'cities',qty:5,money:1000,item:'Orbe',itemQty:6}
+370: ];
+### game/index.html line 1532 — sceau
+1527:   hotel:v102eLoadImage('ASSETS_BATIMENTS_V103C/hotel_face.png'),
+1528:   musee:v102eLoadImage('ASSETS_BATIMENTS_V103C/musee_face.png'),
+1529:   petit_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/petit_immeuble_face.png'),
+1530:   moyen_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/moyen_immeuble_face.png'),
+1531:   grand_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/grand_immeuble_face.png'),
+1532:   sceau_aube:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_aube_face.png'),
+1533:   sceau_roche:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_roche_face.png'),
+1534:   sceau_brumes:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_brumes_face.png'),
+1535:   sceau_vent:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_vent_face.png'),
+1536:   sceau_marees:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_marees_face.png'),
+1537:   sceau_eclat:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_eclat_face.png'),
+1538:   sceau_coeur:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_coeur_face.png')
+1539: };
+1540: function v103cTownNumber(){
+1541:   const m=String(state.zone||'').match(/^town(\d+)/);return m?Number(m[1]):0
+### game/index.html line 1558 — seal, sceau
+1553:   if(type==='station')return 'gare';
+1554:   if(type==='inn')return 'hotel';
+1555:   if(type==='museum')return 'musee';
+1556:   if(type==='school')return (Number(b?.floors||0)>=4?'moyen_immeuble':'petit_immeuble');
+1557:   if(type==='arena'){
+1558:     const seals=['sceau_aube','sceau_roche','sceau_brumes','sceau_vent','sceau_marees','sceau_eclat','sceau_coeur'];
+1559:     const sealIndex=Math.max(1,Math.min(7,v103cTownNumber()));
+1560:     return seals[sealIndex-1]
+1561:   }
+1562:   // V104A : les mégalopoles utilisent bien les petits/moyens/grands immeubles
+1563:   // et les bâtiments de service, au lieu de retomber sur une maison de village.
+1564:   if(['urban','office','library','market','atelier','cafe','restaurant','brasserie','v70building','megabuilding66','mFrenchBlock'].includes(type)){
+1565:     return v103cUrbanAssetKey(b)
+1566:   }
+1567:   if(b?.urbanType)return v103cUrbanAssetKey(b);
+### game/index.html line 1591 — sceau
+1586:   if(!v102eImageReady(im))return false;
+1587:   const x=(b.x-camX)*sx,y=(b.y-camY)*sy,w=b.w*sx,h=b.h*sy;
+1588:   const naturalRatio=im.naturalWidth/im.naturalHeight;
+1589:   // V103D : la porte visible est ancrée sur le vrai point doorX/doorY du bâtiment.
+1590:   // Ainsi la zone d'entrée ne se décale plus quand le nouveau sprite a une silhouette différente.
+1591:   const tall=String(key).startsWith('sceau_');
+1592:   const boxW=w*(tall?1.04:1.06),boxH=h*(tall?1.30:1.10);
+1593:   const scale=Math.min(boxW/im.naturalWidth,boxH/im.naturalHeight);
+1594:   const dw=im.naturalWidth*scale,dh=im.naturalHeight*scale;
+1595:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1596:   const doorAnchors={
+1597:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1598:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1599:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1600:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+### game/index.html line 1600 — sceau
+1595:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1596:   const doorAnchors={
+1597:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1598:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1599:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1600:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+1601:     sceau_marees:[.50,.95],sceau_eclat:[.50,.95],sceau_coeur:[.50,.95]
+1602:   };
+1603:   const a=doorAnchors[key]||[.50,.95];
+1604:   const targetDoorX=((Number.isFinite(b.doorX)?b.doorX:b.x+b.w/2)-camX)*sx;
+1605:   const targetDoorY=((Number.isFinite(b.doorY)?b.doorY:b.y+b.h)-camY)*sy;
+1606:   dx+=targetDoorX-(dx+dw*a[0]);
+1607:   dy+=targetDoorY-(dy+dh*a[1]);
+1608:   if(dx>960||dx+dw<0||dy>600||dy+dh<0)return true;
+1609:   ctx.save();
+### game/index.html line 1716 — seal
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1717: 
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1723:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1724:   const identity=(fam%7)-3;
+1725:   return {
+### game/index.html line 1792 — citadel
+1787: 
+1788: // ======================================================================
+1789: // VALDORA V83 — SYSTEMES V82 REELLEMENT BRANCHES
+1790: // ======================================================================
+1791: const V83_TOTAL_CREATURES=169;
+1792: const V83_CITADEL_CAPTURE_REQUIRED=75;
+1793: 
+1794: function v83CaughtCount(){
+1795:   return Object.values(state.dex||{}).filter(v=>v&&v.caught).length
+1796: }
+1797: 
+1798: // ----- 150 créatures réellement présentes dès l'initialisation -----
+1799: function v83ExpandCreatures150(){
+1800:   if(CREATURES.length>=150)return;
+1801:   const types=['Nature','Feu','Eau','Foudre','Roche','Air','Spore','Glace','Lumière','Ombre','Neutre'];
+### game/index.html line 1826 — seal
+1821: 
+1822: // ----- Progression de niveau selon zone -----
+1823: function v83RouteIndex(){
+1824:   if((state.zone||'').startsWith('route'))return Math.max(0,Number(state.zone.replace('route',''))||0);
+1825:   if((state.zone||'').startsWith('town'))return Math.max(0,Number(state.zone.replace('town',''))||0);
+1826:   return Math.max(0,(state.seals||[]).length)
+1827: }
+1828: function v83AreaLevelBase(){
+1829:   const z=Math.max(0,Math.min(13,v83RouteIndex())),seals=(state.seals||[]).length;
+1830:   // V106R : courbe plus progressive. Après Belrive (zone 4), la faune tourne
+1831:   // autour de N.15-17 au lieu de grimper brutalement au-delà de N.20.
+1832:   const curve=[5,7,9,12,15,18,21,24,27,30,33,36,40,44];
+1833:   return Math.min(52,Math.max(4,curve[z]+Math.floor(seals/2)))
+1834: }
+1835: function v83MovePowerCap(level){
+### game/index.html line 1844 — sceau
+1839:   if(level<40)return 90;
+1840:   if(level<55)return 110;
+1841:   return 140
+1842: }
+1843: 
+1844: // ----- Gardiens : sceaux 1..7 -----
+1845: function v83GuardianPartySize(sealIndex){
+1846:   return Math.max(2,Math.min(7,sealIndex+1))
+1847: }
+1848: 
+1849: function v83GuardianBaseLevel(sealIndex){
+1850:   const levels={1:12,2:19,3:27,4:36,5:46,6:57,7:68};
+1851:   return levels[Math.max(1,Math.min(7,sealIndex))]||8
+1852: }
+1853: 
+### game/index.html line 1856 — seal
+1851:   return levels[Math.max(1,Math.min(7,sealIndex))]||8
+1852: }
+1853: 
+1854: 
+1855: function v83BuildGuardianParty(t){
+1856:   const count=v83GuardianPartySize(t.sealIndex);
+1857:   const base=v83GuardianBaseLevel(t.sealIndex);
+1858:   const party=[];
+1859:   for(let i=0;i<count;i++){
+1860:     const lvl=Math.min(70,base+i);
+1861:     const legal=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+1862:     const maxStage=Math.max(...legal.map(c=>Number(c.stage)||0));
+1863:     const pool=legal.filter(c=>(Number(c.stage)||0)===maxStage);
+1864:     const c=pool[(t.sealIndex*23+i*17)%pool.length]||pool[0]||legal[0]||CREATURES[0];
+1865:     const m=mon(c.id,lvl);
+### game/index.html line 1864 — seal
+1859:   for(let i=0;i<count;i++){
+1860:     const lvl=Math.min(70,base+i);
+1861:     const legal=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+1862:     const maxStage=Math.max(...legal.map(c=>Number(c.stage)||0));
+1863:     const pool=legal.filter(c=>(Number(c.stage)||0)===maxStage);
+1864:     const c=pool[(t.sealIndex*23+i*17)%pool.length]||pool[0]||legal[0]||CREATURES[0];
+1865:     const m=mon(c.id,lvl);
+1866:     m.moves=defaultMoves(m.id,m.level);
+1867:     party.push(m)
+1868:   }
+1869:   return party
+1870: }
+1871: 
+1872: 
+1873: function v83AwardGuardianSeal(t){
+### game/index.html line 1873 — seal
+1868:   }
+1869:   return party
+1870: }
+1871: 
+1872: 
+1873: function v83AwardGuardianSeal(t){
+1874:   if(!t?.guardian||!t.sealIndex)return false;
+1875:   const seal=t.sealIndex;
+1876:   if(!(state.seals||[]).includes(seal)){
+1877:     state.seals.push(seal);
+1878:     state.seals.sort((a,b)=>a-b);
+1879:     if(state.seals.length>=3){state.flags=state.flags||{};state.flags.v119BikeUnlocked=true;}
+1880:     logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+1881:     return true
+1882:   }
+### game/index.html line 1886 — 7 sceaux, sceau, citadel, citadelle
+1881:     return true
+1882:   }
+1883:   return false
+1884: }
+1885: 
+1886: // ----- Citadelle : 75 captures + 7 Sceaux + maîtrise de Vol -----
+1887: function v108mSeal5Beaten(){return (typeof creator==='function'&&creator())||(state.seals||[]).includes(5)}
+1888: function v108mCanUseVolNow(){if(!v108mSeal5Beaten())return false;return (state.team||[]).some(m=>(m?.moves||[]).includes('vol'))}
+1889: window.v108mCanUseVolNow=v108mCanUseVolNow
+1890: function v106pHasVolMastery(){
+1891:   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
+1892: }
+1893: function v106pCitadelRequirements(){
+1894:   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
+1895:   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
+### game/index.html line 1894 — seal
+1889: window.v108mCanUseVolNow=v108mCanUseVolNow
+1890: function v106pHasVolMastery(){
+1891:   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
+1892: }
+1893: function v106pCitadelRequirements(){
+1894:   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
+1895:   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
+1896: }
+1897: function finalTempleAvailableV77(){return v106pCitadelRequirements().ready}
+1898: function v83CitadelGateText(){
+1899:   const r=v106pCitadelRequirements();
+1900:   if(r.ready)return 'La Citadelle est accessible.';
+1901:   const missing=[];
+1902:   if(r.caught<75)missing.push(`capturer 75 espèces (${r.caught}/75)`);
+1903:   if(r.seals<7)missing.push(`réunir les 7 Sceaux (${r.seals}/7)`);
+### game/index.html line 1903 — 7 sceaux, seal, sceau
+1898: function v83CitadelGateText(){
+1899:   const r=v106pCitadelRequirements();
+1900:   if(r.ready)return 'La Citadelle est accessible.';
+1901:   const missing=[];
+1902:   if(r.caught<75)missing.push(`capturer 75 espèces (${r.caught}/75)`);
+1903:   if(r.seals<7)missing.push(`réunir les 7 Sceaux (${r.seals}/7)`);
+1904:   if(!r.vol)missing.push('apprendre Vol à une créature de type Air');
+1905:   return 'Accès à la Citadelle bloqué : '+missing.join(' • ')+'.';
+1906: }
+1907: window.v106pHasVolMastery=v106pHasVolMastery;
+1908: window.v106pCitadelRequirements=v106pCitadelRequirements;
+1909: 
+1910: // ----- Apprentissage des capacités : choix manuel si les 4 emplacements sont occupés -----
+1911: window._v106pMoveChoiceQueue=window._v106pMoveChoiceQueue||[];
+1912: window._v106pMoveChoiceCurrent=window._v106pMoveChoiceCurrent||null;
+### game/index.html line 1915 — seal
+1910: // ----- Apprentissage des capacités : choix manuel si les 4 emplacements sont occupés -----
+1911: window._v106pMoveChoiceQueue=window._v106pMoveChoiceQueue||[];
+1912: window._v106pMoveChoiceCurrent=window._v106pMoveChoiceCurrent||null;
+1913: function v106pUnlockFieldMove(mid){
+1914:   state.fieldAbilitiesV104=state.fieldAbilitiesV104||{};
+1915:   if(mid==='vol'){state.flyLearned=true;state.fieldAbilitiesV104.VolLearned=true;if(v108mSeal5Beaten()){state.fly=true;state.fieldAbilitiesV104.Vol=true}}
+1916:   if(mid==='lumiere'){state.light=true;state.fieldAbilitiesV104.Lumière=true}
+1917:   if(mid==='surf')state.surf=true;
+1918:   if(mid==='nage'){state.nageUnlocked=true;state.fieldAbilitiesV104.Nage=true}
+1919: }
+1920: function v106pApplyMove(m,mid,replaceIndex=-1){
+1921:   if(!m||!MOVE_DB[mid])return false;
+1922:   m.moves=Array.isArray(m.moves)?m.moves:[];
+1923:   if(m.moves.includes(mid))return true;
+1924:   if(replaceIndex>=0&&replaceIndex<m.moves.length)m.moves.splice(replaceIndex,1,mid);
+### game/index.html line 2035 — citadel
+2030: }
+2031: window.addEventListener('DOMContentLoaded',()=>setTimeout(v83PositionTouchPad,180));
+2032: 
+2033: // ====================== VALDORA V82 ======================
+2034: const V82_TOTAL_CREATURES=169;
+2035: const V82_CITADEL_REQUIRED=75;
+2036: 
+2037: function v82CaughtCount(){return Object.values(state.dex||{}).filter(v=>v&&v.caught).length}
+2038: function v82CitadelUnlocked(){return v82CaughtCount()>=V82_CITADEL_REQUIRED}
+2039: 
+2040: function v82ProgressTier(){
+2041:   const s=Number(state.story||0), seals=(state.seals||[]).length;
+2042:   return Math.max(0,Math.min(6,Math.max(seals,Math.floor(s/2))));
+2043: }
+2044: function v82ExpectedLevel(extra=0){
+### game/index.html line 2057 — seal
+2052:   const count=v82GuardianPartySize(), base=v82ExpectedLevel(3);
+2053:   const party=[];
+2054:   for(let i=0;i<count;i++){
+2055:     const lvl=Math.min(75,base+i*2);
+2056:     const pool=CREATURES.filter(c=>minLevelForSpeciesV81(c.id)<=lvl);
+2057:     const c=pool[(guardian?.sealIndex*19+i*13+lvl)%pool.length]||pool[0]||CREATURES[0];
+2058:     party.push(mon(c.id,lvl));
+2059:   }
+2060:   return party
+2061: }
+2062: 
+2063: function v82StatScale(m){
+2064:   const c=BY[m.id]||{}, lvl=Math.max(1,m.level||1), stage=c.stage||0;
+2065:   return {
+2066:     hp:Math.floor(26+lvl*2.35+stage*9),
+### game/index.html line 2355 — seal
+2350:   return st
+2351: }
+2352: 
+2353: 
+2354: function reset(){
+2355:   state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,
+2356:     inventory:{Potion:0,SuperPotion:0,Orbe:0,SuperOrbe:0,MegaOrbe:0,Antidote:2,Baie:3,Repas:0,FioleAttaque:0,FioleDefense:0},
+2357:     trainerWins:{},bike:false,fly:false,light:false,capsules:[],discovered:['town0'],hasDex:false,profGift:false,follow:true,
+2358:     taron:{wins:0,missions:0,active:null}};
+2359:   scene='world';save(false);hud()
+2360: }
+2361: 
+2362: 
+2363: function save(show=true){
+2364:   try{
+### game/index.html line 2924 — aubeval, town14
+2919: {id:'paul',zone:'town11',x:1080,y:690,look:17,dir:2,name:'Paul',text:'Je note les passages de la Team Taron dans mon carnet.'},
+2920: {id:'eva',zone:'town12',x:720,y:560,look:8,dir:0,name:'Éva',text:'Sylvaris est idéal pour observer les espèces Nature.'},
+2921: {id:'mathis',zone:'town12',x:1070,y:690,look:24,dir:1,name:'Mathis',text:'Je guide les voyageurs qui veulent explorer les bois.'},
+2922: {id:'zoe',zone:'town13',x:720,y:570,look:5,dir:0,name:'Zoé',text:'À Taronis, tout le monde parle des opérations de la Team Taron.'},
+2923: {id:'alexis',zone:'town13',x:1080,y:690,look:33,dir:2,name:'Alexis',text:'La métropole ne dort jamais, et les dresseurs non plus.'},
+2924: {id:'manon',zone:'town14',x:720,y:560,look:10,dir:0,name:'Manon',text:'Aubeval marque souvent la dernière étape avant de grands départs.'},
+2925: {id:'victor',zone:'town14',x:1070,y:690,look:37,dir:1,name:'Victor',text:'Je collectionne les récits des dresseurs qui ont parcouru Valdora.'},
+2926: {id:'helene',zone:'town14',x:900,y:620,look:12,dir:0,name:'Hélène',text:'J’aide les voyageurs à préparer leur dernière étape à Aubeval.'}
+2927: ];
+2928: function currentScene(){return SCENES[state.zone]}function pointIn(x,y,r){return x>r.x&&x<r.x+r.w&&y>r.y&&y<r.y+r.h}
+2929: 
+2930: 
+2931: function currentNPCs(){
+2932:   const list=NPCDATA.filter(n=>n.zone===state.zone);
+2933:   const t=currentTaronNPC();
+### game/index.html line 3392 — aubeval, town14
+3387:  {id:'city10',scene:'town9',name:'Port-Écume',kind:'megacity',x:12,y:83,station:true,identity:'harbor'},
+3388:  {id:'city11',scene:'town10',name:'Luminor',kind:'islandMegacity',x:61,y:49,station:true,identity:'island'},
+3389:  {id:'city12',scene:'town11',name:'Brumelac',kind:'islandTown',x:48,y:47,station:false},
+3390:  {id:'city13',scene:'town12',name:'Sylvaris',kind:'town',x:10,y:31,station:false},
+3391:  {id:'city14',scene:'town13',name:'Taronis',kind:'megacity',x:87,y:82,station:true,identity:'industrial'},
+3392:  {id:'city15',scene:'town14',name:'Aubeval',kind:'town',x:31,y:79,station:false}
+3393: ];
+3394: 
+3395: // Simdor is a route hub / mountain crossroads, not a full city.
+3396: const V67_HUBS=[
+3397:  {id:'simdor',name:'Carrefour de Simdor',kind:'mountainHub',x:61,y:20}
+3398: ];
+3399: 
+3400: const V67_ROUTE_DEFS=[
+3401:  {a:'city12',b:'city4',type:'mountain',name:'Route des Brumes'},
+### game/index.html line 4255 — sceau
+4250: 
+4251:       // Quartier central inférieur
+4252:       {id:'taronis_cafe',x:120,y:1135,w:470,h:200,type:'urban',urbanType:'cafe',label:'Café du Rail',floors:2,doorX:355,doorY:1335,megaInterior:true,eventSeed:19},
+4253:       {id:'taronis_school',x:880,y:1135,w:500,h:200,type:'urban',urbanType:'school',label:'Académie Taronis',floors:4,doorX:1130,doorY:1335,megaInterior:true,eventSeed:20},
+4254:       {id:'taronis_office_e',x:2200,y:1135,w:460,h:200,type:'urban',urbanType:'office',label:'Maison des Guildes',floors:6,doorX:2430,doorY:1335,megaInterior:true,eventSeed:21},
+4255:       {id:'taronis_restaurant',x:3030,y:1135,w:420,h:200,type:'urban',urbanType:'restaurant',label:'Le Septième Sceau',floors:3,doorX:3240,doorY:1335,megaInterior:true,eventSeed:22},
+4256: 
+4257:       // Gare UNIQUE au centre du quartier ferroviaire
+4258:       {
+4259:         id:'taronis_station',
+4260:         x:1320,y:1745,w:960,h:300,
+4261:         type:'station',urbanType:'station',label:'Gare Centrale de Taronis',floors:2,
+4262:         doorX:1800,doorY:2045,megaInterior:false
+4263:       }
+4264:     ];
+### game/index.html line 5146 — aubeval, town14
+5141:  {scene:'town9',name:'Port-Écume',mega:true,identity:'harbor'},
+5142:  {scene:'town10',name:'Luminor',mega:true,identity:'island'},
+5143:  {scene:'town11',name:'Brumelac',mega:false,biome:'lake'},
+5144:  {scene:'town12',name:'Sylvaris',mega:false,biome:'forest'},
+5145:  {scene:'town13',name:'Taronis',mega:true,identity:'industrial'},
+5146:  {scene:'town14',name:'Aubeval',mega:false,biome:'prairie'}
+5147: ];
+5148: 
+5149: // Plus aucun "route_next / route_prev" implicite.
+5150: // Chaque liaison indique explicitement ses DEUX destinations et ses deux portes.
+5151: const V77_LINKS=[
+5152:  {route:'route0', name:'Route 1',a:'town0',sideA:'south',b:'town1',sideB:'north',kind:'prairie'},
+5153:  {route:'route1', name:'Route 2',a:'town1',sideA:'east', b:'town2',sideB:'west',kind:'forest'},
+5154:  {route:'route2', name:'Route 3',a:'town2',sideA:'south',b:'town3',sideB:'north',kind:'lake'},
+5155:  {route:'route3', name:'Route 4',a:'town3',sideA:'west', b:'town4',sideB:'east',kind:'autumn'},
+### game/index.html line 5165 — town14
+5160:  {route:'route8', name:'Route du Littoral',a:'town8',sideA:'south',b:'town9',sideB:'north',kind:'coast'},
+5161:  {route:'route9', name:'Détroit de Luminor',a:'town9',sideA:'east', b:'town10',sideB:'west',kind:'lake'},
+5162:  {route:'route10',name:'Route des Brumes',a:'town10',sideA:'south',b:'town11',sideB:'north',kind:'lake'},
+5163:  {route:'route11',name:'Route Sylvestre',a:'town11',sideA:'east',b:'town12',sideB:'west',kind:'forest'},
+5164:  {route:'route12',name:'Route de Taronis',a:'town12',sideA:'south',b:'town13',sideB:'north',kind:'autumn'},
+5165:  {route:'route13',name:'Route d’Aube',a:'town13',sideA:'east',b:'town14',sideB:'west',kind:'prairie'}
+5166: ];
+5167: 
+5168: const V77_LINK_BY_ROUTE=Object.fromEntries(V77_LINKS.map(l=>[l.route,l]));
+5169: const V77_CITY=Object.fromEntries(V77_CITIES.map(c=>[c.scene,c]));
+5170: 
+5171: function simpleTownV77(name,biome){
+5172:   return {
+5173:     kind:'town',name,biome,width:1800,height:1100,megacity:false,
+5174:     buildings:[
+### game/index.html line 5277 — town14
+5272:     cityLinks[l.a].push({link:l,side:l.sideA,to:l.route});
+5273:     cityLinks[l.b].push({link:l,side:l.sideB,to:l.route});
+5274:   }
+5275: 
+5276:   // Taronis possède également le portail du Sanctuaire final.
+5277:   cityLinks.town14.push({
+5278:     link:{name:'Citadelle du Cœur'},
+5279:     side:'east',to:'temple_final',finalTemple:true
+5280:   });
+5281: 
+5282:   for(const [cityKey,arr] of Object.entries(cityLinks)){
+5283:     const sc=SCENES[cityKey];if(!sc)continue;
+5284:     const counts={north:0,south:0,east:0,west:0};
+5285:     arr.forEach(x=>counts[x.side]++);
+5286:     const used={north:0,south:0,east:0,west:0};

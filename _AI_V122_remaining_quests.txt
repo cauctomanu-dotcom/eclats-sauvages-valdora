@@ -1,0 +1,847 @@
+V122 REMAINING DIAGNOSTIC — QUESTS
+====================================================================================================
+### game/CREATEUR.html line 4143 — dossier
+4138:       if(t!=='none'){
+4139:         state.flags=state.flags||{};state.flags[key]=true;
+4140:         if(t==='coins'){state.money=(state.money||0)+180;dialog('<b>Découverte</b><br>Tu trouves 180 ✦ oubliées dans un tiroir.')}
+4141:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Une Orbe d’Éclat était cachée ici.')}
+4142:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Tu récupères 2 Baies.')}
+4143:         else if(t==='lore'){dialog('<b>Document local</b><br>Un vieux dossier raconte comment ce quartier s’est développé autour des premiers Éclats.')}
+4144:         else if(t==='note'){dialog('<b>Note trouvée</b><br>« On raconte qu’une créature inhabituelle apparaît après la tombée du jour près de la gare. »')}
+4145:         else if(t==='rare'){dialog('<b>Traces étranges</b><br>Tu découvres des traces appartenant probablement à une créature rare.')}
+4146:         else if(t==='quest'){dialog('<b>Demande d’un habitant</b><br>Un résident te demande de retrouver un objet perdu dans un autre étage. Cette mission est ajoutée à ton journal.')}
+4147:         save(false);return
+4148:       }
+4149:     }
+4150: 
+4151:     const data=roomDataV69();
+4152:     dialog('<b>'+data.title+'</b><br>'+{
+### game/CREATEUR.html line 4851 — dossier
+4846:       if(t!=='none'){
+4847:         state.flags=state.flags||{};state.flags[key]=true;
+4848:         if(t==='coins'){state.money=(state.money||0)+200;dialog('<b>Découverte</b><br>Tu trouves 200 ✦.')}
+4849:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Tu récupères une Orbe d’Éclat.')}
+4850:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Deux Baies étaient rangées ici.')}
+4851:         else if(t==='lore'){dialog('<b>Document</b><br>Un dossier raconte l’histoire de ce quartier et de ses premiers habitants.')}
+4852:         else if(t==='hint'){dialog('<b>Indice</b><br>Un habitant mentionne une créature rare aperçue près de la gare à la tombée du jour.')}
+4853:         else if(t==='rare'){dialog('<b>Traces rares</b><br>Ces marques semblent appartenir à une créature peu commune.')}
+4854:         else if(t==='quest'){dialog('<b>Nouvelle mission</b><br>Un habitant te demande un service. La mission est ajoutée au journal.')}
+4855:         else if(t==='gift'){state.inventory.Potion=(state.inventory.Potion||0)+1;dialog('<b>Cadeau</b><br>Un habitant t’offre une Potion pour te remercier.')}
+4856:         save(false);return
+4857:       }
+4858:     }
+4859: 
+4860:     const info=v70RoomInfo(V70_INT.room);
+### game/CREATEUR.html line 5919 — dossier
+5914: 
+5915: // ======================================================================
+5916: // V106E — RÉÉCRITURE : QUÊTES PNJ + HERBES SAUVAGES DE CLAIRVAL
+5917: // Les rencontres sauvages, le PC et les missions de départ sont intégrés directement aux systèmes actifs.
+5918: // ======================================================================
+5919: const V106C_QUESTS=[{"id":"v106c_lina","giver":"lina","giverName":"Lina","zone":"town0","title":"Prêt pour la Route 1","text":"Remporte au total 3 combats contre des Éclats sauvages dans Clairval pour préparer ton équipe avant le départ.","kind":"clairvalWildWins","goal":3,"money":350,"item":"Orbe","qty":3,"required":true,"startRequired":true},{"id":"v106c_marc","giver":"marc","giverName":"Marc","zone":"town0","title":"Première capture à Clairval","text":"Capture un Éclat sauvage dans les herbes de Clairval.","kind":"clairvalCaptures","goal":1,"money":260,"item":"Potion","qty":2,"required":true,"startRequired":true},{"id":"v106c_jade","giver":"jade","giverName":"Jade","zone":"town0","title":"Apprendre à utiliser le PC","text":"Au Centre de soins, dépose un Éclat dans le PC puis récupère-le. Le PC permet aussi les échanges équipe ↔ stockage.","kind":"pcRoundTrip","goal":2,"money":280,"item":"Baie","qty":2,"required":true,"startRequired":true},{"id":"v106c_cloe","giver":"cloe","giverName":"Chloé","zone":"town0","title":"Premiers combats sauvages","text":"Entre dans les herbes sauvages de Clairval et remporte un combat contre un Éclat sauvage.","kind":"clairvalWildWins","goal":1,"money":220,"item":"Orbe","qty":2,"required":true,"startRequired":true},{"id":"v106c_milo","giver":"milo","giverName":"Milo","zone":"town1","title":"Herbier vivant","text":"Capture 2 espèces de type Nature.","kind":"caughtType","goal":2,"money":420,"item":"Potion","qty":2,"required":false,"type":"Nature" …[truncated]
+5920: const V106C_QUEST_BY_GIVER=Object.fromEntries(V106C_QUESTS.map(q=>[q.giver,q]));
+5921: function v106cState(){state.v106c=state.v106c||{};state.v106c.quests=state.v106c.quests||{};return state.v106c}
+5922: function v106cQuestState(){return v106cState().quests}
+5923: function v108rOwnedCreatures(){return [...(state.team||[]),...(state.box||[]),...(Array.isArray(state.pc)?state.pc:[])] .filter(Boolean)}
+5924: function v108rCaughtSpeciesSet(){
+5925:   const ids=new Set(v108rOwnedCreatures().map(m=>String(Number(m.id))).filter(id=>id!=='0'));
+5926:   for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught)ids.add(String(Number(id)));
+5927:   return ids
+5928: }
+### game/CREATEUR.html line 15930 — contre-espionnage, espion
+15925:  {id:'c01',seal:0,title:'Inventaire régional',kind:'caught',goal:10,reward:700,item:'Orbe',qty:3},
+15926:  {id:'c02',seal:1,title:'Dresseurs de terrain',kind:'trainers',goal:10,reward:850,item:'Potion',qty:3},
+15927:  {id:'c03',seal:1,title:'Mobilité régionale',kind:'paidTrips',goal:5,reward:600,item:'SuperPotion',qty:1},
+15928:  {id:'c04',seal:2,title:'Cartographe curieux',kind:'caches',goal:5,reward:900,item:'SuperOrbe',qty:1},
+15929:  {id:'c05',seal:2,title:'Faune lacustre',kind:'waterCaught',goal:6,reward:950,item:'SuperOrbe',qty:1},
+15930:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15931:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15932:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15933:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15934:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15935:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15936:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+15937: ];
+15938: const V106Z_CODEX_MILESTONES=[20,40,60,80,100,120,140,150];
+15939: const V106Z_CACHE_ZONES=[...Array.from({length:15},(_,i)=>'town'+i),...Array.from({length:14},(_,i)=>'route'+i),'route4bis'];
+### game/CREATEUR.html line 15980 — dossier
+15975: window.activateTaronOpV106Z=activateTaronOpV106Z;
+15976: function zTaronParty(op,wave){const avg=Math.max(6,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(76,Math.max(8,avg+Math.min(5,op.seal)+Math.floor(wave/2))),count=Math.min(6,2+Math.ceil(op.seal/2)+Math.floor(wave/2)),party=[];const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15977:  for(let i=0;i<count;i++){const lvl=Math.min(78,base+i),pool=CREATURES.filter(c=>op.types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(op.seal*41+wave*23+i*17)%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+15978: function startTaronWaveV106Z(op){const st=zOpState(op.id),wave=st.waves+1,party=zTaronParty(op,wave),trainer={id:`v106z_taron_${op.id}_w${wave}`,level:party[0]?.level||10,look:12,dialog:`Team Taron — ${op.title} (${wave}/${op.waves})`,taron:true,v106zOpId:op.id,party,partyIndex:0,zone:op.zone};window._v106zActiveTaronOp=op.id;window._v106zActiveTaronWave=wave;window.startBattle(party[0],trainer)}
+15979: window.startTaronWaveV106Z=startTaronWaveV106Z;
+15980: function interactTaronOpV106Z(){const op=zActiveOp();if(!op||state.zone!==op.zone)return false;const p=zOpPoint(op);if(!p||Math.hypot(state.x-p.x,state.y-p.y)>135)return false;const st=zOpState(op.id);if(!st.intel){st.intel=true;zSave();dialog(`<b>Dossier Taron — ${op.title}</b><br>${op.text}<br><br>Tu récupères des données chiffrées. Elles révèlent <b>${op.waves} groupe${op.waves>1?'s':''} d'agents</b> à neutraliser dans cette zone.`);return true}if(st.waves<op.waves){dialog(`<b>${op.title}</b><br>Groupe Taron ${st.waves+1}/${op.waves}. Prépare ton équipe.`,()=>startTaronWaveV106Z(op));return true}return false}
+15981: const BASE_COMPLETE_TARON_V106Z=window.completeTaronMission||null;
+15982: window.completeTaronMission=function(){const id=window._v106zActiveTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return BASE_COMPLETE_TARON_V106Z?BASE_COMPLETE_TARON_V106Z():undefined;const st=zOpState(id);st.waves=Math.min(op.waves,(st.waves||0)+1);state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;window._v106zActiveTaronOp=null;window._v106zActiveTaronWave=null;
+15983:  if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} };
+15984: try{completeTaronMission=window.completeTaronMission}catch(_){}
+15985: function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+15986:  for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+15987:  openSimpleMenu('Dossier Team Taron',h)}
+15988: window.openTaronDossierV106Z=openTaronDossierV106Z;
+15989: 
+### game/CREATEUR.html line 15988 — dossier
+15983:  if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} };
+15984: try{completeTaronMission=window.completeTaronMission}catch(_){}
+15985: function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+15986:  for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+15987:  openSimpleMenu('Dossier Team Taron',h)}
+15988: window.openTaronDossierV106Z=openTaronDossierV106Z;
+15989: 
+15990: // -------- CONTRATS DE TERRAIN --------
+15991: function zContractProgress(c,st){const m=zMetrics();return Math.max(0,Number(m[c.kind])||0)}
+15992: function acceptContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id);if(!c||c.seal>(state.seals||[]).length)return;const st=zState().contracts[id]||(zState().contracts[id]={});if(st.claimed||st.accepted)return;st.accepted=true;st.acceptedAt=Date.now();zSave();openContractsV106Z()}
+15993: function claimContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id),st=zState().contracts[id];if(!c||!st?.accepted||st.claimed||zContractProgress(c,st)<c.goal)return;st.claimed=true;state.money=(Number(state.money)||0)+c.reward;state.inventory=state.inventory||{};state.inventory[c.item]=(Number(state.inventory[c.item])||0)+c.qty;zSave();toast(`Contrat terminé : ${c.title}`);openContractsV106Z()}
+15994: window.acceptContractV106Z=acceptContractV106Z;window.claimContractV106Z=claimContractV106Z;
+15995: function zContractText(c){return {caught:`Capturer ${c.goal} espèces différentes`,trainers:`Atteindre ${c.goal} victoires de dresseurs`,paidTrips:`Effectuer ${c.goal} trajets payants (bus ou train)`,caches:`Découvrir ${c.goal} caches d'exploration`,waterCaught:`Capturer ${c.goal} espèces de type Eau`,taronOps:`Démanteler ${c.goal} opération${c.goal>1?'s':''} Taron`,maxLevel:`Atteindre le niveau ${c.goal} avec au moins un Éclat`,masteries:`Valider ${c.goal} maîtrises de ville`}[c.kind]||c.kind}
+15996: function openContractsV106Z(){let h='<div class="quest"><b>Bureau des contrats</b><br>Les contrats suivent tes accomplissements globaux et constituent une progression parallèle à l’histoire.</div>';for(const c of V106Z_CONTRACTS){if(c.seal>(state.seals||[]).length)continue;const st=zState().contracts[c.id]||{},p=st.accepted?Math.min(c.goal,zContractProgress(c,st)):0;h+=`<div class="quest"><b>${c.title}</b><br>${zContractText(c)}${st.accepted?` : <b>${p}/${c.goal}</b>`:''}<br><small>Récompense : ${c.reward} V + ${c.qty} ${c.item}</small>${st.claimed?'<br><b>✓ Contrat soldé</b>':!st.accepted?`<br><button onclick="acceptContractV106Z('${c.id}')">Accepter</button>`:p>=c.goal?`<br><button onclick="claimContractV106Z('${c.id}')">Réclamer</button>`:''}</div>`}openSimpleMenu('Contrats de Valdora',h)}
+15997: window.openContractsV106Z=openContractsV106Z;
+### game/CREATEUR.html line 16023 — dossier team taron, dossier
+16018: }
+16019: window.claimCodexMilestoneV106Z=claimCodexMilestoneV106Z;
+16020: function openCodexMilestonesV106Z(){let h=`<div class="quest"><b>Programme de recherche du Codex</b><br>${zCaught()}/150 espèces capturées.</div>`;for(const n of V106Z_CODEX_MILESTONES){const done=!!zState().codexClaims[n],ready=zCaught()>=n;h+=`<div class="quest"><b>Palier ${n} espèces</b><br>${done?'✓ Récompense récupérée':ready?`Recherche validée<br><button onclick="claimCodexMilestoneV106Z(${n})">Récupérer la récompense</button>`:`Progression : ${Math.min(zCaught(),n)}/${n}`}</div>`}openSimpleMenu('Recherche du Codex',h)}
+16021: window.openCodexMilestonesV106Z=openCodexMilestonesV106Z;
+16022: 
+16023: function openAdventureHubV106Z(){openSimpleMenu('Aventure +',`<div class="quest"><b>Contenu longue durée</b><br>Enquête Taron, contrats, exploration, Circuit des Gardiens et recherche du Codex.</div><div class="baggrid"><button class="bagitem" onclick="openTaronDossierV106Z()"><b>◆ Dossier Team Taron</b><br>${zMainTaronDone()}/6 opérations principales</button><button class="bagitem" onclick="openContractsV106Z()"><b>📋 Contrats</b><br>Objectifs de terrain à progression propre</button><button class="bagitem" onclick="openGuardianCircuitV106Z()"><b>⚔ Circuit des Gardiens</b><br>Revanche à 3, 5 et 7 Sceaux</button><button class="bagitem" onclick="openCodexMilestonesV106Z()"><b>📖 Recherche Codex</b><br>${zCaught()}/150 espèces</button><button class="bagitem" onclick="document.getElementById('menuov').style.display='none';toast('Caches découvertes : ${zCachesFound()}/${V106Z_CACHE_ZONES.length}')"><b>🧭 Exploration</b><br>${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches</button></div>`)}
+16024: window.openAdventureHubV106Z=openAdventureHubV106Z;
+16025: 
+16026: // -------- TRANSPORTS PAYANTS --------
+16027: function trainFareV106Z(cityId){const from=typeof railCurrentCityV94==='function'?railCurrentCityV94():state.currentCityId,a=typeof railCityRecordV94==='function'?railCityRecordV94(from):null,b=typeof railCityRecordV94==='function'?railCityRecordV94(cityId):null;if(zCreator())return 0;const dist=a&&b?Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0)):30,disc=Number(window.ValdoraGameplayV106Y?.rank?.()?.discount)||0;return Math.max(180,Math.min(950,Math.round((140+dist*7)*(1-disc*.5)/10)*10))}
+16028: window.trainFareV106Z=trainFareV106Z;
+16029: window.v106zBoardTrain=function(cityId,fare){fare=Number(fare)||0;if(!railCanDepartV94(cityId)){toast('Cette gare n’est pas encore accessible.');return}if(!zCreator()&&(Number(state.money)||0)<fare){toast(`Billet de train : ${fare} V requis.`);return}if(!zCreator())state.money-=fare;zState().trainTrips++;zSave();document.querySelector('.stationTravelV62')?.remove();const city=railCityRecordV94(cityId);toast(`Billet validé : ${fare} V — ${city?.name||'destination'}.`);setTimeout(()=>playTrainTravelV622(cityId),300)};
+16030: window.v62StationMasterDialog=function(){const here=railCurrentCityV94();if(!here||!railCityHasPhysicalStationV94(here)){toast('Il n’y a pas de gare ferroviaire dans cette ville.');return}const dest=railAvailableDestinationsV94();if(!dest.length){toast('Aucune autre gare découverte.');return}document.querySelector('.stationTravelV62')?.remove();const cards=dest.map(c=>{const fare=trainFareV106Z(c.id);return `<button class="stationDestV62" onclick="v106zBoardTrain('${c.id}',${fare})"><span>${c.kind==='metropole'?'◆':'●'}</span><b>${c.name}</b><small>${zCreator()?'Mode créateur':`Billet : ${fare} V`}</small></button>`}).join('');document.body.insertAdjacentHTML('beforeend',`<div class="stationTravelV62"><div class="stationPanelV62"><div class="stationMasterV62"><div class="stationHatV62">★</div><div><b>Chef de gare</b><p>Le train est un service payant. Le tarif dépend de la distance et de ton rang d'aventure.</p></div></div><div class="stationListV62">${cards}</div><button class="stationCancelV62" onclick="this.closest('.stationTravelV62').remove()">Finalement, je reste ici</button></div></div>`)};
+16031: try{v62StationMasterDialog=window.v62StationMasterDialog}catch(_){}
+16032: window.v62BoardTrain=function(cityId){window.v106zBoardTrain(cityId,trainFareV106Z(cityId))};try{v62BoardTrain=window.v62BoardTrain}catch(_){}
+### game/CREATEUR.html line 16069 — dossier team taron, dossier
+16064: window.finalTempleAvailableV77=function(){return window.v106pCitadelRequirements().ready};try{finalTempleAvailableV77=window.finalTempleAvailableV77}catch(_){}
+16065: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if(r.taron<6)m.push(`démanteler le Projet Résonance (${r.taron}/6)`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16066: 
+16067: // -------- OBJECTIFS + MENU --------
+16068: const BASE_OBJECTIVES_V106Z=typeof objectivesV84==='function'?objectivesV84:null;
+16069: if(BASE_OBJECTIVES_V106Z){objectivesV84=function(){const q=BASE_OBJECTIVES_V106Z(),r=window.v106pCitadelRequirements();q.push({title:'Enquête principale — Projet Résonance',progress:`${zMainTaronDone()}/6 opérations`,txt:zMainTaronDone()>=6?'Le cœur du réseau Taron est identifié.':'Poursuis le Dossier Team Taron : les six opérations principales sont nécessaires avant la Citadelle.'});q.push({title:'Exploration de Valdora',progress:`${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches`,txt:'Des caches discrètes brillent lorsque tu t’en approches. Fouille villes et routes.'});q.push({title:'Progression longue durée',progress:`${zTaronDone()}/8 Taron • ${zMasteries()}/15 maîtrises`,txt:'Contrats, revanche des Gardiens, dresseurs vétérans et paliers du Codex prolongent l’aventure.'});return q};window.objectivesV84=objectivesV84}
+16070: function installV106ZButton(){const grid=document.querySelector('aside .panel:nth-of-type(3) .grid')||document.querySelector('aside .grid');if(grid&&!document.getElementById('adventurePlusV106Z')){const b=document.createElement('button');b.id='adventurePlusV106Z';b.textContent='Aventure +';b.onclick=openAdventureHubV106Z;grid.appendChild(b)}}
+16071: 
+16072: // Bus V106Y : l'économie est volontairement plus exigeante dans V106Z (la formule source est également remplacée lors du build).
+16073: function brandV106Z(){document.title='Éclats Sauvages — Valdora V107A';const b=document.querySelector('.brand b');if(b)b.textContent=`VALDORA V107A — ${zCreator()?'CRÉATEUR':'JOUEUR'}`}
+16074: installV106ZButton();brandV106Z();zState();setTimeout(()=>{installV106ZButton();brandV106Z()},1200);setInterval(()=>{try{zState()}catch(_){}},3000);
+16075: window.ValdoraGameplayV106Z={version:V106Z_VERSION,taronOps:V106Z_TARON_OPS,contracts:V106Z_CONTRACTS,caches:V106Z_CACHE_ZONES,mainTaronDone:zMainTaronDone,openHub:openAdventureHubV106Z};document.documentElement.dataset.gameplayExpansion='V106Z';
+16076: })();
+16077: </script>
+16078: <!-- V106Z-EXTENSION-GAMEPLAY-END -->
+### game/CREATEUR.html line 16295 — solene
+16290: }
+16291: const V107B_DRAW_ROUTE_BASE=window.drawRouteBase||drawRouteBase;
+16292: window.drawRouteBase=function(sc,camX,camY,sx,sy){V107B_DRAW_ROUTE_BASE(sc,camX,camY,sx,sy);v107bDrawLegendOverlay(sc,camX,camY,sx,sy)};try{drawRouteBase=window.drawRouteBase}catch(_){}
+16293: 
+16294: // Aubeval : passage obligatoire et hub d'expéditions.
+16295: const V107B_AUBE_QUEST={id:'v107b_aubeval_horizons',giver:'solene_aubeval',giverName:'Solène',zone:'town14',title:'Épreuve des Horizons',text:'Vaincs l’équipe d’évaluation d’Aubeval pour obtenir le Permis des Horizons et accéder aux biomes légendaires.',kind:'aubevalTrial',goal:1,money:1800,item:'MegaOrbe',qty:2,required:true};
+16296: if(typeof V106C_QUESTS!=='undefined'&&!V106C_QUESTS.some(q=>q.id===V107B_AUBE_QUEST.id)){V106C_QUESTS.push(V107B_AUBE_QUEST);V106C_QUEST_BY_GIVER[V107B_AUBE_QUEST.giver]=V107B_AUBE_QUEST}
+16297: if(typeof NPCDATA!=='undefined'&&!NPCDATA.some(n=>n.id==='solene_aubeval'))NPCDATA.push({id:'solene_aubeval',zone:'town14',x:1240,y:555,look:40,dir:1,name:'Solène',text:'Je dirige les expéditions vers les sanctuaires légendaires.'});
+16298: const V107B_PROGRESS_BASE=v106cProgress;
+16299: v106cProgress=function(q){if(q?.kind==='aubevalTrial')return state.trainerWins?.aubeval_trial_v107b?1:0;return V107B_PROGRESS_BASE(q)};window.v106cProgress=v106cProgress;
+16300: function v107bTrialParty(){const ids=[99,96,93,90,87],levels=[58,59,60,61,62];return ids.map((id,i)=>{const m=mon(BY[id]?id:CREATURES.filter(c=>(c.stage||0)===2)[i%CREATURES.length].id,levels[i]);m.moves=defaultMoves(m.id,m.level);return m})}
+16301: function v107bStartAubeTrial(){const t={id:'aubeval_trial_v107b',name:'Épreuve des Horizons',dialog:'Solène — Épreuve des Horizons',level:60,look:40,aubevalTrialV107B:true,party:v107bTrialParty()};startTrainer413(t)}
+16302: function v107bTravelLegend(zone){if(!state.flags?.aubevalExpeditionLicense){toast('Le Permis des Horizons est requis.');return}if(!V107B_LEGENDS_BY_ZONE[zone])return;document.getElementById('menuov').style.display='none';scene='world';building=null;enterZone(zone,'south');save(false)}
+16303: function openLegendExpeditionsV107B(){
+16304:   if(!state.flags?.aubevalExpeditionLicense){toast('Termine d’abord l’Épreuve des Horizons.');return}
+### game/CREATEUR.html line 16311 — solene
+16306:   openSimpleMenu('Aubeval — Expéditions légendaires',`<div class="quest"><b>Permis des Horizons validé</b><br>Onze sanctuaires sont accessibles. Les légendaires n’apparaissent nulle part ailleurs.<br><br><b>Citadelle :</b> capture au moins ${v107bLegendRequired()} légendaires sur ${V107B_LEGENDS.length}.</div><div class="baggrid">${cards}</div>`)
+16307: }
+16308: window.v107bTravelLegend=v107bTravelLegend;window.openLegendExpeditionsV107B=openLegendExpeditionsV107B;
+16309: const V107B_QUEST_INTERACT_BASE=questInteractionV106C;
+16310: questInteractionV106C=function(n){
+16311:   if(n?.id!=='solene_aubeval')return V107B_QUEST_INTERACT_BASE(n);
+16312:   const q=V107B_AUBE_QUEST,e=v106cQuestState()[q.id];
+16313:   if(state.flags?.aubevalExpeditionLicense||e?.status==='done'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;return dialog('<b>Solène — Bureau des Horizons</b><br>Ton permis est valide. Quelle expédition veux-tu rejoindre ?',openLegendExpeditionsV107B),true}
+16314:   if(!e){dialog('<b>Solène — Épreuve des Horizons</b><br>Aubeval est le dernier bureau d’expédition avant les sanctuaires légendaires. Pour obtenir ton <b>Permis des Horizons</b>, tu dois vaincre mon équipe d’évaluation.<br><br>Cette étape est obligatoire avant la Citadelle.',()=>{v106cAccept(q);setTimeout(v107bStartAubeTrial,220)});return true}
+16315:   if(e.status==='active'&&!state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Épreuve des Horizons</b><br>L’épreuve n’est pas encore remportée. Mon équipe t’attend.',v107bStartAubeTrial);return true}
+16316:   if(e.status==='active'&&state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Permis accordé</b><br>Épreuve réussie. Tu peux désormais partir vers les onze biomes légendaires.',()=>{v106cClaim(q);state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;save(false);openLegendExpeditionsV107B()});return true}
+16317:   return true
+16318: };window.questInteractionV106C=questInteractionV106C;
+16319: 
+16320: // Citadelle : exigences historiques + Aubeval + moitié des légendaires.
+### game/CREATEUR.html line 16507 — solene
+16502:    ctx.textAlign='start';ctx.restore()
+16503:  }
+16504: };
+16505: try{drawRouteBase=window.drawRouteBase}catch(_){}
+16506: 
+16507: function v107cEnsureSoleneHint(){
+16508:  if(typeof NPCDATA==='undefined')return;
+16509:  const n=NPCDATA.find(x=>x.id==='solene_aubeval');
+16510:  if(n)n.text=v107cHasPermit()?'Ton permis est valide. La Route des Horizons se trouve au nord d’Aubeval.':'Remporte mon Épreuve des Horizons pour ouvrir la route vers les onze sanctuaires légendaires.'
+16511: }
+16512: function v107cRefreshUI(){
+16513:  try{refreshObjectivePanelV84()}catch(_){}
+16514:  const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${V107C_VERSION} — ${typeof zCreator==='function'&&zCreator()?'CRÉATEUR':'JOUEUR'}`;
+16515:  document.title='Éclats Sauvages — Valdora V107C — Légendaires intégrés';
+16516:  document.documentElement.dataset.valdoraVersion=V107C_VERSION
+### game/CREATEUR.html line 16525 — solene
+16520:  const routeOk=!!SCENES?.route_horizons&&!!SCENES?.route_legends&&V107C_LEGENDS.every(l=>!!SCENES?.[l.zone]);
+16521:  const aubeExit=!!SCENES?.town14?.exits?.some(e=>(e.to||e.target)==='route_horizons');
+16522:  return {version:V107C_VERSION,legends:V107C_LEGENDS.length,required:V107C_REQUIRED,routeOk,aubevalExit:aubeExit,spritePaths:spriteFiles}
+16523: }
+16524: function v107cApply(){
+16525:  try{v107cEnsureCreatures();v107cEnsureRouteScenes();v107cEnsureSoleneHint();v107cPreloadSprites();v107cRefreshUI();window.ValdoraV107C={version:V107C_VERSION,legends:V107C_LEGENDS,required:V107C_REQUIRED,caught:v107cCaught,audit:v107cAudit};window.ValdoraLegendAuditV107C=v107cAudit()}catch(err){console.error('V107C intégration',err)}
+16526: }
+16527: window.addEventListener('DOMContentLoaded',()=>{setTimeout(v107cApply,2600);setTimeout(v107cApply,4300)});
+16528: setTimeout(v107cApply,5200);setTimeout(v107cApply,10500);setTimeout(v107cApply,12200);
+16529: })();
+16530: </script>
+16531: <!-- V107C-INTEGRATION-LEGENDAIRES-PHYSIQUE-END -->
+16532: 
+16533: 
+16534: <!-- V107D-CHIBI-MOBILIER-START -->
+### game/CREATEUR.html line 16828 — dossier
+16823:     }
+16824:     return changed
+16825:   }catch(_){return false}
+16826: }
+16827: function exportSave(){try{const payload=JSON.stringify(state);if(window.v96DownloadSaveFile)v96DownloadSaveFile(payload);else save(true)}catch(e){toast('Export impossible : '+e.message)}}
+16828: function saveFolderHelp(){dialog('<b>Dossier des sauvegardes</b><br><br>Valdora conserve une copie locale dans ton navigateur. Pour transférer ta partie vers une nouvelle version ou un autre ordinateur, utilise <b>Exporter ma sauvegarde</b> et garde le fichier <b>.valdora</b> dans un endroit sûr. Pour la récupérer, utilise <b>Importer une sauvegarde</b>.')}
+16829: function openSaveHelp(){
+16830:   openSimpleMenu('Sauvegarde',`<div class="quest"><b>Ta sauvegarde contient :</b><br>position, équipe, PC, objets, quêtes, progression, Sceaux et autres données de partie.</div><div class="baggrid"><button onclick="save(true)">Sauvegarder</button><button onclick="ValdoraSaveV107Q.continueGame()">Charger</button><button onclick="ValdoraSaveV107Q.chooseLocation()">Choisir l’emplacement</button><button onclick="ValdoraV107F.exportSave()">Exporter ma sauvegarde</button><button onclick="v96OpenSavePicker()">Importer une sauvegarde</button><button onclick="ValdoraSaveV107Q.folderHelp()">Où est ma sauvegarde ?</button></div>`)
+16831: }
+16832: const HELP={
+16833: 'Déplacements':'Utilise ZQSD, WASD ou les flèches directionnelles pour marcher. Approche-toi des portes pour entrer dans les bâtiments et utilise E ou Entrée pour interagir avec les éléments proches.',
+16834: 'Interactions':'Approche-toi d’un élément interactif puis utilise E ou Entrée.',
+16835: 'Combats':'ATTAQUER permet de choisir une capacité. ÉQUIPE change de compagnon. SAC utilise un objet. Les combats donnent de l’expérience : entraîne plusieurs créatures et surveille leurs PV et leurs niveaux.',
+16836: 'Capture':'Explore les hautes herbes pour rencontrer des créatures sauvages. Affaiblis-en une puis utilise une orbe de capture lorsque les conditions le permettent. Si ton équipe est pleine, la créature capturée est envoyée dans le PC.',
+16837: 'Équipe et PC':'Ton équipe voyage avec toi et combat. Les autres créatures capturées sont envoyées dans le PC. À Clairval, prépare au moins 3 créatures de niveau 10 minimum avant de quitter la ville.',
+### game/CREATEUR.html line 17285 — dossier
+17280: }
+17281: window.v96Continue=loadFile;try{v96Continue=loadFile}catch(_){}
+17282: 
+17283: function openSaveMenu(){
+17284:   if(typeof openSimpleMenu!=='function'){saveAsNow();return}
+17285:   openSimpleMenu('Sauvegarde',`<div class="quest"><b>Enregistrer où tu veux</b><br>Le bouton <b>Enregistrer la sauvegarde…</b> ouvre la fenêtre <b>Enregistrer sous</b> de Windows. Choisis toi-même le dossier et le nom du fichier <b>.valdora</b>. Aucun dossier n’est imposé et Valdora ne mémorise pas l’emplacement.</div><div class="baggrid"><button onclick="ValdoraSaveV108A.saveAsNow()">Enregistrer la sauvegarde…</button><button onclick="ValdoraSaveV108A.loadFile()">Charger un fichier .valdora</button></div>`)
+17286: }
+17287: function install(){
+17288:   const b=document.getElementById('save');if(b){b.onclick=saveAsNow;b.title='Choisir où enregistrer la sauvegarde .valdora';}
+17289:   const c=document.getElementById('continue');if(c){c.onclick=loadFile;c.title='Choisir un fichier .valdora à charger';}
+17290:   const sm=document.getElementById('v107fSaveMenu');if(sm)sm.onclick=openSaveMenu;
+17291:   // Les anciens boutons/exportations doivent tous passer par le même Enregistrer sous.
+17292:   try{window.v96DownloadSaveFile=function(){saveAsNow()}}catch(_){}
+17293:   try{if(window.ValdoraV107F){window.ValdoraV107F.exportSave=saveAsNow;window.ValdoraV107F.openSaveHelp=openSaveMenu;window.ValdoraV107F.saveFolderHelp=openSaveMenu}}catch(_){}
+17294:   try{
+### game/CREATEUR.html line 17807 — dossier
+17802: }
+17803: window.v109aOpenRelearnCreature=v109aOpenRelearnCreature;
+17804: 
+17805: function v109aStartEgg(){const s=v109aState();if(s.egg.status!=='hidden')return;s.egg={status:'active',zones:[],startedAt:Date.now()};save(false);dialog('<b>L’œuf inconnu</b><br>Le directeur te confie un œuf acquis par le musée. Apporte-le au Professeur Aurine à Clairval : ses relevés devraient permettre d’identifier les environnements auxquels il réagit.');}
+17806: window.v109aStartEgg=v109aStartEgg;
+17807: function v109aStartArchives(){const s=v109aState();if(s.archives.status!=='hidden')return;s.archives={status:'active',witnesses:[],startedAt:Date.now()};save(false);dialog('<b>Les archives disparues</b><br>Une page manque au dossier Résonance. Interroge un habitant à Bois-Murmure, un à Cendrebourg et un à Dunes d’Or, puis reviens au musée.');}
+17808: window.v109aStartArchives=v109aStartArchives;
+17809: function v109aZoneLabelV109G(zone){return ({town1:'Bois-Murmure',town2:'Lac Azur',town3:'Cendrebourg',town4:'Hautes-Roches',town5:"Dunes d'Or",town6:'Nivéa',town7:'Valdoria',town10:'Luminor',route4bis:'Route 4 bis — Lac des Reflets',route5:'Route 6'})[zone]||SCENES?.[zone]?.name||zone}
+17810: function v109aRemainingV109G(all,done){const got=new Set(done||[]);return all.filter(z=>!got.has(z)).map(v109aZoneLabelV109G)}
+17811: function v109aEggText(s){const e=s.egg;if(e.status==='hidden')return 'Le musée vient de recevoir un œuf d’origine inconnue.';if(e.status==='active')return 'Étape 1 : apporte l’œuf au Professeur Aurine, dans le laboratoire de Clairval.';if(e.status==='field'){const left=v109aRemainingV109G(V109A_EGG_ZONES,e.zones);return `Réactions observées : ${e.zones.length}/3. Lieux restants : ${left.length?left.join(' • '):'aucun'}. Une réaction est enregistrée automatiquement lorsque tu arrives dans la ville.`}if(e.status==='return')return 'Les trois réactions ont été observées. Retourne parler au directeur ou à la directrice de n’importe quel musée.';return '✓ Chaîne de l’œuf terminée : l’œuf réagit à la Résonance.'}
+17812: function v109aArchiveText(s){const a=s.archives;if(a.status==='hidden')return 'Une page d’archives semble avoir disparu après l’étude de l’œuf.';if(a.status==='active'){const left=v109aRemainingV109G(V109A_WITNESS_ZONES,a.witnesses);return `Témoignages : ${a.witnesses.length}/3. Va dans une maison et parle à un habitant dans : ${left.length?left.join(' • '):'aucune ville restante'}.`}if(a.status==='return')return 'Les trois témoignages concordent. Retourne parler au directeur ou à la directrice d’un musée.';return '✓ Archives disparues retrouvées et classées.'}
+17813: function openMuseumMissionsV109A(){const s=v109aState();let h='<div class="quest"><b>Dossiers du musée</b><br>Les affaires importantes évoluent avec tes découvertes.</div>';
+17814:   h+=`<div class="quest"><b>L’œuf inconnu</b><br>${v109aEggText(s)}${s.egg.status==='hidden'?'<br><button onclick="v109aStartEgg()">Accepter la mission</button>':''}</div>`;
+17815:   if(s.egg.status==='done')h+=`<div class="quest"><b>Les archives disparues</b><br>${v109aArchiveText(s)}${s.archives.status==='hidden'?'<br><button onclick="v109aStartArchives()">Accepter la mission</button>':''}</div>`;
+17816:   h+='<button onclick="openMuseumDirectorV109A()">Retour</button>';openSimpleMenu('Missions du directeur',h);
+### game/CREATEUR.html line 17825 — dossier
+17820: function v109aOpenLivret(){const s=v109aState();if(!s.livret.unlocked||!v109aHasSeal3()){toast('Le livret est encore scellé.');return}try{window.open('LIVRET_SECRET_VALDORA.pdf','_blank')}catch(_){ }toast('Livret secret ouvert.')}
+17821: window.v109aOpenLivret=v109aOpenLivret;
+17822: function openMuseumDirectorV109A(){
+17823:   const s=v109aState();v109aSeedHistory();
+17824:   if(s.egg.status==='return'){
+17825:     s.egg.status='done';s.egg.completedAt=Date.now();state.inventory=state.inventory||{};state.inventory.MegaOrbe=(state.inventory.MegaOrbe||0)+1;logEvent('Musée : l’œuf inconnu est identifié comme sensible à la Résonance.');save(false);dialog('<b>Directeur du musée</b><br>Les relevés correspondent aux anciens dossiers de Résonance. L’œuf reste au musée sous surveillance. Pour ton aide, voici une MegaOrbe. Une autre affaire m’inquiète : une page d’archives a disparu.');return
+17826:   }
+17827:   if(s.archives.status==='return'){
+17828:     s.archives.status='done';s.archives.completedAt=Date.now();state.money=(Number(state.money)||0)+900;logEvent('Musée : les archives disparues sont reconstituées.');save(false);dialog('<b>Directeur du musée</b><br>Les témoignages confirment qu’un membre de la Team Taron cherchait cette page. Tu reçois 900 Voltrons. Ce dossier rejoint désormais le fil rouge du Projet Résonance.');return
+17829:   }
+17830:   const name=v109aMuseumDirector()?.name||'Direction du musée';
+17831:   let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+17832:   h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+17833:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+17834:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+### game/CREATEUR.html line 17835 — dossier
+17830:   const name=v109aMuseumDirector()?.name||'Direction du musée';
+17831:   let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+17832:   h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+17833:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+17834:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+17835:   if(s.livret.unlocked&&v109aHasSeal3())h+='<button class="bagitem" onclick="v109aOpenLivret()"><b>Livret des Éclats</b><br>Ouvrir le dossier secret</button>';
+17836:   h+='</div>';openSimpleMenu('Direction du musée',h);
+17837: }
+17838: window.openMuseumDirectorV109A=openMuseumDirectorV109A;
+17839: 
+17840: function v109aProfessorEgg(){const s=v109aState();if(s.egg.status!=='active')return false;s.egg.status='field';s.egg.analysisAt=Date.now();s.egg.zones=[];save(false);dialog('<b>Professeur Aurine</b><br>Les capteurs détectent trois signatures : une énergie aquatique, une forte pression minérale et un froid intense. Emmène l’œuf à Lac Azur, Hautes-Roches et Nivéa. Observe chaque réaction, puis retourne au musée.');return true}
+17841: window.v109aProfessorEgg=v109aProfessorEgg;
+17842: function v109aWitness(zone){const s=v109aState();if(s.archives.status!=='active'||!V109A_WITNESS_ZONES.includes(zone)||s.archives.witnesses.includes(zone))return;s.archives.witnesses.push(zone);if(s.archives.witnesses.length>=3)s.archives.status='return';save(false);toast('Témoignage ajouté aux archives : '+s.archives.witnesses.length+'/3')}
+17843: 
+17844: window.v109aWitness=v109aWitness;
+### game/CREATEUR.html line 17878 — dossier
+17873: if(V109A_ENTER){enterZone=function(to,entry){const ok=V109A_ENTER(to,entry);if(ok)setTimeout(()=>v109aSyncOnZone(to),120);return ok};window.enterZone=enterZone}
+17874: 
+17875: // Le troisième Gardien remet réellement le code du livret.
+17876: try{
+17877:   const BASE_SEAL=v83AwardGuardianSeal;
+17878:   v83AwardGuardianSeal=function(t){const got=BASE_SEAL(t);if(got&&Number(t?.sealIndex)===3){state.v109a=state.v109a&&typeof state.v109a==='object'?state.v109a:{};const s=state.v109a;s.livret=s.livret&&typeof s.livret==='object'?s.livret:{};s.livret.unlocked=true;s.livret.code=V109A_LIVRET_CODE;s.livret.receivedAt=Date.now();save(false);setTimeout(()=>dialog('<b>Troisième Gardien</b><br>Tu as suffisamment prouvé ta valeur. Dans les fichiers de Valdora se trouve le <b>Livret des Éclats</b>, un dossier réservé aux dresseurs confirmés.<br><br>Code d’ouverture : <b>'+V109A_LIVRET_CODE+'</b><br><br>Ce code est désormais noté dans tes objectifs. Certaines missions du livret sont nécessaires pour comprendre ce qui mène à la Citadelle.'),1100)}return got};
+17879:   window.v83AwardGuardianSeal=v83AwardGuardianSeal;
+17880: }catch(_){ }
+17881: 
+17882: function v109aInstallLivretButton(){
+17883:   const s=v109aState(),grid=document.getElementById('musicBtn')?.parentElement;if(!grid)return;let b=document.getElementById('v109aLivretBtn');
+17884:   if(!b){b=document.createElement('button');b.id='v109aLivretBtn';b.textContent='Livret secret';b.onclick=v109aOpenLivret;grid.appendChild(b)}b.style.display=(v109aCreator()||(s.livret.unlocked&&v109aHasSeal3()))?'':'none';
+17885: }
+17886: setInterval(()=>{try{v109aInstallLivretButton()}catch(_){ }},1500);
+17887: // V111 gère désormais l'identité visuelle finale ; cette ancienne renumérotation périodique est retirée.
+### game/CREATEUR.html line 17899 — dossier
+17894:   objectivesV84=function(){
+17895:     const q=BASE_OBJ?BASE_OBJ():[],s=v109aState();
+17896:     if(s.egg.status!=='hidden')q.push({title:'Musée — L’œuf inconnu',progress:s.egg.status==='field'?`${s.egg.zones.length}/3 environnements`:s.egg.status==='done'?'Terminée':'En cours',txt:v109aEggText(s)});
+17897:     if(s.archives.status!=='hidden')q.push({title:'Musée — Les archives disparues',progress:s.archives.status==='active'?`${s.archives.witnesses.length}/3 témoignages`:s.archives.status==='done'?'Terminée':'Retour au musée',txt:v109aArchiveText(s)});
+17898:     if(s.livret.unlocked&&v109aHasSeal3()){
+17899:       q.push({title:'Livret des Éclats',progress:'Code obtenu',txt:'Le Livret est désormais accessible. Il contient le guide détaillé des dossiers obligatoires.'});
+17900:       const insLeft=v109aRemainingV109G(V109A_INSCRIPTION_ZONES,s.inscriptions);
+17901:       q.push({title:'Les sept inscriptions',progress:`${s.inscriptions.length}/7`,txt:s.inscriptions.length>=7?'Les sept inscriptions ont été relevées.':`Lieux restants : ${insLeft.join(' • ')}. L’inscription est enregistrée automatiquement à l’arrivée dans la zone.`});
+17902:       const fragLeft=v109aRemainingV109G(V109A_FRAGMENT_ZONES,s.fragments);
+17903:       q.push({title:'Le message incomplet',progress:`${s.fragments.length}/4 fragments`,txt:s.fragments.length>=4?'Message reconstitué : « LA RÉSONANCE OUVRE LA VOIE ».':`Fragments restants : ${fragLeft.join(' • ')}. Ils sont enregistrés automatiquement en entrant dans ces zones.`});
+17904:       q.push({title:'Le convoi perdu',progress:v109aConvoiDone()?'Résolu':'À résoudre',txt:v109aConvoiDone()?'Le convoi Résonance a été neutralisé.':'Menu Aventure + → Dossier Team Taron → Le convoi Résonance → Suivre cette opération. Puis va sur la Route 6 et cherche le marqueur noir et jaune.'});
+17905:     }
+17906:     return q;
+17907:   };window.objectivesV84=objectivesV84;
+17908: }catch(_){ }
+### game/CREATEUR.html line 17910 — dossier
+17905:     }
+17906:     return q;
+17907:   };window.objectivesV84=objectivesV84;
+17908: }catch(_){ }
+17909: 
+17910: // Convergence finale : ces premiers dossiers du livret deviennent de vraies conditions de fin.
+17911: try{
+17912:   const BASE_REQ=window.v106pCitadelRequirements||v106pCitadelRequirements;
+17913:   window.v106pCitadelRequirements=function(){const r=BASE_REQ(),n=v109aCreator()||v109aRequiredDone();return {...r,narrative:n,ready:!!r.ready&&n}};try{v106pCitadelRequirements=window.v106pCitadelRequirements}catch(_){ }
+17914:   const BASE_GATE=window.v83CitadelGateText||v83CitadelGateText;
+17915:   window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';let txt=BASE_GATE?BASE_GATE():'Accès à la Citadelle bloqué.';if(!r.narrative)txt=txt.replace(/\.$/,'')+' • terminer les premiers dossiers obligatoires du Livret des Éclats.';return txt};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){ }
+17916: }catch(_){ }
+17917: 
+17918: // PNJ mémoriels : les habitants peuvent faire référence aux actions déjà accomplies.
+17919: try{
+### game/CREATEUR.html line 18472 — dossier
+18467: function desc(m){return m?.description||m?.label||m?.nom||'Cet élément fait partie du décor.'}
+18468: function healAll(){for(const x of (state.team||[])){try{x.hp=maxHP(x);x.status=null}catch(_){}}try{hud();save(false)}catch(_){} }
+18469: function foodHeal(){for(const x of (state.team||[])){try{x.hp=Math.min(maxHP(x),x.hp+Math.max(10,Math.round(maxHP(x)*.25)))}catch(_){}}try{hud();save(false)}catch(_){}dlog('Repas','Ton équipe récupère une partie de ses PV.')}
+18470: function roomJump(m){const raw=m?._raw||m,tf=raw?.targetFloor,tr=raw?.targetRoom;if(!tf&&!tr){dlog(m.label||m.id,desc(m));return}window.ValdoraBuildingV109I?.moveToRoom?.(tf||'rdc',tr||'principal',raw?.arrivalX,raw?.arrivalY)}
+18471: function elevator(){const api=window.ValdoraBuildingV109I,list=api?.listDestinations?.()||[];if(!list.length){dlog('Ascenseur','Aucun autre étage n’est desservi.');return}let html='<b>Ascenseur</b><br>Choisis une destination.<br><br>';for(const x of list)html+=`<button onclick="ValdoraBuildingV109I.moveToRoom('${x.floorId}','${x.roomId}')">${x.label}</button> `;if(typeof openSimpleMenu==='function')openSimpleMenu('Ascenseur',html);else dlog('Ascenseur','Plusieurs étages sont accessibles.')}
+18472: function showArchive(title='Archives'){dlog(title,['Un dossier évoque d’anciennes routes aujourd’hui oubliées.','Des notes relient plusieurs phénomènes de Résonance aux Éclats.','Une annotation demande de comparer les symboles des anciens monuments.'][Math.floor(Math.random()*3)])}
+18473: function storageBox(m){state.inventory=state.inventory||{};const key='v109o_container_'+(m.instanceId||m.id);state.flags=state.flags||{};if(state.flags[key])return dlog(m.label||'Rangement','Tu l’as déjà fouillé.');state.flags[key]=true;state.inventory.Baie=(state.inventory.Baie||0)+1;try{save(false);hud()}catch(_){}dlog(m.label||'Rangement','Tu trouves une Baie utile dans le rangement.')}
+18474: function study(m){state.flags=state.flags||{};const key='v109o_study_'+(m.instanceId||m.id);if(!state.flags[key]&&state.team?.length){state.flags[key]=true;state.team[0].xp=(state.team[0].xp||0)+15;try{save(false);hud()}catch(_){}dlog('Étude','Tu prends quelques notes. La première créature de ton équipe gagne 15 EXP.')}else dlog('Étude',desc(m))}
+18475: function restaurant(){foodHeal()}
+18476: function furnitureAction(m){
+18477:   if(!m)return false;state.mobilierInstanceIdV102Y=m.instanceId;const fn=String(m.fonction||'decor');
+18478:   switch(fn){
+18479:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dlog(m.label||'Repos','Après un court repos, toute l’équipe est soignée.')} break;
+18480:     case 'ouvrir_stockage': if(typeof openPC==='function')openPC(); else dlog('Stockage','Terminal de stockage indisponible.');break;
+18481:     case 'lire_lore_indices': case 'consulter_archives': case 'lore_recherche': case 'lore_musee': case 'lore_gardien': case 'lore_citadelle': showArchive(m.label||m.nom||'Archives');break;
+### game/V105W_INTERIEURS.js line 194 — dossier
+189:     },
+190:     clinic:{
+191:       label:'Cabinet de soins',wall:'#e8f1ef',floor:'#c4d8d5',accent:'#2a989d',
+192:       items:[
+193:         item('centre_soins','machine_soin',440,110,320,250,'heal','Unité de soins'),
+194:         item('centre_soins','pc_public',120,310,190,185,'medical_info','Dossier médical'),
+195:         item('centre_soins','canape_attente',775,330,300,165,'rest','Canapé'),
+196:         item('centre_soins','carte_murale',420,105,360,130,'map','Carte médicale',false),
+197:         plant(65,505),plant(1035,505)
+198:       ]
+199:     },
+200:     studio:{
+201:       label:'Studio',wall:'#e7e3e4',floor:'#9f9389',accent:'#5b7e86',
+202:       items:[
+203:         item('maison','console_salon',385,125,430,195,'studio','Console de travail'),
+### game/V105W_INTERIEURS.js line 505 — dossier
+500:   }
+501:   function describe(m){
+502:     const texts={
+503:       decor:'Cet élément apporte une touche vivante et chaleureuse à la pièce.',rest:'Un endroit confortable pour souffler un moment.',tv:'La chaîne locale diffuse les nouvelles de Valdora.',
+504:       books:'Les rayonnages contiennent des récits, des guides et des archives de Valdora.',meal:'Tout est prêt pour accueillir les visiteurs et préparer un bon repas.',
+505:       desk:'Les documents sont rangés avec soin.',archive:'Des dossiers classés retracent la vie du bâtiment.',storage:'Tout le matériel utile est rangé ici.',
+506:       wardrobe:'L’armoire est propre et bien organisée.',meeting:'Cette table sert aux réunions et aux projets collectifs.',missions:'Plusieurs avis et missions locales sont affichés.',
+507:       museum:'La fiche présente l’origine et l’histoire de cette pièce de collection.',school:'Le matériel de cours est prêt pour la prochaine leçon.',
+508:       guardian:'L’objet porte l’emblème du Gardien de la ville.',hotel:'Le personnel veille à l’accueil et au confort des voyageurs.',studio:'Le matériel est installé pour travailler et créer.',
+509:       medical_info:'La borne permet de consulter des conseils de soins.',research:'Des notes et des schémas de recherche couvrent le tableau.',egg:'Les capteurs de l’incubateur indiquent une activité stable.',
+510:       citadel:'Une énergie ancienne semble vibrer autour de cet objet.',map:'La carte montre les principales régions et routes de Valdora.'
+511:     };
+512:     dialog(`<b>${m.label}</b><br>${texts[m.action]||'Cet objet fait partie de l’aménagement du bâtiment.'}`)
+513:   }
+514:   function useItem(m){
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 454 — solene
+449:   {id:'zoe',zone:'town13',x:720,y:570,look:5,dir:0,name:'Zoé',text:'À Taronis, tout le monde parle des opérations de la Team Taron.'},
+450:   {id:'alexis',zone:'town13',x:1070,y:690,look:27,dir:1,name:'Alexis',text:'Seule une équipe d’élite peut tenir la distance jusque-là.'},
+451:   {id:'manon',zone:'town14',x:720,y:560,look:10,dir:0,name:'Manon',text:'Aubeval marque souvent la dernière étape avant de grands départs.'},
+452:   {id:'victor',zone:'town14',x:1070,y:690,look:37,dir:1,name:'Victor',text:'Je collectionne les récits des dresseurs qui ont parcouru Valdora.'},
+453:   {id:'helene',zone:'town14',x:900,y:620,look:12,dir:0,name:'Hélène',text:'J’aide les voyageurs à préparer leur dernière étape à Aubeval.'},
+454:   {id:'solene_aubeval',zone:'town14',x:1240,y:555,look:40,dir:1,name:'Solène',text:'Je dirige les expéditions vers les sanctuaires légendaires.'}
+455: ];
+456: function ensureLateQuestNpcs(){for(const npc of V109W_LATE_NPCS)upsertNpcV109W(npc);return V109W_LATE_NPCS.length}
+457: 
+458: // ------------------------------------------------------------------
+459: // 11) CODEX / suivi : garantit 169 espèces reconnues dans les compteurs
+460: //    synthétiques utilisés par les menus additionnels.
+461: // ------------------------------------------------------------------
+462: function totalCreaturesV109W(){
+463:   try{return Array.isArray(CREATURES)&&CREATURES.length?CREATURES.length:169}catch(_){return 169}
+### game/VALDORA_PRO_V111.js line 15 — dossier
+10:     ['town6','Nova-Cité',65,48],['town7','Valombre',77,46],['town8','Cimes-d’Or',51,15],
+11:     ['town9','Port-Écume',25,74],['town10','Luminor',55,58],['town11','Brumelac',61,31],
+12:     ['town12','Sylvaris',84,24],['town13','Taronis',70,62],['town14','Aubeval',82,72]
+13:   ];
+14:   const ROUTE_CHAIN = TOWNS.slice(0, -1).map((town, index) => [town[0], TOWNS[index + 1][0], `route${index}`]);
+15:   const DOSSIERS = [
+16:     {id:'egg',icon:'◉',title:'L’œuf inconnu',subtitle:'Signatures environnementales',zones:['town2','town4','town6'],
+17:       intro:'Un œuf ancien réagit à l’eau, à la roche et au froid. Les relevés de terrain permettent de trianguler son origine.',
+18:       ready:s=>s.egg?.status==='done',progress:s=>Math.min(3,s.egg?.zones?.length||0),goal:3,reward:{MegaOrbe:1},rewardText:'1 Méga Orbe d’analyse'},
+19:     {id:'archives',icon:'▤',title:'Les archives disparues',subtitle:'Témoignages recoupés',zones:['town1','town3','town5'],
+20:       intro:'Une page du Projet Résonance a été volée. Trois témoignages indépendants doivent être comparés avant toute conclusion.',
+21:       ready:s=>s.archives?.status==='done',progress:s=>Math.min(3,s.archives?.witnesses?.length||0),goal:3,reward:{money:900},rewardText:'900 Voltrons'},
+22:     {id:'inscriptions',icon:'⌁',title:'Les sept inscriptions',subtitle:'Alphabet des anciens Gardiens',zones:['town1','town2','town3','town4','town5','town6','town7'],
+23:       intro:'Sept inscriptions décrivent un itinéraire invisible. Chaque relevé ajoute un symbole au calque de la carte.',
+24:       ready:s=>(s.inscriptions?.length||0)>=7,progress:s=>Math.min(7,s.inscriptions?.length||0),goal:7,reward:{SuperOrbe:3},rewardText:'3 Super Orbes'},
+### game/VALDORA_PRO_V111.js line 33 — dossier
+28:     {id:'taron',icon:'⚠',title:'Le convoi perdu',subtitle:'Opération Team Taron',zones:['route5'],
+29:       intro:'Un convoi transporte du matériel de Résonance. Son dernier signal provient de la Route 6.',
+30:       ready:()=>{try{return !!zOpState('convoi_resonance')?.done}catch(_){return false}},progress:()=>{try{return zOpState('convoi_resonance')?.done?1:0}catch(_){return 0}},goal:1,reward:{Antidote:3,money:600},rewardText:'600 Voltrons et 3 Antidotes'},
+31:     {id:'mastery',icon:'◆',title:'Maîtrise de Valdora',subtitle:'Synthèse finale',zones:['town14','route_horizons','route_legends'],
+32:       intro:'La synthèse relie les Sceaux, les légendaires et le réseau de transport. Elle révèle les accès finaux sans supprimer les épreuves.',
+33:       ready:()=>DOSSIERS.slice(0,5).every(d=>book().claimed[d.id]),progress:()=>DOSSIERS.slice(0,5).filter(d=>book().claimed[d.id]).length,goal:5,reward:{MegaOrbe:2,money:1500},rewardText:'1 500 Voltrons et 2 Méga Orbes'}
+34:   ];
+35: 
+36:   function esc(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+37:   function creator() { return /CREATEUR/i.test(location.pathname); }
+38:   function discovered(zone) { return creator() || (state?.discovered || []).includes(zone); }
+39:   function book() {
+40:     state.v111 = state.v111 && typeof state.v111 === 'object' ? state.v111 : {};
+41:     state.v111.book = state.v111.book && typeof state.v111.book === 'object' ? state.v111.book : {};
+42:     const value = state.v111.book;
+### game/VALDORA_PRO_V111.js line 119 — dossier
+114:     injectStyle(); const current=selected||book().trackedZone||state.zone||'town0';
+115:     const root=overlay('v111-map','Carte vivante de Valdora','Exploration, itinéraires et voyages rapides',`<div class="v111-mapbody"><section class="v111-mapstage"><img class="v111-mapimage" src="${MAP_IMAGE}" alt="Carte illustrée de Valdora"><svg class="v111-route-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${routeLines()}</svg>${mapNodes()}</section><aside class="v111-side"></aside></div>`);
+116:     root.querySelectorAll('[data-zone]').forEach(button=>button.onclick=()=>renderMapSide(root,button.dataset.zone)); renderMapSide(root,current);
+117:   }
+118: 
+119:   function dossierReady(d) { try { return !!d.ready(legacy()); } catch (_) { return false; } }
+120:   function dossierProgress(d) { try { return Number(d.progress(legacy()))||0; } catch (_) { return 0; } }
+121:   function claim(id) {
+122:     const d=DOSSIERS.find(x=>x.id===id),b=book(); if(!d||b.claimed[id]||!dossierReady(d)){toastSafe('Le dossier n’est pas encore résolu.');return}
+123:     state.inventory=state.inventory||{}; for(const [key,value] of Object.entries(d.reward||{})){if(key==='money')state.money=(Number(state.money)||0)+value;else state.inventory[key]=(Number(state.inventory[key])||0)+value}
+124:     b.claimed[id]=Date.now(); b.opened[id]=true; if(id==='mastery')state.flags={...(state.flags||{}),v111MasterCartographer:true}; persist(); toastSafe('Analyse validée — récompense obtenue.'); openBook(id);
+125:   }
+126:   function trackDossier(id) { const d=DOSSIERS.find(x=>x.id===id); if(!d)return; const done=new Set([...(legacy().inscriptions||[]),...(legacy().fragments||[]),...(legacy().egg?.zones||[]),...(legacy().archives?.witnesses||[])]); const zone=d.zones.find(z=>!done.has(z))||d.zones[0]; book().trackedZone=zone;book().active=id;persist();close('v111-book');window.ValdoraProV112?.openMap?.(zone)||openMap(zone); }
+127:   function bookPage(d) {
+128:     const progress=dossierProgress(d),ready=dossierReady(d),claimed=!!book().claimed[d.id],pct=Math.max(0,Math.min(100,progress/d.goal*100));
+### game/VALDORA_PRO_V111.js line 128 — dossier
+123:     state.inventory=state.inventory||{}; for(const [key,value] of Object.entries(d.reward||{})){if(key==='money')state.money=(Number(state.money)||0)+value;else state.inventory[key]=(Number(state.inventory[key])||0)+value}
+124:     b.claimed[id]=Date.now(); b.opened[id]=true; if(id==='mastery')state.flags={...(state.flags||{}),v111MasterCartographer:true}; persist(); toastSafe('Analyse validée — récompense obtenue.'); openBook(id);
+125:   }
+126:   function trackDossier(id) { const d=DOSSIERS.find(x=>x.id===id); if(!d)return; const done=new Set([...(legacy().inscriptions||[]),...(legacy().fragments||[]),...(legacy().egg?.zones||[]),...(legacy().archives?.witnesses||[])]); const zone=d.zones.find(z=>!done.has(z))||d.zones[0]; book().trackedZone=zone;book().active=id;persist();close('v111-book');window.ValdoraProV112?.openMap?.(zone)||openMap(zone); }
+127:   function bookPage(d) {
+128:     const progress=dossierProgress(d),ready=dossierReady(d),claimed=!!book().claimed[d.id],pct=Math.max(0,Math.min(100,progress/d.goal*100));
+129:     const foundSet=new Set([...(legacy().inscriptions||[]),...(legacy().fragments||[]),...(legacy().egg?.zones||[]),...(legacy().archives?.witnesses||[])]);
+130:     return `<div class="subtitle">${esc(d.subtitle)}</div><h1>${d.icon} ${esc(d.title)}</h1><p>${esc(d.intro)}</p><div class="v111-progress"><i style="width:${pct}%"></i></div><p><b>Progression : ${progress}/${d.goal}</b> — ${ready?'Analyse complète.':'Des éléments restent à découvrir.'}</p><div class="v111-clues">${d.zones.map(zone=>`<div class="v111-clue ${foundSet.has(zone)||discovered(zone)?'found':''}"><b>${foundSet.has(zone)?'✓':'◇'} ${esc(SCENES?.[zone]?.name||zone)}</b><br><small>${foundSet.has(zone)?'Indice enregistré':'À examiner sur le terrain'}</small></div>`).join('')}</div><div class="v111-reward"><b>Récompense d’analyse</b><br>${esc(d.rewardText)}${claimed?' — ✓ obtenue':''}</div><div class="v111-actions"><button class="v111-action" data-track-dossier>Afficher la prochaine piste sur la carte</button><button class="v111-action" data-claim ${ready&&!claimed?'':'disabled'}>${claimed?'Analyse déjà validée':'Valider l’analyse et recevoir la récompense'}</button>${d.id==='mastery'?'<button class="v111-action" data-pdf>Consulter le fac-similé PDF</button>':''}</div>`;
+131:   }
+132:   function selectBookPage(root,id) { const d=DOSSIERS.find(x=>x.id===id)||DOSSIERS[0];book().active=d.id;book().opened[d.id]=true;root.querySelectorAll('.v111-tab').forEach(x=>x.classList.toggle('active',x.dataset.id===d.id));const page=root.querySelector('.v111-page');page.innerHTML=bookPage(d);page.querySelector('[data-track-dossier]').onclick=()=>trackDossier(d.id);page.querySelector('[data-claim]').onclick=()=>claim(d.id);const pdf=page.querySelector('[data-pdf]');if(pdf)pdf.onclick=()=>window.open('LIVRET_SECRET_VALDORA.pdf','_blank');persist(); }
+133:   function openBook(id) {
+134:     if(!unlocked()){toastSafe('Le Livret secret est remis après le troisième Sceau.');return}
+135:     injectStyle(); const active=id||book().active||DOSSIERS[0].id;
+136:     const nav=DOSSIERS.map(d=>`<button class="v111-tab ${book().claimed[d.id]?'done':''}" data-id="${d.id}"><span class="mark">${d.icon}</span><span><b>${esc(d.title)}</b><br><small>${dossierProgress(d)}/${d.goal}${book().claimed[d.id]?' • Validé':''}</small></span></button>`).join('');
+137:     const root=overlay('v111-book','Livret secret des Éclats','Journal d’enquête interactif — les découvertes modifient la carte et accordent des récompenses',`<div class="v111-bookbody"><nav class="v111-booknav">${nav}</nav><main class="v111-page"></main></div>`);
+### game/VALDORA_PRO_V111.js line 136 — dossier
+131:   }
+132:   function selectBookPage(root,id) { const d=DOSSIERS.find(x=>x.id===id)||DOSSIERS[0];book().active=d.id;book().opened[d.id]=true;root.querySelectorAll('.v111-tab').forEach(x=>x.classList.toggle('active',x.dataset.id===d.id));const page=root.querySelector('.v111-page');page.innerHTML=bookPage(d);page.querySelector('[data-track-dossier]').onclick=()=>trackDossier(d.id);page.querySelector('[data-claim]').onclick=()=>claim(d.id);const pdf=page.querySelector('[data-pdf]');if(pdf)pdf.onclick=()=>window.open('LIVRET_SECRET_VALDORA.pdf','_blank');persist(); }
+133:   function openBook(id) {
+134:     if(!unlocked()){toastSafe('Le Livret secret est remis après le troisième Sceau.');return}
+135:     injectStyle(); const active=id||book().active||DOSSIERS[0].id;
+136:     const nav=DOSSIERS.map(d=>`<button class="v111-tab ${book().claimed[d.id]?'done':''}" data-id="${d.id}"><span class="mark">${d.icon}</span><span><b>${esc(d.title)}</b><br><small>${dossierProgress(d)}/${d.goal}${book().claimed[d.id]?' • Validé':''}</small></span></button>`).join('');
+137:     const root=overlay('v111-book','Livret secret des Éclats','Journal d’enquête interactif — les découvertes modifient la carte et accordent des récompenses',`<div class="v111-bookbody"><nav class="v111-booknav">${nav}</nav><main class="v111-page"></main></div>`);
+138:     root.querySelectorAll('.v111-tab').forEach(tab=>tab.onclick=()=>selectBookPage(root,tab.dataset.id));selectBookPage(root,active);
+139:   }
+140: 
+141:   function playTransport(kind,label,done) {
+142:     injectStyle();close('v111-transport');const root=document.createElement('div');root.id='v111-transport';root.className='v111-transport';
+143:     const visual=kind==='bus'?`<div class="v111-vehicle bus"><img src="${BUS_IMAGE}" alt="Bus régional de Valdora"></div>`:kind==='train'?'<div class="v111-vehicle train"></div>':kind==='bike'?'<div class="v111-bike">🚴</div>':'<div class="v111-flight">🪽</div>';
+144:     root.innerHTML=`<div class="v111-skyline"></div><div class="v111-traveltext"><b>${kind==='bus'?'Réseau Fluo Val d’Ora':kind==='train'?'Express de Valdora':kind==='bike'?'Traversée à vélo':'Vol au-dessus de Valdora'}</b><span>Destination : ${esc(label||'prochaine étape')}</span></div>${visual}`;document.body.appendChild(root);
+145:     setTimeout(()=>{root.classList.add('leaving');setTimeout(()=>{root.remove();try{done?.()}catch(error){console.error('V111 transport',error)}},220)},2350);
+### game/VALDORA_PRO_V111.js line 186 — dossier
+181:   function enforceIdentity(){
+182:     if(window.ValdoraProV112)return;
+183:     const wanted='Éclats Sauvages — Valdora V111 Pro';if(document.title!==wanted)document.title=wanted;
+184:     const brand=document.querySelector('.brand b'),label=`VALDORA V111 PRO — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==label)brand.textContent=label;
+185:   }
+186:   function install() { injectStyle();retireObsoleteDiagnostics();installButtons();hookTransports();hookBikeVisual();observeLostBus();window.ValdoraProV111={version:VERSION,openMap,openBook,playTransport,busTravel,audit:()=>({mapImage:!!MAP_IMAGE,towns:TOWNS.length,dossiers:DOSSIERS.length,unlocked:unlocked(),buttons:!!document.getElementById('v111MapBtn'),bikeVisual:!!window.__v111BikeHooked,transportHooks:!!window.__v111TransportHooked})};document.documentElement.dataset.valdoraPro=VERSION;enforceIdentity(); }
+187: 
+188:   install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[2400,5200,9200,12600].forEach(delay=>setTimeout(install,delay));
+189:   // Les anciennes couches renomment encore périodiquement la fenêtre et le bandeau.
+190:   // Une synchronisation légère maintient l'identité de la version finale et les deux boutons.
+191:   setInterval(()=>{try{installButtons();enforceIdentity()}catch(_){}},650);
+192: })();
+### game/VALDORA_SAVE_V118.js line 269 — dossier
+264:       const nativeName = fileName(false);
+265:       const file = new File([blob], shareName, { type: 'application/json', lastModified: Date.now() });
+266: 
+267:       // Sur iPhone et Android, cette branche doit rester le premier appel asynchrone :
+268:       // elle conserve le geste de l'utilisateur et ouvre la feuille native, où
+269:       // « Enregistrer dans Fichiers » permet de choisir iCloud Drive ou un dossier.
+270:       if (capability.mobile && capability.sharedFiles) {
+271:         try {
+272:           await navigator.share({ files: [file], title: 'Sauvegarde Valdora' });
+273:           rememberExternalSave('fichiers-mobile');
+274:           notify('Sauvegarde envoyée vers Fichiers ✓');
+275:           centerMessage('Sauvegarde locale créée. Dans la feuille iPhone, utilise « Enregistrer dans Fichiers » et choisis ton dossier.', 'success');
+276:           refreshCenter();
+277:           return true;
+278:         } catch (error) {
+### game/VALDORA_SAVE_V118.js line 559 — dossier
+554:     center.setAttribute('aria-modal', 'true');
+555:     center.setAttribute('aria-labelledby', 'valdoraSaveTitle');
+556:     center.innerHTML = `
+557:       <div class="valdoraSaveCard">
+558:         <div class="valdoraSaveHead">
+559:           <div><h2 id="valdoraSaveTitle">Mes sauvegardes</h2><p>Choisis toi-même le dossier de ta copie dans Fichiers ou iCloud Drive.</p></div>
+560:           <button type="button" class="valdoraSaveClose" data-save-action="close" aria-label="Fermer">×</button>
+561:         </div>
+562:         <div class="valdoraSaveStatus">
+563:           <div class="valdoraSaveSlot"><b>Sur cet appareil</b><span id="valdoraPrimaryStatus">Aucune partie enregistrée</span></div>
+564:           <div class="valdoraSaveSlot"><b>Copie précédente</b><span id="valdoraBackupStatus">Aucune copie disponible</span></div>
+565:         </div>
+566:         <div class="valdoraSaveAuto"><i aria-hidden="true"></i>Sauvegarde automatique active</div>
+567:         <div class="valdoraSaveActions">
+568:           <button type="button" class="primary" data-save-action="native"><b>Sauvegarder dans Fichiers / iCloud</b><small>Ouvre le choix d’emplacement natif à chaque sauvegarde manuelle.</small></button>
+### game/index.html line 4142 — dossier
+4137:       if(t!=='none'){
+4138:         state.flags=state.flags||{};state.flags[key]=true;
+4139:         if(t==='coins'){state.money=(state.money||0)+180;dialog('<b>Découverte</b><br>Tu trouves 180 ✦ oubliées dans un tiroir.')}
+4140:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Une Orbe d’Éclat était cachée ici.')}
+4141:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Tu récupères 2 Baies.')}
+4142:         else if(t==='lore'){dialog('<b>Document local</b><br>Un vieux dossier raconte comment ce quartier s’est développé autour des premiers Éclats.')}
+4143:         else if(t==='note'){dialog('<b>Note trouvée</b><br>« On raconte qu’une créature inhabituelle apparaît après la tombée du jour près de la gare. »')}
+4144:         else if(t==='rare'){dialog('<b>Traces étranges</b><br>Tu découvres des traces appartenant probablement à une créature rare.')}
+4145:         else if(t==='quest'){dialog('<b>Demande d’un habitant</b><br>Un résident te demande de retrouver un objet perdu dans un autre étage. Cette mission est ajoutée à ton journal.')}
+4146:         save(false);return
+4147:       }
+4148:     }
+4149: 
+4150:     const data=roomDataV69();
+4151:     dialog('<b>'+data.title+'</b><br>'+{
+### game/index.html line 4850 — dossier
+4845:       if(t!=='none'){
+4846:         state.flags=state.flags||{};state.flags[key]=true;
+4847:         if(t==='coins'){state.money=(state.money||0)+200;dialog('<b>Découverte</b><br>Tu trouves 200 ✦.')}
+4848:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Tu récupères une Orbe d’Éclat.')}
+4849:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Deux Baies étaient rangées ici.')}
+4850:         else if(t==='lore'){dialog('<b>Document</b><br>Un dossier raconte l’histoire de ce quartier et de ses premiers habitants.')}
+4851:         else if(t==='hint'){dialog('<b>Indice</b><br>Un habitant mentionne une créature rare aperçue près de la gare à la tombée du jour.')}
+4852:         else if(t==='rare'){dialog('<b>Traces rares</b><br>Ces marques semblent appartenir à une créature peu commune.')}
+4853:         else if(t==='quest'){dialog('<b>Nouvelle mission</b><br>Un habitant te demande un service. La mission est ajoutée au journal.')}
+4854:         else if(t==='gift'){state.inventory.Potion=(state.inventory.Potion||0)+1;dialog('<b>Cadeau</b><br>Un habitant t’offre une Potion pour te remercier.')}
+4855:         save(false);return
+4856:       }
+4857:     }
+4858: 
+4859:     const info=v70RoomInfo(V70_INT.room);
+### game/index.html line 5918 — dossier
+5913: 
+5914: // ======================================================================
+5915: // V106E — RÉÉCRITURE : QUÊTES PNJ + HERBES SAUVAGES DE CLAIRVAL
+5916: // Les rencontres sauvages, le PC et les missions de départ sont intégrés directement aux systèmes actifs.
+5917: // ======================================================================
+5918: const V106C_QUESTS=[{"id":"v106c_lina","giver":"lina","giverName":"Lina","zone":"town0","title":"Prêt pour la Route 1","text":"Remporte au total 3 combats contre des Éclats sauvages dans Clairval pour préparer ton équipe avant le départ.","kind":"clairvalWildWins","goal":3,"money":350,"item":"Orbe","qty":3,"required":true,"startRequired":true},{"id":"v106c_marc","giver":"marc","giverName":"Marc","zone":"town0","title":"Première capture à Clairval","text":"Capture un Éclat sauvage dans les herbes de Clairval.","kind":"clairvalCaptures","goal":1,"money":260,"item":"Potion","qty":2,"required":true,"startRequired":true},{"id":"v106c_jade","giver":"jade","giverName":"Jade","zone":"town0","title":"Apprendre à utiliser le PC","text":"Au Centre de soins, dépose un Éclat dans le PC puis récupère-le. Le PC permet aussi les échanges équipe ↔ stockage.","kind":"pcRoundTrip","goal":2,"money":280,"item":"Baie","qty":2,"required":true,"startRequired":true},{"id":"v106c_cloe","giver":"cloe","giverName":"Chloé","zone":"town0","title":"Premiers combats sauvages","text":"Entre dans les herbes sauvages de Clairval et remporte un combat contre un Éclat sauvage.","kind":"clairvalWildWins","goal":1,"money":220,"item":"Orbe","qty":2,"required":true,"startRequired":true},{"id":"v106c_milo","giver":"milo","giverName":"Milo","zone":"town1","title":"Herbier vivant","text":"Capture 2 espèces de type Nature.","kind":"caughtType","goal":2,"money":420,"item":"Potion","qty":2,"required":false,"type":"Nature" …[truncated]
+5919: const V106C_QUEST_BY_GIVER=Object.fromEntries(V106C_QUESTS.map(q=>[q.giver,q]));
+5920: function v106cState(){state.v106c=state.v106c||{};state.v106c.quests=state.v106c.quests||{};return state.v106c}
+5921: function v106cQuestState(){return v106cState().quests}
+5922: function v108rOwnedCreatures(){return [...(state.team||[]),...(state.box||[]),...(Array.isArray(state.pc)?state.pc:[])] .filter(Boolean)}
+5923: function v108rCaughtSpeciesSet(){
+5924:   const ids=new Set(v108rOwnedCreatures().map(m=>String(Number(m.id))).filter(id=>id!=='0'));
+5925:   for(const [id,d] of Object.entries(state.dex||{}))if(d?.caught)ids.add(String(Number(id)));
+5926:   return ids
+5927: }
+### game/index.html line 15951 — contre-espionnage, espion
+15946:  {id:'c01',seal:0,title:'Inventaire régional',kind:'caught',goal:10,reward:700,item:'Orbe',qty:3},
+15947:  {id:'c02',seal:1,title:'Dresseurs de terrain',kind:'trainers',goal:10,reward:850,item:'Potion',qty:3},
+15948:  {id:'c03',seal:1,title:'Mobilité régionale',kind:'paidTrips',goal:5,reward:600,item:'SuperPotion',qty:1},
+15949:  {id:'c04',seal:2,title:'Cartographe curieux',kind:'caches',goal:5,reward:900,item:'SuperOrbe',qty:1},
+15950:  {id:'c05',seal:2,title:'Faune lacustre',kind:'waterCaught',goal:6,reward:950,item:'SuperOrbe',qty:1},
+15951:  {id:'c06',seal:3,title:'Contre-espionnage',kind:'taronOps',goal:2,reward:1300,item:'Rappel',qty:1},
+15952:  {id:'c07',seal:3,title:'Équipe en croissance',kind:'maxLevel',goal:28,reward:1000,item:'SuperPotion',qty:2},
+15953:  {id:'c08',seal:4,title:'Circuit vétéran',kind:'trainers',goal:25,reward:1600,item:'SuperOrbe',qty:2},
+15954:  {id:'c09',seal:4,title:'Fouilles de Valdora',kind:'caches',goal:15,reward:1700,item:'Rappel',qty:1},
+15955:  {id:'c10',seal:5,title:'Maîtrise urbaine',kind:'masteries',goal:8,reward:1900,item:'SuperPotion',qty:3},
+15956:  {id:'c11',seal:6,title:'Grand recensement',kind:'caught',goal:90,reward:2400,item:'SuperOrbe',qty:3},
+15957:  {id:'c12',seal:7,title:'Fin du Projet Résonance',kind:'taronOps',goal:8,reward:3200,item:'MegaOrbe',qty:1}
+15958: ];
+15959: const V106Z_CODEX_MILESTONES=[20,40,60,80,100,120,140,150];
+15960: const V106Z_CACHE_ZONES=[...Array.from({length:15},(_,i)=>'town'+i),...Array.from({length:14},(_,i)=>'route'+i),'route4bis'];
+### game/index.html line 16001 — dossier
+15996: window.activateTaronOpV106Z=activateTaronOpV106Z;
+15997: function zTaronParty(op,wave){const avg=Math.max(6,Math.round((state.team||[]).reduce((s,m)=>s+(Number(m?.level)||0),0)/Math.max(1,(state.team||[]).length))),base=Math.min(76,Math.max(8,avg+Math.min(5,op.seal)+Math.floor(wave/2))),count=Math.min(6,2+Math.ceil(op.seal/2)+Math.floor(wave/2)),party=[];const minLegal=id=>window.ValdoraCombatV105R?.minimumLegalLevel?.(id)||1;
+15998:  for(let i=0;i<count;i++){const lvl=Math.min(78,base+i),pool=CREATURES.filter(c=>op.types.includes(c.type)&&minLegal(c.id)<=lvl),c=pool[(op.seal*41+wave*23+i*17)%Math.max(1,pool.length)]||CREATURES[0],m=mon(c.id,lvl);m.moves=defaultMoves(m.id,m.level);party.push(m)}return party}
+15999: function startTaronWaveV106Z(op){const st=zOpState(op.id),wave=st.waves+1,party=zTaronParty(op,wave),trainer={id:`v106z_taron_${op.id}_w${wave}`,level:party[0]?.level||10,look:12,dialog:`Team Taron — ${op.title} (${wave}/${op.waves})`,taron:true,v106zOpId:op.id,party,partyIndex:0,zone:op.zone};window._v106zActiveTaronOp=op.id;window._v106zActiveTaronWave=wave;window.startBattle(party[0],trainer)}
+16000: window.startTaronWaveV106Z=startTaronWaveV106Z;
+16001: function interactTaronOpV106Z(){const op=zActiveOp();if(!op||state.zone!==op.zone)return false;const p=zOpPoint(op);if(!p||Math.hypot(state.x-p.x,state.y-p.y)>135)return false;const st=zOpState(op.id);if(!st.intel){st.intel=true;zSave();dialog(`<b>Dossier Taron — ${op.title}</b><br>${op.text}<br><br>Tu récupères des données chiffrées. Elles révèlent <b>${op.waves} groupe${op.waves>1?'s':''} d'agents</b> à neutraliser dans cette zone.`);return true}if(st.waves<op.waves){dialog(`<b>${op.title}</b><br>Groupe Taron ${st.waves+1}/${op.waves}. Prépare ton équipe.`,()=>startTaronWaveV106Z(op));return true}return false}
+16002: const BASE_COMPLETE_TARON_V106Z=window.completeTaronMission||null;
+16003: window.completeTaronMission=function(){const id=window._v106zActiveTaronOp,op=V106Z_TARON_OPS.find(o=>o.id===id);if(!op)return BASE_COMPLETE_TARON_V106Z?BASE_COMPLETE_TARON_V106Z():undefined;const st=zOpState(id);st.waves=Math.min(op.waves,(st.waves||0)+1);state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(Number(state.taron.wins)||0)+1;window._v106zActiveTaronOp=null;window._v106zActiveTaronWave=null;
+16004:  if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} };
+16005: try{completeTaronMission=window.completeTaronMission}catch(_){}
+16006: function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+16007:  for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+16008:  openSimpleMenu('Dossier Team Taron',h)}
+16009: window.openTaronDossierV106Z=openTaronDossierV106Z;
+16010: 
+### game/index.html line 16009 — dossier
+16004:  if(st.waves>=op.waves){st.done=true;st.doneAt=Date.now();state.taron.missions=(Number(state.taron.missions)||0)+1;zState().activeTaronOp=null;state.money=(Number(state.money)||0)+op.reward;state.inventory=state.inventory||{};state.inventory.SuperOrbe=(Number(state.inventory.SuperOrbe)||0)+1;zSave();dialog(`<b>Opération démantelée : ${op.title}</b><br>La cellule Taron est neutralisée.<br><br>Récompense : <b>${op.reward} V + 1 Super Orbe</b>.${op.main?'<br><br>Un nouveau fragment du <b>Projet Résonance</b> est ajouté à ton dossier.':''}`)}else{zSave();dialog(`<b>${op.title}</b><br>Groupe neutralisé : <b>${st.waves}/${op.waves}</b>.<br>Les autres agents sont encore dans la zone.`)} };
+16005: try{completeTaronMission=window.completeTaronMission}catch(_){}
+16006: function openTaronDossierV106Z(){let h=`<div class="quest"><b>Projet Résonance</b><br>${zMainTaronDone()}/6 opérations principales démantelées.<br><small>Les six premières opérations font désormais partie de l'enquête principale avant la Citadelle. Deux opérations supplémentaires prolongent l'histoire.</small></div>`;
+16007:  for(const op of V106Z_TARON_OPS){const st=zOpState(op.id),un=zOpUnlocked(op),active=zState().activeTaronOp===op.id;h+=`<div class="quest"><b>${op.main?'◆':'◇'} ${op.title}</b> — ${zCityName(op.zone)}<br>${st.done?'✓ Terminée':un?`${st.intel?'Renseignements obtenus':'Renseignements à récupérer'} • Groupes ${st.waves||0}/${op.waves}`:`🔒 ${op.seal} Sceau${op.seal>1?'x':''} + zone découverte`}<br><small>${op.text}</small>${un&&!st.done?`<br><button onclick="activateTaronOpV106Z('${op.id}')">${active?'Opération suivie':'Suivre cette opération'}</button>`:''}</div>`}
+16008:  openSimpleMenu('Dossier Team Taron',h)}
+16009: window.openTaronDossierV106Z=openTaronDossierV106Z;
+16010: 
+16011: // -------- CONTRATS DE TERRAIN --------
+16012: function zContractProgress(c,st){const m=zMetrics();return Math.max(0,Number(m[c.kind])||0)}
+16013: function acceptContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id);if(!c||c.seal>(state.seals||[]).length)return;const st=zState().contracts[id]||(zState().contracts[id]={});if(st.claimed||st.accepted)return;st.accepted=true;st.acceptedAt=Date.now();zSave();openContractsV106Z()}
+16014: function claimContractV106Z(id){const c=V106Z_CONTRACTS.find(x=>x.id===id),st=zState().contracts[id];if(!c||!st?.accepted||st.claimed||zContractProgress(c,st)<c.goal)return;st.claimed=true;state.money=(Number(state.money)||0)+c.reward;state.inventory=state.inventory||{};state.inventory[c.item]=(Number(state.inventory[c.item])||0)+c.qty;zSave();toast(`Contrat terminé : ${c.title}`);openContractsV106Z()}
+16015: window.acceptContractV106Z=acceptContractV106Z;window.claimContractV106Z=claimContractV106Z;
+16016: function zContractText(c){return {caught:`Capturer ${c.goal} espèces différentes`,trainers:`Atteindre ${c.goal} victoires de dresseurs`,paidTrips:`Effectuer ${c.goal} trajets payants (bus ou train)`,caches:`Découvrir ${c.goal} caches d'exploration`,waterCaught:`Capturer ${c.goal} espèces de type Eau`,taronOps:`Démanteler ${c.goal} opération${c.goal>1?'s':''} Taron`,maxLevel:`Atteindre le niveau ${c.goal} avec au moins un Éclat`,masteries:`Valider ${c.goal} maîtrises de ville`}[c.kind]||c.kind}
+16017: function openContractsV106Z(){let h='<div class="quest"><b>Bureau des contrats</b><br>Les contrats suivent tes accomplissements globaux et constituent une progression parallèle à l’histoire.</div>';for(const c of V106Z_CONTRACTS){if(c.seal>(state.seals||[]).length)continue;const st=zState().contracts[c.id]||{},p=st.accepted?Math.min(c.goal,zContractProgress(c,st)):0;h+=`<div class="quest"><b>${c.title}</b><br>${zContractText(c)}${st.accepted?` : <b>${p}/${c.goal}</b>`:''}<br><small>Récompense : ${c.reward} V + ${c.qty} ${c.item}</small>${st.claimed?'<br><b>✓ Contrat soldé</b>':!st.accepted?`<br><button onclick="acceptContractV106Z('${c.id}')">Accepter</button>`:p>=c.goal?`<br><button onclick="claimContractV106Z('${c.id}')">Réclamer</button>`:''}</div>`}openSimpleMenu('Contrats de Valdora',h)}
+16018: window.openContractsV106Z=openContractsV106Z;
+### game/index.html line 16044 — dossier team taron, dossier
+16039: }
+16040: window.claimCodexMilestoneV106Z=claimCodexMilestoneV106Z;
+16041: function openCodexMilestonesV106Z(){let h=`<div class="quest"><b>Programme de recherche du Codex</b><br>${zCaught()}/150 espèces capturées.</div>`;for(const n of V106Z_CODEX_MILESTONES){const done=!!zState().codexClaims[n],ready=zCaught()>=n;h+=`<div class="quest"><b>Palier ${n} espèces</b><br>${done?'✓ Récompense récupérée':ready?`Recherche validée<br><button onclick="claimCodexMilestoneV106Z(${n})">Récupérer la récompense</button>`:`Progression : ${Math.min(zCaught(),n)}/${n}`}</div>`}openSimpleMenu('Recherche du Codex',h)}
+16042: window.openCodexMilestonesV106Z=openCodexMilestonesV106Z;
+16043: 
+16044: function openAdventureHubV106Z(){openSimpleMenu('Aventure +',`<div class="quest"><b>Contenu longue durée</b><br>Enquête Taron, contrats, exploration, Circuit des Gardiens et recherche du Codex.</div><div class="baggrid"><button class="bagitem" onclick="openTaronDossierV106Z()"><b>◆ Dossier Team Taron</b><br>${zMainTaronDone()}/6 opérations principales</button><button class="bagitem" onclick="openContractsV106Z()"><b>📋 Contrats</b><br>Objectifs de terrain à progression propre</button><button class="bagitem" onclick="openGuardianCircuitV106Z()"><b>⚔ Circuit des Gardiens</b><br>Revanche à 3, 5 et 7 Sceaux</button><button class="bagitem" onclick="openCodexMilestonesV106Z()"><b>📖 Recherche Codex</b><br>${zCaught()}/150 espèces</button><button class="bagitem" onclick="document.getElementById('menuov').style.display='none';toast('Caches découvertes : ${zCachesFound()}/${V106Z_CACHE_ZONES.length}')"><b>🧭 Exploration</b><br>${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches</button></div>`)}
+16045: window.openAdventureHubV106Z=openAdventureHubV106Z;
+16046: 
+16047: // -------- TRANSPORTS PAYANTS --------
+16048: function trainFareV106Z(cityId){const from=typeof railCurrentCityV94==='function'?railCurrentCityV94():state.currentCityId,a=typeof railCityRecordV94==='function'?railCityRecordV94(from):null,b=typeof railCityRecordV94==='function'?railCityRecordV94(cityId):null;if(zCreator())return 0;const dist=a&&b?Math.hypot((a.x||0)-(b.x||0),(a.y||0)-(b.y||0)):30,disc=Number(window.ValdoraGameplayV106Y?.rank?.()?.discount)||0;return Math.max(180,Math.min(950,Math.round((140+dist*7)*(1-disc*.5)/10)*10))}
+16049: window.trainFareV106Z=trainFareV106Z;
+16050: window.v106zBoardTrain=function(cityId,fare){fare=Number(fare)||0;if(!railCanDepartV94(cityId)){toast('Cette gare n’est pas encore accessible.');return}if(!zCreator()&&(Number(state.money)||0)<fare){toast(`Billet de train : ${fare} V requis.`);return}if(!zCreator())state.money-=fare;zState().trainTrips++;zSave();document.querySelector('.stationTravelV62')?.remove();const city=railCityRecordV94(cityId);toast(`Billet validé : ${fare} V — ${city?.name||'destination'}.`);setTimeout(()=>playTrainTravelV622(cityId),300)};
+16051: window.v62StationMasterDialog=function(){const here=railCurrentCityV94();if(!here||!railCityHasPhysicalStationV94(here)){toast('Il n’y a pas de gare ferroviaire dans cette ville.');return}const dest=railAvailableDestinationsV94();if(!dest.length){toast('Aucune autre gare découverte.');return}document.querySelector('.stationTravelV62')?.remove();const cards=dest.map(c=>{const fare=trainFareV106Z(c.id);return `<button class="stationDestV62" onclick="v106zBoardTrain('${c.id}',${fare})"><span>${c.kind==='metropole'?'◆':'●'}</span><b>${c.name}</b><small>${zCreator()?'Mode créateur':`Billet : ${fare} V`}</small></button>`}).join('');document.body.insertAdjacentHTML('beforeend',`<div class="stationTravelV62"><div class="stationPanelV62"><div class="stationMasterV62"><div class="stationHatV62">★</div><div><b>Chef de gare</b><p>Le train est un service payant. Le tarif dépend de la distance et de ton rang d'aventure.</p></div></div><div class="stationListV62">${cards}</div><button class="stationCancelV62" onclick="this.closest('.stationTravelV62').remove()">Finalement, je reste ici</button></div></div>`)};
+16052: try{v62StationMasterDialog=window.v62StationMasterDialog}catch(_){}
+16053: window.v62BoardTrain=function(cityId){window.v106zBoardTrain(cityId,trainFareV106Z(cityId))};try{v62BoardTrain=window.v62BoardTrain}catch(_){}
+### game/index.html line 16090 — dossier team taron, dossier
+16085: window.finalTempleAvailableV77=function(){return window.v106pCitadelRequirements().ready};try{finalTempleAvailableV77=window.finalTempleAvailableV77}catch(_){}
+16086: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if(r.taron<6)m.push(`démanteler le Projet Résonance (${r.taron}/6)`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16087: 
+16088: // -------- OBJECTIFS + MENU --------
+16089: const BASE_OBJECTIVES_V106Z=typeof objectivesV84==='function'?objectivesV84:null;
+16090: if(BASE_OBJECTIVES_V106Z){objectivesV84=function(){const q=BASE_OBJECTIVES_V106Z(),r=window.v106pCitadelRequirements();q.push({title:'Enquête principale — Projet Résonance',progress:`${zMainTaronDone()}/6 opérations`,txt:zMainTaronDone()>=6?'Le cœur du réseau Taron est identifié.':'Poursuis le Dossier Team Taron : les six opérations principales sont nécessaires avant la Citadelle.'});q.push({title:'Exploration de Valdora',progress:`${zCachesFound()}/${V106Z_CACHE_ZONES.length} caches`,txt:'Des caches discrètes brillent lorsque tu t’en approches. Fouille villes et routes.'});q.push({title:'Progression longue durée',progress:`${zTaronDone()}/8 Taron • ${zMasteries()}/15 maîtrises`,txt:'Contrats, revanche des Gardiens, dresseurs vétérans et paliers du Codex prolongent l’aventure.'});return q};window.objectivesV84=objectivesV84}
+16091: function installV106ZButton(){const grid=document.querySelector('aside .panel:nth-of-type(3) .grid')||document.querySelector('aside .grid');if(grid&&!document.getElementById('adventurePlusV106Z')){const b=document.createElement('button');b.id='adventurePlusV106Z';b.textContent='Aventure +';b.onclick=openAdventureHubV106Z;grid.appendChild(b)}}
+16092: 
+16093: // Bus V106Y : l'économie est volontairement plus exigeante dans V106Z (la formule source est également remplacée lors du build).
+16094: function brandV106Z(){document.title='Éclats Sauvages — Valdora V107A';const b=document.querySelector('.brand b');if(b)b.textContent=`VALDORA V107A — ${zCreator()?'CRÉATEUR':'JOUEUR'}`}
+16095: installV106ZButton();brandV106Z();zState();setTimeout(()=>{installV106ZButton();brandV106Z()},1200);setInterval(()=>{try{zState()}catch(_){}},3000);
+16096: window.ValdoraGameplayV106Z={version:V106Z_VERSION,taronOps:V106Z_TARON_OPS,contracts:V106Z_CONTRACTS,caches:V106Z_CACHE_ZONES,mainTaronDone:zMainTaronDone,openHub:openAdventureHubV106Z};document.documentElement.dataset.gameplayExpansion='V106Z';
+16097: })();
+16098: </script>
+16099: <!-- V106Z-EXTENSION-GAMEPLAY-END -->
+### game/index.html line 16316 — solene
+16311: }
+16312: const V107B_DRAW_ROUTE_BASE=window.drawRouteBase||drawRouteBase;
+16313: window.drawRouteBase=function(sc,camX,camY,sx,sy){V107B_DRAW_ROUTE_BASE(sc,camX,camY,sx,sy);v107bDrawLegendOverlay(sc,camX,camY,sx,sy)};try{drawRouteBase=window.drawRouteBase}catch(_){}
+16314: 
+16315: // Aubeval : passage obligatoire et hub d'expéditions.
+16316: const V107B_AUBE_QUEST={id:'v107b_aubeval_horizons',giver:'solene_aubeval',giverName:'Solène',zone:'town14',title:'Épreuve des Horizons',text:'Vaincs l’équipe d’évaluation d’Aubeval pour obtenir le Permis des Horizons et accéder aux biomes légendaires.',kind:'aubevalTrial',goal:1,money:1800,item:'MegaOrbe',qty:2,required:true};
+16317: if(typeof V106C_QUESTS!=='undefined'&&!V106C_QUESTS.some(q=>q.id===V107B_AUBE_QUEST.id)){V106C_QUESTS.push(V107B_AUBE_QUEST);V106C_QUEST_BY_GIVER[V107B_AUBE_QUEST.giver]=V107B_AUBE_QUEST}
+16318: if(typeof NPCDATA!=='undefined'&&!NPCDATA.some(n=>n.id==='solene_aubeval'))NPCDATA.push({id:'solene_aubeval',zone:'town14',x:1240,y:555,look:40,dir:1,name:'Solène',text:'Je dirige les expéditions vers les sanctuaires légendaires.'});
+16319: const V107B_PROGRESS_BASE=v106cProgress;
+16320: v106cProgress=function(q){if(q?.kind==='aubevalTrial')return state.trainerWins?.aubeval_trial_v107b?1:0;return V107B_PROGRESS_BASE(q)};window.v106cProgress=v106cProgress;
+16321: function v107bTrialParty(){const ids=[99,96,93,90,87],levels=[58,59,60,61,62];return ids.map((id,i)=>{const m=mon(BY[id]?id:CREATURES.filter(c=>(c.stage||0)===2)[i%CREATURES.length].id,levels[i]);m.moves=defaultMoves(m.id,m.level);return m})}
+16322: function v107bStartAubeTrial(){const t={id:'aubeval_trial_v107b',name:'Épreuve des Horizons',dialog:'Solène — Épreuve des Horizons',level:60,look:40,aubevalTrialV107B:true,party:v107bTrialParty()};startTrainer413(t)}
+16323: function v107bTravelLegend(zone){if(!state.flags?.aubevalExpeditionLicense){toast('Le Permis des Horizons est requis.');return}if(!V107B_LEGENDS_BY_ZONE[zone])return;document.getElementById('menuov').style.display='none';scene='world';building=null;enterZone(zone,'south');save(false)}
+16324: function openLegendExpeditionsV107B(){
+16325:   if(!state.flags?.aubevalExpeditionLicense){toast('Termine d’abord l’Épreuve des Horizons.');return}
+### game/index.html line 16332 — solene
+16327:   openSimpleMenu('Aubeval — Expéditions légendaires',`<div class="quest"><b>Permis des Horizons validé</b><br>Onze sanctuaires sont accessibles. Les légendaires n’apparaissent nulle part ailleurs.<br><br><b>Citadelle :</b> capture au moins ${v107bLegendRequired()} légendaires sur ${V107B_LEGENDS.length}.</div><div class="baggrid">${cards}</div>`)
+16328: }
+16329: window.v107bTravelLegend=v107bTravelLegend;window.openLegendExpeditionsV107B=openLegendExpeditionsV107B;
+16330: const V107B_QUEST_INTERACT_BASE=questInteractionV106C;
+16331: questInteractionV106C=function(n){
+16332:   if(n?.id!=='solene_aubeval')return V107B_QUEST_INTERACT_BASE(n);
+16333:   const q=V107B_AUBE_QUEST,e=v106cQuestState()[q.id];
+16334:   if(state.flags?.aubevalExpeditionLicense||e?.status==='done'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;return dialog('<b>Solène — Bureau des Horizons</b><br>Ton permis est valide. Quelle expédition veux-tu rejoindre ?',openLegendExpeditionsV107B),true}
+16335:   if(!e){dialog('<b>Solène — Épreuve des Horizons</b><br>Aubeval est le dernier bureau d’expédition avant les sanctuaires légendaires. Pour obtenir ton <b>Permis des Horizons</b>, tu dois vaincre mon équipe d’évaluation.<br><br>Cette étape est obligatoire avant la Citadelle.',()=>{v106cAccept(q);setTimeout(v107bStartAubeTrial,220)});return true}
+16336:   if(e.status==='active'&&!state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Épreuve des Horizons</b><br>L’épreuve n’est pas encore remportée. Mon équipe t’attend.',v107bStartAubeTrial);return true}
+16337:   if(e.status==='active'&&state.trainerWins?.aubeval_trial_v107b){dialog('<b>Solène — Permis accordé</b><br>Épreuve réussie. Tu peux désormais partir vers les onze biomes légendaires.',()=>{v106cClaim(q);state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;save(false);openLegendExpeditionsV107B()});return true}
+16338:   return true
+16339: };window.questInteractionV106C=questInteractionV106C;
+16340: 
+16341: // Citadelle : exigences historiques + Aubeval + moitié des légendaires.
+### game/index.html line 16528 — solene
+16523:    ctx.textAlign='start';ctx.restore()
+16524:  }
+16525: };
+16526: try{drawRouteBase=window.drawRouteBase}catch(_){}
+16527: 
+16528: function v107cEnsureSoleneHint(){
+16529:  if(typeof NPCDATA==='undefined')return;
+16530:  const n=NPCDATA.find(x=>x.id==='solene_aubeval');
+16531:  if(n)n.text=v107cHasPermit()?'Ton permis est valide. La Route des Horizons se trouve au nord d’Aubeval.':'Remporte mon Épreuve des Horizons pour ouvrir la route vers les onze sanctuaires légendaires.'
+16532: }
+16533: function v107cRefreshUI(){
+16534:  try{refreshObjectivePanelV84()}catch(_){}
+16535:  const brand=document.querySelector('.brand b');if(brand)brand.textContent=`VALDORA ${V107C_VERSION} — ${typeof zCreator==='function'&&zCreator()?'CRÉATEUR':'JOUEUR'}`;
+16536:  document.title='Éclats Sauvages — Valdora V107C — Légendaires intégrés';
+16537:  document.documentElement.dataset.valdoraVersion=V107C_VERSION
+### game/index.html line 16546 — solene
+16541:  const routeOk=!!SCENES?.route_horizons&&!!SCENES?.route_legends&&V107C_LEGENDS.every(l=>!!SCENES?.[l.zone]);
+16542:  const aubeExit=!!SCENES?.town14?.exits?.some(e=>(e.to||e.target)==='route_horizons');
+16543:  return {version:V107C_VERSION,legends:V107C_LEGENDS.length,required:V107C_REQUIRED,routeOk,aubevalExit:aubeExit,spritePaths:spriteFiles}
+16544: }
+16545: function v107cApply(){
+16546:  try{v107cEnsureCreatures();v107cEnsureRouteScenes();v107cEnsureSoleneHint();v107cPreloadSprites();v107cRefreshUI();window.ValdoraV107C={version:V107C_VERSION,legends:V107C_LEGENDS,required:V107C_REQUIRED,caught:v107cCaught,audit:v107cAudit};window.ValdoraLegendAuditV107C=v107cAudit()}catch(err){console.error('V107C intégration',err)}
+16547: }
+16548: window.addEventListener('DOMContentLoaded',()=>{setTimeout(v107cApply,2600);setTimeout(v107cApply,4300)});
+16549: setTimeout(v107cApply,5200);setTimeout(v107cApply,10500);setTimeout(v107cApply,12200);
+16550: })();
+16551: </script>
+16552: <!-- V107C-INTEGRATION-LEGENDAIRES-PHYSIQUE-END -->
+16553: 
+16554: 
+16555: <!-- V107D-CHIBI-MOBILIER-START -->
+### game/index.html line 16865 — dossier
+16860:     }
+16861:     return changed
+16862:   }catch(_){return false}
+16863: }
+16864: function exportSave(){try{const payload=JSON.stringify(state);if(window.v96DownloadSaveFile)v96DownloadSaveFile(payload);else save(true)}catch(e){toast('Export impossible : '+e.message)}}
+16865: function saveFolderHelp(){dialog('<b>Dossier des sauvegardes</b><br><br>Valdora conserve une copie locale dans ton navigateur. Pour transférer ta partie vers une nouvelle version ou un autre ordinateur, utilise <b>Exporter ma sauvegarde</b> et garde le fichier <b>.valdora</b> dans un endroit sûr. Pour la récupérer, utilise <b>Importer une sauvegarde</b>.')}
+16866: function openSaveHelp(){
+16867:   openSimpleMenu('Sauvegarde',`<div class="quest"><b>Ta sauvegarde contient :</b><br>position, équipe, PC, objets, quêtes, progression, Sceaux et autres données de partie.</div><div class="baggrid"><button onclick="save(true)">Sauvegarder</button><button onclick="ValdoraSaveV107Q.continueGame()">Charger</button><button onclick="ValdoraSaveV107Q.chooseLocation()">Choisir l’emplacement</button><button onclick="ValdoraV107F.exportSave()">Exporter ma sauvegarde</button><button onclick="v96OpenSavePicker()">Importer une sauvegarde</button><button onclick="ValdoraSaveV107Q.folderHelp()">Où est ma sauvegarde ?</button></div>`)
+16868: }
+16869: const HELP={
+16870: 'Déplacements':'Utilise ZQSD, WASD ou les flèches directionnelles pour marcher. Approche-toi des portes pour entrer dans les bâtiments et utilise E ou Entrée pour interagir avec les éléments proches.',
+16871: 'Interactions':'Approche-toi d’un élément interactif puis utilise E ou Entrée.',
+16872: 'Combats':'ATTAQUER permet de choisir une capacité. ÉQUIPE change de compagnon. SAC utilise un objet. Les combats donnent de l’expérience : entraîne plusieurs créatures et surveille leurs PV et leurs niveaux.',
+16873: 'Capture':'Explore les hautes herbes pour rencontrer des créatures sauvages. Affaiblis-en une puis utilise une orbe de capture lorsque les conditions le permettent. Si ton équipe est pleine, la créature capturée est envoyée dans le PC.',
+16874: 'Équipe et PC':'Ton équipe voyage avec toi et combat. Les autres créatures capturées sont envoyées dans le PC. À Clairval, prépare au moins 3 créatures de niveau 10 minimum avant de quitter la ville.',
+### game/index.html line 17322 — dossier
+17317: }
+17318: window.v96Continue=loadFile;try{v96Continue=loadFile}catch(_){}
+17319: 
+17320: function openSaveMenu(){
+17321:   if(typeof openSimpleMenu!=='function'){saveAsNow();return}
+17322:   openSimpleMenu('Sauvegarde',`<div class="quest"><b>Enregistrer où tu veux</b><br>Le bouton <b>Enregistrer la sauvegarde…</b> ouvre la fenêtre <b>Enregistrer sous</b> de Windows. Choisis toi-même le dossier et le nom du fichier <b>.valdora</b>. Aucun dossier n’est imposé et Valdora ne mémorise pas l’emplacement.</div><div class="baggrid"><button onclick="ValdoraSaveV108A.saveAsNow()">Enregistrer la sauvegarde…</button><button onclick="ValdoraSaveV108A.loadFile()">Charger un fichier .valdora</button></div>`)
+17323: }
+17324: function install(){
+17325:   const b=document.getElementById('save');if(b){b.onclick=saveAsNow;b.title='Choisir où enregistrer la sauvegarde .valdora';}
+17326:   const c=document.getElementById('continue');if(c){c.onclick=loadFile;c.title='Choisir un fichier .valdora à charger';}
+17327:   const sm=document.getElementById('v107fSaveMenu');if(sm)sm.onclick=openSaveMenu;
+17328:   // Les anciens boutons/exportations doivent tous passer par le même Enregistrer sous.
+17329:   try{window.v96DownloadSaveFile=function(){saveAsNow()}}catch(_){}
+17330:   try{if(window.ValdoraV107F){window.ValdoraV107F.exportSave=saveAsNow;window.ValdoraV107F.openSaveHelp=openSaveMenu;window.ValdoraV107F.saveFolderHelp=openSaveMenu}}catch(_){}
+17331:   try{
+### game/index.html line 17846 — dossier
+17841: }
+17842: window.v109aOpenRelearnCreature=v109aOpenRelearnCreature;
+17843: 
+17844: function v109aStartEgg(){const s=v109aState();if(s.egg.status!=='hidden')return;s.egg={status:'active',zones:[],startedAt:Date.now()};save(false);dialog('<b>L’œuf inconnu</b><br>Le directeur te confie un œuf acquis par le musée. Apporte-le au Professeur Aurine à Clairval : ses relevés devraient permettre d’identifier les environnements auxquels il réagit.');}
+17845: window.v109aStartEgg=v109aStartEgg;
+17846: function v109aStartArchives(){const s=v109aState();if(s.archives.status!=='hidden')return;s.archives={status:'active',witnesses:[],startedAt:Date.now()};save(false);dialog('<b>Les archives disparues</b><br>Une page manque au dossier Résonance. Interroge un habitant à Bois-Murmure, un à Cendrebourg et un à Dunes d’Or, puis reviens au musée.');}
+17847: window.v109aStartArchives=v109aStartArchives;
+17848: function v109aZoneLabelV109G(zone){return ({town1:'Bois-Murmure',town2:'Lac Azur',town3:'Cendrebourg',town4:'Hautes-Roches',town5:"Dunes d'Or",town6:'Nivéa',town7:'Valdoria',town10:'Luminor',route4bis:'Route 4 bis — Lac des Reflets',route5:'Route 6'})[zone]||SCENES?.[zone]?.name||zone}
+17849: function v109aRemainingV109G(all,done){const got=new Set(done||[]);return all.filter(z=>!got.has(z)).map(v109aZoneLabelV109G)}
+17850: function v109aEggText(s){const e=s.egg;if(e.status==='hidden')return 'Le musée vient de recevoir un œuf d’origine inconnue.';if(e.status==='active')return 'Étape 1 : apporte l’œuf au Professeur Aurine, dans le laboratoire de Clairval.';if(e.status==='field'){const left=v109aRemainingV109G(V109A_EGG_ZONES,e.zones);return `Réactions observées : ${e.zones.length}/3. Lieux restants : ${left.length?left.join(' • '):'aucun'}. Une réaction est enregistrée automatiquement lorsque tu arrives dans la ville.`}if(e.status==='return')return 'Les trois réactions ont été observées. Retourne parler au directeur ou à la directrice de n’importe quel musée.';return '✓ Chaîne de l’œuf terminée : l’œuf réagit à la Résonance.'}
+17851: function v109aArchiveText(s){const a=s.archives;if(a.status==='hidden')return 'Une page d’archives semble avoir disparu après l’étude de l’œuf.';if(a.status==='active'){const left=v109aRemainingV109G(V109A_WITNESS_ZONES,a.witnesses);return `Témoignages : ${a.witnesses.length}/3. Va dans une maison et parle à un habitant dans : ${left.length?left.join(' • '):'aucune ville restante'}.`}if(a.status==='return')return 'Les trois témoignages concordent. Retourne parler au directeur ou à la directrice d’un musée.';return '✓ Archives disparues retrouvées et classées.'}
+17852: function openMuseumMissionsV109A(){const s=v109aState();let h='<div class="quest"><b>Dossiers du musée</b><br>Les affaires importantes évoluent avec tes découvertes.</div>';
+17853:   h+=`<div class="quest"><b>L’œuf inconnu</b><br>${v109aEggText(s)}${s.egg.status==='hidden'?'<br><button onclick="v109aStartEgg()">Accepter la mission</button>':''}</div>`;
+17854:   if(s.egg.status==='done')h+=`<div class="quest"><b>Les archives disparues</b><br>${v109aArchiveText(s)}${s.archives.status==='hidden'?'<br><button onclick="v109aStartArchives()">Accepter la mission</button>':''}</div>`;
+17855:   h+='<button onclick="openMuseumDirectorV109A()">Retour</button>';openSimpleMenu('Missions du directeur',h);
+### game/index.html line 17864 — dossier
+17859: function v109aOpenLivret(){const s=v109aState();if(!s.livret.unlocked||!v109aHasSeal3()){toast('Le livret est encore scellé.');return}try{window.open('LIVRET_SECRET_VALDORA.pdf','_blank')}catch(_){ }toast('Livret secret ouvert.')}
+17860: window.v109aOpenLivret=v109aOpenLivret;
+17861: function openMuseumDirectorV109A(){
+17862:   const s=v109aState();v109aSeedHistory();
+17863:   if(s.egg.status==='return'){
+17864:     s.egg.status='done';s.egg.completedAt=Date.now();state.inventory=state.inventory||{};state.inventory.MegaOrbe=(state.inventory.MegaOrbe||0)+1;logEvent('Musée : l’œuf inconnu est identifié comme sensible à la Résonance.');save(false);dialog('<b>Directeur du musée</b><br>Les relevés correspondent aux anciens dossiers de Résonance. L’œuf reste au musée sous surveillance. Pour ton aide, voici une MegaOrbe. Une autre affaire m’inquiète : une page d’archives a disparu.');return
+17865:   }
+17866:   if(s.archives.status==='return'){
+17867:     s.archives.status='done';s.archives.completedAt=Date.now();state.money=(Number(state.money)||0)+900;logEvent('Musée : les archives disparues sont reconstituées.');save(false);dialog('<b>Directeur du musée</b><br>Les témoignages confirment qu’un membre de la Team Taron cherchait cette page. Tu reçois 900 Voltrons. Ce dossier rejoint désormais le fil rouge du Projet Résonance.');return
+17868:   }
+17869:   const name=v109aMuseumDirector()?.name||'Direction du musée';
+17870:   let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+17871:   h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+17872:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+17873:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+### game/index.html line 17874 — dossier
+17869:   const name=v109aMuseumDirector()?.name||'Direction du musée';
+17870:   let h=`<div class="quest"><b>${v109aEsc(name)}</b><br>Le musée conserve les archives de Valdora, suit les phénomènes de Résonance et peut aider tes Éclats à retrouver des techniques oubliées.</div><div class="baggrid">`;
+17871:   h+='<button class="bagitem" onclick="openMuseumMissionsV109A()"><b>Missions du musée</b><br>Enquêtes, œuf et archives</button>';
+17872:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'forgotten\')"><b>Réapprendre</b><br>Anciennes attaques oubliées</button>';
+17873:   h+='<button class="bagitem" onclick="v109aOpenRelearn(\'refused\')"><b>Attaques refusées</b><br>Reproposer un apprentissage refusé</button>';
+17874:   if(s.livret.unlocked&&v109aHasSeal3())h+='<button class="bagitem" onclick="v109aOpenLivret()"><b>Livret des Éclats</b><br>Ouvrir le dossier secret</button>';
+17875:   h+='</div>';openSimpleMenu('Direction du musée',h);
+17876: }
+17877: window.openMuseumDirectorV109A=openMuseumDirectorV109A;
+17878: 
+17879: function v109aProfessorEgg(){const s=v109aState();if(s.egg.status!=='active')return false;s.egg.status='field';s.egg.analysisAt=Date.now();s.egg.zones=[];save(false);dialog('<b>Professeur Aurine</b><br>Les capteurs détectent trois signatures : une énergie aquatique, une forte pression minérale et un froid intense. Emmène l’œuf à Lac Azur, Hautes-Roches et Nivéa. Observe chaque réaction, puis retourne au musée.');return true}
+17880: window.v109aProfessorEgg=v109aProfessorEgg;
+17881: function v109aWitness(zone){const s=v109aState();if(s.archives.status!=='active'||!V109A_WITNESS_ZONES.includes(zone)||s.archives.witnesses.includes(zone))return;s.archives.witnesses.push(zone);if(s.archives.witnesses.length>=3)s.archives.status='return';save(false);toast('Témoignage ajouté aux archives : '+s.archives.witnesses.length+'/3')}
+17882: 
+17883: window.v109aWitness=v109aWitness;
+### game/index.html line 17917 — dossier
+17912: if(V109A_ENTER){enterZone=function(to,entry){const ok=V109A_ENTER(to,entry);if(ok)setTimeout(()=>v109aSyncOnZone(to),120);return ok};window.enterZone=enterZone}
+17913: 
+17914: // Le troisième Gardien remet réellement le code du livret.
+17915: try{
+17916:   const BASE_SEAL=v83AwardGuardianSeal;
+17917:   v83AwardGuardianSeal=function(t){const got=BASE_SEAL(t);if(got&&Number(t?.sealIndex)===3){state.v109a=state.v109a&&typeof state.v109a==='object'?state.v109a:{};const s=state.v109a;s.livret=s.livret&&typeof s.livret==='object'?s.livret:{};s.livret.unlocked=true;s.livret.code=V109A_LIVRET_CODE;s.livret.receivedAt=Date.now();save(false);setTimeout(()=>dialog('<b>Troisième Gardien</b><br>Tu as suffisamment prouvé ta valeur. Dans les fichiers de Valdora se trouve le <b>Livret des Éclats</b>, un dossier réservé aux dresseurs confirmés.<br><br>Code d’ouverture : <b>'+V109A_LIVRET_CODE+'</b><br><br>Ce code est désormais noté dans tes objectifs. Certaines missions du livret sont nécessaires pour comprendre ce qui mène à la Citadelle.'),1100)}return got};
+17918:   window.v83AwardGuardianSeal=v83AwardGuardianSeal;
+17919: }catch(_){ }
+17920: 
+17921: function v109aInstallLivretButton(){
+17922:   const s=v109aState(),grid=document.getElementById('musicBtn')?.parentElement;if(!grid)return;let b=document.getElementById('v109aLivretBtn');
+17923:   if(!b){b=document.createElement('button');b.id='v109aLivretBtn';b.textContent='Livret secret';b.onclick=v109aOpenLivret;grid.appendChild(b)}b.style.display=(v109aCreator()||(s.livret.unlocked&&v109aHasSeal3()))?'':'none';
+17924: }
+17925: setInterval(()=>{try{v109aInstallLivretButton()}catch(_){ }},1500);
+17926: // V111 gère désormais l'identité visuelle finale ; cette ancienne renumérotation périodique est retirée.
+### game/index.html line 17938 — dossier
+17933:   objectivesV84=function(){
+17934:     const q=BASE_OBJ?BASE_OBJ():[],s=v109aState();
+17935:     if(s.egg.status!=='hidden')q.push({title:'Musée — L’œuf inconnu',progress:s.egg.status==='field'?`${s.egg.zones.length}/3 environnements`:s.egg.status==='done'?'Terminée':'En cours',txt:v109aEggText(s)});
+17936:     if(s.archives.status!=='hidden')q.push({title:'Musée — Les archives disparues',progress:s.archives.status==='active'?`${s.archives.witnesses.length}/3 témoignages`:s.archives.status==='done'?'Terminée':'Retour au musée',txt:v109aArchiveText(s)});
+17937:     if(s.livret.unlocked&&v109aHasSeal3()){
+17938:       q.push({title:'Livret des Éclats',progress:'Code obtenu',txt:'Le Livret est désormais accessible. Il contient le guide détaillé des dossiers obligatoires.'});
+17939:       const insLeft=v109aRemainingV109G(V109A_INSCRIPTION_ZONES,s.inscriptions);
+17940:       q.push({title:'Les sept inscriptions',progress:`${s.inscriptions.length}/7`,txt:s.inscriptions.length>=7?'Les sept inscriptions ont été relevées.':`Lieux restants : ${insLeft.join(' • ')}. L’inscription est enregistrée automatiquement à l’arrivée dans la zone.`});
+17941:       const fragLeft=v109aRemainingV109G(V109A_FRAGMENT_ZONES,s.fragments);
+17942:       q.push({title:'Le message incomplet',progress:`${s.fragments.length}/4 fragments`,txt:s.fragments.length>=4?'Message reconstitué : « LA RÉSONANCE OUVRE LA VOIE ».':`Fragments restants : ${fragLeft.join(' • ')}. Ils sont enregistrés automatiquement en entrant dans ces zones.`});
+17943:       q.push({title:'Le convoi perdu',progress:v109aConvoiDone()?'Résolu':'À résoudre',txt:v109aConvoiDone()?'Le convoi Résonance a été neutralisé.':'Menu Aventure + → Dossier Team Taron → Le convoi Résonance → Suivre cette opération. Puis va sur la Route 6 et cherche le marqueur noir et jaune.'});
+17944:     }
+17945:     return q;
+17946:   };window.objectivesV84=objectivesV84;
+17947: }catch(_){ }
+### game/index.html line 17949 — dossier
+17944:     }
+17945:     return q;
+17946:   };window.objectivesV84=objectivesV84;
+17947: }catch(_){ }
+17948: 
+17949: // Convergence finale : ces premiers dossiers du livret deviennent de vraies conditions de fin.
+17950: try{
+17951:   const BASE_REQ=window.v106pCitadelRequirements||v106pCitadelRequirements;
+17952:   window.v106pCitadelRequirements=function(){const r=BASE_REQ(),n=v109aCreator()||v109aRequiredDone();return {...r,narrative:n,ready:!!r.ready&&n}};try{v106pCitadelRequirements=window.v106pCitadelRequirements}catch(_){ }
+17953:   const BASE_GATE=window.v83CitadelGateText||v83CitadelGateText;
+17954:   window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';let txt=BASE_GATE?BASE_GATE():'Accès à la Citadelle bloqué.';if(!r.narrative)txt=txt.replace(/\.$/,'')+' • terminer les premiers dossiers obligatoires du Livret des Éclats.';return txt};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){ }
+17955: }catch(_){ }
+17956: 
+17957: // PNJ mémoriels : les habitants peuvent faire référence aux actions déjà accomplies.
+17958: try{
+### game/index.html line 18511 — dossier
+18506: function desc(m){return m?.description||m?.label||m?.nom||'Cet élément fait partie du décor.'}
+18507: function healAll(){for(const x of (state.team||[])){try{x.hp=maxHP(x);x.status=null}catch(_){}}try{hud();save(false)}catch(_){} }
+18508: function foodHeal(){for(const x of (state.team||[])){try{x.hp=Math.min(maxHP(x),x.hp+Math.max(10,Math.round(maxHP(x)*.25)))}catch(_){}}try{hud();save(false)}catch(_){}dlog('Repas','Ton équipe récupère une partie de ses PV.')}
+18509: function roomJump(m){const raw=m?._raw||m,tf=raw?.targetFloor,tr=raw?.targetRoom;if(!tf&&!tr){dlog(m.label||m.id,desc(m));return}window.ValdoraBuildingV109I?.moveToRoom?.(tf||'rdc',tr||'principal',raw?.arrivalX,raw?.arrivalY)}
+18510: function elevator(){const api=window.ValdoraBuildingV109I,list=api?.listDestinations?.()||[];if(!list.length){dlog('Ascenseur','Aucun autre étage n’est desservi.');return}let html='<b>Ascenseur</b><br>Choisis une destination.<br><br>';for(const x of list)html+=`<button onclick="ValdoraBuildingV109I.moveToRoom('${x.floorId}','${x.roomId}')">${x.label}</button> `;if(typeof openSimpleMenu==='function')openSimpleMenu('Ascenseur',html);else dlog('Ascenseur','Plusieurs étages sont accessibles.')}
+18511: function showArchive(title='Archives'){dlog(title,['Un dossier évoque d’anciennes routes aujourd’hui oubliées.','Des notes relient plusieurs phénomènes de Résonance aux Éclats.','Une annotation demande de comparer les symboles des anciens monuments.'][Math.floor(Math.random()*3)])}
+18512: function storageBox(m){state.inventory=state.inventory||{};const key='v109o_container_'+(m.instanceId||m.id);state.flags=state.flags||{};if(state.flags[key])return dlog(m.label||'Rangement','Tu l’as déjà fouillé.');state.flags[key]=true;state.inventory.Baie=(state.inventory.Baie||0)+1;try{save(false);hud()}catch(_){}dlog(m.label||'Rangement','Tu trouves une Baie utile dans le rangement.')}
+18513: function study(m){state.flags=state.flags||{};const key='v109o_study_'+(m.instanceId||m.id);if(!state.flags[key]&&state.team?.length){state.flags[key]=true;state.team[0].xp=(state.team[0].xp||0)+15;try{save(false);hud()}catch(_){}dlog('Étude','Tu prends quelques notes. La première créature de ton équipe gagne 15 EXP.')}else dlog('Étude',desc(m))}
+18514: function restaurant(){foodHeal()}
+18515: function furnitureAction(m){
+18516:   if(!m)return false;state.mobilierInstanceIdV102Y=m.instanceId;const fn=String(m.fonction||'decor');
+18517:   switch(fn){
+18518:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dlog(m.label||'Repos','Après un court repos, toute l’équipe est soignée.')} break;
+18519:     case 'ouvrir_stockage': if(typeof openPC==='function')openPC(); else dlog('Stockage','Terminal de stockage indisponible.');break;
+18520:     case 'lire_lore_indices': case 'consulter_archives': case 'lore_recherche': case 'lore_musee': case 'lore_gardien': case 'lore_citadelle': showArchive(m.label||m.nom||'Archives');break;

@@ -1,0 +1,1368 @@
+V122 REMAINING DIAGNOSTIC — BIKE
+====================================================================================================
+### game/CREATEUR.html line 971 — drawHero
+966:  ctx.fillText((megaBuildingV66?.label||'Immeuble')+' — '+megaFloorNameV66(),18,30);
+967: 
+968:  // habitants / Taron
+969:  if(megaEventV66?.type==='taron'&&!megaEventV66.handled&&megaFloorV66>0){drawTaronNpc(690,300,0,false);drawTaronNpc(770,350,3,false)}
+970:  else{drawNpc((megaFloorV66*3)%41,690,300,0,false);drawNpc((megaFloorV66*3+5)%41,775,350,1,false)}
+971:  drawHero(state.roomX*.8,state.roomY*.75,state.dir,Date.now()-lastMove<190);
+972:  ctx.textAlign='start'
+973: }
+974: function moveMegaInteriorV66(dx,dy,dir){
+975:  state.dir=dir;state.roomX=Math.max(70,Math.min(1130,state.roomX+dx));state.roomY=Math.max(70,Math.min(760,state.roomY+dy));
+976:  if(megaFloorV66===0&&state.roomY>740&&state.roomX>500&&state.roomX<700){
+977:    scene='world';state.zone=megaReturnZoneV66;const b=megaBuildingV66;
+978:    if(b){state.x=b.doorX;state.y=b.doorY+70}
+979:    megaBuildingV66=null;building=null;megaFloorV66=0;megaEventV66=null;toast(currentScene().name)
+980:  }
+### game/CREATEUR.html line 1046 — drawHero
+1041:    }
+1042:  }else{
+1043:    ctx.fillStyle='#17324a';ctx.font='800 15px Segoe UI';ctx.textAlign='left';ctx.fillText('Chambre '+hotelRoomV66,90,92)
+1044:  }
+1045:  ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,45);ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';ctx.fillText('Hôtel — '+(hotelModeV66==='lobby'?'Hall':'Chambre '+hotelRoomV66),18,29);
+1046:  drawHero(state.roomX*.8,state.roomY*.75,state.dir,Date.now()-lastMove<190);ctx.textAlign='start'
+1047: }
+1048: function moveHotelV66(dx,dy,dir){
+1049:  state.dir=dir;state.roomX=Math.max(70,Math.min(1130,state.roomX+dx));state.roomY=Math.max(70,Math.min(760,state.roomY+dy));
+1050:  if(state.roomY>740&&state.roomX>500&&state.roomX<700){
+1051:    if(hotelModeV66==='room'){hotelModeV66='lobby';state.roomX=600;state.roomY=590;toast('Hall de l’hôtel')}
+1052:    else{scene='world';state.zone=hotelReturnZoneV66;const b=hotelV66;if(b){state.x=b.doorX;state.y=b.doorY+70}building=null;hotelV66=null;toast(currentScene().name)}
+1053:  }
+1054: }
+1055: function interactHotelV66(){
+### game/CREATEUR.html line 1310 — drawHero
+1305:   if(megaEventV65?.active && floor>0 && !megaEventV65.clearedFloors?.includes(floor)){
+1306:     drawTaronNpc(690,300,0,false);drawTaronNpc(770,340,3,false)
+1307:   }else{
+1308:     drawNpc((floor*3)%41,680,300,0,false);drawNpc((floor*3+4)%41,760,345,1,false)
+1309:   }
+1310:   drawHero(state.roomX*.8,state.roomY*.75,state.dir,Date.now()-lastMove<190)
+1311: }
+1312: 
+1313: function megaInteriorBlockedV64(nx,ny){
+1314:   if(nx<70||nx>1130||ny<70||ny>760)return true;
+1315:   // staircase and elevator are usable, not blockers.
+1316:   return false
+1317: }
+1318: 
+1319: function moveMegaInteriorV64(dx,dy,dir){
+### game/CREATEUR.html line 1480 — cycle
+1475:   }
+1476:   ctx.restore()
+1477: }
+1478: function trainPosition(plan){
+1479:   if(!plan||!plan.railY)return null;
+1480:   const cycle=(performance.now()/1000)%150;
+1481:   let wx,moving=true;
+1482:   if(cycle<7)wx=-600+920*(cycle/7);
+1483:   else if(cycle<12){wx=300;moving=false}
+1484:   else if(cycle<19)wx=300+2500*((cycle-12)/7);
+1485:   else return null;
+1486:   // visual center moved down to the lower rail
+1487:   return {x:wx,y:plan.railY+18,moving}
+1488: }
+1489: 
+### game/CREATEUR.html line 1717 — bike
+1712: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1713: 
+1714: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1715: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1716: const SAVE='valdora_v41_creator'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1717: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1718: 
+1719: 
+1720: function creatureStats(m){
+1721:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1722:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1723:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1724:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1725:   const identity=(fam%7)-3;
+1726:   return {
+### game/CREATEUR.html line 1880 — bike
+1875:   if(!t?.guardian||!t.sealIndex)return false;
+1876:   const seal=t.sealIndex;
+1877:   if(!(state.seals||[]).includes(seal)){
+1878:     state.seals.push(seal);
+1879:     state.seals.sort((a,b)=>a-b);
+1880:     if(state.seals.length>=4)state.bike=true;
+1881:     logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+1882:     return true
+1883:   }
+1884:   return false
+1885: }
+1886: 
+1887: // ----- Citadelle : 75 captures + 7 Sceaux + maîtrise de Vol -----
+1888: function v108mSeal5Beaten(){return (typeof creator==='function'&&creator())||(state.seals||[]).includes(5)}
+1889: function v108mCanUseVolNow(){if(!v108mSeal5Beaten())return false;return (state.team||[]).some(m=>(m?.moves||[]).includes('vol'))}
+### game/CREATEUR.html line 2358 — bike
+2353: 
+2354: 
+2355: function reset(){
+2356:   state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,
+2357:     inventory:{Potion:0,SuperPotion:0,Orbe:0,SuperOrbe:0,MegaOrbe:0,Antidote:2,Baie:3,Repas:0,FioleAttaque:0,FioleDefense:0},
+2358:     trainerWins:{},bike:false,fly:false,light:false,capsules:[],discovered:['town0'],hasDex:false,profGift:false,follow:true,
+2359:     taron:{wins:0,missions:0,active:null}};
+2360:   scene='world';save(false);hud()
+2361: }
+2362: 
+2363: 
+2364: function save(show=true){
+2365:   try{
+2366:     if(!state||typeof state!=='object')throw new Error('État de partie invalide.');
+2367:     ensureInventoryV81(state);
+### game/CREATEUR.html line 2578 — drawHero
+2573:   ctx.fillStyle='rgba(255,255,255,.55)';for(const [x,y,r] of [[110,80,55],[190,65,38],[760,88,65],[845,75,38]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+2574:   ctx.fillStyle='#7b9d69';ctx.beginPath();ctx.ellipse(485,370,310,72,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#cfe2b7';ctx.beginPath();ctx.ellipse(480,350,260,50,0,0,Math.PI*2);ctx.fill();
+2575:   ctx.fillStyle='rgba(42,68,55,.20)';ctx.beginPath();ctx.ellipse(255,480,150,30,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(660,230,130,26,0,0,Math.PI*2);ctx.fill()
+2576: }
+2577: 
+2578: function drawHero(x,y,dir,moving){
+2579:   const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+2580:   const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+2581:   if(v102eDrawGrounded(im,x,y,62,.22))return;
+2582:   // Secours uniquement pendant le chargement de l'image.
+2583:   v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+2584: }
+2585: function drawNpc(i,x,y,dir=0,moving=false){
+2586:   const idx=Math.abs(Math.trunc(Number(i)||0))%V102F_NPC_KINDS.length;
+2587:   const kind=V102F_NPC_KINDS[idx],im=V102F_NPC_IMAGES[kind][v102eDirName(dir)];
+### game/CREATEUR.html line 3683 — drawHero
+3678:  if(v67Event?.type==='taron'&&!v67Event.done&&v67Floor>0){drawTaronNpc(720,210,0,false);drawTaronNpc(760,420,3,false)}
+3679:  else{drawNpc((v67Floor*4)%41,735,210,0,false);drawNpc((v67Floor*4+5)%41,745,425,1,false)}
+3680: 
+3681:  ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+3682:  ctx.fillText((v67Building?.label||'Immeuble')+' — '+v67FloorLabel(),16,27);
+3683:  drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);ctx.textAlign='start'
+3684: }
+3685: function drawAutoStairV67(x,y,down){
+3686:  ctx.fillStyle='#2e4c5e';ctx.beginPath();ctx.roundRect(x,y,145,105,8);ctx.fill();
+3687:  for(let i=0;i<6;i++){ctx.fillStyle=i%2?'#a9b8be':'#8297a1';ctx.fillRect(x+10,y+13+i*14,125,9)}
+3688:  ctx.fillStyle='#fff';ctx.font='900 12px Segoe UI';ctx.textAlign='center';ctx.fillText(down?'↓ DESCENTE':'MONTÉE ↑',x+72,y-8)
+3689: }
+3690: function moveInteriorV67(dx,dy,dir){
+3691:  state.dir=dir;
+3692:  const oldX=state.roomX,oldY=state.roomY;
+### game/CREATEUR.html line 4104 — drawHero
+4099: 
+4100:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+4101:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+4102:   ctx.fillText(data.title+' — '+v68FloorLabel(),16,27);
+4103: 
+4104:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+4105:   ctx.textAlign='start'
+4106: }
+4107: 
+4108: function v69DiscoveryKey(){
+4109:   return 'v69discover_'+V68_INTERIOR.returnZone+'_'+V68_INTERIOR.building.id+'_'+V68_INTERIOR.floor+'_'+V68_INTERIOR.roomIndex
+4110: }
+4111: function v69DiscoveryType(){
+4112:   const types=['none','coins','orbe','berry','lore','note','rare','taron','quest'];
+4113:   return types[(V68_INTERIOR.eventSeed+V68_INTERIOR.floor*7+(V68_INTERIOR.roomIndex||0)*3)%types.length]
+### game/CREATEUR.html line 4143 — velo
+4138:       if(t!=='none'){
+4139:         state.flags=state.flags||{};state.flags[key]=true;
+4140:         if(t==='coins'){state.money=(state.money||0)+180;dialog('<b>Découverte</b><br>Tu trouves 180 ✦ oubliées dans un tiroir.')}
+4141:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Une Orbe d’Éclat était cachée ici.')}
+4142:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Tu récupères 2 Baies.')}
+4143:         else if(t==='lore'){dialog('<b>Document local</b><br>Un vieux dossier raconte comment ce quartier s’est développé autour des premiers Éclats.')}
+4144:         else if(t==='note'){dialog('<b>Note trouvée</b><br>« On raconte qu’une créature inhabituelle apparaît après la tombée du jour près de la gare. »')}
+4145:         else if(t==='rare'){dialog('<b>Traces étranges</b><br>Tu découvres des traces appartenant probablement à une créature rare.')}
+4146:         else if(t==='quest'){dialog('<b>Demande d’un habitant</b><br>Un résident te demande de retrouver un objet perdu dans un autre étage. Cette mission est ajoutée à ton journal.')}
+4147:         save(false);return
+4148:       }
+4149:     }
+4150: 
+4151:     const data=roomDataV69();
+4152:     dialog('<b>'+data.title+'</b><br>'+{
+### game/CREATEUR.html line 4680 — drawHero
+4675:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+4676:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+4677:   ctx.fillText((V70_INT.building.label||'Immeuble')+' — '+v70FloorLabel(),16,27);
+4678: 
+4679:   drawNpc((V70_INT.floor*4)%41,690,330,0,false);
+4680:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+4681:   ctx.textAlign='start'
+4682: }
+4683: 
+4684: function drawDoorV70(x,y,index){
+4685:   const info=v70RoomInfo(index);
+4686:   ctx.fillStyle='#6b4e3d';ctx.beginPath();ctx.roundRect(x,y,60,86,6);ctx.fill();
+4687:   ctx.fillStyle='#e4c25c';ctx.beginPath();ctx.arc(x+49,y+43,4,0,Math.PI*2);ctx.fill();
+4688:   ctx.fillStyle='#203847';ctx.font='800 9px Segoe UI';ctx.textAlign='center';
+4689:   ctx.fillText(info.label,x+30,y-8)
+### game/CREATEUR.html line 4764 — drawHero
+4759: 
+4760:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+4761:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+4762:   ctx.fillText(info.label+' — '+v70FloorLabel(),16,27);
+4763: 
+4764:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+4765:   ctx.textAlign='start'
+4766: }
+4767: 
+4768: 
+4769: function v70DiscoveryKey(){
+4770:   return 'v70disc_'+V70_INT.returnZone+'_'+V70_INT.building.id+'_'+V70_INT.floor+'_'+V70_INT.room
+4771: }
+4772: function v70DiscoveryType(){
+4773:   const arr=['none','coins','orbe','berry','lore','hint','rare','taron','quest','gift'];
+### game/CREATEUR.html line 5585 — cycle
+5580: }
+5581: 
+5582: 
+5583: 
+5584: // ======================================================================
+5585: // VALDORA V90 — CYCLE JOUR / NUIT
+5586: // Un cycle complet dure 24 minutes réelles : 1 seconde = 1 minute en jeu.
+5587: // Le premier lancement part de l'heure locale de l'appareil.
+5588: // ======================================================================
+5589: 
+5590: function ensureDayCycleV90(){
+5591:   state.dayCycle=state.dayCycle||{};
+5592:   if(state.dayCycle.anchorReal==null||state.dayCycle.anchorMinutes==null){
+5593:     const d=new Date();
+5594:     state.dayCycle.anchorReal=Date.now();
+### game/CREATEUR.html line 5594 — cycle
+5589: 
+5590: function ensureDayCycleV90(){
+5591:   state.dayCycle=state.dayCycle||{};
+5592:   if(state.dayCycle.anchorReal==null||state.dayCycle.anchorMinutes==null){
+5593:     const d=new Date();
+5594:     state.dayCycle.anchorReal=Date.now();
+5595:     state.dayCycle.anchorMinutes=d.getHours()*60+d.getMinutes();
+5596:     save(false)
+5597:   }
+5598: }
+5599: function gameMinutesV90(){
+5600:   
+5601:   const elapsed=(Date.now()-state.dayCycle.anchorReal)/1000;
+5602:   return (state.dayCycle.anchorMinutes+elapsed)%1440
+5603: }
+### game/CREATEUR.html line 5602 — cycle
+5597:   }
+5598: }
+5599: function gameMinutesV90(){
+5600:   
+5601:   const elapsed=(Date.now()-state.dayCycle.anchorReal)/1000;
+5602:   return (state.dayCycle.anchorMinutes+elapsed)%1440
+5603: }
+5604: function gameTimeV90(){
+5605:   const mins=gameMinutesV90();
+5606:   return {h:Math.floor(mins/60),m:Math.floor(mins%60),mins}
+5607: }
+5608: function dayPhaseV90(){
+5609:   const {mins}=gameTimeV90();
+5610:   if(mins<300)return 'night';       // 00:00 - 05:00
+5611:   if(mins<420)return 'dawn';        // 05:00 - 07:00
+### game/CREATEUR.html line 5691 — drawHero
+5686:     const x=(t.x-camX)*sx,y=(t.y-camY)*sy;
+5687:     drawNpc(t.look,x,y,t.dir||0,!!t.moving);
+5688:     drawTrainerAlert(t,x,y)
+5689:   }
+5690: 
+5691:   drawHero((state.x-camX)*sx,(state.y-camY)*sy,state.dir,Date.now()-lastMove<190);
+5692: 
+5693:   // Le filtre est dessiné en dernier sur le monde, mais avant l'UI HTML.
+5694:   $('location').textContent=sc.name
+5695: }
+5696: 
+5697: 
+5698: 
+5699: 
+5700: 
+### game/CREATEUR.html line 5860 — bike
+5855: 
+5856: function move(dx,dy,dir){
+5857:   state.dir=dir;
+5858:   if(scene!=='world'||trainerEvent)return;
+5859:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast('Position rétablie dans la Citadelle.')}catch(_){}}
+5860:   const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+5861:   if(collision(nx,ny,state.x,state.y)){
+5862:     lastMove=Date.now();
+5863:     const n=npcCollision(nx,ny);if(n&&Math.random()<.12)toast('E / Entrée pour parler à '+n.name);
+5864:     return
+5865:   }
+5866:   recordFollowerStep();state.x=nx;state.y=ny;lastMove=Date.now();checkPortal();
+5867: 
+5868:   // Les rencontres sauvages de Clairval font partie du déplacement normal de la ville.
+5869:   const kind=currentScene().kind;
+### game/CREATEUR.html line 6055 — velo
+6050:     'La gare est le meilleur endroit pour entendre les nouvelles des autres villes.',
+6051:     'Des voyageurs racontent que la Team Taron apparaît parfois là où personne ne l’attend.',
+6052:     'Ces derniers temps, les voyageurs parlent surtout de tes exploits.'
+6053:   ]},
+6054:   {name:'Aya',look:13,lines:[
+6055:     'Les Éclats ne sont pas seulement des combattants. Certains développent un vrai attachement à leur dresseur.',
+6056:     'Ton compagnon te suit partout. C’est généralement un signe qu’il se sent en sécurité avec toi.',
+6057:     'Ton équipe a l’air soudée. Ça ne s’obtient pas uniquement avec des niveaux.'
+6058:   ]},
+6059:   {name:'Jules',look:14,lines:[
+6060:     'Il existe des raccourcis que la carte ne montre pas toujours clairement. Observe les changements de terrain.',
+6061:     'Quand tu débloqueras certaines capacités d’exploration, pense à revisiter les anciennes zones.',
+6062:     'Les plus grands secrets de Valdora sont souvent dans des endroits que tu croyais déjà connaître.'
+6063:   ]}
+6064: ];
+### game/CREATEUR.html line 6382 — drawHero
+6377:     drawTaronNpcV68(690,335,0,false);drawTaronNpcV68(760,360,3,false)
+6378:   }else{
+6379:     drawNpc((V68_INTERIOR.floor*4)%41,700,335,0,false);
+6380:   }
+6381: 
+6382:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+6383:   ctx.textAlign='start'
+6384: }
+6385: function drawV68Room(){
+6386:   const idx=V68_INTERIOR.roomIndex||0,type=v68RoomType(idx);
+6387:   ctx.fillStyle='#182c3b';ctx.fillRect(0,0,960,640);
+6388:   ctx.fillStyle='#eee7db';ctx.beginPath();ctx.roundRect(55,55,850,530,14);ctx.fill();
+6389: 
+6390:   // Pièce volontairement vide : aucun mobilier n'est dessiné.
+6391: 
+### game/CREATEUR.html line 6398 — drawHero
+6393:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+6394:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.fillText(v68RoomName(idx)+' — '+v68FloorLabel(),16,27);
+6395: 
+6396:   // room event
+6397:   drawV68RoomEvent();
+6398:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190)
+6399: }
+6400: function v68EventType(){
+6401:   const types=['none','none','lostCreature','blackout','injured','researcher','hiddenItem','alarm','delivery','rareCreature','taron'];
+6402:   return types[(V68_INTERIOR.eventSeed+V68_INTERIOR.floor*5+(V68_INTERIOR.roomIndex||0))%types.length]
+6403: }
+6404: function drawV68RoomEvent(){
+6405:   const t=v68EventType();if(t==='none')return;
+6406:   if(t==='taron'){
+6407:     drawTaronNpcV68(690,285,0,false);drawTaronNpcV68(760,350,3,false);return
+### game/CREATEUR.html line 6583 — drawHero
+6578:   const room=currentRoom();
+6579:   if(building?.type==='playerhome')drawEmptyPlayerHome();
+6580:   else v101sRoomBackdrop(building?.type||'home');
+6581:   const sx=960/1200,sy=640/800;
+6582:   for(const n of room.npcs||[])drawNpc(n.look,n.x*sx,n.y*sy,Number.isFinite(Number(n.dir))?Number(n.dir):0,!!n.moving);
+6583:   drawHero(state.roomX*sx,state.roomY*sy,state.dir,Date.now()-lastMove<190);
+6584:   drawHealingOverlay();
+6585: }
+6586: 
+6587: /* V102P — INTÉRIEURS SANS MOBILIER */
+6588: function visibleInteriorBlocksV102F(){return []}
+6589: 
+6590: function interiorBlocked(x,y){
+6591:   // Limites des murs de la pièce.
+6592:   if(x<48||y<55||x>1152||y>770)return true;
+### game/CREATEUR.html line 6710 — velo
+6705: function showStarters(){
+6706:   const el=$('starterlist');el.innerHTML='';
+6707:   const starters=[
+6708:     {id:1,name:(BY[1]?.name||'Brindel'),type:(BY[1]?.type||'Nature')},
+6709:     {id:4,name:(BY[4]?.name||'Tisonnet'),type:(BY[4]?.type||'Feu')},
+6710:     {id:7,name:(BY[7]?.name||'Rivelot'),type:(BY[7]?.type||'Eau')},
+6711:     {id:162,name:'Schneck',type:'Ombre'}
+6712:   ];
+6713:   starters.forEach(item=>{
+6714:     const id=item.id,box=document.createElement('div');box.className='starter';
+6715:     const can=document.createElement('canvas');can.width=150;can.height=150;
+6716:     const b=document.createElement('b');b.textContent=item.name+' — '+item.type;
+6717:     const p=document.createElement('p');p.textContent=starterPitch(id);
+6718:     const btn=document.createElement('button');btn.textContent='Choisir '+item.name;btn.onclick=()=>chooseStarter(id);
+6719:     box.append(can,b,p,btn);el.appendChild(box);
+### game/CREATEUR.html line 8566 — velo
+8561: function teachMove(teamIndex,mid){
+8562:   return v83TeachMove(teamIndex,mid)
+8563: }
+8564: 
+8565: 
+8566: const V108T_MOVE_DESCRIPTIONS={"v108e_nature_fouet_de_liane":"Le lanceur fouette vivement la cible en renforçant son mouvement avec l’énergie Nature. C’est une attaque offensive de type Nature dont l’impact dépend de sa puissance, du niveau, des statistiques et des affinités de type.","v108e_nature_feuille_tranchante":"Le lanceur projette un flot de feuilles acérées vers la cible. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_racines_vives":"Le lanceur fait jaillir des végétaux autour de la cible pour la frapper ou entraver ses mouvements. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_ronces":"Le lanceur fait jaillir des végétaux autour de la cible pour la frapper ou entraver ses mouvements. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_epine_venimeuse":"Le lanceur projette ou enfonce une épine chargée de substances irritantes dans la cible. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_charge_sylvestre":"Le lanceur prend de l’élan et percute directement la cible. C’est une attaque offensive de type Nature dont l’impact dépend de sa pui …[truncated]
+8567: function moveDescriptionV108T(mid,mv=MOVE_DB[mid]||{}){
+8568:   if(mv.description)return String(mv.description);
+8569:   if(V108T_MOVE_DESCRIPTIONS[mid])return V108T_MOVE_DESCRIPTIONS[mid];
+8570:   const name=String(mv.name||mid||'Cette attaque'),type=String(mv.type||'Neutre'),power=typeof moveDisplayPowerV106U==='function'?Number(moveDisplayPowerV106U(mid)||0):Number(mv.displayPower||0);
+8571:   if(mid==='rugissement'||name==='Rugissement')return 'Le lanceur pousse un rugissement intimidant qui déstabilise l’adversaire. Cette capacité ne provoque pas de dégâts directs et sert à diminuer sa puissance offensive.';
+8572:   if(mid==='nage'||name==='Nage')return 'Le lanceur utilise l’élan de l’eau pour agir sur la cible. Hors combat, cette capacité permet aussi de franchir les passages aquatiques lorsque son utilisation est débloquée.';
+8573:   if(mid==='vol'||name==='Vol')return 'Le lanceur prend de la hauteur et exploite les courants aériens. Hors combat, cette capacité permet aussi de voyager vers les destinations autorisées après son déblocage.';
+8574:   if(mid==='surf'||name==='Surf')return 'Le lanceur soulève une vague et utilise la force de l’eau pour progresser ou frapper. Cette technique est liée aux déplacements aquatiques lorsqu’ils sont autorisés.';
+8575:   if(power>0)return name+' est une attaque offensive de type '+type+'. Elle inflige des dégâts directs dont le résultat dépend de sa puissance, des niveaux, des statistiques et des affinités de type.';
+### game/CREATEUR.html line 10522 — drawHero
+10517: 
+10518:   drawFollower(camX,camY,sx,sy);
+10519:   const npcs=[...currentNPCs(),...(sc.megacity?(sc.megaNPCs||[]):[])];
+10520:   for(const n of npcs){const x=(n.x-camX)*sx,y=(n.y-camY)*sy;if(n.taron)drawTaronNpcV68(x,y,n.dir||0,!!n.moving);else drawNpc(n.look,x,y,n.dir||0,!!n.moving)}
+10521:   for(const t of (sc.trainers||[])){const x=(t.x-camX)*sx,y=(t.y-camY)*sy;drawNpc(t.look,x,y,t.dir||0,!!t.moving);drawTrainerAlert(t,x,y)}
+10522:   drawHero((state.x-camX)*sx,(state.y-camY)*sy,state.dir,Date.now()-lastMove<190);
+10523:   $('location').textContent=sc.name
+10524: };
+10525: 
+10526: const _v93Collision=collision;
+10527: collision=function(x,y,oldX=state.x,oldY=state.y){
+10528:   const sc=currentScene();
+10529:   if(state.zone==='town13'&&sc.taronisV93)return collisionTaronisV93(x,y,oldX,oldY);
+10530:   return _v93Collision(x,y,oldX,oldY)
+10531: };
+### game/CREATEUR.html line 10919 — velo
+10914:       req.onerror=()=>reject(req.error)
+10915:     });
+10916:     db.close(); return raw
+10917:   }catch(e){console.warn('V96 IndexedDB load unavailable',e);return null}
+10918: }
+10919: function v96Envelope(payload){
+10920:   return {format:'ECLATS_SAUVAGES_VALDORA_SAVE',formatVersion:1,gameVersion:'V96',
+10921:     exportedAt:Date.now(),mode:PLAYER_PROGRESSION_LOCK?'joueur':'createur',state:JSON.parse(payload)}
+10922: }
+10923: window.v96DownloadSaveFile=function(payload){
+10924:   const blob=new Blob([JSON.stringify(v96Envelope(payload),null,2)],{type:'application/json'});
+10925:   const url=URL.createObjectURL(blob), d=new Date();
+10926:   const stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'
+10927:     +String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+10928:   const a=document.createElement('a');
+### game/CREATEUR.html line 13058 — drawHero
+13053: function drawPlayerFurniturePose(){
+13054:   const mode=state.mobilierStatutV102Y;
+13055:   if(mode==='couche'){
+13056:     const m=currentFurniture(); if(!m)return false;
+13057:     const r=rotatedBounds(m); const x=(r.x+r.w*.52)*.8,y=(r.y+r.h*.53)*.8;
+13058:     ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/2);drawHero(0,0,2,false);ctx.restore();return true;
+13059:   }
+13060:   if(mode==='assis'){
+13061:     ctx.save();ctx.translate(state.roomX*.8,state.roomY*.8+8);ctx.scale(1,.76);drawHero(0,0,state.dir,false);ctx.restore();return true;
+13062:   }
+13063:   return false;
+13064: }
+13065: function drawFurnitureStatus(){
+13066:   if(state.mobilierStatutV102Y!=='couche'||!state.mobilierSleepEndsV102Y)return;
+13067:   const sec=Math.max(0,Math.ceil((state.mobilierSleepEndsV102Y-Date.now())/1000));
+### game/CREATEUR.html line 13202 — cycle
+13197:     case 'controle_ticket': window.ValdoraTrainV109D.open();break;
+13198:     case 'horaires_train': stationBoard();break;
+13199:     case 'distributeur_boissons': vending();break;
+13200:     case 'choix_starters': if(!state.team.length)dialog('<b>Table des Starters</b><br>Quatre capsules t’attendent…',()=>showStarters());else dialog('<b>Table des Starters</b><br>Ton premier compagnon est déjà avec toi.');break;
+13201:     case 'recherche_codex': superComputer();break;
+13202:     case 'lore_recherche': dialog('<b>Tableau de recherche</b><br>'+pick(['Les croquis comparent plusieurs stades d’évolution.','Une note indique : « environnement + expérience = évolution parfois imprévisible ».','Un schéma relie les types Feu, Plante et Eau dans un cycle d’avantages.','Des coordonnées sont entourées près des montagnes du nord.']));break;
+13203:     case 'infos_oeuf': dialog('<b>Incubateur</b><br>'+pick(['L’œuf réagit légèrement à ta présence.','Les capteurs indiquent une activité stable. Impossible encore d’identifier l’espèce.','Une étiquette indique : « origine inconnue — trouvé près d’anciennes ruines ».']));break;
+13204:     case 'lore_musee': dialog('<b>'+((m.nom)||'Exposition')+'</b><br>'+pick(MUSEUM));break;
+13205:     case 'decor': if(m.description)dialog('<b>'+(m.nom||'Objet')+'</b><br>'+m.description);break;
+13206:     default: if(m.description)dialog('<b>'+(m.nom||'Mobilier')+'</b><br>'+m.description);break;
+13207:   }
+13208: }
+13209: window.declencherInteraction=triggerFurniture;
+13210: window.fonctionsMobilier={
+13211:   interagirLit:(joueur,equipe)=>{const m=targetFurniture();if(m)sleepAt(m)},
+### game/V105W_INTERIEURS.js line 404 — drawHero
+399:     const tpl=activeTemplate();drawBackdrop(tpl);
+400:     const npcs=INT.multi?customNpcs():standardNpcs();if(INT.multi)updateCustomNpcs(npcs);
+401:     const layers=[];
+402:     for(const m of tpl.items)layers.push({depth:m.y+m.h,draw:()=>drawAsset(m)});
+403:     for(const n of npcs)layers.push({depth:n.y,draw:()=>drawNpc(n.look,n.x*SX,n.y*SY,n.dir||0,n.moving!==false)});
+404:     layers.push({depth:state.roomY,draw:()=>drawHero(state.roomX*SX,state.roomY*SY,state.dir,Date.now()-lastMove<190)});
+405:     layers.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
+406:     drawPassage(roomExitRect(),INT.multi?'RETOUR AU COULOIR':'SORTIE');
+407:     if(INT.multi&&building?.type==='v70building'){
+408:       try{if(typeof drawDiscoveryV70==='function')drawDiscoveryV70()}catch(_){ }
+409:     }
+410:     const title=INT.multi?`${activeTemplate().label} — ${floorLabel()}`:activeTemplate().label;
+411:     drawHeader(title);
+412:   }
+413:   function drawCorridor(){
+### game/V105W_INTERIEURS.js line 433 — drawHero
+428:       drawAsset(plant(245,500,85,105));drawAsset(plant(870,500,85,105));
+429:     }else{
+430:       drawAsset(item('residence','canape_modulaire',430,500,340,140,'rest','Banquette'));
+431:       drawAsset(plant(245,500,85,105));drawAsset(plant(870,500,85,105));
+432:     }
+433:     drawHero(state.roomX*SX,state.roomY*SY,state.dir,Date.now()-lastMove<190);
+434:     drawHeader(`${INT.label} — ${floorLabel()}`);ctx.textAlign='start';
+435:   }
+436:   function draw(){if(!ensureInterior())return BASE_DRAW();INT.mode==='corridor'?drawCorridor():drawRoom()}
+437: 
+438:   function inside(px,py,r){return px>=r.x&&px<=r.x+r.w&&py>=r.y&&py<=r.y+r.h}
+439:   function collisionRect(m){
+440:     const pad=12,top=m.y+Math.min(m.h*.36,55);
+441:     return {x:m.x+pad,y:top,w:Math.max(20,m.w-pad*2),h:Math.max(24,m.y+m.h-top-5)};
+442:   }
+### game/V109V_INTERIEUR_REWRITE.js line 155 — drawHero
+150:   for(const n of session.npcs||[]){if(Date.now()<(n.pauseUntil||0)){n.moving=false;continue}if(!n.nextDecision||now>=n.nextDecision){let ok=false;for(let i=0;i<20&&!ok;i++){const a=Math.random()*Math.PI*2,r=Math.random()*44,nx=n.homeX+Math.cos(a)*r,ny=n.homeY+Math.sin(a)*r;if(!blocked(nx,ny,n)){n.targetX=nx;n.targetY=ny;ok=true}}n.nextDecision=now+1200+Math.random()*1800}
+151:     const dx=n.targetX-n.x,dy=n.targetY-n.y,d=Math.hypot(dx,dy);if(d<2){n.moving=false;continue}const step=Math.min(d,24*dt),nx=n.x+dx/d*step,ny=n.y+dy/d*step;if(blocked(nx,ny,n)){n.nextDecision=0;n.moving=false;continue}n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.x=nx;n.y=ny;n.moving=true;
+152:   }
+153: }
+154: function drawNpcExact(n){const p=toScreen(n.x,n.y),g=geometry();ctx.save();ctx.translate(p.x,p.y);ctx.scale(g.scale,g.scale);drawNpc(n.look,0,0,n.dir||0,!!n.moving);ctx.restore()}
+155: function drawHeroExact(){const p=toScreen(state.roomX,state.roomY),g=geometry();ctx.save();ctx.translate(p.x,p.y);ctx.scale(g.scale,g.scale);drawHero(0,0,state.dir,Date.now()-lastMove<190);ctx.restore()}
+156: function facingVector(){
+157:   const d=((Number(state.dir)||0)%4+4)%4;
+158:   return d===1?{x:-1,y:0}:d===2?{x:1,y:0}:d===3?{x:0,y:-1}:{x:0,y:1}
+159: }
+160: function targetMetrics(x,y,maxDistance){
+161:   const dx=Number(x)-Number(state.roomX),dy=Number(y)-Number(state.roomY),dist=Math.hypot(dx,dy);
+162:   if(!Number.isFinite(dist)||dist>maxDistance)return null;
+163:   if(dist<=20)return{distance:dist,forward:0,side:0,score:dist};
+164:   const f=facingVector(),forward=dx*f.x+dy*f.y,side=Math.abs(dx*f.y-dy*f.x);
+### game/V109V_INTERIEUR_REWRITE.js line 199 — drawHero
+194:   const q=nearestInteractionTarget();if(!q)return;const n=q.kind==='npc'?q.target:null,m=q.kind==='furniture'?q.target:null;
+195:   const label=n?n.name:(m.label||m.nom||m.id||'Interagir');
+196:   ctx.save();ctx.font='800 13px Segoe UI';const txt='E / Entrée — '+label,w=Math.min(700,ctx.measureText(txt).width+34),x=(960-w)/2,y=548;ctx.fillStyle='rgba(15,32,43,.92)';ctx.beginPath();ctx.roundRect(x,y,w,36,12);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.28)';ctx.stroke();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(txt,480,y+23);ctx.textAlign='start';ctx.restore();
+197: }
+198: function draw(){
+199:   if(!session)return;updateNpcs();drawFloor();const objects=[];for(const m of furn())objects.push({depth:Number(m.y||0)+Number(m.h||0),z:Number(m.z)||0,draw:()=>drawFurniture(m)});for(const n of session.npcs||[])objects.push({depth:n.y,z:100000,draw:()=>drawNpcExact(n)});objects.push({depth:state.roomY,z:999999,draw:drawHeroExact});objects.sort((a,b)=>a.depth-b.depth||a.z-b.z).forEach(o=>o.draw());try{if(typeof drawHealingOverlay==='function')drawHealingOverlay()}catch(_){}prompt();
+200: }
+201: 
+202: function labelFor(b,key){return b?.label||b?.name||buildingRef(key)?.name||'Bâtiment'}
+203: function door(b){return{x:Number(b?.doorX??(Number(b?.x||0)+Number(b?.w||0)/2)),y:Number(b?.doorY??(Number(b?.y||0)+Number(b?.h||0)))} }
+204: function nearDoor(){
+205:   if(scene!=='world'||currentScene?.()?.kind!=='town')return null;let best=null,bd=Infinity;for(const b of currentScene().buildings||[]){const d=door(b),dist=Math.hypot(Number(state.x)-d.x,Number(state.y)-d.y);if(dist<bd){bd=dist;best=b}}return best&&bd<=110?best:null;
+206: }
+207: function enter(b){
+208:   if(!b)return false;const key=refKeyFor(b),fr=firstRoom(key);if(!fr)return false;const d=door(b);session={key,zone:state.zone,source:b,door:d,floorId:fr.floorId,roomId:fr.roomId,entryFloorId:fr.floorId,entryRoomId:fr.roomId,npcs:[]};building={...b,type:key,_buildingEngine:VERSION};scene='interior';
+### game/V109V_INTERIEUR_REWRITE.js line 292 — bike
+287: function worldInteract(){if(scene==='world'){const b=nearDoor();if(b)return enter(b)}return WORLD_INTERACT_BEFORE?.apply(this,arguments)}
+288: 
+289: // Citadelle monde : déplacement dédié, sans dépendance au réseau routier des villes.
+290: const WORLD_MOVE_BEFORE=window.move;
+291: function worldMove(dx,dy,dir){if(scene==='world'&&state.zone==='temple_final'){
+292:   state.dir=dir;const sc=currentScene(),speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;let bad=false;if(typeof finalTempleCollisionV77==='function')bad=finalTempleCollisionV77(nx,ny);else bad=nx<390||nx>2010||ny<70||ny>2040;
+293:   if(!bad){for(const t of (typeof currentTrainers==='function'?currentTrainers():[])){const nd=Math.hypot(nx-t.x,ny-t.y),od=Math.hypot(state.x-t.x,state.y-t.y);if(nd<36&&nd<=od+.01){bad=true;break}}}
+294:   if(!bad){try{recordFollowerStep?.()}catch(_){}state.x=nx;state.y=ny;lastMove=Date.now();try{checkPortal?.()}catch(_){}}return;
+295:  }return WORLD_MOVE_BEFORE?.apply(this,arguments)}
+296: 
+297: function recover(){if(scene==='interior'&&!session&&building){try{enter(building)}catch(e){console.warn('V109V restauration intérieur',e)}}if(scene==='world'&&state.zone==='temple_final'){if(!Number.isFinite(Number(state.x))||!Number.isFinite(Number(state.y))||Number(state.x)<390||Number(state.x)>2010||Number(state.y)<70||Number(state.y)>2040){state.x=1200;state.y=1900}}}
+298: function audit(){const functions=new Set(),rooms=[];for(const [bk,b] of Object.entries(REF().buildings||{}))for(const [fk,f] of Object.entries(b.floors||{}))for(const [rk,r] of Object.entries(f.rooms||{})){rooms.push({building:bk,floor:fk,room:rk,w:r.width,h:r.height,count:(r.furniture||[]).length});for(const m of r.furniture||[])functions.add(String(m.fonction||'decor'))}return{version:VERSION,rooms,functions:[...functions].sort(),unhandled:[...functions].filter(x=>!HANDLED.has(x)).sort()}}
+299: const api={version:VERSION,enter,leave,move:moveInteriorNew,draw,interact,interactFurniture,nearFurniture,nearNpc,nearDoor,blocked,moveToRoom,destinations,session:()=>session,rawRoom,furniture:furn,interactionTarget:nearestInteractionTarget,audit};
+300: window.ValdoraInteriorV109V=api;window.ValdoraBuildingV109I=api;
+301: window.drawInterior=draw;try{drawInterior=draw}catch(_){}window.moveInterior=moveInteriorNew;try{moveInterior=moveInteriorNew}catch(_){}window.interactInterior=interact;try{interactInterior=interact}catch(_){}window.interiorBlocked=blocked;try{interiorBlocked=blocked}catch(_){}window.interiorCollision=(x,y)=>blocked(x,y);try{interiorCollision=window.interiorCollision}catch(_){}window.nearInteriorNPC=nearNpc;try{nearInteriorNPC=nearNpc}catch(_){}window.interact=worldInteract;try{interact=worldInteract}catch(_){}window.move=worldMove;try{move=worldMove}catch(_){}window.v109eNearEntryBuilding=nearDoor;window.v109eEnterBuilding=enter;window.enterBuildingV67=enter;window.enterBuildingV68=enter;window.enterBuildingV70=enter;window.V109OFurnitureAction=interactFurniture;window.declencherInteraction=interactFurniture;try{triggerFurniture=interactFurniture}catch(_){}
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 54 — bike
+49: function templeMove(dx,dy,dir){
+50:   if(!(scene==='world'&&state.zone==='temple_final'))return false;
+51:   state.dir=dir;
+52:   if(window.joueurBloque)return true;
+53:   if(!Number.isFinite(+state.x)||!Number.isFinite(+state.y)||state.x<390||state.x>2010||state.y<70||state.y>2040){state.x=1200;state.y=1900}
+54:   const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+55:   let bad=false;
+56:   try{bad=typeof finalTempleCollisionV77==='function'?finalTempleCollisionV77(nx,ny):(nx<390||nx>2010||ny<70||ny>2040)}catch(_){bad=nx<390||nx>2010||ny<70||ny>2040}
+57:   if(!bad){
+58:     for(const t of (SCENES.temple_final?.trainers||[])){
+59:       if(state.trainerWins?.[t.id])continue;
+60:       const nd=Math.hypot(nx-t.x,ny-t.y),od=Math.hypot(state.x-t.x,state.y-t.y);
+61:       if(nd<34&&nd<=od+.01){bad=true;break}
+62:     }
+63:   }
+### game/V122_REGRESSION_FIXES.js line 119 — vélo, cycle
+114:   try{v?.completeTemple?.()}catch(_){}
+115:   try{v?.configureSimdor?.()}catch(_){}
+116:   try{v?.ensureVolAgent?.()}catch(_){}
+117:   try{v?.ensureTaronisLinkV109Y?.()}catch(_){}
+118:   try{v?.ensureLateQuestNpcs?.()}catch(_){}
+119:   try{window.ValdoraCycleV119?.repair?.()}catch(e){console.warn('V122 réparation vélo',e)}
+120:   try{if(window.ValdoraBusV118Bridge)window.ValdoraBusV118Bridge.ownedByV118=true}catch(_){}
+121: }
+122: function trackBattleParticipant(){
+123:   try{
+124:     if(typeof scene==='undefined'||scene!=='battle'||typeof battle==='undefined'||!battle)return;
+125:     const a=typeof active==='function'?active():null;if(!a)return;
+126:     battle._v122Participants=Array.isArray(battle._v122Participants)?battle._v122Participants:[];
+127:     if(!battle._v122Participants.includes(a))battle._v122Participants.push(a);
+128:   }catch(_){}
+### game/VALDORA_BIOMES_V112.js line 246 — drawHero
+241:   function hookWorldDrawing(){
+242:     let current=null;try{current=window.drawWorld||drawWorld}catch(_){}if(typeof current!=='function'||current.__v112World)return;const base=current;
+243:     const wrapped=function(){base.apply(this,arguments);try{worldOverlay()}catch(error){console.warn('V112 ambiance',error)}};wrapped.__v112World=true;wrapped.__v107dDraw=true;window.drawWorld=wrapped;try{drawWorld=wrapped}catch(_){}
+244:   }
+245:   function hookHero(){
+246:     let current=null;try{current=window.drawHero||drawHero}catch(_){}if(typeof current!=='function'||current.__v112Hero)return;const base=current;
+247:     const wrapped=function(){if(state?.zone!=='route4bis')return base.apply(this,arguments);const bike=state.bike;state.bike=false;try{return base.apply(this,arguments)}finally{state.bike=bike}};wrapped.__v112Hero=true;window.drawHero=wrapped;try{drawHero=wrapped}catch(_){}
+248:   }
+249:   function hookTrees(){
+250:     let current=null;try{current=window.tree||tree}catch(_){}if(typeof current!=='function'||current.__v112Tree)return;const base=current;
+251:     const wrapped=function(item,camX,camY,sx,sy){if(!ready(IMAGES.tree))return base.apply(this,arguments);const x=(item.x-camX)*sx,y=(item.y-camY)*sy,s=(item.s||1)*sx;if(x<-100||x>1060||y<-140||y>710)return;const theme=String(SCENES?.[state.zone]?.v112Theme||'');ctx.save();if(theme==='autumn')ctx.filter='hue-rotate(300deg) saturate(1.15)';else if(theme==='shadow')ctx.filter='hue-rotate(65deg) brightness(.72) saturate(1.1)';else if(theme==='mist'||theme==='goldpeaks'||theme==='modern')ctx.filter='hue-rotate(35deg) saturate(.72) brightness(1.08)';else if(theme==='redrock'||theme==='industrial')ctx.filter='hue-rotate(325deg) saturate(.82)';ctx.shadowColor='rgba(14,45,28,.3)';ctx.shadowBlur=6;ctx.drawImage(IMAGES.tree,x-58*s,y-100*s,116*s,124*s);ctx.restore()};wrapped.__v112Tree=true;window.tree=wrapped;try{tree=wrapped}catch(_){}
+252:   }
+253:   function hookCreatorNavigation(){if(!creator())return;window.creatorTeleportZoneV105N=creatorPreviewZone;try{creatorTeleportZoneV105N=creatorPreviewZone}catch(_){}}
+254:   function hookCreatorNavigationClicks(){if(!creator()||document.documentElement.dataset.v112CreatorClicks==='1')return;document.documentElement.dataset.v112CreatorClicks='1';document.addEventListener('click',event=>{const button=event.target?.closest?.('button[onclick*="creatorTeleportZoneV105N"]');if(!button)return;const match=String(button.getAttribute('onclick')||'').match(/creatorTeleportZoneV105N\(['"]([^'"]+)['"]\)/);if(!match)return;event.preventDefault();event.stopImmediatePropagation();creatorPreviewZone(match[1])},true)}
+255:   function installButton(){const button=document.getElementById('v111MapBtn');if(!button)return;const final=window.ValdoraWorldV117||window.ValdoraWorldV116,version=document.documentElement.dataset.valdoraPolish,label=final?.active?'Carte du monde V117':version==='V115-BIOMES-AUDIO'?'Carte du monde V115':version==='V114-ROUTES-BIOMES'?'Carte du monde V114':version==='V113-POLISH'?'Carte du monde V113':'Carte du monde V112';if(button.textContent!==label)button.textContent=label;button.onclick=()=>openMap()}
+### game/VALDORA_BIOMES_V112.js line 265 — drawHero
+260:     for(const [zone,type] of Object.entries(LEGEND_TYPES))if(!SCENES?.[zone]||SCENES[zone].legendaryType!==type||!String(SCENES[zone].v112Theme).startsWith('legend_'))issues.push(`${zone}: ambiance ${type} absente`);
+261:     const lakeNPC=(typeof NPCDATA!=='undefined'?NPCDATA:[]).filter(n=>n.zone==='route4bis'&&n.swimmerV109O).length;
+262:     const core={scenes:Object.keys(SCENES||{}).length,creatures:(typeof CREATURES!=='undefined'?CREATURES:[]).length,moves:typeof MOVE_DB!=='undefined'?Object.keys(MOVE_DB||{}).length:0,save:typeof save==='function',load:typeof load==='function'||typeof loadGame==='function',battle:typeof startBattle==='function',codex:!!document.getElementById('dexBtn')||!!document.getElementById('dexov')};
+263:     const systems={movement:typeof window.collision==='function',interaction:typeof window.interact==='function',shop:typeof window.openShop==='function',healing:typeof window.startHealingSequence==='function',objectives:typeof window.openObjectivesV84==='function',bag:typeof window.openBag==='function',pc:typeof window.openPC==='function',saveFile:typeof window.ValdoraSaveV108A?.saveAsNow==='function'&&typeof window.ValdoraSaveV108A?.loadFile==='function',transport:typeof window.ValdoraProV111?.playTransport==='function',secretBook:typeof window.ValdoraProV111?.openBook==='function'};
+264:     for(const [name,ok] of Object.entries(systems))if(!ok)issues.push(`système ${name} indisponible`);
+265:     return{version:VERSION,ok:issues.length===0,issues,locations:LOCATIONS.length,routes:LINKS.length,legendaryBiomes:Object.keys(LEGEND_TYPES).length,lakeNPC,lakeTrainers:(SCENES?.route4bis?.trainers||[]).filter(n=>n.swimmer).length,core,systems,assets:{map:MAP_IMAGE,swimmer:ready(IMAGES.swimmer),playerBuoy:ready(IMAGES.playerBuoy),roadside:ready(IMAGES.roadside),tree:ready(IMAGES.tree)},hooks:{world:!!window.drawWorld?.__v112World,route:!!window.drawRouteObjectsV93?.__v112Route,hero:!!window.drawHero?.__v112Hero,treeOverlay:ready(IMAGES.tree),creatorNavigation:!creator()||window.creatorTeleportZoneV105N===creatorPreviewZone}}
+266:   }
+267:   function publishAudit(){try{document.documentElement.dataset.valdoraV112Audit=JSON.stringify(audit())}catch(_){}}
+268:   function install(){canonicalTopology();injectMapStyle();hookRouteDrawing();hookWorldDrawing();hookHero();hookTrees();hookCreatorNavigation();hookCreatorNavigationClicks();installButton();enforceIdentity();window.ValdoraProV112={version:VERSION,locations:LOCATIONS,links:LINKS,openMap,previewZone:creatorPreviewZone,repair:canonicalTopology,audit};document.documentElement.dataset.valdoraBiomes=VERSION;publishAudit()}
+269: 
+270:   install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[900,3200,7800,10800,13300,14900].forEach(delay=>setTimeout(install,delay));setInterval(()=>{try{canonicalTopology();installButton();enforceIdentity();publishAudit()}catch(_){}},2800);
+271: })();
+### game/VALDORA_LIVING_WORLD_V118.js line 38 — cycle
+33: function overlapArea(a,b){const w=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x)),h=Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y));return w*h}
+34: function sceneFor(zone){return typeof SCENES==='object'?SCENES?.[zone]:null}
+35: function current(){try{return typeof currentScene==='function'?currentScene():sceneFor(state.zone)}catch(_){return sceneFor(state?.zone)}}
+36: // ---------------------------------------------------------------------
+37: // V121 — VRAIES ROUTES CYCLABLES, façon Pokémon.
+38: // La bicyclette ne se superpose plus aux routes normales : elle ouvre des
+39: // chemins dédiés qui relient rapidement deux zones déjà connues.
+40: // ---------------------------------------------------------------------
+41: const CYCLE_LINKS_V121=[
+42:   {id:'cycle_clairval_rochebrune',a:'town0',b:'town2'},
+43:   {id:'cycle_soleria_novacite',a:'town4',b:'town6'},
+44:   {id:'cycle_route4_route7',a:'route3',b:'route6'},
+45:   {id:'cycle_town9_town10',a:'town9',b:'town10'},
+46:   {id:'cycle_route9_route11',a:'route8',b:'route10'},
+47:   {id:'cycle_route11_route13',a:'route10',b:'route12'}
+### game/VALDORA_LIVING_WORLD_V118.js line 46 — cycle
+41: const CYCLE_LINKS_V121=[
+42:   {id:'cycle_clairval_rochebrune',a:'town0',b:'town2'},
+43:   {id:'cycle_soleria_novacite',a:'town4',b:'town6'},
+44:   {id:'cycle_route4_route7',a:'route3',b:'route6'},
+45:   {id:'cycle_town9_town10',a:'town9',b:'town10'},
+46:   {id:'cycle_route9_route11',a:'route8',b:'route10'},
+47:   {id:'cycle_route11_route13',a:'route10',b:'route12'}
+48: ];
+49: let bikeNoticeAtV119=0;
+50: function bikeUnlockedV119(){return creator()||!!state?.flags?.v119BikeUnlocked||(Array.isArray(state?.seals)&&state.seals.length>=3)}
+51: function cycleZoneV121(zone=state?.zone){return CYCLE_LINKS_V121.some(l=>l.id===zone)}
+52: function cycleKnownV121(zone){
+53:   if(creator()||state?.zone===zone)return true;
+54:   const lists=[state?.discovered,state?.visited,state?.visitedZones,state?.visitedCities];
+55:   return lists.some(a=>Array.isArray(a)&&a.includes(zone))
+### game/VALDORA_LIVING_WORLD_V118.js line 57 — cycle
+52: function cycleKnownV121(zone){
+53:   if(creator()||state?.zone===zone)return true;
+54:   const lists=[state?.discovered,state?.visited,state?.visitedZones,state?.visitedCities];
+55:   return lists.some(a=>Array.isArray(a)&&a.includes(zone))
+56: }
+57: function cycleSceneV121(link){
+58:   const width=2800,height=1400,path=[[130,700],[480,560],[850,760],[1220,610],[1580,790],[1950,590],[2320,750],[2670,700]];
+59:   return{name:`Voie cyclable — ${sceneFor(link.a)?.name||link.a} / ${sceneFor(link.b)?.name||link.b}`,kind:'route',cycleOnlyV121:true,routeEngine:'V121-CYCLE',width,height,buildings:[],trainers:[],objects:[],obstacles:[],mObstacles:[],grass:[],v105dTrees:[],v105dBushes:[],v105dCell:220,v105dCore:118,v105dRoad:new Set(),v76Path:path,v104Path:path,kPath:path,exits:[
+60:     {x:0,y:610,w:150,h:180,side:'west',to:link.a,label:sceneFor(link.a)?.name||'Retour',v121CycleExit:true},
+61:     {x:2650,y:610,w:150,h:180,side:'east',to:link.b,label:sceneFor(link.b)?.name||'Sortie',v121CycleExit:true}
+62:   ]}
+63: }
+64: function cycleEntryRectV121(sc,side,slot){
+65:   const w=Number(sc?.width)||1800,h=Number(sc?.height)||1100,span=150,depth=92,p=slot?0.68:0.32;
+66:   if(side==='west')return{x:0,y:Math.round(h*p-span/2),w:depth,h:span,side};
+### game/VALDORA_LIVING_WORLD_V118.js line 69 — cycle
+64: function cycleEntryRectV121(sc,side,slot){
+65:   const w=Number(sc?.width)||1800,h=Number(sc?.height)||1100,span=150,depth=92,p=slot?0.68:0.32;
+66:   if(side==='west')return{x:0,y:Math.round(h*p-span/2),w:depth,h:span,side};
+67:   return{x:Math.max(0,w-depth),y:Math.round(h*p-span/2),w:depth,h:span,side:'east'}
+68: }
+69: function cycleUpsertExitV121(sc,to,value){
+70:   if(!sc)return;sc.exits=Array.isArray(sc.exits)?sc.exits:[];const i=sc.exits.findIndex(e=>e?.v121CycleEntry&&String(e.to||e.target)===to);
+71:   if(i>=0)sc.exits[i]={...sc.exits[i],...value,to};else sc.exits.push({...value,to})
+72: }
+73: function cycleRemoveExitV121(sc,to){if(sc?.exits)sc.exits=sc.exits.filter(e=>!(e?.v121CycleEntry&&String(e.to||e.target)===to))}
+74: function ensureCycleNetworkV121(){
+75:   if(typeof SCENES!=='object'||!SCENES)return false;const unlocked=bikeUnlockedV119();
+76:   for(const [i,link] of CYCLE_LINKS_V121.entries()){
+77:     const a=sceneFor(link.a),b=sceneFor(link.b);if(!a||!b)continue;
+78:     const available=unlocked&&(creator()||(cycleKnownV121(link.a)&&cycleKnownV121(link.b)));
+### game/VALDORA_LIVING_WORLD_V118.js line 78 — cycle
+73: function cycleRemoveExitV121(sc,to){if(sc?.exits)sc.exits=sc.exits.filter(e=>!(e?.v121CycleEntry&&String(e.to||e.target)===to))}
+74: function ensureCycleNetworkV121(){
+75:   if(typeof SCENES!=='object'||!SCENES)return false;const unlocked=bikeUnlockedV119();
+76:   for(const [i,link] of CYCLE_LINKS_V121.entries()){
+77:     const a=sceneFor(link.a),b=sceneFor(link.b);if(!a||!b)continue;
+78:     const available=unlocked&&(creator()||(cycleKnownV121(link.a)&&cycleKnownV121(link.b)));
+79:     if(!SCENES[link.id]||!SCENES[link.id].cycleOnlyV121)SCENES[link.id]=cycleSceneV121(link);
+80:     else{SCENES[link.id].name=`Voie cyclable — ${a.name||link.a} / ${b.name||link.b}`;SCENES[link.id].exits[0].label=a.name||'Retour';SCENES[link.id].exits[1].label=b.name||'Sortie'}
+81:     if(available){
+82:       cycleUpsertExitV121(a,link.id,{...cycleEntryRectV121(a,'east',i%2),label:`🚲 Voie cyclable vers ${b.name||link.b}`,v121CycleEntry:true});
+83:       cycleUpsertExitV121(b,link.id,{...cycleEntryRectV121(b,'west',(i+1)%2),label:`🚲 Voie cyclable vers ${a.name||link.a}`,v121CycleEntry:true})
+84:     }else{cycleRemoveExitV121(a,link.id);cycleRemoveExitV121(b,link.id)}
+85:   }
+86:   return true
+87: }
+### game/VALDORA_LIVING_WORLD_V118.js line 88 — bike
+83:       cycleUpsertExitV121(b,link.id,{...cycleEntryRectV121(b,'west',(i+1)%2),label:`🚲 Voie cyclable vers ${a.name||link.a}`,v121CycleEntry:true})
+84:     }else{cycleRemoveExitV121(a,link.id);cycleRemoveExitV121(b,link.id)}
+85:   }
+86:   return true
+87: }
+88: function ensureBikeUnlockV119(){
+89:   state.flags=state.flags||{};
+90:   if(Array.isArray(state.seals)&&state.seals.length>=3&&!state.flags.v119BikeUnlocked){
+91:     state.flags.v119BikeUnlocked=true;state.bike=false;
+92:     if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! De nouvelles voies cyclables permettent maintenant de relier rapidement des zones déjà découvertes.')}catch(_){} }
+93:     try{save?.(false)}catch(_){}
+94:   }
+95:   if(!bikeUnlockedV119()&&state.bike)state.bike=false;ensureCycleNetworkV121();return bikeUnlockedV119()
+96: }
+97: function cycleSegmentsV119(){return[]}
+### game/VALDORA_LIVING_WORLD_V118.js line 97 — cycle
+92:     if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! De nouvelles voies cyclables permettent maintenant de relier rapidement des zones déjà découvertes.')}catch(_){} }
+93:     try{save?.(false)}catch(_){}
+94:   }
+95:   if(!bikeUnlockedV119()&&state.bike)state.bike=false;ensureCycleNetworkV121();return bikeUnlockedV119()
+96: }
+97: function cycleSegmentsV119(){return[]}
+98: function onCycleTrackV119(zone=state?.zone){return cycleZoneV121(zone)}
+99: function drawCycleTracksV119(){/* V121 : aucun marquage superposé aux routes normales. */}
+100: function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1200)return;bikeNoticeAtV119=now;try{toast?.(msg)}catch(_){}}
+101: function refreshBikeUiV119(){
+102:   const unlocked=ensureBikeUnlockV119(),onPath=cycleZoneV121();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;if(onPath)state.bike=true;else if(state.bike)state.bike=false;
+103:   let panel=document.getElementById('v119CyclePanel'),btn=document.getElementById('v119BikeBtn');
+104:   if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Après 3 Sceaux, la bicyclette ouvre des voies dédiées servant de raccourcis entre des zones déjà découvertes.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
+105:   if(!btn)return;btn.disabled=true;btn.textContent=!unlocked?'🔒 Bicyclette — 3 Sceaux':onPath?'🚲 Voie cyclable — vitesse ×2':'🚲 Bicyclette débloquée — cherche les voies cyclables'
+106: }
+### game/VALDORA_LIVING_WORLD_V118.js line 105 — cycle
+100: function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1200)return;bikeNoticeAtV119=now;try{toast?.(msg)}catch(_){}}
+101: function refreshBikeUiV119(){
+102:   const unlocked=ensureBikeUnlockV119(),onPath=cycleZoneV121();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;if(onPath)state.bike=true;else if(state.bike)state.bike=false;
+103:   let panel=document.getElementById('v119CyclePanel'),btn=document.getElementById('v119BikeBtn');
+104:   if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Après 3 Sceaux, la bicyclette ouvre des voies dédiées servant de raccourcis entre des zones déjà découvertes.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
+105:   if(!btn)return;btn.disabled=true;btn.textContent=!unlocked?'🔒 Bicyclette — 3 Sceaux':onPath?'🚲 Voie cyclable — vitesse ×2':'🚲 Bicyclette débloquée — cherche les voies cyclables'
+106: }
+107: function toggleBikeV119(){if(cycleZoneV121()){state.bike=true;bikeNoticeV119('La bicyclette est utilisée automatiquement sur cette voie.');return true}bikeNoticeV119('La bicyclette s’utilise sur les voies cyclables dédiées.');return false}
+108: function cycleMoveV119(dx,dy,dir){
+109:   ensureBikeUnlockV119();const startZone=state?.zone,onPath=cycleZoneV121(startZone);state.bike=!!onPath;let result=false,passes=onPath?2:1;
+110:   for(let i=0;i<passes;i++){const r=typeof BASE.move==='function'?BASE.move.apply(this,arguments):false;result=!!r||result;if(state?.zone!==startZone)break}
+111:   if(!cycleZoneV121(state?.zone))state.bike=false;refreshBikeUiV119();return result
+112: }
+113: window.ValdoraCycleV119={version:'V121-CYCLE-ROUTES',unlocked:bikeUnlockedV119,onTrack:onCycleTrackV119,toggle:toggleBikeV119,segments:cycleSegmentsV119,refresh:refreshBikeUiV119,links:CYCLE_LINKS_V121,repair:ensureCycleNetworkV121};
+114: try{ensureCycleNetworkV121()}catch(_){}
+### game/VALDORA_LIVING_WORLD_V118.js line 113 — bike, cycle
+108: function cycleMoveV119(dx,dy,dir){
+109:   ensureBikeUnlockV119();const startZone=state?.zone,onPath=cycleZoneV121(startZone);state.bike=!!onPath;let result=false,passes=onPath?2:1;
+110:   for(let i=0;i<passes;i++){const r=typeof BASE.move==='function'?BASE.move.apply(this,arguments):false;result=!!r||result;if(state?.zone!==startZone)break}
+111:   if(!cycleZoneV121(state?.zone))state.bike=false;refreshBikeUiV119();return result
+112: }
+113: window.ValdoraCycleV119={version:'V121-CYCLE-ROUTES',unlocked:bikeUnlockedV119,onTrack:onCycleTrackV119,toggle:toggleBikeV119,segments:cycleSegmentsV119,refresh:refreshBikeUiV119,links:CYCLE_LINKS_V121,repair:ensureCycleNetworkV121};
+114: try{ensureCycleNetworkV121()}catch(_){}
+115: 
+116: function stateV118(){
+117:   state.v118Living=state.v118Living||{};const s=state.v118Living;
+118:   s.version=VERSION;s.towns=s.towns||{};s.rewards=s.rewards||{};s.region=s.region||{};
+119:   for(const zone of TOWNS)s.towns[zone]=s.towns[zone]||{talks:0,uniqueNpcs:{},interiors:{},visits:0,contracts:{}};
+120:   return s
+121: }
+122: function townState(zone=state.zone){return stateV118().towns[zone]||(stateV118().towns[zone]={talks:0,uniqueNpcs:{},interiors:{},visits:0,contracts:{}})}
+### game/VALDORA_LIVING_WORLD_V118.js line 188 — velo
+183:   town14:['Aubeval est la dernière grande halte avant la Citadelle du Cœur et les expéditions légendaires','Les voyageurs viennent ici vérifier une dernière fois leur équipe et leurs réserves','La Route des Aubes donne à chaque arrivée une impression de nouveau départ','Les habitants collectionnent les récits de ceux qui ont parcouru toute Valdora','Les biomes légendaires ne s’ouvrent qu’aux équipes réellement préparées','La lumière du matin donne à la ville une atmosphère différente de toutes les autres']
+184: };
+185: const DIALOGUE_BANK={};
+186: function buildDialogueBank(){
+187:   for(const [zi,zone] of TOWNS.entries()){
+188:     const local=LOCAL[zone]||['Cette partie de Valdora a développé ses propres habitudes'];
+189:     DIALOGUE_BANK[zone]=Array.from({length:96},(_,i)=>{
+190:       const op=OPENERS[(i*5+zi)%OPENERS.length],loc=local[(i*7+zi)%local.length],ctx=CONTEXTS[(i*11+zi*3)%CONTEXTS.length],tip=TIPS[(i*13+zi*5)%TIPS.length],end=ENDINGS[(i*17+zi)%ENDINGS.length];
+191:       return `${op} ${loc}. ${ctx} ${tip} ${end}`
+192:     })
+193:   }
+194: }
+195: buildDialogueBank();
+196: 
+197: const NAMES=['Adèle','Alban','Alix','Amélie','Anatole','Apolline','Basile','Bérénice','Camille','Célestin','Clara','Colin','Diane','Éloi','Émilie','Esteban','Fanny','Florian','Garance','Gaspard','Hanaé','Hector','Iris','Ismaël','Jeanne','Joachim','Kenza','Léandre','Lila','Louison','Maël','Maëlys','Malo','Mélina','Naël','Nina','Octave','Olivia','Oscar','Paloma','Quentin','Romy','Samir','Sixtine','Solal','Thaïs','Tilio','Valentin','Victoire','Yasmine','Zélie','Aïdan','Côme','Énora','Faustine','Ilian','Lison','Marceau','Noémie','Sohan','Yuna'];
+### game/VALDORA_LIVING_WORLD_V118.js line 371 — velo
+366:   return typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false
+367: }
+368: worldInteractV118.__v107dInteract=true;worldInteractV118.__v118StableInteract=true;
+369: // Les anciens modules d'ambiance se réinstallent encore à intervalles fixes.
+370: // Ces marqueurs leur indiquent que V118 contient déjà leurs interactions et
+371: // évitent qu'ils réenveloppent ce moteur en formant une boucle récursive.
+372: worldInteractV118.__v107dInteract=true;
+373: worldInteractV118.__v113Museum=true;
+374: 
+375: // ---------------------------------------------------------------------
+376: // Intérieurs habités : plusieurs personnes par pièce, placement sur les
+377: // zones réellement libres du mobilier V105X et interactions individuelles.
+378: // ---------------------------------------------------------------------
+379: const INTERIOR_ROLES={
+380:   maison:['habitante','parent','jeune dresseuse','voisin en visite'],residence:['résidente','voisin','gardienne de l’immeuble','livreur'],immeuble_moyen:['résidente','employé de bureau','technicienne','visiteur'],grand_immeuble:['résidente','agent d’entretien','consultante','visiteur'],
+### game/VALDORA_LIVING_WORLD_V118.js line 415 — bike
+410:     if(typeof dialog==='function')dialog(`<b>${name}</b><br>${talkLine(n,zone,s?.key||'intérieur')}`);return true
+411:   }
+412:   return typeof BASE.interactInterior==='function'?BASE.interactInterior.apply(this,arguments):false
+413: }
+414: function drawInteriorV118(){ensureInteriorPopulation(true);return typeof BASE.drawInterior==='function'?BASE.drawInterior.apply(this,arguments):undefined}
+415: function enterInteriorV118(b){state.bike=false;const ok=typeof BASE.interiorEnter==='function'?BASE.interiorEnter(b):false;if(ok)ensureInteriorPopulation(true);return ok}
+416: function moveInteriorRoomV118(){state.bike=false;const ok=typeof BASE.interiorMoveToRoom==='function'?BASE.interiorMoveToRoom(...arguments):false;if(ok)ensureInteriorPopulation(true);return ok}
+417: 
+418: // ---------------------------------------------------------------------
+419: // Implantation : détection et déplacement conservateur des bâtiments qui
+420: // occupent réellement une portion importante de la chaussée.
+421: // ---------------------------------------------------------------------
+422: function roadRects(sc){
+423:   const C=Number(sc?.v105dCell)||220,core=Number(sc?.v105dCore)||90,set=sc?.v105dRoad instanceof Set?sc.v105dRoad:new Set(),out=[];
+424:   for(const key of set){const [gx,gy]=String(key).split(',').map(Number),cx=(gx+.5)*C,cy=(gy+.5)*C;out.push({x:cx-core/2,y:cy-core/2,w:core,h:core});if(set.has((gx+1)+','+gy))out.push({x:cx,y:cy-core/2,w:C,h:core});if(set.has(gx+','+(gy+1)))out.push({x:cx-core/2,y:cy,w:core,h:C})}
+### game/VALDORA_LIVING_WORLD_V118.js line 616 — cycle
+611:   const near=nearWorldNpc();if(near&&distance(near,state)<90){const label=`E / Entrée — ${near.name||'Habitant'}`,w=Math.min(520,ctx.measureText(label).width+34);ctx.globalAlpha=1;ctx.fillStyle='rgba(13,34,47,.93)';ctx.beginPath();ctx.roundRect((960-w)/2,539,w,38,12);ctx.fill();ctx.strokeStyle='rgba(255,222,129,.75)';ctx.stroke();ctx.fillStyle='#fff';ctx.font='800 13px Segoe UI';ctx.fillText(label,480,563)}ctx.restore();ctx.textAlign='start';ctx.globalAlpha=1
+612: }
+613: function drawWorldV118(){
+614:   const result=typeof BASE.drawWorld==='function'?BASE.drawWorld.apply(this,arguments):undefined;
+615:   if(typeof scene!=='undefined'&&scene==='world'){
+616:     try{drawCycleTracksV119()}catch(e){console.warn('V119 pistes cyclables',e)}
+617:     try{if(window.ValdoraChestV118Bridge){window.ValdoraChestV118Bridge.ownedByV118=true;window.ValdoraChestV118Bridge.drawNow?.()}}catch(e){console.warn('V118 coffre Valdora',e)}
+618:     if(current()?.kind==='town'){
+619:       try{if(window.ValdoraBusV118Bridge){window.ValdoraBusV118Bridge.ownedByV118=true;window.ValdoraBusV118Bridge.drawNow?.()}}catch(e){console.warn('V118 arrêt Fluo Valdora',e)}
+620:       drawTownAmbience()
+621:     }
+622:     refreshBikeUiV119()
+623:   }
+624:   return result
+625: }
+### game/VALDORA_LIVING_WORLD_V118.js line 687 — cycle
+682: function publishAudit(){try{const a=audit();window.ValdoraLivingAuditV118=a;document.documentElement.dataset.valdoraV118Audit=JSON.stringify(a);return a}catch(e){console.warn('Audit V118',e);return{version:VERSION,ok:false,issues:[String(e)]}}}
+683: function previewHouse(){
+684:   if(!creator())return false;const panel=document.getElementById('v118-living-panel');if(panel)panel.style.display='none';for(const zone of TOWNS){const sc=sceneFor(zone),b=(sc?.buildings||[]).find(x=>/home|maison|residence|appartement/i.test([x.type,x.urbanType,x.id,x.label].join(' ')))||(sc?.buildings||[])[0];if(!b)continue;state.zone=zone;try{scene='world';building=null}catch(_){}const ok=enterInteriorV118(b);if(ok){for(const id of['title','prologue','menuov','starterov','battleUI']){const el=document.getElementById(id);if(el)el.style.display='none'}ensureInteriorPopulation(true);const s=interiorSession(),n=(s?.npcs||[]).find(x=>x.v118Resident);if(n){state.roomX=n.x;state.roomY=n.y+64;state.dir=3}try{hud?.();drawInteriorV118();toast?.(`${zoneName(zone)} — maison habitée V118`)}catch(_){}return true}}return false
+685: }
+686: function installHooks(){
+687:   window.sceneNPCs=allWorldCitizens;try{sceneNPCs=allWorldCitizens}catch(_){}window.updateTownNPCs=updateWorldCitizens;try{updateTownNPCs=updateWorldCitizens}catch(_){}window.updateNPCsD=updateWorldCitizens;try{updateNPCsD=updateWorldCitizens}catch(_){}window.nearNPC=nearWorldNpc;try{nearNPC=nearWorldNpc}catch(_){}window.interact=worldInteractV118;try{interact=worldInteractV118}catch(_){}window.drawWorld=drawWorldV118;try{drawWorld=drawWorldV118}catch(_){}window.move=cycleMoveV119;try{move=cycleMoveV119}catch(_){}window.collision=BASE.collision;try{collision=BASE.collision}catch(_){}window.startWild=BASE.startWild;try{startWild=BASE.startWild}catch(_){}window.drawInterior=drawInteriorV118;try{drawInterior=drawInteriorV118}catch(_){}window.interactInterior=interactInteriorV118;try{interactInterior=interactInteriorV118}catch(_){};
+688:   if(BASE.interior){BASE.interior.enter=enterInteriorV118;BASE.interior.moveToRoom=moveInteriorRoomV118;BASE.interior.draw=drawInteriorV118;BASE.interior.interact=interactInteriorV118;window.ValdoraInteriorV109V=BASE.interior;window.ValdoraBuildingV109I=BASE.interior}
+689:   window.v109eEnterBuilding=enterInteriorV118;window.enterBuildingV67=enterInteriorV118;window.enterBuildingV68=enterInteriorV118;window.enterBuildingV70=enterInteriorV118;return true
+690: }
+691: function configureCurrent(force=false){if(TOWNS.includes(state?.zone))placeTownCitizens(state.zone,force);ensureInteriorPopulation(false)}
+692: function configureAll(force=false){for(const zone of TOWNS)placeTownCitizens(zone,force);ensureInteriorPopulation(false)}
+693: function scheduleTownPopulation(force=false,delay=260){TOWNS.forEach((zone,i)=>setTimeout(()=>{try{placeTownCitizens(zone,force);if(i===TOWNS.length-1)publishAudit()}catch(e){console.warn('V118 population '+zone,e)}},delay+i*95))}
+694: let lastBuildingRepair=Date.now();
+695: function refreshBuildings(){const now=Date.now();if(now-lastBuildingRepair<9000)return 0;lastBuildingRepair=now;const moved=repairAllBuildings();if(moved)scheduleTownPopulation(false,80);return moved}
+696: function install(){configureCurrent(false);ensureCycleNetworkV121();installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}
+### game/VALDORA_LIVING_WORLD_V118.js line 696 — cycle
+691: function configureCurrent(force=false){if(TOWNS.includes(state?.zone))placeTownCitizens(state.zone,force);ensureInteriorPopulation(false)}
+692: function configureAll(force=false){for(const zone of TOWNS)placeTownCitizens(zone,force);ensureInteriorPopulation(false)}
+693: function scheduleTownPopulation(force=false,delay=260){TOWNS.forEach((zone,i)=>setTimeout(()=>{try{placeTownCitizens(zone,force);if(i===TOWNS.length-1)publishAudit()}catch(e){console.warn('V118 population '+zone,e)}},delay+i*95))}
+694: let lastBuildingRepair=Date.now();
+695: function refreshBuildings(){const now=Date.now();if(now-lastBuildingRepair<9000)return 0;lastBuildingRepair=now;const moved=repairAllBuildings();if(moved)scheduleTownPopulation(false,80);return moved}
+696: function install(){configureCurrent(false);ensureCycleNetworkV121();installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}
+697: 
+698: const api={version:VERSION,active:true,dialogues:DIALOGUE_BANK,contracts:CONTRACTS,install,installHooks,configure:configureAll,stabilizeSidebar,enforceIdentity,openPanel,previewHouse,publishAudit,audit,allWorldCitizens,nearWorldNpc,ensureInteriorPopulation,repairAllBuildings,cycle:window.ValdoraCycleV119};
+699: window.ValdoraLivingWorldV118=api;stateV118();install();scheduleTownPopulation(false,320);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[80,420,1100,2400,4200,7200,10800,17600].forEach(ms=>setTimeout(install,ms));setTimeout(()=>{try{lastBuildingRepair=0;refreshBuildings();install();}catch(e){console.warn('V118 implantation',e)}},11800);setInterval(()=>{try{installHooks();stabilizeSidebar();enforceIdentity();configureCurrent(false);refreshBuildings();publishAudit()}catch(e){console.warn('V118 maintenance',e)}},3500);
+700: console.log('V118 : monde vivant actif — 1 440 dialogues, 60 activités locales et intérieurs habités.');
+701: })();
+### game/VALDORA_PRO_V111.js line 82 — bike
+77:       .v111-bookbody{display:grid;grid-template-columns:270px minmax(0,1fr);flex:1;min-height:0}.v111-booknav{padding:14px;background:#091c27;border-right:1px solid #8bdfff28;overflow:auto}.v111-tab{width:100%;text-align:left;margin-bottom:8px;background:#102d3a;display:flex;gap:10px;align-items:center}.v111-tab.active{background:#236e8a;border-color:#bcefff}.v111-tab.done{border-color:#73e59c88}.v111-tab .mark{font-size:22px}.v111-page{display:block!important;padding:28px 34px;overflow:auto;background:radial-gradient(circle at 80% 10%,#1c4a5a55,transparent 44%)}.v111-page>*{float:none!important;position:static!important}
+78:       .v111-page h1{font-family:Georgia,serif;font-size:34px;margin:0 0 4px;color:#fff2b4}.v111-page .subtitle{text-transform:uppercase;letter-spacing:.15em;font-size:12px;color:#72dff8}.v111-page p{line-height:1.7;color:#d6e5e9;max-width:850px}.v111-progress{height:12px;background:#051219;border-radius:20px;overflow:hidden;border:1px solid #ffffff26;margin:18px 0}.v111-progress i{display:block;height:100%;background:linear-gradient(90deg,#20b9d4,#a2f27c);box-shadow:0 0 12px #59e3ee}
+79:       .v111-clues{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}.v111-clue{background:#ffffff0b;border:1px solid #ffffff1e;border-radius:13px;padding:12px}.v111-clue.found{border-color:#64dba0;background:#123e34}.v111-reward{background:linear-gradient(90deg,#4f3c12,#745a1b);border:1px solid #ffd86a66;border-radius:14px;padding:14px;margin:18px 0;color:#fff2be}
+80:       .v111-transport{position:fixed;inset:0;z-index:18000;background:linear-gradient(#071a2c,#163e55 58%,#1a2930);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff}.v111-transport:before{content:'';position:absolute;inset:auto 0 0;height:34%;background:repeating-linear-gradient(90deg,#25333a 0 90px,#35444a 90px 180px);border-top:8px solid #d8c577}.v111-skyline{position:absolute;inset:18% 0 auto;height:32%;background:linear-gradient(150deg,transparent 25%,#214a50 26% 34%,transparent 35%) 0 0/180px 100% repeat-x;opacity:.7}
+81:       .v111-vehicle{position:absolute;left:-55%;bottom:20%;width:min(660px,68vw);animation:v111drive 2.25s cubic-bezier(.2,.7,.25,1) forwards}.v111-vehicle.bus img{width:100%;filter:drop-shadow(0 18px 12px #0008)}.v111-vehicle.train{height:170px;background:linear-gradient(#d8f1f5 0 35%,#287ca4 36% 72%,#163f59 73%);border-radius:80px 22px 18px 18px;border:5px solid #eafcff;box-shadow:0 20px 15px #0007}.v111-vehicle.train:before{content:'';position:absolute;left:55px;right:35px;top:30px;height:42px;background:repeating-linear-gradient(90deg,#bce8fa 0 68px,#153b50 70px 78px);border-radius:12px}.v111-vehicle.train:after{content:'';position:absolute;left:70px;right:70px;bottom:-28px;height:54px;background:radial-gradient(circle,#18232a 0 45%,#8ca0a7 47% 60%,transparent 62%) 0 0/125px 54px repeat-x}
+82:       .v111-flight{font-size:160px;filter:drop-shadow(0 18px 12px #0008);animation:v111fly 2.2s ease-in-out forwards}.v111-bike{font-size:150px;animation:v111drive 1.8s ease-in-out forwards;position:absolute;left:-35%;bottom:20%}.v111-traveltext{position:absolute;top:10%;text-align:center}.v111-traveltext b{display:block;font-size:28px}.v111-traveltext span{color:#b9dbe7}
+83:       @keyframes v111drive{0%{left:-60%;transform:translateY(0)}45%{transform:translateY(-5px)}100%{left:115%;transform:translateY(0)}}@keyframes v111fly{0%{transform:translate(-70vw,28vh) scale(.7) rotate(-8deg)}50%{transform:translate(0,-4vh) scale(1.15)}100%{transform:translate(70vw,-30vh) scale(.65) rotate(8deg)}}@keyframes v111pulse{to{transform:scale(1.28);box-shadow:0 0 0 8px #ff696944,0 0 28px #ff9d7c}}
+84:       @media(max-width:800px){.v111-mapbody{grid-template-columns:1fr}.v111-side{position:absolute;right:10px;bottom:10px;width:min(300px,80vw);max-height:47%;border-radius:16px}.v111-bookbody{grid-template-columns:1fr}.v111-booknav{display:flex;gap:7px;overflow:auto;border-right:0}.v111-tab{min-width:170px}.v111-page{padding:20px}}
+85:     `;
+86:     document.head.appendChild(style);
+87:   }
+88: 
+89:   function overlay(id, title, subtitle, body) {
+90:     close(id); const root = document.createElement('div'); root.id = id; root.className = 'v111-overlay';
+91:     root.innerHTML = `<div class="v111-shell"><header class="v111-head"><div><h2>${esc(title)}</h2><small>${esc(subtitle)}</small></div><div class="v111-spacer"></div><button class="v111-iconbtn" data-close>Fermer ✕</button></header>${body}</div>`;
+### game/VALDORA_PRO_V111.js line 143 — bike
+138:     root.querySelectorAll('.v111-tab').forEach(tab=>tab.onclick=()=>selectBookPage(root,tab.dataset.id));selectBookPage(root,active);
+139:   }
+140: 
+141:   function playTransport(kind,label,done) {
+142:     injectStyle();close('v111-transport');const root=document.createElement('div');root.id='v111-transport';root.className='v111-transport';
+143:     const visual=kind==='bus'?`<div class="v111-vehicle bus"><img src="${BUS_IMAGE}" alt="Bus régional de Valdora"></div>`:kind==='train'?'<div class="v111-vehicle train"></div>':kind==='bike'?'<div class="v111-bike">🚴</div>':'<div class="v111-flight">🪽</div>';
+144:     root.innerHTML=`<div class="v111-skyline"></div><div class="v111-traveltext"><b>${kind==='bus'?'Réseau Fluo Val d’Ora':kind==='train'?'Express de Valdora':kind==='bike'?'Traversée à vélo':'Vol au-dessus de Valdora'}</b><span>Destination : ${esc(label||'prochaine étape')}</span></div>${visual}`;document.body.appendChild(root);
+145:     setTimeout(()=>{root.classList.add('leaving');setTimeout(()=>{root.remove();try{done?.()}catch(error){console.error('V111 transport',error)}},220)},2350);
+146:   }
+147:   function busTravel(zone) {
+148:     if(!discovered(zone)||zone===state.zone)return; if(!creator()&&(Number(state.money)||0)<40){toastSafe('Le trajet en bus coûte 40 Voltrons.');return}
+149:     if(!creator())state.money-=40;book().busTrips=(book().busTrips||0)+1;persist();close('v111-map');const name=TOWNS.find(t=>t[0]===zone)?.[1]||zone;playTransport('bus',name,()=>{if(typeof enterZone==='function')enterZone(zone);else state.zone=zone;toastSafe('Arrivée du bus à '+name+'.')});
+150:   }
+151:   function installButtons() {
+152:     const grid=document.getElementById('musicBtn')?.parentElement;if(!grid)return;
+### game/VALDORA_PRO_V111.js line 161 — bike
+156:   function hookTransports() {
+157:     if(window.__v111TransportHooked)return;window.__v111TransportHooked=true;
+158:     const train=window.playTrainTravelV622;if(typeof train==='function'){window.playTrainTravelV622=function(cityId){const city=(typeof CITY_SCENE_V622!=='undefined'?CITY_SCENE_V622:[]).find?.(x=>x.id===cityId);playTransport('train',city?.name||'Gare suivante',()=>train(cityId))};try{playTrainTravelV622=window.playTrainTravelV622}catch(_){}}
+159:     const baseFly=window.flyTo;if(typeof baseFly==='function'){window.flyTo=function(zone){const name=TOWNS.find(t=>t[0]===zone)?.[1]||zone;playTransport('flight',name,()=>baseFly(zone))};try{flyTo=window.flyTo}catch(_){}}
+160:   }
+161:   function hookBikeVisual(){
+162:     if(window.__v111BikeHooked||typeof window.drawHero!=='function')return;window.__v111BikeHooked=true;const base=window.drawHero;
+163:     window.drawHero=function(x,y,dir,moving){
+164:       if(state?.bike&&typeof ctx!=='undefined'){ctx.save();ctx.strokeStyle='#172e38';ctx.lineWidth=4;ctx.beginPath();ctx.arc(x-17,y+11,13,0,Math.PI*2);ctx.arc(x+19,y+11,13,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#43d5e8';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x-17,y+11);ctx.lineTo(x-2,y-7);ctx.lineTo(x+19,y+11);ctx.lineTo(x-7,y+11);ctx.lineTo(x+9,y-7);ctx.stroke();ctx.fillStyle='#ffd84a';ctx.fillRect(x+5,y-11,17,4);ctx.restore()}
+165:       return base.apply(this,arguments)
+166:     };try{drawHero=window.drawHero}catch(_){}
+167:   }
+168:   function observeLostBus() {
+169:     const target=document.getElementById('dtxt');if(!target||target.dataset.v111BusObserver)return;target.dataset.v111BusObserver='1';new MutationObserver(()=>{if(/incident de bus|bus perdu|petit incident de bus/i.test(target.textContent||'')&&!document.getElementById('v111-transport'))playTransport('bus','Incident sur la route')}).observe(target,{childList:true,subtree:true,characterData:true});
+170:   }
+### game/VALDORA_PRO_V111.js line 186 — bike, velo
+181:   function enforceIdentity(){
+182:     if(window.ValdoraProV112)return;
+183:     const wanted='Éclats Sauvages — Valdora V111 Pro';if(document.title!==wanted)document.title=wanted;
+184:     const brand=document.querySelector('.brand b'),label=`VALDORA V111 PRO — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==label)brand.textContent=label;
+185:   }
+186:   function install() { injectStyle();retireObsoleteDiagnostics();installButtons();hookTransports();hookBikeVisual();observeLostBus();window.ValdoraProV111={version:VERSION,openMap,openBook,playTransport,busTravel,audit:()=>({mapImage:!!MAP_IMAGE,towns:TOWNS.length,dossiers:DOSSIERS.length,unlocked:unlocked(),buttons:!!document.getElementById('v111MapBtn'),bikeVisual:!!window.__v111BikeHooked,transportHooks:!!window.__v111TransportHooked})};document.documentElement.dataset.valdoraPro=VERSION;enforceIdentity(); }
+187: 
+188:   install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[2400,5200,9200,12600].forEach(delay=>setTimeout(install,delay));
+189:   // Les anciennes couches renomment encore périodiquement la fenêtre et le bandeau.
+190:   // Une synchronisation légère maintient l'identité de la version finale et les deux boutons.
+191:   setInterval(()=>{try{installButtons();enforceIdentity()}catch(_){}},650);
+192: })();
+### game/VALDORA_ROUTES_BIOMES_V114.js line 291 — bike
+286:   state.v114PortalLock=Date.now()+520;let go=window.enterZone;try{go=window.enterZone||enterZone}catch(_){};return typeof go==='function'?go(to,sideOpposite[ex.side]):false;
+287: }
+288: function moveV114(dx,dy,dir){
+289:   state.dir=dir;if(typeof scene!=='undefined'&&scene!=='world'||typeof trainerEvent!=='undefined'&&trainerEvent)return false;
+290:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast?.('Position rétablie dans la Citadelle.')}catch(_){}}
+291:   const speed=state.bike?1.55:1,nx=Number(state.x)+Number(dx)*speed,ny=Number(state.y)+Number(dy)*speed;
+292:   if(collisionV114(nx,ny,state.x,state.y)){try{lastMove=Date.now();const n=typeof npcCollision==='function'?npcCollision(nx,ny):null;if(n&&Math.random()<.12)toast?.('E / Entrée pour parler à '+n.name)}catch(_){}return false}
+293:   try{recordFollowerStep?.()}catch(_){}state.x=nx;state.y=ny;try{lastMove=Date.now()}catch(_){}if(checkPortalV114())return true;
+294:   const kind=typeof currentScene==='function'?currentScene()?.kind:null;if(state.team?.length){if((kind==='route'||kind==='temple')&&!(typeof trainerEvent!=='undefined'&&trainerEvent))try{checkTrainerDetection?.()}catch(_){}if((kind==='route'||state.zone==='town0')&&!(typeof trainerEvent!=='undefined'&&trainerEvent))try{v104EncounterStep?.()}catch(_){}}
+295:   return true;
+296: }
+297: 
+298: function installHooks(){
+299:   const v116=window.ValdoraWorldV116;
+300:   const worldInteract=v116?.active&&typeof v116.interact==='function'?v116.interact:interactV114;
+### game/VALDORA_SANCTUARIES_V117.js line 121 — bike
+116:   if(f.cliff&&!pointIn(x,y,f.cliff)){const pass={x:0,y:990,w:430,h:220};if(!pointIn(x,y,pass))return true}
+117:   return(sc.v116Blocks||[]).some(b=>blockHit(b,x,y))
+118: }
+119: function blockedCustom(x,y,ox=state.x,oy=state.y){const sc=current();if(!sc?.v116Sanctuary)return false;const next=terrainHit(sc,Number(x),Number(y));if(!next)return false;const old=terrainHit(sc,Number(ox),Number(oy));if(!old)return true;const l=sc.v116Lair,nd=Math.hypot(x-l.x,y-l.y),od=Math.hypot(ox-l.x,oy-l.y);return nd<=od+.01}
+120: function collisionV116(x,y,ox=state.x,oy=state.y){if(blockedCustom(x,y,ox,oy))return true;return typeof BASE_COLLISION==='function'?!!BASE_COLLISION(x,y,ox,oy):false}
+121: function moveV116(dx,dy,dir){if(typeof scene!=='undefined'&&scene==='world'&&current()?.v116Sanctuary){const speed=state.bike?1.55:1,nx=Number(state.x)+Number(dx)*speed,ny=Number(state.y)+Number(dy)*speed;if(blockedCustom(nx,ny,state.x,state.y)){state.dir=dir;try{lastMove=Date.now()}catch(_){}return false}}return typeof BASE_MOVE==='function'?BASE_MOVE(dx,dy,dir):false}
+122: 
+123: function roundedRectWorld(cam,r,radius=28){const p=screen(r.x,r.y,cam);ctx.beginPath();ctx.roundRect(p.x,p.y,r.w*cam.sx,r.h*cam.sy,radius*cam.sx)}
+124: function drawWorldEllipse(cam,o,fill,stroke){const p=screen(o.x,o.y,cam);ctx.beginPath();ctx.ellipse(p.x,p.y,o.rx*cam.sx,o.ry*cam.sy,0,0,Math.PI*2);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=9*cam.sx;ctx.stroke()}}
+125: function drawRiver(sc,cam){const r=sc.v116Features.river,p=screen(r.x,r.y,cam),t=performance.now()/1000;ctx.save();const g=ctx.createLinearGradient(p.x,0,p.x+r.w*cam.sx,0);g.addColorStop(0,'#244e65');g.addColorStop(.5,'#3d91a6');g.addColorStop(1,'#244e65');ctx.fillStyle=g;ctx.fillRect(p.x,p.y,r.w*cam.sx,r.h*cam.sy);ctx.strokeStyle='rgba(219,252,255,.54)';ctx.lineWidth=2;for(let wy=-40;wy<sc.height+60;wy+=78){const y=(wy-cam.camY)*cam.sy+(t*22)%46;ctx.beginPath();for(let wx=r.x-15;wx<=r.x+r.w+15;wx+=28){const x=(wx-cam.camX)*cam.sx,yy=y+Math.sin(wx*.035+t*2.1+wy)*5;wx===r.x-15?ctx.moveTo(x,yy):ctx.lineTo(x,yy)}ctx.stroke()}ctx.restore()}
+126: function drawIslandGround(sc,cam){ctx.save();ctx.fillStyle='#207f9b';ctx.fillRect(0,0,960,600);const wave=performance.now()/700;ctx.strokeStyle='rgba(213,250,249,.28)';ctx.lineWidth=1.4;for(let y=-20;y<640;y+=46){ctx.beginPath();for(let x=-30;x<1000;x+=34){const py=y+Math.sin(x*.025+wave+y*.02)*4;x<0?ctx.moveTo(x,py):ctx.lineTo(x,py)}ctx.stroke()}const island=sc.v116Features.island,p=screen(island.x,island.y,cam);ctx.beginPath();ctx.ellipse(p.x,p.y,island.rx*cam.sx,island.ry*cam.sy,0,0,Math.PI*2);ctx.clip();if(typeof WORLD.drawGround==='function')WORLD.drawGround(sc);else if(typeof BASE.drawGround==='function')BASE.drawGround(sc);ctx.fillStyle='rgba(58,154,101,.14)';ctx.fillRect(0,0,960,600);ctx.restore();drawWorldEllipse(cam,island,null,'rgba(239,219,159,.88)')}
+127: function drawCliffGround(sc,cam){ctx.save();const sky=ctx.createLinearGradient(0,0,0,600);sky.addColorStop(0,'#91d4e3');sky.addColorStop(1,'#d8eef0');ctx.fillStyle=sky;ctx.fillRect(0,0,960,600);const t=performance.now()/1700;ctx.fillStyle='rgba(255,255,255,.52)';for(let i=0;i<12;i++){const x=((i*173+t*22)%1120)-80,y=45+(i*83)%510,r=22+(i%4)*8;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.arc(x+r*.9,y+4,r*.72,0,Math.PI*2);ctx.arc(x-r*.8,y+6,r*.64,0,Math.PI*2);ctx.fill()}const c=sc.v116Features.cliff,p=screen(c.x,c.y,cam),pass=screen(0,990,cam);ctx.beginPath();ctx.roundRect(p.x,p.y,c.w*cam.sx,c.h*cam.sy,120*cam.sx);ctx.rect(pass.x,pass.y,430*cam.sx,220*cam.sy);ctx.clip();if(typeof WORLD.drawGround==='function')WORLD.drawGround(sc);else if(typeof BASE.drawGround==='function')BASE.drawGround(sc);ctx.fillStyle='rgba(202,235,225,.25)';ctx.fillRect(0,0,960,600);ctx.restore()}
+128: function drawGround(sc){
+129:   const meta=META[zone()];if(!meta)return typeof BASE.drawGround==='function'?BASE.drawGround(sc):undefined;const cam=camera(sc);
+130:   if(meta.kind==='water')drawIslandGround(sc,cam);else if(meta.kind==='air')drawCliffGround(sc,cam);else{if(typeof WORLD.drawGround==='function')WORLD.drawGround(sc);else if(typeof BASE.drawGround==='function')BASE.drawGround(sc);ctx.save();const alpha=meta.kind==='factory'?'78':meta.kind==='fire'?'68':meta.kind==='storm'?'a8':meta.kind==='rock'?'62':meta.kind==='ice'?'72':meta.kind==='origin'?'55':'28';ctx.fillStyle=meta.palette+alpha;ctx.fillRect(0,0,960,600);ctx.restore()}
+### game/index.html line 970 — drawHero
+965:  ctx.fillText((megaBuildingV66?.label||'Immeuble')+' — '+megaFloorNameV66(),18,30);
+966: 
+967:  // habitants / Taron
+968:  if(megaEventV66?.type==='taron'&&!megaEventV66.handled&&megaFloorV66>0){drawTaronNpc(690,300,0,false);drawTaronNpc(770,350,3,false)}
+969:  else{drawNpc((megaFloorV66*3)%41,690,300,0,false);drawNpc((megaFloorV66*3+5)%41,775,350,1,false)}
+970:  drawHero(state.roomX*.8,state.roomY*.75,state.dir,Date.now()-lastMove<190);
+971:  ctx.textAlign='start'
+972: }
+973: function moveMegaInteriorV66(dx,dy,dir){
+974:  state.dir=dir;state.roomX=Math.max(70,Math.min(1130,state.roomX+dx));state.roomY=Math.max(70,Math.min(760,state.roomY+dy));
+975:  if(megaFloorV66===0&&state.roomY>740&&state.roomX>500&&state.roomX<700){
+976:    scene='world';state.zone=megaReturnZoneV66;const b=megaBuildingV66;
+977:    if(b){state.x=b.doorX;state.y=b.doorY+70}
+978:    megaBuildingV66=null;building=null;megaFloorV66=0;megaEventV66=null;toast(currentScene().name)
+979:  }
+### game/index.html line 1045 — drawHero
+1040:    }
+1041:  }else{
+1042:    ctx.fillStyle='#17324a';ctx.font='800 15px Segoe UI';ctx.textAlign='left';ctx.fillText('Chambre '+hotelRoomV66,90,92)
+1043:  }
+1044:  ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,45);ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';ctx.fillText('Hôtel — '+(hotelModeV66==='lobby'?'Hall':'Chambre '+hotelRoomV66),18,29);
+1045:  drawHero(state.roomX*.8,state.roomY*.75,state.dir,Date.now()-lastMove<190);ctx.textAlign='start'
+1046: }
+1047: function moveHotelV66(dx,dy,dir){
+1048:  state.dir=dir;state.roomX=Math.max(70,Math.min(1130,state.roomX+dx));state.roomY=Math.max(70,Math.min(760,state.roomY+dy));
+1049:  if(state.roomY>740&&state.roomX>500&&state.roomX<700){
+1050:    if(hotelModeV66==='room'){hotelModeV66='lobby';state.roomX=600;state.roomY=590;toast('Hall de l’hôtel')}
+1051:    else{scene='world';state.zone=hotelReturnZoneV66;const b=hotelV66;if(b){state.x=b.doorX;state.y=b.doorY+70}building=null;hotelV66=null;toast(currentScene().name)}
+1052:  }
+1053: }
+1054: function interactHotelV66(){
+### game/index.html line 1309 — drawHero
+1304:   if(megaEventV65?.active && floor>0 && !megaEventV65.clearedFloors?.includes(floor)){
+1305:     drawTaronNpc(690,300,0,false);drawTaronNpc(770,340,3,false)
+1306:   }else{
+1307:     drawNpc((floor*3)%41,680,300,0,false);drawNpc((floor*3+4)%41,760,345,1,false)
+1308:   }
+1309:   drawHero(state.roomX*.8,state.roomY*.75,state.dir,Date.now()-lastMove<190)
+1310: }
+1311: 
+1312: function megaInteriorBlockedV64(nx,ny){
+1313:   if(nx<70||nx>1130||ny<70||ny>760)return true;
+1314:   // staircase and elevator are usable, not blockers.
+1315:   return false
+1316: }
+1317: 
+1318: function moveMegaInteriorV64(dx,dy,dir){
+### game/index.html line 1479 — cycle
+1474:   }
+1475:   ctx.restore()
+1476: }
+1477: function trainPosition(plan){
+1478:   if(!plan||!plan.railY)return null;
+1479:   const cycle=(performance.now()/1000)%150;
+1480:   let wx,moving=true;
+1481:   if(cycle<7)wx=-600+920*(cycle/7);
+1482:   else if(cycle<12){wx=300;moving=false}
+1483:   else if(cycle<19)wx=300+2500*((cycle-12)/7);
+1484:   else return null;
+1485:   // visual center moved down to the lower rail
+1486:   return {x:wx,y:plan.railY+18,moving}
+1487: }
+1488: 
+### game/index.html line 1716 — bike
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1717: 
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1723:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1724:   const identity=(fam%7)-3;
+1725:   return {
+### game/index.html line 1879 — bike
+1874:   if(!t?.guardian||!t.sealIndex)return false;
+1875:   const seal=t.sealIndex;
+1876:   if(!(state.seals||[]).includes(seal)){
+1877:     state.seals.push(seal);
+1878:     state.seals.sort((a,b)=>a-b);
+1879:     if(state.seals.length>=3){state.flags=state.flags||{};state.flags.v119BikeUnlocked=true;}
+1880:     logEvent('Gardien vaincu : Sceau '+seal+' obtenu.');
+1881:     return true
+1882:   }
+1883:   return false
+1884: }
+1885: 
+1886: // ----- Citadelle : 75 captures + 7 Sceaux + maîtrise de Vol -----
+1887: function v108mSeal5Beaten(){return (typeof creator==='function'&&creator())||(state.seals||[]).includes(5)}
+1888: function v108mCanUseVolNow(){if(!v108mSeal5Beaten())return false;return (state.team||[]).some(m=>(m?.moves||[]).includes('vol'))}
+### game/index.html line 2357 — bike
+2352: 
+2353: 
+2354: function reset(){
+2355:   state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,
+2356:     inventory:{Potion:0,SuperPotion:0,Orbe:0,SuperOrbe:0,MegaOrbe:0,Antidote:2,Baie:3,Repas:0,FioleAttaque:0,FioleDefense:0},
+2357:     trainerWins:{},bike:false,fly:false,light:false,capsules:[],discovered:['town0'],hasDex:false,profGift:false,follow:true,
+2358:     taron:{wins:0,missions:0,active:null}};
+2359:   scene='world';save(false);hud()
+2360: }
+2361: 
+2362: 
+2363: function save(show=true){
+2364:   try{
+2365:     if(!state||typeof state!=='object')throw new Error('État de partie invalide.');
+2366:     ensureInventoryV81(state);
+### game/index.html line 2577 — drawHero
+2572:   ctx.fillStyle='rgba(255,255,255,.55)';for(const [x,y,r] of [[110,80,55],[190,65,38],[760,88,65],[845,75,38]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+2573:   ctx.fillStyle='#7b9d69';ctx.beginPath();ctx.ellipse(485,370,310,72,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#cfe2b7';ctx.beginPath();ctx.ellipse(480,350,260,50,0,0,Math.PI*2);ctx.fill();
+2574:   ctx.fillStyle='rgba(42,68,55,.20)';ctx.beginPath();ctx.ellipse(255,480,150,30,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(660,230,130,26,0,0,Math.PI*2);ctx.fill()
+2575: }
+2576: 
+2577: function drawHero(x,y,dir,moving){
+2578:   const d=v102eDirName(dir),walk=!!moving&&(Math.floor(Date.now()/150)%2===1);
+2579:   const im=V102F_HERO_IMAGES[d+'_'+(walk?'walk':'idle')];
+2580:   if(v102eDrawGrounded(im,x,y,62,.22))return;
+2581:   // Secours uniquement pendant le chargement de l'image.
+2582:   v101sCharacter(ctx,x,y,{moving,dir,shirt:'#e45f4e',pants:'#3d5f73',hair:'#3f302b',cap:'#d94f43',accent:'#f4f3e8'})
+2583: }
+2584: function drawNpc(i,x,y,dir=0,moving=false){
+2585:   const idx=Math.abs(Math.trunc(Number(i)||0))%V102F_NPC_KINDS.length;
+2586:   const kind=V102F_NPC_KINDS[idx],im=V102F_NPC_IMAGES[kind][v102eDirName(dir)];
+### game/index.html line 3682 — drawHero
+3677:  if(v67Event?.type==='taron'&&!v67Event.done&&v67Floor>0){drawTaronNpc(720,210,0,false);drawTaronNpc(760,420,3,false)}
+3678:  else{drawNpc((v67Floor*4)%41,735,210,0,false);drawNpc((v67Floor*4+5)%41,745,425,1,false)}
+3679: 
+3680:  ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+3681:  ctx.fillText((v67Building?.label||'Immeuble')+' — '+v67FloorLabel(),16,27);
+3682:  drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);ctx.textAlign='start'
+3683: }
+3684: function drawAutoStairV67(x,y,down){
+3685:  ctx.fillStyle='#2e4c5e';ctx.beginPath();ctx.roundRect(x,y,145,105,8);ctx.fill();
+3686:  for(let i=0;i<6;i++){ctx.fillStyle=i%2?'#a9b8be':'#8297a1';ctx.fillRect(x+10,y+13+i*14,125,9)}
+3687:  ctx.fillStyle='#fff';ctx.font='900 12px Segoe UI';ctx.textAlign='center';ctx.fillText(down?'↓ DESCENTE':'MONTÉE ↑',x+72,y-8)
+3688: }
+3689: function moveInteriorV67(dx,dy,dir){
+3690:  state.dir=dir;
+3691:  const oldX=state.roomX,oldY=state.roomY;
+### game/index.html line 4103 — drawHero
+4098: 
+4099:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+4100:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+4101:   ctx.fillText(data.title+' — '+v68FloorLabel(),16,27);
+4102: 
+4103:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+4104:   ctx.textAlign='start'
+4105: }
+4106: 
+4107: function v69DiscoveryKey(){
+4108:   return 'v69discover_'+V68_INTERIOR.returnZone+'_'+V68_INTERIOR.building.id+'_'+V68_INTERIOR.floor+'_'+V68_INTERIOR.roomIndex
+4109: }
+4110: function v69DiscoveryType(){
+4111:   const types=['none','coins','orbe','berry','lore','note','rare','taron','quest'];
+4112:   return types[(V68_INTERIOR.eventSeed+V68_INTERIOR.floor*7+(V68_INTERIOR.roomIndex||0)*3)%types.length]
+### game/index.html line 4142 — velo
+4137:       if(t!=='none'){
+4138:         state.flags=state.flags||{};state.flags[key]=true;
+4139:         if(t==='coins'){state.money=(state.money||0)+180;dialog('<b>Découverte</b><br>Tu trouves 180 ✦ oubliées dans un tiroir.')}
+4140:         else if(t==='orbe'){state.inventory.Orbe=(state.inventory.Orbe||0)+1;dialog('<b>Découverte</b><br>Une Orbe d’Éclat était cachée ici.')}
+4141:         else if(t==='berry'){state.inventory.Baie=(state.inventory.Baie||0)+2;dialog('<b>Découverte</b><br>Tu récupères 2 Baies.')}
+4142:         else if(t==='lore'){dialog('<b>Document local</b><br>Un vieux dossier raconte comment ce quartier s’est développé autour des premiers Éclats.')}
+4143:         else if(t==='note'){dialog('<b>Note trouvée</b><br>« On raconte qu’une créature inhabituelle apparaît après la tombée du jour près de la gare. »')}
+4144:         else if(t==='rare'){dialog('<b>Traces étranges</b><br>Tu découvres des traces appartenant probablement à une créature rare.')}
+4145:         else if(t==='quest'){dialog('<b>Demande d’un habitant</b><br>Un résident te demande de retrouver un objet perdu dans un autre étage. Cette mission est ajoutée à ton journal.')}
+4146:         save(false);return
+4147:       }
+4148:     }
+4149: 
+4150:     const data=roomDataV69();
+4151:     dialog('<b>'+data.title+'</b><br>'+{
+### game/index.html line 4679 — drawHero
+4674:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+4675:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+4676:   ctx.fillText((V70_INT.building.label||'Immeuble')+' — '+v70FloorLabel(),16,27);
+4677: 
+4678:   drawNpc((V70_INT.floor*4)%41,690,330,0,false);
+4679:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+4680:   ctx.textAlign='start'
+4681: }
+4682: 
+4683: function drawDoorV70(x,y,index){
+4684:   const info=v70RoomInfo(index);
+4685:   ctx.fillStyle='#6b4e3d';ctx.beginPath();ctx.roundRect(x,y,60,86,6);ctx.fill();
+4686:   ctx.fillStyle='#e4c25c';ctx.beginPath();ctx.arc(x+49,y+43,4,0,Math.PI*2);ctx.fill();
+4687:   ctx.fillStyle='#203847';ctx.font='800 9px Segoe UI';ctx.textAlign='center';
+4688:   ctx.fillText(info.label,x+30,y-8)
+### game/index.html line 4763 — drawHero
+4758: 
+4759:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+4760:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.textAlign='left';
+4761:   ctx.fillText(info.label+' — '+v70FloorLabel(),16,27);
+4762: 
+4763:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+4764:   ctx.textAlign='start'
+4765: }
+4766: 
+4767: 
+4768: function v70DiscoveryKey(){
+4769:   return 'v70disc_'+V70_INT.returnZone+'_'+V70_INT.building.id+'_'+V70_INT.floor+'_'+V70_INT.room
+4770: }
+4771: function v70DiscoveryType(){
+4772:   const arr=['none','coins','orbe','berry','lore','hint','rare','taron','quest','gift'];
+### game/index.html line 5584 — cycle
+5579: }
+5580: 
+5581: 
+5582: 
+5583: // ======================================================================
+5584: // VALDORA V90 — CYCLE JOUR / NUIT
+5585: // Un cycle complet dure 24 minutes réelles : 1 seconde = 1 minute en jeu.
+5586: // Le premier lancement part de l'heure locale de l'appareil.
+5587: // ======================================================================
+5588: 
+5589: function ensureDayCycleV90(){
+5590:   state.dayCycle=state.dayCycle||{};
+5591:   if(state.dayCycle.anchorReal==null||state.dayCycle.anchorMinutes==null){
+5592:     const d=new Date();
+5593:     state.dayCycle.anchorReal=Date.now();
+### game/index.html line 5593 — cycle
+5588: 
+5589: function ensureDayCycleV90(){
+5590:   state.dayCycle=state.dayCycle||{};
+5591:   if(state.dayCycle.anchorReal==null||state.dayCycle.anchorMinutes==null){
+5592:     const d=new Date();
+5593:     state.dayCycle.anchorReal=Date.now();
+5594:     state.dayCycle.anchorMinutes=d.getHours()*60+d.getMinutes();
+5595:     save(false)
+5596:   }
+5597: }
+5598: function gameMinutesV90(){
+5599:   
+5600:   const elapsed=(Date.now()-state.dayCycle.anchorReal)/1000;
+5601:   return (state.dayCycle.anchorMinutes+elapsed)%1440
+5602: }
+### game/index.html line 5601 — cycle
+5596:   }
+5597: }
+5598: function gameMinutesV90(){
+5599:   
+5600:   const elapsed=(Date.now()-state.dayCycle.anchorReal)/1000;
+5601:   return (state.dayCycle.anchorMinutes+elapsed)%1440
+5602: }
+5603: function gameTimeV90(){
+5604:   const mins=gameMinutesV90();
+5605:   return {h:Math.floor(mins/60),m:Math.floor(mins%60),mins}
+5606: }
+5607: function dayPhaseV90(){
+5608:   const {mins}=gameTimeV90();
+5609:   if(mins<300)return 'night';       // 00:00 - 05:00
+5610:   if(mins<420)return 'dawn';        // 05:00 - 07:00
+### game/index.html line 5690 — drawHero
+5685:     const x=(t.x-camX)*sx,y=(t.y-camY)*sy;
+5686:     drawNpc(t.look,x,y,t.dir||0,!!t.moving);
+5687:     drawTrainerAlert(t,x,y)
+5688:   }
+5689: 
+5690:   drawHero((state.x-camX)*sx,(state.y-camY)*sy,state.dir,Date.now()-lastMove<190);
+5691: 
+5692:   // Le filtre est dessiné en dernier sur le monde, mais avant l'UI HTML.
+5693:   $('location').textContent=sc.name
+5694: }
+5695: 
+5696: 
+5697: 
+5698: 
+5699: 
+### game/index.html line 5859 — bike
+5854: 
+5855: function move(dx,dy,dir){
+5856:   state.dir=dir;
+5857:   if(scene!=='world'||trainerEvent)return;
+5858:   if(state.zone==='temple_final'&&typeof finalTempleCollisionV77==='function'&&finalTempleCollisionV77(state.x,state.y)){state.x=1200;state.y=1900;try{toast('Position rétablie dans la Citadelle.')}catch(_){}}
+5859:   const speed=state.bike?1.55:1,nx=state.x+dx*speed,ny=state.y+dy*speed;
+5860:   if(collision(nx,ny,state.x,state.y)){
+5861:     lastMove=Date.now();
+5862:     const n=npcCollision(nx,ny);if(n&&Math.random()<.12)toast('E / Entrée pour parler à '+n.name);
+5863:     return
+5864:   }
+5865:   recordFollowerStep();state.x=nx;state.y=ny;lastMove=Date.now();checkPortal();
+5866: 
+5867:   // Les rencontres sauvages de Clairval font partie du déplacement normal de la ville.
+5868:   const kind=currentScene().kind;
+### game/index.html line 6054 — velo
+6049:     'La gare est le meilleur endroit pour entendre les nouvelles des autres villes.',
+6050:     'Des voyageurs racontent que la Team Taron apparaît parfois là où personne ne l’attend.',
+6051:     'Ces derniers temps, les voyageurs parlent surtout de tes exploits.'
+6052:   ]},
+6053:   {name:'Aya',look:13,lines:[
+6054:     'Les Éclats ne sont pas seulement des combattants. Certains développent un vrai attachement à leur dresseur.',
+6055:     'Ton compagnon te suit partout. C’est généralement un signe qu’il se sent en sécurité avec toi.',
+6056:     'Ton équipe a l’air soudée. Ça ne s’obtient pas uniquement avec des niveaux.'
+6057:   ]},
+6058:   {name:'Jules',look:14,lines:[
+6059:     'Il existe des raccourcis que la carte ne montre pas toujours clairement. Observe les changements de terrain.',
+6060:     'Quand tu débloqueras certaines capacités d’exploration, pense à revisiter les anciennes zones.',
+6061:     'Les plus grands secrets de Valdora sont souvent dans des endroits que tu croyais déjà connaître.'
+6062:   ]}
+6063: ];
+### game/index.html line 6381 — drawHero
+6376:     drawTaronNpcV68(690,335,0,false);drawTaronNpcV68(760,360,3,false)
+6377:   }else{
+6378:     drawNpc((V68_INTERIOR.floor*4)%41,700,335,0,false);
+6379:   }
+6380: 
+6381:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190);
+6382:   ctx.textAlign='start'
+6383: }
+6384: function drawV68Room(){
+6385:   const idx=V68_INTERIOR.roomIndex||0,type=v68RoomType(idx);
+6386:   ctx.fillStyle='#182c3b';ctx.fillRect(0,0,960,640);
+6387:   ctx.fillStyle='#eee7db';ctx.beginPath();ctx.roundRect(55,55,850,530,14);ctx.fill();
+6388: 
+6389:   // Pièce volontairement vide : aucun mobilier n'est dessiné.
+6390: 
+### game/index.html line 6397 — drawHero
+6392:   ctx.fillStyle='#17324a';ctx.fillRect(0,0,960,43);
+6393:   ctx.fillStyle='#fff';ctx.font='800 15px Segoe UI';ctx.fillText(v68RoomName(idx)+' — '+v68FloorLabel(),16,27);
+6394: 
+6395:   // room event
+6396:   drawV68RoomEvent();
+6397:   drawHero(state.roomX*.75,state.roomY*.70,state.dir,Date.now()-lastMove<190)
+6398: }
+6399: function v68EventType(){
+6400:   const types=['none','none','lostCreature','blackout','injured','researcher','hiddenItem','alarm','delivery','rareCreature','taron'];
+6401:   return types[(V68_INTERIOR.eventSeed+V68_INTERIOR.floor*5+(V68_INTERIOR.roomIndex||0))%types.length]
+6402: }
+6403: function drawV68RoomEvent(){
+6404:   const t=v68EventType();if(t==='none')return;
+6405:   if(t==='taron'){
+6406:     drawTaronNpcV68(690,285,0,false);drawTaronNpcV68(760,350,3,false);return
+### game/index.html line 6582 — drawHero
+6577:   const room=currentRoom();
+6578:   if(building?.type==='playerhome')drawEmptyPlayerHome();
+6579:   else v101sRoomBackdrop(building?.type||'home');
+6580:   const sx=960/1200,sy=640/800;
+6581:   for(const n of room.npcs||[])drawNpc(n.look,n.x*sx,n.y*sy,Number.isFinite(Number(n.dir))?Number(n.dir):0,!!n.moving);
+6582:   drawHero(state.roomX*sx,state.roomY*sy,state.dir,Date.now()-lastMove<190);
+6583:   drawHealingOverlay();
+6584: }
+6585: 
+6586: /* V102P — INTÉRIEURS SANS MOBILIER */
+6587: function visibleInteriorBlocksV102F(){return []}
+6588: 
+6589: function interiorBlocked(x,y){
+6590:   // Limites des murs de la pièce.
+6591:   if(x<48||y<55||x>1152||y>770)return true;
+### game/index.html line 6709 — velo
+6704: function showStarters(){
+6705:   const el=$('starterlist');el.innerHTML='';
+6706:   const starters=[
+6707:     {id:1,name:(BY[1]?.name||'Brindel'),type:(BY[1]?.type||'Nature')},
+6708:     {id:4,name:(BY[4]?.name||'Tisonnet'),type:(BY[4]?.type||'Feu')},
+6709:     {id:7,name:(BY[7]?.name||'Rivelot'),type:(BY[7]?.type||'Eau')},
+6710:     {id:162,name:'Schneck',type:'Ombre'}
+6711:   ];
+6712:   starters.forEach(item=>{
+6713:     const id=item.id,box=document.createElement('div');box.className='starter';
+6714:     const can=document.createElement('canvas');can.width=150;can.height=150;
+6715:     const b=document.createElement('b');b.textContent=item.name+' — '+item.type;
+6716:     const p=document.createElement('p');p.textContent=starterPitch(id);
+6717:     const btn=document.createElement('button');btn.textContent='Choisir '+item.name;btn.onclick=()=>chooseStarter(id);
+6718:     box.append(can,b,p,btn);el.appendChild(box);
+### game/index.html line 8565 — velo
+8560: function teachMove(teamIndex,mid){
+8561:   return v83TeachMove(teamIndex,mid)
+8562: }
+8563: 
+8564: 
+8565: const V108T_MOVE_DESCRIPTIONS={"v108e_nature_fouet_de_liane":"Le lanceur fouette vivement la cible en renforçant son mouvement avec l’énergie Nature. C’est une attaque offensive de type Nature dont l’impact dépend de sa puissance, du niveau, des statistiques et des affinités de type.","v108e_nature_feuille_tranchante":"Le lanceur projette un flot de feuilles acérées vers la cible. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_racines_vives":"Le lanceur fait jaillir des végétaux autour de la cible pour la frapper ou entraver ses mouvements. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_ronces":"Le lanceur fait jaillir des végétaux autour de la cible pour la frapper ou entraver ses mouvements. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_epine_venimeuse":"Le lanceur projette ou enfonce une épine chargée de substances irritantes dans la cible. C’est une attaque offensive de type Nature : elle inflige des dégâts directs et peut ensuite déclencher l’effet secondaire indiqué ci-dessous.","v108e_nature_charge_sylvestre":"Le lanceur prend de l’élan et percute directement la cible. C’est une attaque offensive de type Nature dont l’impact dépend de sa pui …[truncated]
+8566: function moveDescriptionV108T(mid,mv=MOVE_DB[mid]||{}){
+8567:   if(mv.description)return String(mv.description);
+8568:   if(V108T_MOVE_DESCRIPTIONS[mid])return V108T_MOVE_DESCRIPTIONS[mid];
+8569:   const name=String(mv.name||mid||'Cette attaque'),type=String(mv.type||'Neutre'),power=typeof moveDisplayPowerV106U==='function'?Number(moveDisplayPowerV106U(mid)||0):Number(mv.displayPower||0);
+8570:   if(mid==='rugissement'||name==='Rugissement')return 'Le lanceur pousse un rugissement intimidant qui déstabilise l’adversaire. Cette capacité ne provoque pas de dégâts directs et sert à diminuer sa puissance offensive.';
+8571:   if(mid==='nage'||name==='Nage')return 'Le lanceur utilise l’élan de l’eau pour agir sur la cible. Hors combat, cette capacité permet aussi de franchir les passages aquatiques lorsque son utilisation est débloquée.';
+8572:   if(mid==='vol'||name==='Vol')return 'Le lanceur prend de la hauteur et exploite les courants aériens. Hors combat, cette capacité permet aussi de voyager vers les destinations autorisées après son déblocage.';
+8573:   if(mid==='surf'||name==='Surf')return 'Le lanceur soulève une vague et utilise la force de l’eau pour progresser ou frapper. Cette technique est liée aux déplacements aquatiques lorsqu’ils sont autorisés.';
+8574:   if(power>0)return name+' est une attaque offensive de type '+type+'. Elle inflige des dégâts directs dont le résultat dépend de sa puissance, des niveaux, des statistiques et des affinités de type.';
+### game/index.html line 10521 — drawHero
+10516: 
+10517:   drawFollower(camX,camY,sx,sy);
+10518:   const npcs=[...currentNPCs(),...(sc.megacity?(sc.megaNPCs||[]):[])];
+10519:   for(const n of npcs){const x=(n.x-camX)*sx,y=(n.y-camY)*sy;if(n.taron)drawTaronNpcV68(x,y,n.dir||0,!!n.moving);else drawNpc(n.look,x,y,n.dir||0,!!n.moving)}
+10520:   for(const t of (sc.trainers||[])){const x=(t.x-camX)*sx,y=(t.y-camY)*sy;drawNpc(t.look,x,y,t.dir||0,!!t.moving);drawTrainerAlert(t,x,y)}
+10521:   drawHero((state.x-camX)*sx,(state.y-camY)*sy,state.dir,Date.now()-lastMove<190);
+10522:   $('location').textContent=sc.name
+10523: };
+10524: 
+10525: const _v93Collision=collision;
+10526: collision=function(x,y,oldX=state.x,oldY=state.y){
+10527:   const sc=currentScene();
+10528:   if(state.zone==='town13'&&sc.taronisV93)return collisionTaronisV93(x,y,oldX,oldY);
+10529:   return _v93Collision(x,y,oldX,oldY)
+10530: };
+### game/index.html line 10918 — velo
+10913:       req.onerror=()=>reject(req.error)
+10914:     });
+10915:     db.close(); return raw
+10916:   }catch(e){console.warn('V96 IndexedDB load unavailable',e);return null}
+10917: }
+10918: function v96Envelope(payload){
+10919:   return {format:'ECLATS_SAUVAGES_VALDORA_SAVE',formatVersion:1,gameVersion:'V96',
+10920:     exportedAt:Date.now(),mode:PLAYER_PROGRESSION_LOCK?'joueur':'createur',state:JSON.parse(payload)}
+10921: }
+10922: window.v96DownloadSaveFile=function(payload){
+10923:   const blob=new Blob([JSON.stringify(v96Envelope(payload),null,2)],{type:'application/json'});
+10924:   const url=URL.createObjectURL(blob), d=new Date();
+10925:   const stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'
+10926:     +String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+10927:   const a=document.createElement('a');
+### game/index.html line 13057 — drawHero
+13052: function drawPlayerFurniturePose(){
+13053:   const mode=state.mobilierStatutV102Y;
+13054:   if(mode==='couche'){
+13055:     const m=currentFurniture(); if(!m)return false;
+13056:     const r=rotatedBounds(m); const x=(r.x+r.w*.52)*.8,y=(r.y+r.h*.53)*.8;
+13057:     ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/2);drawHero(0,0,2,false);ctx.restore();return true;
+13058:   }
+13059:   if(mode==='assis'){
+13060:     ctx.save();ctx.translate(state.roomX*.8,state.roomY*.8+8);ctx.scale(1,.76);drawHero(0,0,state.dir,false);ctx.restore();return true;
+13061:   }
+13062:   return false;
+13063: }
+13064: function drawFurnitureStatus(){
+13065:   if(state.mobilierStatutV102Y!=='couche'||!state.mobilierSleepEndsV102Y)return;
+13066:   const sec=Math.max(0,Math.ceil((state.mobilierSleepEndsV102Y-Date.now())/1000));
+### game/index.html line 13201 — cycle
+13196:     case 'controle_ticket': window.ValdoraTrainV109D.open();break;
+13197:     case 'horaires_train': stationBoard();break;
+13198:     case 'distributeur_boissons': vending();break;
+13199:     case 'choix_starters': if(!state.team.length)dialog('<b>Table des Starters</b><br>Quatre capsules t’attendent…',()=>showStarters());else dialog('<b>Table des Starters</b><br>Ton premier compagnon est déjà avec toi.');break;
+13200:     case 'recherche_codex': superComputer();break;
+13201:     case 'lore_recherche': dialog('<b>Tableau de recherche</b><br>'+pick(['Les croquis comparent plusieurs stades d’évolution.','Une note indique : « environnement + expérience = évolution parfois imprévisible ».','Un schéma relie les types Feu, Plante et Eau dans un cycle d’avantages.','Des coordonnées sont entourées près des montagnes du nord.']));break;
+13202:     case 'infos_oeuf': dialog('<b>Incubateur</b><br>'+pick(['L’œuf réagit légèrement à ta présence.','Les capteurs indiquent une activité stable. Impossible encore d’identifier l’espèce.','Une étiquette indique : « origine inconnue — trouvé près d’anciennes ruines ».']));break;
+13203:     case 'lore_musee': dialog('<b>'+((m.nom)||'Exposition')+'</b><br>'+pick(MUSEUM));break;
+13204:     case 'decor': if(m.description)dialog('<b>'+(m.nom||'Objet')+'</b><br>'+m.description);break;
+13205:     default: if(m.description)dialog('<b>'+(m.nom||'Mobilier')+'</b><br>'+m.description);break;
+13206:   }
+13207: }
+13208: window.declencherInteraction=triggerFurniture;
+13209: window.fonctionsMobilier={
+13210:   interagirLit:(joueur,equipe)=>{const m=targetFurniture();if(m)sleepAt(m)},

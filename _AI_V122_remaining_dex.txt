@@ -1,0 +1,852 @@
+V122 REMAINING DIAGNOSTIC — DEX
+====================================================================================================
+### game/CREATEUR.html line 176 — 169
+171:   <linearGradient id="trainBody" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f4f69"/><stop offset="0.55" stop-color="#4785a6"/><stop offset="1" stop-color="#d7eef9"/></linearGradient>
+172:   <filter id="shadowT" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#071320" flood-opacity="0.28"/></filter>
+173: </defs>
+174: <rect width="1000" height="680" fill="url(#skyTitle)"/>
+175: <circle cx="742" cy="140" r="88" fill="url(#sunset)" opacity=".98"/>
+176: <g fill="#ffffff" opacity=".55"><ellipse cx="180" cy="132" rx="60" ry="20"/><ellipse cx="224" cy="132" rx="28" ry="14"/><ellipse cx="310" cy="168" rx="44" ry="16"/><ellipse cx="346" cy="169" rx="22" ry="11"/></g>
+177: <path d="M0 405C130 334 230 322 324 350C435 384 576 392 723 342C822 308 908 304 1000 324V680H0Z" fill="#5c9f63"/>
+178: <path d="M0 487C135 446 256 434 374 482C516 540 715 532 1000 462V680H0Z" fill="#447a51"/>
+179: <path d="M0 563C150 532 282 541 406 589C537 639 734 639 1000 583V680H0Z" fill="#376345"/>
+180: <path d="M338 680C362 564 416 477 489 412C573 488 626 583 658 680Z" fill="url(#roadTitle)" stroke="#b28c57" stroke-width="18" stroke-linejoin="round"/>
+181: <path d="M489 414L421 366" stroke="#c49b61" stroke-width="18" stroke-linecap="round"/><path d="M489 414L577 364" stroke="#c49b61" stroke-width="18" stroke-linecap="round"/>
+182: <g filter="url(#shadowT)">
+183:   <g transform="translate(578 244)">
+184:     <rect x="0" y="48" width="174" height="120" rx="18" fill="#f6f2e9" stroke="#587184" stroke-width="5"/>
+185:     <path d="M-18 62L86 -6L190 62Z" fill="#c95c52"/>
+### game/CREATEUR.html line 409 — 169
+404: }
+405: function cityFloorsV60(cityId){const c=VALDORA_CITIES_V60.find(c=>c.id===cityId);return c?c.floors:1}
+406: 
+407: 'use strict';
+408: const PLAYER_PROGRESSION_LOCK=false;
+409: const SCENES={"town0":{"kind":"town","name":"Clairval","image":"assets/town_0_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"lab","label":"Laboratoire"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"healer","label":"Centre soins"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"shop","label":"Boutique"},{"x":1210,"y":690,"w":260,"h":175,"doorX":1340,"doorY":856,"type":"station","label":"Gare"}],"biome":"prairie","exits":[{"x":835,"y":1030,"w":130,"h":70,"side":"south","target":"route_next"}]},"town1":{"kind":"town","name":"Bois-Murmure","image":"assets/town_1_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"healer","label":"Centre soins"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"shop","label":"Boutique"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"arena","label":"Arène"},{"x":760,"y":680,"w":260,"h":175,"doorX":890,"doorY":846,"type":"inn","label":"Auberge"}],"biome":"forest","exits":[{"x":835,"y":0,"w":130,"h":70,"side":"north","target":"route_prev"},{"x":1730,"y":485,"w":70,"h":130,"side":"east","target":"route_next"}]},"town2":{"kind":"town","name":"Lac Azur","image":"assets/town …[truncated]
+410: 
+411: const TOWN_THEMES={
+412:   prairie:{ground:'#8fcf78',road:'#e5d2a2',tree:'#4c9453',roof:'#d86855'},
+413:   forest:{ground:'#76b86e',road:'#d2c295',tree:'#357b49',roof:'#7d5f46'},
+414:   lake:{ground:'#86c987',road:'#ddd1a7',tree:'#4d9258',roof:'#5ea7d8'},
+415:   autumn:{ground:'#b6b06b',road:'#d8c495',tree:'#b36d3b',roof:'#a85542'},
+416:   mountain:{ground:'#a9b28d',road:'#cbbb9b',tree:'#557a50',roof:'#777f8d'},
+417:   desert:{ground:'#d9c37d',road:'#ead9a7',tree:'#8d9860',roof:'#d68b48'},
+418:   snow:{ground:'#d8eced',road:'#c9d6d9',tree:'#668f7f',roof:'#699fcf'},
+### game/CREATEUR.html line 1724 — 169
+1719: 
+1720: function creatureStats(m){
+1721:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1722:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1723:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1724:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1725:   const identity=(fam%7)-3;
+1726:   return {
+1727:     hp:Math.floor(30+lvl*3.0+stage*10+(fam%6)),
+1728:     atk:Math.floor(8+lvl*1.42+stage*6+Math.max(0,identity)),
+1729:     def:Math.floor(8+lvl*1.30+stage*6+Math.max(0,-identity)),
+1730:     spd:Math.floor(7+lvl*1.12+stage*4+((fam*3)%5))
+1731:   }
+1732: }
+1733: 
+### game/CREATEUR.html line 1792 — 169
+1787: 
+1788: 
+1789: // ======================================================================
+1790: // VALDORA V83 — SYSTEMES V82 REELLEMENT BRANCHES
+1791: // ======================================================================
+1792: const V83_TOTAL_CREATURES=169;
+1793: const V83_CITADEL_CAPTURE_REQUIRED=75;
+1794: 
+1795: function v83CaughtCount(){
+1796:   return Object.values(state.dex||{}).filter(v=>v&&v.caught).length
+1797: }
+1798: 
+1799: // ----- 150 créatures réellement présentes dès l'initialisation -----
+1800: function v83ExpandCreatures150(){
+1801:   if(CREATURES.length>=150)return;
+### game/CREATEUR.html line 1895 — caughtCount
+1890: window.v108mCanUseVolNow=v108mCanUseVolNow
+1891: function v106pHasVolMastery(){
+1892:   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
+1893: }
+1894: function v106pCitadelRequirements(){
+1895:   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
+1896:   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
+1897: }
+1898: function finalTempleAvailableV77(){return v106pCitadelRequirements().ready}
+1899: function v83CitadelGateText(){
+1900:   const r=v106pCitadelRequirements();
+1901:   if(r.ready)return 'La Citadelle est accessible.';
+1902:   const missing=[];
+1903:   if(r.caught<75)missing.push(`capturer 75 espèces (${r.caught}/75)`);
+1904:   if(r.seals<7)missing.push(`réunir les 7 Sceaux (${r.seals}/7)`);
+### game/CREATEUR.html line 2035 — 169
+2030:   }
+2031: }
+2032: window.addEventListener('DOMContentLoaded',()=>setTimeout(v83PositionTouchPad,180));
+2033: 
+2034: // ====================== VALDORA V82 ======================
+2035: const V82_TOTAL_CREATURES=169;
+2036: const V82_CITADEL_REQUIRED=75;
+2037: 
+2038: function v82CaughtCount(){return Object.values(state.dex||{}).filter(v=>v&&v.caught).length}
+2039: function v82CitadelUnlocked(){return v82CaughtCount()>=V82_CITADEL_REQUIRED}
+2040: 
+2041: function v82ProgressTier(){
+2042:   const s=Number(state.story||0), seals=(state.seals||[]).length;
+2043:   return Math.max(0,Math.min(6,Math.max(seals,Math.floor(s/2))));
+2044: }
+### game/CREATEUR.html line 4916 — 169
+4911:     name:'Route 2',orientation:'WE',kind:'forest',w:3600,h:1600,
+4912:     path:[[70,800],[480,800],[850,690],[1220,880],[1640,720],[2100,840],[2600,720],[3100,800],[3530,800]]
+4913:   },
+4914:   route2:{
+4915:     name:'Route 3',orientation:'NS',kind:'lake',w:3200,h:2200,
+4916:     path:[[1600,70],[1600,420],[1450,760],[1690,1080],[1450,1420],[1600,1770],[1600,2130]]
+4917:   },
+4918:   route3:{
+4919:     name:'Route 4',orientation:'EW',kind:'autumn',w:3800,h:1700,
+4920:     path:[[3730,850],[3300,850],[2880,700],[2450,900],[1950,730],[1450,900],[900,730],[450,850],[70,850]]
+4921:   },
+4922:   route4:{
+4923:     name:'Route 5',orientation:'NS',kind:'mountain',w:3000,h:2400,
+4924:     path:[[1500,70],[1500,430],[1360,790],[1600,1120],[1370,1510],[1530,1900],[1500,2330]]
+4925:   },
+### game/CREATEUR.html line 5467 — caughtCount
+5462: }
+5463: function templeGuardsClearedV77(){
+5464:   return Array.from({length:10},(_,i)=>'temple_guard_'+(i+1)).every(id=>!!state.trainerWins[id])
+5465: }
+5466: function finalTempleAvailableV77(){
+5467:   return typeof v106pCitadelRequirements==='function'?v106pCitadelRequirements().ready:(v83CaughtCount()>=75&&(state.seals||[]).length>=7&&!!state.fly)
+5468: }
+5469: function altarReadyV77(){
+5470:   return templeGuardsClearedV77()&&!!state.trainerWins.final_boss
+5471: }
+5472: 
+5473: function drawFinalTempleV77(sc,camX,camY,sx,sy){
+5474:   if(window.ValdoraPolishV113?.active)return window.ValdoraPolishV113.drawCitadel(sc,camX,camY,sx,sy);
+5475:   ctx.fillStyle='#151d28';ctx.fillRect(0,0,960,600);
+5476: 
+### game/CREATEUR.html line 7669 — caughtCount
+7664:   const city=V106R_TOWN_NAMES[q?.zone]||SCENES[q?.zone]?.name||q?.zone||'Valdora';
+7665:   return q?.giverName?`Retourne voir ${q.giverName} à ${city} pour valider la quête.`:`Validation : ${city}.`
+7666: }
+7667: function objectivesV84(){
+7668:   const q=[];
+7669:   const caught=v83CaughtCount();
+7670:   const seals=(state.seals||[]).length;
+7671: 
+7672:   if(!state.team.length){
+7673:     q.push({title:'Choisir ton premier compagnon',progress:'0/1',txt:'Va au laboratoire de Clairval et parle au Professeur Aurine.'});
+7674:   }else{
+7675:     q.push({title:'Explorer Valdora',progress:(state.discovered||[]).filter(z=>String(z).startsWith('town')).length+'/15 villes',txt:'Découvre progressivement les villes et leurs gares.'});
+7676:   }
+7677: 
+7678:   if(seals<7)q.push({title:'Les Sept Sceaux',progress:seals+'/7',txt:'Bats chaque Gardien pour obtenir son Sceau.'});
+### game/CREATEUR.html line 7700 — caughtCount
+7695:   return q
+7696: }
+7697: function objectiveVisibleV108M(x){
+7698:   const title=String(x?.title||''),quests=typeof V106C_QUESTS!=='undefined'?V106C_QUESTS:[],knownQuest=quests.some(q=>v106cQuestState?.()?.[q.id]&&title.includes(q.title));
+7699:   if(title==='Missions des habitants')return quests.some(q=>!!v106cQuestState?.()?.[q.id]);if(knownQuest)return true;
+7700:   const discovered=new Set(state.discovered||[]),seals=(state.seals||[]).length,caught=typeof v83CaughtCount==='function'?v83CaughtCount():0;
+7701:   if(/Aubeval|Horizons/i.test(title))return discovered.has('town14')||!!state.flags?.aubevalExpeditionLicense;
+7702:   if(/Légendaires/i.test(title))return !!state.flags?.aubevalExpeditionLicense||[151,152,153,154,155,156,157,158,159,160,161].some(id=>state.dex?.[id]?.seen||state.dex?.[id]?.caught);
+7703:   if(/Citadelle/i.test(title))return seals>=4||caught>=50||discovered.has('town7')||discovered.has('town14');
+7704:   if(/Capacité Vol/i.test(title))return seals>=3||discovered.has('route3')||discovered.has('route4');
+7705:   if(/Projet Résonance|Team Taron/i.test(title))return !!state.v106z?.activeTaronOp||Object.values(state.v106z?.taronOps||{}).some(v=>v?.done||v?.waves>0)||(state.taron?.wins||0)>0;
+7706:   if(title==='Exploration de Valdora'&&/caches/i.test(String(x?.progress||'')+' '+String(x?.txt||'')))return Object.keys(state.v106z?.caches||{}).length>0;
+7707:   if(title==='Les Sept Sceaux')return seals>0||Number(state.story||0)>=2||discovered.has('town1');
+7708:   if(/Progression longue durée|Maîtrise de Valdora/i.test(title))return seals>=2||[...discovered].filter(z=>/^town\d+$/.test(z)).length>=3;
+7709:   if(/Réseau ferroviaire/i.test(title))return (state.visitedCities||[]).length>1||[...discovered].filter(z=>/^town\d+$/.test(z)).length>1||Number(state.v106y?.trainTrips||0)>0;
+### game/CREATEUR.html line 7724 — caughtCount
+7719: }
+7720: function openObjectivesV84(){
+7721:   const q=visibleObjectivesV108M();
+7722:   let h=q.map(x=>`<div class="quest"><b>${x.title}</b><br><b>${x.progress}</b><br>${x.txt}</div>`).join('');
+7723:   h+='<div class="quest"><b>Progression générale</b><br>'+
+7724:     'Espèces capturées : '+v83CaughtCount()+'/150<br>'+
+7725:     'Sceaux : '+(state.seals||[]).length+'/7<br>'+
+7726:     'Gares découvertes : '+v84UnlockedStationCities().length+'/8</div>';
+7727:   openSimpleMenu('Objectifs',h)
+7728: }
+7729: function installObjectivesButtonV84(){
+7730:   const grid=document.querySelector('aside .panel .grid');
+7731:   if(!grid||document.getElementById('objectivesBtnV84'))return;
+7732:   const b=document.createElement('button');
+7733:   b.id='objectivesBtnV84';b.textContent='Objectifs';b.onclick=openObjectivesV84;
+### game/CREATEUR.html line 8278 — 169
+8273: 
+8274: 
+8275: 
+8276: // V108P — ÉQUIPE : composant entièrement réécrit.
+8277: // Une seule source de vérité pour les miniatures. Aucun canvas préconverti, aucun data URI massif.
+8278: const TEAM_PORTRAIT_PATHS_V108P={"123":"assets/creatures/123_Truffor/front.png","110":"assets/creatures/110_Oragin/front.png","132":"assets/creatures/132_Felyor/front.png","69":"assets/creatures/069_Runaex/front.png","160":"assets/creatures/160_Solaryx/front.png","118":"assets/creatures/118_Cristex/front.png","33":"assets/creatures/033_Solarex/front.png","56":"assets/creatures/056_Onyxor/front.png","27":"assets/creatures/027_Cervex/front.png","26":"assets/creatures/026_Cervor/front.png","24":"assets/creatures/024_Myrex/front.png","8":"assets/creatures/008_Aquaor/front.png","79":"assets/creatures/079_Sporain/front.png","51":"assets/creatures/051_Coralex/front.png","164":"assets/creatures/164_Quetzal/front.png","93":"assets/creatures/093_Vifex/front.png","13":"assets/creatures/013_Noctin/front.png","125":"assets/creatures/125_Polarin/front.png","140":"assets/creatures/140_Canopin/front.png","22":"assets/creatures/022_Myrin/front.png","86":"assets/creatures/086_Lumaor/front.png","127":"assets/creatures/127_Polarex/front.png","16":"assets/creatures/016_Rocin/front.png","29":"assets/creatures/029_Brumor/front.png","57":"assets/creatures/057_Onyxex/front.png","65":"assets/creatures/065_Muscor/front.png","126":"assets/creatures/126_Polaror/front.png","151":"assets/creatures/151_Sylvarion/front.png","61":"assets/creatures/061_Nivin/front.png","163":"assets/creatures/163_Drago/front.png","4":"assets/creatures/004_Pyroin/front.png","30":"assets/creatures/030_Brumex/front.png","120":"as …[truncated]
+8279: const TEAM_MASCOT_PATHS_BY_NAME_V108P={
+8280:   schneck:'assets/creatures/162_Schneck/front.png',
+8281:   drago:'assets/creatures/163_Drago/front.png',
+8282:   quetzal:'assets/creatures/164_Quetzal/front.png',
+8283:   phoeny:'assets/creatures/165_Phenie/front.png',
+8284:   phenie:'assets/creatures/165_Phenie/front.png',
+8285:   kroka:'assets/creatures/166_Kroka/front.png',
+8286:   wang:'assets/creatures/167_Wang/front.png',
+8287:   hack:'assets/creatures/168_Hack/front.png',
+### game/CREATEUR.html line 8288 — 169
+8283:   phoeny:'assets/creatures/165_Phenie/front.png',
+8284:   phenie:'assets/creatures/165_Phenie/front.png',
+8285:   kroka:'assets/creatures/166_Kroka/front.png',
+8286:   wang:'assets/creatures/167_Wang/front.png',
+8287:   hack:'assets/creatures/168_Hack/front.png',
+8288:   buddl:'assets/creatures/169_Buddl/front.png'
+8289: };
+8290: function normalizeTeamSpeciesNameV108P(v){
+8291:   return String(v||'').toLowerCase().replace(/œ/g,'oe').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+8292: }
+8293: function teamSpeciesNameV108P(m){
+8294:   return String((m&&m.name)||BY?.[Number(m?.id)]?.name||'Éclat');
+8295: }
+8296: function teamPortraitPathV108P(mOrId){
+8297:   const m=(mOrId&&typeof mOrId==='object')?mOrId:null;
+### game/CREATEUR.html line 8492 — 169
+8487: 
+8488: 
+8489: function pcPortraitV106C(m){
+8490:   const id=Number(m?.id),data=BY[id]||{};
+8491:   // V108S : le PC utilise exactement la même source de vérité que l'Équipe.
+8492:   // Cela couvre aussi les huit mascottes Phantasialand (162–169).
+8493:   let src='';
+8494:   try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+8495:   if(!src){
+8496:     const slug=(typeof SLUGS!=='undefined'&&SLUGS[String(id)])||'';
+8497:     src=slug?'assets/creatures/'+slug+'/front.png':(window.ValdoraV106A?.portraits?.[id]||'');
+8498:   }
+8499:   if(src)return '<img src="'+src+'" class="v101d-pcimg" alt="'+String(data.name||'Créature').replace(/"/g,'&quot;')+'" data-pc-creature-id="'+id+'">';
+8500:   return '<div class="v101d-pcimg" style="display:grid;place-items:center">?</div>';
+8501: }
+### game/CREATEUR.html line 8648 — 169
+8643:   return c
+8644: }
+8645: 
+8646: const PHANTASIALAND_CODEX_V108L={
+8647:   168:'Un petit troll montagnard au caractère jovial. Habitué à creuser profondément sous terre, son corps robuste lui permet de déplacer des rochers bien plus lourds que lui.',
+8648:   169:'Curieux et débrouillard, Buddl adore explorer et récupérer les objets les plus improbables. Sa grande faculté d’adaptation lui permet de se sortir de presque toutes les situations.'
+8649: };
+8650: function openDexEntry(id){
+8651:   const c=BY[id],d=state.dex[id]||{seen:false,caught:false};
+8652:   if(!d.seen&&!d.caught){toast('Cette espèce n’a pas encore été observée.');return}
+8653:   const tr=CREATURE_TRAITS[id]||{};
+8654:   const family=CREATURES.filter(x=>x.family===c.family).sort((a,b)=>a.stage-b.stage);
+8655:   const stageIndex=family.findIndex(x=>x.id===id),evoText=family.map(x=>x.name).join(' → ');
+8656:   const typeHab={
+8657:     Nature:'prairies, lisières et sous-bois',Feu:'zones sèches, falaises chaudes et terrains volcaniques',
+### game/CREATEUR.html line 8801 — 169
+8796: function v101uSvgData(svg){return 'url("data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg)+'")'}
+8797: function v101uPrologueSvg(index){
+8798:   const scenes=[
+8799: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800">
+8800: <defs><linearGradient id="a1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#112844"/><stop offset=".5" stop-color="#48789f"/><stop offset="1" stop-color="#88d0c0"/></linearGradient><linearGradient id="a2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3bc"/><stop offset="1" stop-color="#ffb164"/></linearGradient></defs>
+8801: <rect width="1400" height="800" fill="url(#a1)"/><circle cx="1040" cy="128" r="98" fill="url(#a2)"/><path d="M0 470C169 372 308 366 445 405C600 448 785 460 977 402C1120 358 1253 356 1400 382V800H0Z" fill="#5fa36b"/><path d="M0 576C200 496 374 492 545 560C700 622 950 624 1400 536V800H0Z" fill="#457d53"/><path d="M420 800C456 642 518 528 614 434C716 532 786 654 838 800Z" fill="#dfcc9c" stroke="#bb9965" stroke-width="24"/><path d="M610 438L522 382" stroke="#c79e67" stroke-width="22" stroke-linecap="round"/><path d="M612 438L722 374" stroke="#c79e67" stroke-width="22" stroke-linecap="round"/><g transform="translate(760 250)"><rect x="0" y="52" width="190" height="132" rx="20" fill="#f6f2e8" stroke="#617b8b" stroke-width="6"/><path d="M-18 69L95 -7L208 69Z" fill="#ca5d51"/><rect x="40" y="90" width="38" height="32" rx="4" fill="#9fd5ef"/><rect x="115" y="90" width="38" height="32" rx="4" fill="#9fd5ef"/><rect x="82" y="136" width="30" height="48" rx="4" fill="#845946"/></g><g transform="translate(168 542)"><path d="M0 60H520" stroke="#66717b" stroke-width="10"/><path d="M0 92H520" stroke="#1e2b35" stroke-width="10"/>`+
+8802: Array.from({length:11},(_,i)=>`<path d="M${24+i*48} 76H${52+i*48}" stroke="#8f7750" stroke-width="8"/>`).join('')+
+8803: `<g transform="translate(72 0)"><rect x="0" y="16" width="132" height="48" rx="14" fill="#225770" stroke="#1c4154" stroke-width="4"/><rect x="138" y="16" width="132" height="48" rx="14" fill="#34708f" stroke="#1c4154" stroke-width="4"/><path d="M276 16H353C383 16 406 32 406 52C406 69 383 80 353 80H276Z" fill="#255873" stroke="#1c4154" stroke-width="4"/><path d="M308 26H353C364 26 376 36 382 45C371 46 357 46 341 46H303Z" fill="#ccecf8"/><g fill="#e7f7ff">`+
+8804: Array.from({length:3},(_,i)=>`<rect x="${15+i*34}" y="27" width="22" height="15" rx="3"/>`).join('')+
+8805: Array.from({length:3},(_,i)=>`<rect x="${154+i*34}" y="27" width="22" height="15" rx="3"/>`).join('')+
+8806: `</g><g fill="#20323d"><circle cx="25" cy="72" r="8"/><circle cx="98" cy="72" r="8"/><circle cx="162" cy="72" r="8"/><circle cx="235" cy="72" r="8"/><circle cx="304" cy="72" r="8"/><circle cx="377" cy="72" r="8"/></g></g></g><g transform="translate(654 586)"><ellipse cy="30" rx="42" ry="10" fill="#10222a" opacity=".25"/><circle cy="-42" r="35" fill="#efb18a"/><path d="M-36-55Q0-100 36-55V-22H-36Z" fill="#46342d"/><rect x="-29" y="-10" width="58" height="52" rx="10" fill="#e55f4d"/><rect x="-20" y="-3" width="40" height="5" fill="#f5efe6"/><rect x="-20" y="42" width="13" height="38" fill="#385c72"/><rect x="7" y="42" width="13" height="38" fill="#385c72"/><rect x="-38" y="-82" width="76" height="14" rx="4" fill="#d34e40"/><rect x="-22" y="-92" width="44" height="12" rx="4" fill="#d34e40"/><ellipse cx="28" cy="-76" rx="20" ry="5" fill="#f4efe6"/></g><g transform="translate(770 460)"><path d="M0-38L28 0L0 38L-28 0Z" fill="#7af0d2" stroke="#fff" stroke-width="5"/><path d="M0-21L14 0L0 21L-14 0Z" fill="#dbfff6"/></g></svg>`,
+8807: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><defs><linearGradient id="b1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#84b46f"/><stop offset="1" stop-color="#406746"/></linearGradient></defs><rect width="1400" height="800" fill="url(#b1)"/><path d="M0 124Q340 32 702 124T1400 95V0H0Z" fill="#5f965b"/><path d="M670 810C604 690 690 604 746 542C819 462 830 384 779 305C719 212 818 106 774 0" fill="none" stroke="#dcc79e" stroke-width="178" stroke-linecap="round"/><path d="M670 810C604 690 690 604 746 542C819 462 830 384 779 305C719 212 818 106 774 0" fill="none" stroke="#8c765e" stroke-width="214" stroke-linecap="round" opacity=".45"/><g fill="#2d6a3d">`+Array.from({length:34},(_,i)=>`<circle cx="${60+(i*113)%1260}" cy="${90+(i*167)%640}" r="${24+(i%4)*7}"/>`).join('')+`</g><g transform="translate(1060 450)"><circle r="70" fill="#f7e373" opacity=".18"/><circle r="34" fill="#f7e373"/><g stroke="#fff2a9" stroke-width="12"><path d="M0-84V-128"/><path d="M84 0H128"/><path d="M0 84V128"/><path d="M-84 0H-128"/></g></g><g transform="translate(903 585)"><ellipse cy="20" rx="36" ry="8" fill="#20333b" opacity=".2"/><circle cy="-42" r="36" fill="#efb18a"/><path d="M-36-56Q0-100 36-56V-20H-36Z" fill="#433229"/><rect x="-28" y="-12" width="56" height="49" rx="10" fill="#e55f4d"/><rect x="-18" y="-4" width="36" height="5" fill="#f4efe6"/><rect x="-18" y="37" width="13" height="36" fill="#395b70"/><rect x="5" y="37" width="13" height="36" fill="#395b70"/><g fill= …[truncated]
+8808: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><rect width="1400" height="800" fill="#dde9ee"/><rect x="110" y="90" width="1180" height="620" rx="36" fill="#f7fbfc" stroke="#718d99" stroke-width="10"/><rect x="155" y="140" width="388" height="420" rx="20" fill="#bed2d7"/><g fill="#668792">`+Array.from({length:6},(_,i)=>`<rect x="190" y="${182+i*60}" width="314" height="25" rx="8"/>`).join('')+`</g><rect x="650" y="170" width="380" height="225" rx="24" fill="#90c6ca"/><circle cx="840" cy="280" r="88" fill="#e1faf6"/><path d="M792 293Q844 182 895 293Q845 375 792 293" fill="#59a86d"/><path d="M666 454H1038" stroke="#b0c7cf" stroke-width="12" stroke-linecap="round"/><g transform="translate(1080 590)"><ellipse cy="28" rx="40" ry="9" fill="#22363f" opacity=".18"/><circle cy="-45" r="35" fill="#efb18a"/><path d="M-36-57Q0-101 36-57V-18H-36Z" fill="#6a4c32"/><rect x="-30" y="-9" width="60" height="53" rx="11" fill="#eff3f4"/><rect x="-20" y="44" width="14" height="36" fill="#557786"/><rect x="6" y="44" width="14" height="36" fill="#557786"/><rect x="-14" y="0" width="28" height="4" fill="#95aeb8"/></g><g transform="translate(710 590)"><ellipse cy="25" rx="40" ry="9" fill="#20333d" opacity=".18"/><circle cy="-45" r="35" fill="#efb18a"/><path d="M-36-57Q0-101 36-57V-18H-36Z" fill="#46342d"/><rect x="-30" y="-9" width="60" height="53" rx="11" fill="#e55f4d"/><rect x="-20" y="44" width="14" height="36" fill="#395b70"/><rect x="6" y="44" width="14" height="36" fill="#395b …[truncated]
+8809: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><rect width="1400" height="800" fill="#1e2d37"/><path d="M0 586Q255 434 537 557T1048 524T1400 582V800H0Z" fill="#536a5b"/><circle cx="1025" cy="173" r="100" fill="#d2be50" opacity=".18"/><g transform="translate(770 520)"><circle cy="-50" r="36" fill="#d8a07c"/><rect x="-29" y="-22" width="58" height="52" rx="10" fill="#13181b"/><path d="M-18-8L0 12L18-8" fill="none" stroke="#f0cf33" stroke-width="9"/><rect x="-18" y="30" width="13" height="38" fill="#20262a"/><rect x="5" y="30" width="13" height="38" fill="#20262a"/><path d="M-36-82h72v16h-72z" fill="#101518"/></g><g transform="translate(930 555) scale(.92)"><circle cy="-50" r="36" fill="#efb18a"/><rect x="-29" y="-22" width="58" height="52" rx="10" fill="#13181b"/><path d="M-18-8L0 12L18-8" fill="none" stroke="#f0cf33" stroke-width="9"/><rect x="-18" y="30" width="13" height="38" fill="#20262a"/><rect x="5" y="30" width="13" height="38" fill="#20262a"/></g><g fill="#f7e159"><circle cx="372" cy="338" r="18"/><circle cx="454" cy="412" r="11"/><circle cx="547" cy="295" r="13"/><circle cx="621" cy="364" r="9"/></g><path d="M126 593L401 410" stroke="#6f5c44" stroke-width="28" stroke-linecap="round"/><path d="M126 593L401 410" stroke="#d2b086" stroke-width="20" stroke-linecap="round"/><g transform="translate(428 400)"><ellipse cy="18" rx="32" ry="8" fill="#23353c" opacity=".18"/><circle cy="-38" r="34" fill="#efb18a"/><path d="M-33-49Q0-92 33-49V-18H-33Z" fill="#6a4c3 …[truncated]
+8810: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><defs><linearGradient id="e1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#97ca83"/><stop offset="1" stop-color="#6ba1c0"/></linearGradient></defs><rect width="1400" height="800" fill="url(#e1)"/><path d="M610 800V0h204v800" fill="#ddc89f"/><path d="M0 345h1400v184H0z" fill="#decba6"/><g fill="#f6f1e6" stroke="#68828d" stroke-width="6"><rect x="120" y="120" width="280" height="182" rx="18"/><rect x="1000" y="118" width="280" height="182" rx="18"/><rect x="125" y="558" width="280" height="164" rx="18"/><rect x="995" y="558" width="280" height="164" rx="18"/></g><g fill="#c95e52"><path d="M98 145l164-102 164 102z"/><path d="M978 143l164-102 164 102z"/></g><g transform="translate(708 444)"><ellipse cy="22" rx="39" ry="9" fill="#21363d" opacity=".2"/><circle cy="-48" r="35" fill="#efb18a"/><path d="M-35-60Q0-104 35-60V-20H-35Z" fill="#45332c"/><rect x="-29" y="-9" width="58" height="51" rx="10" fill="#e55f4d"/><rect x="-20" y="42" width="13" height="38" fill="#395b70"/><rect x="7" y="42" width="13" height="38" fill="#395b70"/><g fill="#fff"><ellipse cx="-10" cy="-48" rx="6" ry="8"/><ellipse cx="10" cy="-48" rx="6" ry="8"/></g><g fill="#263d49"><circle cx="-9" cy="-47" r="3"/><circle cx="11" cy="-47" r="3"/></g><path d="M-8-38Q0-31 8-38" stroke="#9d5c52" stroke-width="2" fill="none"/><rect x="-38" y="-86" width="76" height="14" rx="4" fill="#d34e40"/><rect x="-22" y="-96" width="44" height="12" rx="4" fil …[truncated]
+### game/CREATEUR.html line 12979 — 169
+12974: /* V102Y — INTÉGRATION DIRECTE DU FICHIER MOBILIER_REFERENCE_VALDORA.JSON
+12975:    Le mobilier, les positions, tailles, rotations, flips, collisions et fonctions
+12976:    proviennent tous de l'export V102X fourni par l'utilisateur. */
+12977: (()=>{
+12978: 'use strict';
+12979: const MOBREF = {"schema":"valdora-mobilier-reference-v1","project":"Éclats Sauvages — Valdora","baseGame":"V102Z_AMELIORATIONS_GAMEPLAY_TEAM_TARON","editor":"V102X","coordinateSystem":{"width":1200,"height":800,"previewScale":0.8},"exportedAt":"2026-08-13T23:42:53.908Z","rooms":{"home":[{"instanceId":"home_lit_simple_1786664003541_1","id":"lit_simple","x":11,"y":55,"w":116,"h":169,"rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","collision":{"x":11,"y":55,"w":116,"h":169}},{"instanceId":"home_console_salon_1786664020291_2","id":"console_salon","x":864,"y":55,"w":204,"h":155,"rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"ouvrir_stockage","description":"Un terminal domestique relié à la télévision et au stockage des créatures.","collision":{"x":864,"y":55,"w":204,"h":155}},{"instanceId":"home_bibliotheque_1786664039281_3","id":"bibliotheque","x":376,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":4,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":376,"y":55,"w":135,"h":210}},{"instanceId":"home_bibliotheque_1786664046064_4","id":"bibliotheque","x":520,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":5,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","de …[truncated]
+12980: window.MOBILIER_REFERENCE_VALDORA = MOBREF;
+12981: const MOBREF_CATALOG = Object.fromEntries((MOBREF.catalog||[]).map(x=>[x.id,x]));
+12982: window.MOBREF_CATALOG_V105J=MOBREF_CATALOG;window.MOBREF_DATA_V105J=MOBREF;
+12983: const MOBREF_IMAGES = {};
+12984: for(const item of MOBREF.catalog||[]){
+12985:   const im=new Image(); im.decoding='async'; im.src=item.asset; MOBREF_IMAGES[item.id]=im;
+12986: }
+12987: if(typeof window.joueurBloque!=='boolean') window.joueurBloque=false;
+12988: 
+### game/CREATEUR.html line 14403 — 169
+14398: })();
+14399: </script>
+14400: 
+14401: <!-- V105O-SPRITES-START -->
+14402: <script>
+14403: // V108L — catalogue étendu à 169 créatures, dont 8 mascottes spéciales Phantasialand sans évolution.
+14404: (function(){
+14405: const DEFINITIONS=[{"id":1,"name":"Florin","type":"Nature","family":0,"stage":0,"evolve":16},{"id":2,"name":"Floror","type":"Nature","family":0,"stage":1,"evolve":32},{"id":3,"name":"Florex","type":"Nature","family":0,"stage":2,"evolve":null},{"id":4,"name":"Pyroin","type":"Feu","family":1,"stage":0,"evolve":16},{"id":5,"name":"Pyroor","type":"Feu","family":1,"stage":1,"evolve":32},{"id":6,"name":"Pyroex","type":"Feu","family":1,"stage":2,"evolve":null},{"id":7,"name":"Aquain","type":"Eau","family":2,"stage":0,"evolve":16},{"id":8,"name":"Aquaor","type":"Eau","family":2,"stage":1,"evolve":32},{"id":9,"name":"Aquaex","type":"Eau","family":2,"stage":2,"evolve":null},{"id":10,"name":"Voltin","type":"Foudre","family":3,"stage":0,"evolve":16},{"id":11,"name":"Voltor","type":"Foudre","family":3,"stage":1,"evolve":32},{"id":12,"name":"Voltex","type":"Foudre","family":3,"stage":2,"evolve":null},{"id":13,"name":"Noctin","type":"Ombre","family":4,"stage":0,"evolve":16},{"id":14,"name":"Noctor","type":"Ombre","family":4,"stage":1,"evolve":32},{"id":15,"name":"Noctex","type":"Ombre","family":4,"stage":2,"evolve":null},{"id":16,"name":"Rocin","type":"Roche","family":5,"stage":0,"evolve":16},{"id":17,"name":"Rocor","type":"Roche","family":5,"stage":1,"evolve":32},{"id":18,"name":"Rocex","type":"Roche","family":5,"stage":2,"evolve":null},{"id":19,"name":"Zephin","type":"Air","family":6,"stage":0,"evolve":16},{"id":20,"name":"Zephor","type":"Air","family":6,"stage":1,"evolve":32},{"id":21,"n …[truncated]
+14406: const SLUGS={"1":"001_Florin","2":"002_Floror","3":"003_Florex","4":"004_Pyroin","5":"005_Pyroor","6":"006_Pyroex","7":"007_Aquain","8":"008_Aquaor","9":"009_Aquaex","10":"010_Voltin","11":"011_Voltor","12":"012_Voltex","13":"013_Noctin","14":"014_Noctor","15":"015_Noctex","16":"016_Rocin","17":"017_Rocor","18":"018_Rocex","19":"019_Zephin","20":"020_Zephor","21":"021_Zephex","22":"022_Myrin","23":"023_Myror","24":"024_Myrex","25":"025_Cervin","26":"026_Cervor","27":"027_Cervex","28":"028_Brumin","29":"029_Brumor","30":"030_Brumex","31":"031_Solarin","32":"032_Solaror","33":"033_Solarex","34":"034_Cryoin","35":"035_Cryoor","36":"036_Cryoex","37":"037_Lunain","38":"038_Lunaor","39":"039_Lunaex","40":"040_Terrain","41":"041_Terraor","42":"042_Terraex","43":"043_Fulgin","44":"044_Fulgor","45":"045_Fulgex","46":"046_Sylvin","47":"047_Sylvor","48":"048_Sylvex","49":"049_Coralin","50":"050_Coralor","51":"051_Coralex","52":"052_Cendrin","53":"053_Cendror","54":"054_Cendrex","55":"055_Onyxin","56":"056_Onyxor","57":"057_Onyxex","58":"058_Azurin","59":"059_Azuror","60":"060_Azurex","61":"061_Nivin","62":"062_Nivor","63":"063_Nivex","64":"064_Muscin","65":"065_Muscor","66":"066_Muscex","67":"067_Runain","68":"068_Runaor","69":"069_Runaex","70":"070_Aeroin","71":"071_Aeroor","72":"072_Aeroex","73":"073_Dunain","74":"074_Dunaor","75":"075_Dunaex","76":"076_Prismin","77":"077_Prismor","78":"078_Prismex","79":"079_Sporain","80":"080_Sporaor","81":"081_Sporaex","82":"082_Feralin","83":"083_ …[truncated]
+14407: const TRAITS={"34":["caméléon végétal","queue en liane et crête de pétales"],"35":["taupe de magma","griffes volcaniques et plaques incandescentes"],"36":["ornithorynque des rivières","queue en nénuphar et nageoires de roseaux"],"37":["rapace d’orage","plumage électrique et crête foudroyante"],"38":["chauve-souris spectrale","ailes vaporeuses et marques lunaires"],"39":["pangolin cristallin","écailles facettées et queue de quartz"],"40":["agneau des nuages","laine de brume et cornes de vent"],"41":["hérisson truffier","piquants fongiques et points de mycélium"],"42":["phoque polaire","nageoires de glacier et moustaches en flocons"],"43":["grue lumineuse","plumes d’aurore et ailes dorées"],"44":["lynx","oreilles touffues et pelage tacheté"],"45":["poisson abyssal","leurre bioluminescent et nageoires de velours"],"46":["tortue de lave","carapace volcanique traversée de veines de magma"],"47":["paresseux de la canopée","fourrure feuillue et lianes fleuries"],"48":["cheval de tempête","crinière de foudre et sabots nuageux"],"49":["tapir onirique","rubans de rêve et marques en croissant"],"50":["dragon-serpent cosmique","écailles étoilées et perles orbitales"]};
+14408: Object.assign(TRAITS,{"0":["faon-esprit forestier","oreilles en feuilles, bourgeon frontal et bois végétaux"],"1":["salamandre-dragon","crête de braises, marques de charbon et queue en flamme"],"2":["loutre aquatique","oreilles en nageoires, motifs de vagues et queue en goutte d’eau"],"3":["lièvre électrique","oreilles en éclair, marques en zigzag et queue foudroyante"],"4":["chat d’ombre","marques en croissant, pattes brumeuses et queue vaporeuse"],"5":["tortue minérale","carapace de galets, plaques rocheuses et cristaux"],"6":["oiseau des vents","plumage nuageux et plumes en spirale"],"7":["souris fongique","coiffe de champignon et spores lumineuses"],"8":["hybride cerf-scarabée","armure d’écorce, bois feuillus et élytres d’émeraude"],"9":["ours arctique","fourrure givrée et cristaux de glace aux épaules"],"10":["lion solaire","crinière en soleil, marques dorées et pattes de braise"],"11":["manchot de glace","crête cristalline et nageoires en éclats de glacier"],"12":["hibou nocturne","marques lunaires et ailes bordées de brume"],"13":["tatou de terre","plaques de terracotta et armure de canyon"],"14":["loup de foudre","crinière électrique et marques lumineuses"],"15":["écureuil végétal","oreilles de fougère et immense queue feuillue"],"16":["hippocampe corallien","bois de corail, perles et nageoires turquoise"],"17":["bélier de feu","cornes d’obsidienne et laine de braises"],"18":["panthère d’onyx","armure cristalline noire et brume violette"],"19":["dauphin azur","rubans  …[truncated]
+14409: Object.assign(TRAITS,{"51":["dragon sombre à cornes","chaînes, sacoche et ailes membraneuses"],"52":["dragon doré royal","cornes spiralées, plumage blanc et parure dorée"],"53":["dragon mésoaméricain élancé","crinière turquoise, cornes dorées et ornements solaires"],"54":["dragon-phénix doré","plumage blanc, ailes lumineuses et sceptre turquoise"],"55":["dragon-crocodile trapu","écailles végétales vertes et pointes orangées"],"56":["dragon chinois serpentin","lanterne rouge, crinière claire et queue turquoise"]});
+14410: const DIRECTIONS=['front','left','right','back'];
+14411: const CACHE=new Map();
+14412: const BOUNDS=new WeakMap();
+### game/CREATEUR.html line 14504 — 169
+14499:   const team=(state&&state.team)||[];
+14500:   for(const member of team)for(const direction of DIRECTIONS)spriteEntry(member.id,direction);
+14501:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+14502:   const brand=document.querySelector('.brand b');
+14503:   if(brand)brand.textContent='VALDORA V107R — '+(creator?'CRÉATEUR':'JOUEUR');
+14504:   document.title='VALDORA V108T — 169 créatures chibi 3D';
+14505:   document.documentElement.dataset.valdoraVersion='V107R';
+14506:   document.documentElement.dataset.creatureSprites='624-directional'
+14507: }
+14508: applyV105O();
+14509: setTimeout(applyV105O,7800);setTimeout(applyV105O,9200);
+14510: })();
+14511: </script>
+14512: <!-- V105O-SPRITES-END -->
+14513: <!-- V105U-COMBAT-INTEGRE-START -->
+### game/CREATEUR.html line 16267 — caughtCount
+16262:  {id:160,name:'Solaryx',type:'Lumière',zone:'legend_lumiere',biome:'Observatoire Solaire',level:67,desc:'un observatoire antique baigné de lumière'},
+16263:  {id:161,name:'Equinoxe',type:'Neutre',zone:'legend_neutre',biome:'Sanctuaire des Origines',level:68,desc:'une plaine minérale où toutes les énergies s’équilibrent'}
+16264: ];
+16265: const V107B_LEGENDS_BY_ZONE=Object.fromEntries(V107B_LEGENDS.map(x=>[x.zone,x]));
+16266: for(const [i,l] of V107B_LEGENDS.entries())if(!BY[l.id]){const c={id:l.id,name:l.name,type:l.type,family:200+i,stage:3,evolve:null,legendary:true};CREATURES.push(c);BY[l.id]=c;CREATURE_TRAITS[l.id]={body:'legendary',ornament:l.type==='Lumière'?'corne cristalline':l.type==='Eau'?'nageoires':l.type==='Air'?'oreilles en ailes':l.type==='Feu'?'crinière de flammes':l.type==='Nature'?'queue en feuille':''}}
+16267: function v107bLegendCaughtCount(){return V107B_LEGENDS.filter(l=>!!state.dex?.[l.id]?.caught).length}
+16268: function v107bLegendRequired(){return Math.ceil(V107B_LEGENDS.length/2)}
+16269: 
+16270: function v107bCloneLegendScenes(){
+16271:   const template=SCENES.route0;if(!template)return;
+16272:   for(const [i,l] of V107B_LEGENDS.entries()){
+16273:     if(SCENES[l.zone])continue;
+16274:     const src=SCENES['route'+(i%7)]||template,w=src.width||3000,h=src.height||1800;
+16275:     SCENES[l.zone]={...src,name:l.biome,kind:'route',routeKind:'legendary',legendaryBiome:true,legendaryType:l.type,biome:'legendary',image:src.image,trainers:[],objects:[],obstacles:Array.isArray(src.obstacles)?src.obstacles.slice(0,18):[],mObstacles:[],grass:Array.isArray(src.grass)?src.grass.slice():[],v105dTrees:Array.isArray(src.v105dTrees)?src.v105dTrees.slice():[],v105dRoad:src.v105dRoad instanceof Set?new Set(src.v105dRoad):src.v105dRoad,v104Path:Array.isArray(src.v104Path)?src.v104Path.map(p=>Array.isArray(p)?[...p]:({...p})):src.v104Path,v76Path:Array.isArray(src.v76Path)?src.v76Path.map(p=>Array.isArray(p)?[...p]:({...p})):src.v76Path,kPath:Array.isArray(src.kPath)?src.kPath.map(p=>Array.isArray(p)?[...p]:({...p})):src.kPath,exits:[{x:w/2-110,y:0,w:220,h:95,side:'north',to:'town14',label:'Retour à Aubeval'}]};
+16276:   }
+### game/CREATEUR.html line 16322 — caughtCount
+16317:   return true
+16318: };window.questInteractionV106C=questInteractionV106C;
+16319: 
+16320: // Citadelle : exigences historiques + Aubeval + moitié des légendaires.
+16321: const V107B_REQ_BASE=window.v106pCitadelRequirements;
+16322: window.v106pCitadelRequirements=function(){const r=V107B_REQ_BASE?V107B_REQ_BASE():{caught:0,seals:0,vol:false,ready:false},legends=v107bLegendCaughtCount(),legendRequired=v107bLegendRequired(),aubeval=!!state.flags?.aubevalExpeditionLicense;return {...r,legends,legendRequired,aubeval,ready:!!r.ready&&aubeval&&legends>=legendRequired}};try{v106pCitadelRequirements=window.v106pCitadelRequirements}catch(_){}
+16323: window.finalTempleAvailableV77=function(){return window.v106pCitadelRequirements().ready};try{finalTempleAvailableV77=window.finalTempleAvailableV77}catch(_){}
+16324: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if((r.taron||0)<6)m.push(`démanteler le Projet Résonance (${r.taron||0}/6)`);if(!r.aubeval)m.push('réussir l’Épreuve des Horizons à Aubeval');if(r.legends<r.legendRequired)m.push(`capturer ${r.legendRequired} légendaires (${r.legends}/${r.legendRequired})`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16325: const V107B_OBJECTIVES_BASE=typeof objectivesV84==='function'?objectivesV84:null;
+16326: if(V107B_OBJECTIVES_BASE){objectivesV84=function(){const q=V107B_OBJECTIVES_BASE(),r=window.v106pCitadelRequirements();q.unshift({title:'Aubeval — Épreuve des Horizons',progress:r.aubeval?'Permis obtenu':'Obligatoire',txt:r.aubeval?'Le Bureau des Horizons donne accès aux onze expéditions légendaires.':'Parle à Solène à Aubeval et remporte son épreuve.'});q.push({title:'Légendaires de Valdora',progress:`${r.legends}/${V107B_LEGENDS.length} capturés`,txt:`Capture au moins ${r.legendRequired} légendaires pour ouvrir la Citadelle. Chaque type possède son biome exclusif.`});return q};window.objectivesV84=objectivesV84}
+16327: 
+16328: function v107bInit(){v107bCloneLegendScenes();state.flags=state.flags||{};if(v106cQuestState?.()[V107B_AUBE_QUEST.id]?.status==='done')state.flags.aubevalExpeditionLicense=true;window.ValdoraV107B={version:V107B_VERSION,routeBands:V107B_ROUTE_BANDS,legends:V107B_LEGENDS,legendCaught:v107bLegendCaughtCount,legendRequired:v107bLegendRequired}}
+16329: window.addEventListener('DOMContentLoaded',()=>{setTimeout(v107bInit,2100)});setTimeout(v107bInit,3400);setTimeout(v107bInit,10000);setTimeout(v107bInit,11600);
+16330: })();
+16331: </script>
+### game/CREATEUR.html line 16799 — 169
+16794:     const m=mon(id,levels[id]||60); if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
+16795:     state.box.push(m); state.dex[id]={...(state.dex[id]||{}),seen:true,caught:true}; changed=true; owned.add(id);
+16796:   }
+16797:   // V108L : les huit mascottes Phantasialand sont disponibles dans le PC Créateur uniquement.
+16798:   // Elles ne sont jamais injectées automatiquement dans l'équipe.
+16799:   const mascotLevels={162:30,163:30,164:30,165:30,166:30,167:30,168:30,169:30};
+16800:   for(const id of Object.keys(mascotLevels).map(Number)){
+16801:     if(!BY[id]||owned.has(id))continue;
+16802:     const m=mon(id,mascotLevels[id]); if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
+16803:     state.box.push(m); state.dex[id]={...(state.dex[id]||{}),seen:true,caught:true}; changed=true; owned.add(id);
+16804:   }
+16805:   if(changed){try{save(false)}catch(_){}}
+16806: }
+16807: function migrateDragonsV107W(){
+16808:   try{
+### game/CREATEUR.html line 16934 — 169
+16929: <!-- V107K-PROGRESSION-NAMES-START -->
+16930: <script>
+16931: (function(){
+16932: 'use strict';
+16933: const V107K_VERSION='V107K';
+16934: const V107K_NAMES={"1":"Brindel","2":"Feuilcerf","3":"Sylvarch","4":"Tisonnet","5":"Salambrase","6":"Dracendre","7":"Rivelot","8":"Ondeloutre","9":"Néréonde","10":"Zipou","11":"Foudrille","12":"Voltélan","13":"Murne","14":"Ombrelune","15":"Noxéline","16":"Galetou","17":"Rocapace","18":"Lithorace","19":"Plumiz","20":"Zéphrel","21":"Alcyvent","22":"Mycotte","23":"Sporonge","24":"Fongrelune","25":"Scarfaon","26":"Boiscarab","27":"Cervémeraude","28":"Frimousse","29":"Ursigivre","30":"Boréalours","31":"Solion","32":"Flambéroi","33":"Héliocrin","34":"Glaçou","35":"Pingivre","36":"Cryopenn","37":"Hulune","38":"Strigombre","39":"Nocturiel","40":"Terratou","41":"Armadroc","42":"Canyoncuir","43":"Éclaloup","44":"Fulgriffe","45":"Tonnerage","46":"Fougri","47":"Sylvécure","48":"Canopiflair","49":"Corailou","50":"Hippocor","51":"Récifâme","52":"Brasin","53":"Bélierbraise","54":"Cornobsid","55":"Nyxou","56":"Panthonyx","57":"Obscélyx","58":"Azufin","59":"Delphonde","60":"Céruléon","61":"Nivette","62":"Givrenard","63":"Polarynne","64":"Mycolim","65":"Sporacoque","66":"Fongastrop","67":"Runet","68":"Lithorune","69":"Arkégolem","70":"Griflou","71":"Aérocroc","72":"Célestigrif","73":"Dromin","74":"Grésadaire","75":"Dunarche","76":"Prislume","77":"Paprisme","78":"Iridélya","79":"Crapospore","80":"Mycrobate","81":"Lumifonge","82":"Groinou","83":"Sanglierce","84":"Brocferal","85":"Halopin","86":"Lucièvre","87":"Astralapin","88":"Marécaille","89":"Tortivague","90":"Pélagor","91":"Colivif","92":"Br …[truncated]
+16935: 
+16936: function v107kCreator(){
+16937:   return /CREATEUR/i.test(location.pathname) || window.CREATOR_MODE===true;
+16938: }
+16939: function v107kQuestDone(q){
+16940:   try{return typeof v106cQuestDone==='function' ? !!v106cQuestDone(q) : false}catch(_){return false}
+16941: }
+16942: function v107kRequiredTownQuests(zone){
+16943:   if(typeof V106C_QUESTS==='undefined')return [];
+### game/CREATEUR.html line 18611 — 169
+18606: <script src="VALDORA_MOBILE_UI_V118.js?v=118-mobile-5"></script>
+18607: <script src="V122_REGRESSION_FIXES.js?v=122-regression-2"></script>
+18608: </body></html
+18609: >
+18610: 
+18611: <!-- V108L-PHANTASIALAND {"162":{"name":"Schneck","type":"Ombre"},"163":{"name":"Drago","type":"Foudre"},"164":{"name":"Quetzal","type":"Feu"},"165":{"name":"Phœny","type":"Lumière"},"166":{"name":"Kroka","type":"Nature"},"167":{"name":"Wang","type":"Spore"},"168":{"name":"Hack","type":"Roche"},"169":{"name":"Buddl","type":"Neutre"}} -->
+18612: 
+18613: <!-- V108C-CLAIRVAL-SIMPLE-PROGRESSION: starter + 3 creatures level>=10; wild types Nature/Feu/Eau/Foudre/Neutre -->
+### game/V109V_INTERIEUR_REWRITE.js line 102 — 169
+97:   const unit=(t.kind==='wood'?34:t.kind==='medical'?42:t.kind==='station'?48:t.kind==='museum'?58:t.kind==='tile'?50:t.kind==='stone'?62:t.kind==='citadel'?58:60)*g.scale;
+98:   ctx.lineWidth=Math.max(.65,g.scale*1.05);ctx.strokeStyle=t.line;
+99:   if(t.kind==='wood'){
+100:     // Lames de parquet en quinconce, proches du rendu Maison/Hôtel de la planche V105X.
+101:     let row=0;for(let y=fy;y<=fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke();const off=(row++%2)*unit*1.7;for(let x=fx-off;x<fx+fw;x+=unit*3.4){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+unit);ctx.stroke()}}
+102:     ctx.fillStyle='rgba(255,224,169,.08)';for(let y=fy+unit*.3;y<fy+fh;y+=unit*2){ctx.fillRect(fx,y,fw,unit*.18)}
+103:   }else if(t.kind==='medical'){
+104:     // Petits carreaux blancs/bleutés de Centre de soins/Laboratoire.
+105:     ctx.fillStyle=t.b;ctx.globalAlpha=.34;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+106:     for(let x=fx;x<=fx+fw;x+=unit){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+fh);ctx.stroke()}
+107:     for(let y=fy;y<=fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke()}
+108:     ctx.fillStyle='rgba(255,255,255,.16)';for(let yy=0,y=fy;y<fy+fh;y+=unit,yy++)for(let xx=0,x=fx;x<fx+fw;x+=unit,xx++)if((xx+yy)%2===0)ctx.fillRect(x+1,y+1,unit-2,unit-2);
+109:   }else if(t.kind==='station'){
+110:     // Dalles crème avec bordure bleutée, comme la gare de référence.
+111:     ctx.fillStyle=t.b;ctx.globalAlpha=.36;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 459 — 169
+454:   {id:'solene_aubeval',zone:'town14',x:1240,y:555,look:40,dir:1,name:'Solène',text:'Je dirige les expéditions vers les sanctuaires légendaires.'}
+455: ];
+456: function ensureLateQuestNpcs(){for(const npc of V109W_LATE_NPCS)upsertNpcV109W(npc);return V109W_LATE_NPCS.length}
+457: 
+458: // ------------------------------------------------------------------
+459: // 11) CODEX / suivi : garantit 169 espèces reconnues dans les compteurs
+460: //    synthétiques utilisés par les menus additionnels.
+461: // ------------------------------------------------------------------
+462: function totalCreaturesV109W(){
+463:   try{return Array.isArray(CREATURES)&&CREATURES.length?CREATURES.length:169}catch(_){return 169}
+464: }
+465: // ------------------------------------------------------------------
+466: // Installation répétée uniquement pour les scènes qu'anciens timers peuvent régénérer.
+467: // ------------------------------------------------------------------
+468: function install(){
+### game/V122_REGRESSION_FIXES.js line 16 — 169
+11:   const out=new Map();
+12:   try{for(const c of (Array.isArray(CREATURES)?CREATURES:[])){const id=Number(c?.id);if(Number.isFinite(id))out.set(id,c)}}catch(_){}
+13:   try{if(typeof BY==='object'&&BY)for(const [k,c] of Object.entries(BY)){const id=Number(c?.id??k);if(Number.isFinite(id)&&!out.has(id))out.set(id,{...c,id})}}catch(_){}
+14:   return [...out.values()].sort((a,b)=>Number(a.id)-Number(b.id));
+15: }
+16: function speciesCount(){return Math.max(169,species().length)}
+17: function legalLevel(id){try{return Math.max(1,Number(window.ValdoraCombatV105R?.minimumLegalLevel?.(id))||1)}catch(_){return 1}}
+18: function creatorMon(c){
+19:   const lvl=Math.max(50,legalLevel(c.id));
+20:   try{if(typeof mon==='function'){const m=mon(c.id,lvl);if(m){m._v122CreatorStock=true;return m}}}catch(_){}
+21:   let moves=[];try{if(typeof defaultMoves==='function')moves=defaultMoves(c.id,lvl)||[]}catch(_){}
+22:   return {id:Number(c.id),level:lvl,xp:0,hp:999,moves,_v122CreatorStock:true}
+23: }
+24: function markCollection(s,key,id){
+25:   let c=s[key];
+### game/VALDORA_BIOMES_AUDIO_V115.js line 80 — 169
+75:     }else if(env.kind==='factory'){
+76:       ctx.fillStyle=n>.46?'rgba(72,70,70,.34)':'rgba(31,34,39,.3)';ctx.fillRect(x+1,y+1,w-2,h-2);ctx.strokeStyle='rgba(8,11,14,.42)';ctx.lineWidth=2;ctx.strokeRect(x+1,y+1,w-2,h-2);ctx.fillStyle=n>.78?'rgba(73,36,90,.42)':'rgba(80,46,29,.17)';ctx.beginPath();ctx.ellipse(x+w*(.25+n*.45),y+h*(.3+(1-n)*.4),w*.17,h*.09,n*4,0,Math.PI*2);ctx.fill();if(n>.82){ctx.fillStyle='rgba(234,174,54,.38)';for(let i=0;i<3;i++)ctx.fillRect(x+i*w*.23,y+h*.76,w*.11,h*.06)}
+77:     }else if(env.kind==='rock'){
+78:       ctx.fillStyle=n>.5?'rgba(137,69,40,.2)':'rgba(234,167,92,.18)';ctx.fillRect(x,y,w,h);ctx.strokeStyle='rgba(104,53,31,.22)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y+h*(.25+n*.45));ctx.bezierCurveTo(x+w*.3,y+h*.1,x+w*.65,y+h*.9,x+w,y+h*(.3+n*.3));ctx.stroke();
+79:     }else if(env.kind==='air'){
+80:       ctx.fillStyle=n>.56?'rgba(255,255,244,.17)':'rgba(97,169,185,.1)';ctx.fillRect(x,y,w,h);ctx.strokeStyle='rgba(255,255,255,.34)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x+w*.05,y+h*(.3+n*.35));ctx.quadraticCurveTo(x+w*.5,y+h*(.05+n*.25),x+w*.94,y+h*(.28+n*.28));ctx.stroke();
+81:     }else if(env.kind==='spore'){
+82:       ctx.fillStyle=n>.5?'rgba(18,45,40,.31)':'rgba(65,83,58,.26)';ctx.fillRect(x,y,w,h);ctx.fillStyle=n>.65?'rgba(67,236,211,.22)':'rgba(141,73,183,.18)';ctx.beginPath();ctx.ellipse(x+w*.5,y+h*.55,w*(.18+n*.13),h*(.12+n*.08),n*3,0,Math.PI*2);ctx.fill();
+83:     }else if(env.kind==='ice'){
+84:       ctx.fillStyle=n>.5?'rgba(220,249,250,.22)':'rgba(61,151,185,.16)';ctx.fillRect(x,y,w,h);ctx.strokeStyle='rgba(237,255,255,.42)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(x+w*.08,y+h*.82);ctx.lineTo(x+w*(.35+n*.2),y+h*.1);ctx.lineTo(x+w*.9,y+h*.66);ctx.stroke();
+85:     }else if(env.kind==='light'){
+86:       ctx.fillStyle=n>.52?'rgba(255,248,204,.22)':'rgba(180,140,72,.13)';ctx.fillRect(x+1,y+1,w-2,h-2);ctx.strokeStyle='rgba(255,246,178,.34)';ctx.lineWidth=1.3;ctx.strokeRect(x+1,y+1,w-2,h-2);ctx.beginPath();ctx.arc(x+w*.5,y+h*.5,w*.19,0,Math.PI*2);ctx.stroke();
+87:     }else if(env.kind==='origin'){
+88:       ctx.fillStyle=n>.5?'rgba(226,227,213,.16)':'rgba(66,70,81,.16)';ctx.fillRect(x,y,w,h);const colors=['#73d49a','#ff945b','#6acbea','#be88e8','#fff09a'];ctx.fillStyle=colors[Math.floor(n*colors.length)%colors.length]+'55';ctx.beginPath();ctx.arc(x+w*.5,y+h*.5,2+n*4,0,Math.PI*2);ctx.fill();
+89:     }else{
+### game/VALDORA_CREATOR_GATE_V121.js line 11 — 169
+6: function hex(buf){return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+7: async function digest(value){
+8:   const data=new TextEncoder().encode(String(value||''));
+9:   if(globalThis.crypto?.subtle)return hex(await crypto.subtle.digest('SHA-256',data));
+10:   // Fallback compact pour exécution locale sans WebCrypto.
+11:   function rr(v,n){return(v>>>n)|(v<<(32-n))}const K=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298];
+12:   const bytes=Array.from(data),bit=bytes.length*8;bytes.push(128);while(bytes.length%64!==56)bytes.push(0);for(let i=7;i>=0;i--)bytes.push(Math.floor(bit/2**(i*8))&255);let H=[1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225];
+13:   for(let o=0;o<bytes.length;o+=64){const w=new Array(64);for(let i=0;i<16;i++)w[i]=(bytes[o+4*i]<<24)|(bytes[o+4*i+1]<<16)|(bytes[o+4*i+2]<<8)|bytes[o+4*i+3];for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2],s0=rr(x,7)^rr(x,18)^(x>>>3),s1=rr(y,17)^rr(y,19)^(y>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0}let[a,b,c,d,e,f,g,h]=H;for(let i=0;i<64;i++){const S1=rr(e,6)^rr(e,11)^rr(e,25),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[i]+w[i])|0,S0=rr(a,2)^rr(a,13)^rr(a,22),maj=(a&b)^(a&c)^(b&c),t2=(S0+maj)|0;h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0}H=H.map((v,i)=>(v+[a,b,c,d,e,f,g,h][i])|0)}return H.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('')
+14: }
+15: function style(){if(document.getElementById('v121CreatorStyle'))return;const s=document.createElement('style');s.id='v121CreatorStyle';s.textContent=`#v121CreatorBtn{margin-top:8px!important;padding:9px 15px!important;font-size:12px!important;opacity:.86}#v121CreatorGate{position:fixed;inset:0;z-index:999999;background:rgba(5,13,25,.82);display:flex;align-items:center;justify-content:center;padding:20px}#v121CreatorGate .box{width:min(430px,92vw);background:#102334;border:1px solid rgba(120,239,210,.5);border-radius:18px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.5);color:#fff}#v121CreatorGate h2{margin:0 0 8px}#v121CreatorGate p{opacity:.8;line-height:1.45}#v121CreatorGate input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid #506b7c;background:#081823;color:#fff;font-size:15px}#v121CreatorGate .actions{display:flex;gap:10px;margin-top:14px}#v121CreatorGate button{flex:1;padding:11px;border-radius:10px;border:0;font-weight:800;cursor:pointer}#v121CreatorError{min-height:18px;color:#ff9b9b;margin-top:8px;font-size:13px}`;document.head.appendChild(s)}
+16: function close(){document.getElementById('v121CreatorGate')?.remove()}
+17: function openGate(){
+18:   style();close();const ov=document.createElement('div');ov.id='v121CreatorGate';ov.innerHTML='<div class="box"><h2>Mode créateur</h2><p>Accès réservé. Entre le code créateur pour ouvrir Valdora avec tous les droits de test et de progression.</p><input id="v121CreatorPassword" type="password" autocomplete="current-password" placeholder="Code créateur"><div id="v121CreatorError"></div><div class="actions"><button id="v121CreatorCancel">Annuler</button><button id="v121CreatorOpen">Ouvrir le mode créateur</button></div></div>';document.body.appendChild(ov);const input=ov.querySelector('#v121CreatorPassword'),err=ov.querySelector('#v121CreatorError');input.focus();
+19:   async function submit(){err.textContent='Vérification…';try{if(await digest(input.value)===HASH){sessionStorage.setItem(SESSION_KEY,'1');location.href='./CREATEUR.html';return}err.textContent='Code incorrect.';input.select()}catch(e){err.textContent='Impossible de vérifier le code sur ce navigateur.'}}
+20:   ov.querySelector('#v121CreatorCancel').onclick=close;ov.querySelector('#v121CreatorOpen').onclick=submit;input.addEventListener('keydown',e=>{if(e.key==='Enter')submit();if(e.key==='Escape')close()});ov.addEventListener('click',e=>{if(e.target===ov)close()})
+### game/VALDORA_MOBILE_UI_V118.js line 36 — 169
+31:     #valdoraJoystick.active{border-color:rgba(121,226,255,.9);box-shadow:inset 0 0 0 8px rgba(111,218,248,.1),0 0 0 4px rgba(76,176,211,.16),0 10px 25px rgba(0,0,0,.38)}
+32:     #valdoraJoystick.active #valdoraJoystickKnob{transition:none;box-shadow:0 8px 18px rgba(0,0,0,.45),0 0 16px rgba(137,229,255,.34)}
+33:     #valdoraJoystickHint{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.62);font-size:11px;font-weight:950;letter-spacing:.08em;pointer-events:none}
+34:     #touchControlsV79 .actions{grid-template-columns:auto auto;grid-template-areas:"menu action" "close close";align-items:center;justify-items:center}
+35:     #touchControlsV79 #v79Menu{grid-area:menu}#touchControlsV79 #v79Action{grid-area:action}
+36:     #valdoraDialogClose{grid-area:close;width:100%;min-height:38px;height:38px;margin-top:5px;padding:0 10px;border-radius:999px!important;background:linear-gradient(145deg,rgba(169,54,48,.96),rgba(112,31,31,.96))!important;color:#fff;font-size:11px!important;font-weight:950!important;letter-spacing:.035em;pointer-events:auto;touch-action:manipulation!important;box-shadow:0 5px 14px rgba(0,0,0,.3)!important}
+37:     #valdoraDialogClose[hidden]{display:none!important}
+38:     #gamewrap.valdoraTouchRails #touchControlsV79 #valdoraDialogClose{width:100%!important;min-width:100%!important;height:34px!important;min-height:34px!important;margin-top:var(--touch-action-gap,6px)!important;padding:0 6px!important;border-radius:999px!important;font-size:clamp(8px,1.45vw,11px)!important}
+39:     #valdoraUpdateDialog{position:fixed;inset:0;z-index:2300000;display:grid;place-items:center;padding:calc(16px + var(--safe-top,0px)) calc(16px + var(--safe-right,0px)) calc(16px + var(--safe-bottom,0px)) calc(16px + var(--safe-left,0px));background:rgba(5,18,29,.88);backdrop-filter:blur(13px)}
+40:     #valdoraUpdateDialog[hidden]{display:none}.valdoraUpdateCard{width:min(620px,100%);max-height:100%;overflow:auto;padding:24px;border-radius:26px;background:linear-gradient(150deg,#f9fdff,#e7f4f8);color:#173548;border:1px solid rgba(255,255,255,.86);box-shadow:0 30px 90px rgba(0,0,0,.54)}
+41:     .valdoraUpdateKicker{display:inline-block;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:#d9f1e7;color:#256145;font-size:11px;font-weight:950;letter-spacing:.07em}.valdoraUpdateCard h2{margin:0;color:#174d70;font-size:27px}.valdoraUpdateCard>p{margin:9px 0 14px;line-height:1.5;color:#587180}.valdoraUpdateList{display:grid;gap:8px;margin:0 0 17px;padding:0;list-style:none}.valdoraUpdateList li{position:relative;padding:10px 11px 10px 38px;border-radius:14px;background:#fff;border:1px solid #d0e1e7;line-height:1.4}.valdoraUpdateList li:before{content:"✓";position:absolute;left:12px;top:9px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#3eaa76;color:#fff;font-size:11px;font-weight:1000}.valdoraUpdateClose{width:100%;min-height:48px;background:linear-gradient(145deg,#216b91,#174d70);color:#fff;font-weight:950}
+42:     @media (max-width:900px),(max-height:520px){
+43:       #menuov,#starterov{align-items:stretch!important;justify-content:stretch!important;padding:calc(7px + var(--safe-top,0px)) calc(7px + var(--safe-right,0px)) calc(7px + var(--safe-bottom,0px)) calc(7px + var(--safe-left,0px))!important}
+44:       #menuov>.card,#starterov>.card{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;padding:10px!important;border-radius:15px!important;overflow:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+45:       #menuov>.card h2,#starterov>.card h2{margin:0 0 7px!important;font-size:clamp(17px,4.5vh,23px)!important;line-height:1.1}
+### game/index.html line 175 — 169
+170:   <linearGradient id="trainBody" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1f4f69"/><stop offset="0.55" stop-color="#4785a6"/><stop offset="1" stop-color="#d7eef9"/></linearGradient>
+171:   <filter id="shadowT" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#071320" flood-opacity="0.28"/></filter>
+172: </defs>
+173: <rect width="1000" height="680" fill="url(#skyTitle)"/>
+174: <circle cx="742" cy="140" r="88" fill="url(#sunset)" opacity=".98"/>
+175: <g fill="#ffffff" opacity=".55"><ellipse cx="180" cy="132" rx="60" ry="20"/><ellipse cx="224" cy="132" rx="28" ry="14"/><ellipse cx="310" cy="168" rx="44" ry="16"/><ellipse cx="346" cy="169" rx="22" ry="11"/></g>
+176: <path d="M0 405C130 334 230 322 324 350C435 384 576 392 723 342C822 308 908 304 1000 324V680H0Z" fill="#5c9f63"/>
+177: <path d="M0 487C135 446 256 434 374 482C516 540 715 532 1000 462V680H0Z" fill="#447a51"/>
+178: <path d="M0 563C150 532 282 541 406 589C537 639 734 639 1000 583V680H0Z" fill="#376345"/>
+179: <path d="M338 680C362 564 416 477 489 412C573 488 626 583 658 680Z" fill="url(#roadTitle)" stroke="#b28c57" stroke-width="18" stroke-linejoin="round"/>
+180: <path d="M489 414L421 366" stroke="#c49b61" stroke-width="18" stroke-linecap="round"/><path d="M489 414L577 364" stroke="#c49b61" stroke-width="18" stroke-linecap="round"/>
+181: <g filter="url(#shadowT)">
+182:   <g transform="translate(578 244)">
+183:     <rect x="0" y="48" width="174" height="120" rx="18" fill="#f6f2e9" stroke="#587184" stroke-width="5"/>
+184:     <path d="M-18 62L86 -6L190 62Z" fill="#c95c52"/>
+### game/index.html line 408 — 169
+403: }
+404: function cityFloorsV60(cityId){const c=VALDORA_CITIES_V60.find(c=>c.id===cityId);return c?c.floors:1}
+405: 
+406: 'use strict';
+407: const PLAYER_PROGRESSION_LOCK=true;
+408: const SCENES={"town0":{"kind":"town","name":"Clairval","image":"assets/town_0_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"lab","label":"Laboratoire"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"healer","label":"Centre soins"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"shop","label":"Boutique"},{"x":1210,"y":690,"w":260,"h":175,"doorX":1340,"doorY":856,"type":"station","label":"Gare"}],"biome":"prairie","exits":[{"x":835,"y":1030,"w":130,"h":70,"side":"south","target":"route_next"}]},"town1":{"kind":"town","name":"Bois-Murmure","image":"assets/town_1_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"healer","label":"Centre soins"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"shop","label":"Boutique"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"arena","label":"Arène"},{"x":760,"y":680,"w":260,"h":175,"doorX":890,"doorY":846,"type":"inn","label":"Auberge"}],"biome":"forest","exits":[{"x":835,"y":0,"w":130,"h":70,"side":"north","target":"route_prev"},{"x":1730,"y":485,"w":70,"h":130,"side":"east","target":"route_next"}]},"town2":{"kind":"town","name":"Lac Azur","image":"assets/town …[truncated]
+409: 
+410: const TOWN_THEMES={
+411:   prairie:{ground:'#8fcf78',road:'#e5d2a2',tree:'#4c9453',roof:'#d86855'},
+412:   forest:{ground:'#76b86e',road:'#d2c295',tree:'#357b49',roof:'#7d5f46'},
+413:   lake:{ground:'#86c987',road:'#ddd1a7',tree:'#4d9258',roof:'#5ea7d8'},
+414:   autumn:{ground:'#b6b06b',road:'#d8c495',tree:'#b36d3b',roof:'#a85542'},
+415:   mountain:{ground:'#a9b28d',road:'#cbbb9b',tree:'#557a50',roof:'#777f8d'},
+416:   desert:{ground:'#d9c37d',road:'#ead9a7',tree:'#8d9860',roof:'#d68b48'},
+417:   snow:{ground:'#d8eced',road:'#c9d6d9',tree:'#668f7f',roof:'#699fcf'},
+### game/index.html line 1723 — 169
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1723:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1724:   const identity=(fam%7)-3;
+1725:   return {
+1726:     hp:Math.floor(30+lvl*3.0+stage*10+(fam%6)),
+1727:     atk:Math.floor(8+lvl*1.42+stage*6+Math.max(0,identity)),
+1728:     def:Math.floor(8+lvl*1.30+stage*6+Math.max(0,-identity)),
+1729:     spd:Math.floor(7+lvl*1.12+stage*4+((fam*3)%5))
+1730:   }
+1731: }
+1732: 
+### game/index.html line 1791 — 169
+1786: 
+1787: 
+1788: // ======================================================================
+1789: // VALDORA V83 — SYSTEMES V82 REELLEMENT BRANCHES
+1790: // ======================================================================
+1791: const V83_TOTAL_CREATURES=169;
+1792: const V83_CITADEL_CAPTURE_REQUIRED=75;
+1793: 
+1794: function v83CaughtCount(){
+1795:   return Object.values(state.dex||{}).filter(v=>v&&v.caught).length
+1796: }
+1797: 
+1798: // ----- 150 créatures réellement présentes dès l'initialisation -----
+1799: function v83ExpandCreatures150(){
+1800:   if(CREATURES.length>=150)return;
+### game/index.html line 1894 — caughtCount
+1889: window.v108mCanUseVolNow=v108mCanUseVolNow
+1890: function v106pHasVolMastery(){
+1891:   if(!v108mSeal5Beaten())return false;const owned=[...(state.team||[]),...(state.box||[])];return owned.some(m=>(m?.moves||[]).includes('vol'))
+1892: }
+1893: function v106pCitadelRequirements(){
+1894:   const caught=v83CaughtCount(),seals=(state.seals||[]).length,vol=v106pHasVolMastery();
+1895:   return {caught,seals,vol,ready:caught>=75&&seals>=7&&vol};
+1896: }
+1897: function finalTempleAvailableV77(){return v106pCitadelRequirements().ready}
+1898: function v83CitadelGateText(){
+1899:   const r=v106pCitadelRequirements();
+1900:   if(r.ready)return 'La Citadelle est accessible.';
+1901:   const missing=[];
+1902:   if(r.caught<75)missing.push(`capturer 75 espèces (${r.caught}/75)`);
+1903:   if(r.seals<7)missing.push(`réunir les 7 Sceaux (${r.seals}/7)`);
+### game/index.html line 2034 — 169
+2029:   }
+2030: }
+2031: window.addEventListener('DOMContentLoaded',()=>setTimeout(v83PositionTouchPad,180));
+2032: 
+2033: // ====================== VALDORA V82 ======================
+2034: const V82_TOTAL_CREATURES=169;
+2035: const V82_CITADEL_REQUIRED=75;
+2036: 
+2037: function v82CaughtCount(){return Object.values(state.dex||{}).filter(v=>v&&v.caught).length}
+2038: function v82CitadelUnlocked(){return v82CaughtCount()>=V82_CITADEL_REQUIRED}
+2039: 
+2040: function v82ProgressTier(){
+2041:   const s=Number(state.story||0), seals=(state.seals||[]).length;
+2042:   return Math.max(0,Math.min(6,Math.max(seals,Math.floor(s/2))));
+2043: }
+### game/index.html line 4915 — 169
+4910:     name:'Route 2',orientation:'WE',kind:'forest',w:3600,h:1600,
+4911:     path:[[70,800],[480,800],[850,690],[1220,880],[1640,720],[2100,840],[2600,720],[3100,800],[3530,800]]
+4912:   },
+4913:   route2:{
+4914:     name:'Route 3',orientation:'NS',kind:'lake',w:3200,h:2200,
+4915:     path:[[1600,70],[1600,420],[1450,760],[1690,1080],[1450,1420],[1600,1770],[1600,2130]]
+4916:   },
+4917:   route3:{
+4918:     name:'Route 4',orientation:'EW',kind:'autumn',w:3800,h:1700,
+4919:     path:[[3730,850],[3300,850],[2880,700],[2450,900],[1950,730],[1450,900],[900,730],[450,850],[70,850]]
+4920:   },
+4921:   route4:{
+4922:     name:'Route 5',orientation:'NS',kind:'mountain',w:3000,h:2400,
+4923:     path:[[1500,70],[1500,430],[1360,790],[1600,1120],[1370,1510],[1530,1900],[1500,2330]]
+4924:   },
+### game/index.html line 5466 — caughtCount
+5461: }
+5462: function templeGuardsClearedV77(){
+5463:   return Array.from({length:10},(_,i)=>'temple_guard_'+(i+1)).every(id=>!!state.trainerWins[id])
+5464: }
+5465: function finalTempleAvailableV77(){
+5466:   return typeof v106pCitadelRequirements==='function'?v106pCitadelRequirements().ready:(v83CaughtCount()>=75&&(state.seals||[]).length>=7&&!!state.fly)
+5467: }
+5468: function altarReadyV77(){
+5469:   return templeGuardsClearedV77()&&!!state.trainerWins.final_boss
+5470: }
+5471: 
+5472: function drawFinalTempleV77(sc,camX,camY,sx,sy){
+5473:   if(window.ValdoraPolishV113?.active)return window.ValdoraPolishV113.drawCitadel(sc,camX,camY,sx,sy);
+5474:   ctx.fillStyle='#151d28';ctx.fillRect(0,0,960,600);
+5475: 
+### game/index.html line 7668 — caughtCount
+7663:   const city=V106R_TOWN_NAMES[q?.zone]||SCENES[q?.zone]?.name||q?.zone||'Valdora';
+7664:   return q?.giverName?`Retourne voir ${q.giverName} à ${city} pour valider la quête.`:`Validation : ${city}.`
+7665: }
+7666: function objectivesV84(){
+7667:   const q=[];
+7668:   const caught=v83CaughtCount();
+7669:   const seals=(state.seals||[]).length;
+7670: 
+7671:   if(!state.team.length){
+7672:     q.push({title:'Choisir ton premier compagnon',progress:'0/1',txt:'Va au laboratoire de Clairval et parle au Professeur Aurine.'});
+7673:   }else{
+7674:     q.push({title:'Explorer Valdora',progress:(state.discovered||[]).filter(z=>String(z).startsWith('town')).length+'/15 villes',txt:'Découvre progressivement les villes et leurs gares.'});
+7675:   }
+7676: 
+7677:   if(seals<7)q.push({title:'Les Sept Sceaux',progress:seals+'/7',txt:'Bats chaque Gardien pour obtenir son Sceau.'});
+### game/index.html line 7699 — caughtCount
+7694:   return q
+7695: }
+7696: function objectiveVisibleV108M(x){
+7697:   const title=String(x?.title||''),quests=typeof V106C_QUESTS!=='undefined'?V106C_QUESTS:[],knownQuest=quests.some(q=>v106cQuestState?.()?.[q.id]&&title.includes(q.title));
+7698:   if(title==='Missions des habitants')return quests.some(q=>!!v106cQuestState?.()?.[q.id]);if(knownQuest)return true;
+7699:   const discovered=new Set(state.discovered||[]),seals=(state.seals||[]).length,caught=typeof v83CaughtCount==='function'?v83CaughtCount():0;
+7700:   if(/Aubeval|Horizons/i.test(title))return discovered.has('town14')||!!state.flags?.aubevalExpeditionLicense;
+7701:   if(/Légendaires/i.test(title))return !!state.flags?.aubevalExpeditionLicense||[151,152,153,154,155,156,157,158,159,160,161].some(id=>state.dex?.[id]?.seen||state.dex?.[id]?.caught);
+7702:   if(/Citadelle/i.test(title))return seals>=4||caught>=50||discovered.has('town7')||discovered.has('town14');
+7703:   if(/Capacité Vol/i.test(title))return seals>=3||discovered.has('route3')||discovered.has('route4');
+7704:   if(/Projet Résonance|Team Taron/i.test(title))return !!state.v106z?.activeTaronOp||Object.values(state.v106z?.taronOps||{}).some(v=>v?.done||v?.waves>0)||(state.taron?.wins||0)>0;
+7705:   if(title==='Exploration de Valdora'&&/caches/i.test(String(x?.progress||'')+' '+String(x?.txt||'')))return Object.keys(state.v106z?.caches||{}).length>0;
+7706:   if(title==='Les Sept Sceaux')return seals>0||Number(state.story||0)>=2||discovered.has('town1');
+7707:   if(/Progression longue durée|Maîtrise de Valdora/i.test(title))return seals>=2||[...discovered].filter(z=>/^town\d+$/.test(z)).length>=3;
+7708:   if(/Réseau ferroviaire/i.test(title))return (state.visitedCities||[]).length>1||[...discovered].filter(z=>/^town\d+$/.test(z)).length>1||Number(state.v106y?.trainTrips||0)>0;
+### game/index.html line 7723 — caughtCount
+7718: }
+7719: function openObjectivesV84(){
+7720:   const q=visibleObjectivesV108M();
+7721:   let h=q.map(x=>`<div class="quest"><b>${x.title}</b><br><b>${x.progress}</b><br>${x.txt}</div>`).join('');
+7722:   h+='<div class="quest"><b>Progression générale</b><br>'+
+7723:     'Espèces capturées : '+v83CaughtCount()+'/150<br>'+
+7724:     'Sceaux : '+(state.seals||[]).length+'/7<br>'+
+7725:     'Gares découvertes : '+v84UnlockedStationCities().length+'/8</div>';
+7726:   openSimpleMenu('Objectifs',h)
+7727: }
+7728: function installObjectivesButtonV84(){
+7729:   const grid=document.querySelector('aside .panel .grid');
+7730:   if(!grid||document.getElementById('objectivesBtnV84'))return;
+7731:   const b=document.createElement('button');
+7732:   b.id='objectivesBtnV84';b.textContent='Objectifs';b.onclick=openObjectivesV84;
+### game/index.html line 8277 — 169
+8272: 
+8273: 
+8274: 
+8275: // V108P — ÉQUIPE : composant entièrement réécrit.
+8276: // Une seule source de vérité pour les miniatures. Aucun canvas préconverti, aucun data URI massif.
+8277: const TEAM_PORTRAIT_PATHS_V108P={"123":"assets/creatures/123_Truffor/front.png","110":"assets/creatures/110_Oragin/front.png","132":"assets/creatures/132_Felyor/front.png","69":"assets/creatures/069_Runaex/front.png","160":"assets/creatures/160_Solaryx/front.png","118":"assets/creatures/118_Cristex/front.png","33":"assets/creatures/033_Solarex/front.png","56":"assets/creatures/056_Onyxor/front.png","27":"assets/creatures/027_Cervex/front.png","26":"assets/creatures/026_Cervor/front.png","24":"assets/creatures/024_Myrex/front.png","8":"assets/creatures/008_Aquaor/front.png","79":"assets/creatures/079_Sporain/front.png","51":"assets/creatures/051_Coralex/front.png","164":"assets/creatures/164_Quetzal/front.png","93":"assets/creatures/093_Vifex/front.png","13":"assets/creatures/013_Noctin/front.png","125":"assets/creatures/125_Polarin/front.png","140":"assets/creatures/140_Canopin/front.png","22":"assets/creatures/022_Myrin/front.png","86":"assets/creatures/086_Lumaor/front.png","127":"assets/creatures/127_Polarex/front.png","16":"assets/creatures/016_Rocin/front.png","29":"assets/creatures/029_Brumor/front.png","57":"assets/creatures/057_Onyxex/front.png","65":"assets/creatures/065_Muscor/front.png","126":"assets/creatures/126_Polaror/front.png","151":"assets/creatures/151_Sylvarion/front.png","61":"assets/creatures/061_Nivin/front.png","163":"assets/creatures/163_Drago/front.png","4":"assets/creatures/004_Pyroin/front.png","30":"assets/creatures/030_Brumex/front.png","120":"as …[truncated]
+8278: const TEAM_MASCOT_PATHS_BY_NAME_V108P={
+8279:   schneck:'assets/creatures/162_Schneck/front.png',
+8280:   drago:'assets/creatures/163_Drago/front.png',
+8281:   quetzal:'assets/creatures/164_Quetzal/front.png',
+8282:   phoeny:'assets/creatures/165_Phenie/front.png',
+8283:   phenie:'assets/creatures/165_Phenie/front.png',
+8284:   kroka:'assets/creatures/166_Kroka/front.png',
+8285:   wang:'assets/creatures/167_Wang/front.png',
+8286:   hack:'assets/creatures/168_Hack/front.png',
+### game/index.html line 8287 — 169
+8282:   phoeny:'assets/creatures/165_Phenie/front.png',
+8283:   phenie:'assets/creatures/165_Phenie/front.png',
+8284:   kroka:'assets/creatures/166_Kroka/front.png',
+8285:   wang:'assets/creatures/167_Wang/front.png',
+8286:   hack:'assets/creatures/168_Hack/front.png',
+8287:   buddl:'assets/creatures/169_Buddl/front.png'
+8288: };
+8289: function normalizeTeamSpeciesNameV108P(v){
+8290:   return String(v||'').toLowerCase().replace(/œ/g,'oe').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+8291: }
+8292: function teamSpeciesNameV108P(m){
+8293:   return String((m&&m.name)||BY?.[Number(m?.id)]?.name||'Éclat');
+8294: }
+8295: function teamPortraitPathV108P(mOrId){
+8296:   const m=(mOrId&&typeof mOrId==='object')?mOrId:null;
+### game/index.html line 8491 — 169
+8486: 
+8487: 
+8488: function pcPortraitV106C(m){
+8489:   const id=Number(m?.id),data=BY[id]||{};
+8490:   // V108S : le PC utilise exactement la même source de vérité que l'Équipe.
+8491:   // Cela couvre aussi les huit mascottes Phantasialand (162–169).
+8492:   let src='';
+8493:   try{if(typeof teamPortraitPathV108P==='function')src=teamPortraitPathV108P(m)||''}catch(_){}
+8494:   if(!src){
+8495:     const slug=(typeof SLUGS!=='undefined'&&SLUGS[String(id)])||'';
+8496:     src=slug?'assets/creatures/'+slug+'/front.png':(window.ValdoraV106A?.portraits?.[id]||'');
+8497:   }
+8498:   if(src)return '<img src="'+src+'" class="v101d-pcimg" alt="'+String(data.name||'Créature').replace(/"/g,'&quot;')+'" data-pc-creature-id="'+id+'">';
+8499:   return '<div class="v101d-pcimg" style="display:grid;place-items:center">?</div>';
+8500: }
+### game/index.html line 8647 — 169
+8642:   return c
+8643: }
+8644: 
+8645: const PHANTASIALAND_CODEX_V108L={
+8646:   168:'Un petit troll montagnard au caractère jovial. Habitué à creuser profondément sous terre, son corps robuste lui permet de déplacer des rochers bien plus lourds que lui.',
+8647:   169:'Curieux et débrouillard, Buddl adore explorer et récupérer les objets les plus improbables. Sa grande faculté d’adaptation lui permet de se sortir de presque toutes les situations.'
+8648: };
+8649: function openDexEntry(id){
+8650:   const c=BY[id],d=state.dex[id]||{seen:false,caught:false};
+8651:   if(!d.seen&&!d.caught){toast('Cette espèce n’a pas encore été observée.');return}
+8652:   const tr=CREATURE_TRAITS[id]||{};
+8653:   const family=CREATURES.filter(x=>x.family===c.family).sort((a,b)=>a.stage-b.stage);
+8654:   const stageIndex=family.findIndex(x=>x.id===id),evoText=family.map(x=>x.name).join(' → ');
+8655:   const typeHab={
+8656:     Nature:'prairies, lisières et sous-bois',Feu:'zones sèches, falaises chaudes et terrains volcaniques',
+### game/index.html line 8800 — 169
+8795: function v101uSvgData(svg){return 'url("data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg)+'")'}
+8796: function v101uPrologueSvg(index){
+8797:   const scenes=[
+8798: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800">
+8799: <defs><linearGradient id="a1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#112844"/><stop offset=".5" stop-color="#48789f"/><stop offset="1" stop-color="#88d0c0"/></linearGradient><linearGradient id="a2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3bc"/><stop offset="1" stop-color="#ffb164"/></linearGradient></defs>
+8800: <rect width="1400" height="800" fill="url(#a1)"/><circle cx="1040" cy="128" r="98" fill="url(#a2)"/><path d="M0 470C169 372 308 366 445 405C600 448 785 460 977 402C1120 358 1253 356 1400 382V800H0Z" fill="#5fa36b"/><path d="M0 576C200 496 374 492 545 560C700 622 950 624 1400 536V800H0Z" fill="#457d53"/><path d="M420 800C456 642 518 528 614 434C716 532 786 654 838 800Z" fill="#dfcc9c" stroke="#bb9965" stroke-width="24"/><path d="M610 438L522 382" stroke="#c79e67" stroke-width="22" stroke-linecap="round"/><path d="M612 438L722 374" stroke="#c79e67" stroke-width="22" stroke-linecap="round"/><g transform="translate(760 250)"><rect x="0" y="52" width="190" height="132" rx="20" fill="#f6f2e8" stroke="#617b8b" stroke-width="6"/><path d="M-18 69L95 -7L208 69Z" fill="#ca5d51"/><rect x="40" y="90" width="38" height="32" rx="4" fill="#9fd5ef"/><rect x="115" y="90" width="38" height="32" rx="4" fill="#9fd5ef"/><rect x="82" y="136" width="30" height="48" rx="4" fill="#845946"/></g><g transform="translate(168 542)"><path d="M0 60H520" stroke="#66717b" stroke-width="10"/><path d="M0 92H520" stroke="#1e2b35" stroke-width="10"/>`+
+8801: Array.from({length:11},(_,i)=>`<path d="M${24+i*48} 76H${52+i*48}" stroke="#8f7750" stroke-width="8"/>`).join('')+
+8802: `<g transform="translate(72 0)"><rect x="0" y="16" width="132" height="48" rx="14" fill="#225770" stroke="#1c4154" stroke-width="4"/><rect x="138" y="16" width="132" height="48" rx="14" fill="#34708f" stroke="#1c4154" stroke-width="4"/><path d="M276 16H353C383 16 406 32 406 52C406 69 383 80 353 80H276Z" fill="#255873" stroke="#1c4154" stroke-width="4"/><path d="M308 26H353C364 26 376 36 382 45C371 46 357 46 341 46H303Z" fill="#ccecf8"/><g fill="#e7f7ff">`+
+8803: Array.from({length:3},(_,i)=>`<rect x="${15+i*34}" y="27" width="22" height="15" rx="3"/>`).join('')+
+8804: Array.from({length:3},(_,i)=>`<rect x="${154+i*34}" y="27" width="22" height="15" rx="3"/>`).join('')+
+8805: `</g><g fill="#20323d"><circle cx="25" cy="72" r="8"/><circle cx="98" cy="72" r="8"/><circle cx="162" cy="72" r="8"/><circle cx="235" cy="72" r="8"/><circle cx="304" cy="72" r="8"/><circle cx="377" cy="72" r="8"/></g></g></g><g transform="translate(654 586)"><ellipse cy="30" rx="42" ry="10" fill="#10222a" opacity=".25"/><circle cy="-42" r="35" fill="#efb18a"/><path d="M-36-55Q0-100 36-55V-22H-36Z" fill="#46342d"/><rect x="-29" y="-10" width="58" height="52" rx="10" fill="#e55f4d"/><rect x="-20" y="-3" width="40" height="5" fill="#f5efe6"/><rect x="-20" y="42" width="13" height="38" fill="#385c72"/><rect x="7" y="42" width="13" height="38" fill="#385c72"/><rect x="-38" y="-82" width="76" height="14" rx="4" fill="#d34e40"/><rect x="-22" y="-92" width="44" height="12" rx="4" fill="#d34e40"/><ellipse cx="28" cy="-76" rx="20" ry="5" fill="#f4efe6"/></g><g transform="translate(770 460)"><path d="M0-38L28 0L0 38L-28 0Z" fill="#7af0d2" stroke="#fff" stroke-width="5"/><path d="M0-21L14 0L0 21L-14 0Z" fill="#dbfff6"/></g></svg>`,
+8806: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><defs><linearGradient id="b1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#84b46f"/><stop offset="1" stop-color="#406746"/></linearGradient></defs><rect width="1400" height="800" fill="url(#b1)"/><path d="M0 124Q340 32 702 124T1400 95V0H0Z" fill="#5f965b"/><path d="M670 810C604 690 690 604 746 542C819 462 830 384 779 305C719 212 818 106 774 0" fill="none" stroke="#dcc79e" stroke-width="178" stroke-linecap="round"/><path d="M670 810C604 690 690 604 746 542C819 462 830 384 779 305C719 212 818 106 774 0" fill="none" stroke="#8c765e" stroke-width="214" stroke-linecap="round" opacity=".45"/><g fill="#2d6a3d">`+Array.from({length:34},(_,i)=>`<circle cx="${60+(i*113)%1260}" cy="${90+(i*167)%640}" r="${24+(i%4)*7}"/>`).join('')+`</g><g transform="translate(1060 450)"><circle r="70" fill="#f7e373" opacity=".18"/><circle r="34" fill="#f7e373"/><g stroke="#fff2a9" stroke-width="12"><path d="M0-84V-128"/><path d="M84 0H128"/><path d="M0 84V128"/><path d="M-84 0H-128"/></g></g><g transform="translate(903 585)"><ellipse cy="20" rx="36" ry="8" fill="#20333b" opacity=".2"/><circle cy="-42" r="36" fill="#efb18a"/><path d="M-36-56Q0-100 36-56V-20H-36Z" fill="#433229"/><rect x="-28" y="-12" width="56" height="49" rx="10" fill="#e55f4d"/><rect x="-18" y="-4" width="36" height="5" fill="#f4efe6"/><rect x="-18" y="37" width="13" height="36" fill="#395b70"/><rect x="5" y="37" width="13" height="36" fill="#395b70"/><g fill= …[truncated]
+8807: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><rect width="1400" height="800" fill="#dde9ee"/><rect x="110" y="90" width="1180" height="620" rx="36" fill="#f7fbfc" stroke="#718d99" stroke-width="10"/><rect x="155" y="140" width="388" height="420" rx="20" fill="#bed2d7"/><g fill="#668792">`+Array.from({length:6},(_,i)=>`<rect x="190" y="${182+i*60}" width="314" height="25" rx="8"/>`).join('')+`</g><rect x="650" y="170" width="380" height="225" rx="24" fill="#90c6ca"/><circle cx="840" cy="280" r="88" fill="#e1faf6"/><path d="M792 293Q844 182 895 293Q845 375 792 293" fill="#59a86d"/><path d="M666 454H1038" stroke="#b0c7cf" stroke-width="12" stroke-linecap="round"/><g transform="translate(1080 590)"><ellipse cy="28" rx="40" ry="9" fill="#22363f" opacity=".18"/><circle cy="-45" r="35" fill="#efb18a"/><path d="M-36-57Q0-101 36-57V-18H-36Z" fill="#6a4c32"/><rect x="-30" y="-9" width="60" height="53" rx="11" fill="#eff3f4"/><rect x="-20" y="44" width="14" height="36" fill="#557786"/><rect x="6" y="44" width="14" height="36" fill="#557786"/><rect x="-14" y="0" width="28" height="4" fill="#95aeb8"/></g><g transform="translate(710 590)"><ellipse cy="25" rx="40" ry="9" fill="#20333d" opacity=".18"/><circle cy="-45" r="35" fill="#efb18a"/><path d="M-36-57Q0-101 36-57V-18H-36Z" fill="#46342d"/><rect x="-30" y="-9" width="60" height="53" rx="11" fill="#e55f4d"/><rect x="-20" y="44" width="14" height="36" fill="#395b70"/><rect x="6" y="44" width="14" height="36" fill="#395b …[truncated]
+8808: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><rect width="1400" height="800" fill="#1e2d37"/><path d="M0 586Q255 434 537 557T1048 524T1400 582V800H0Z" fill="#536a5b"/><circle cx="1025" cy="173" r="100" fill="#d2be50" opacity=".18"/><g transform="translate(770 520)"><circle cy="-50" r="36" fill="#d8a07c"/><rect x="-29" y="-22" width="58" height="52" rx="10" fill="#13181b"/><path d="M-18-8L0 12L18-8" fill="none" stroke="#f0cf33" stroke-width="9"/><rect x="-18" y="30" width="13" height="38" fill="#20262a"/><rect x="5" y="30" width="13" height="38" fill="#20262a"/><path d="M-36-82h72v16h-72z" fill="#101518"/></g><g transform="translate(930 555) scale(.92)"><circle cy="-50" r="36" fill="#efb18a"/><rect x="-29" y="-22" width="58" height="52" rx="10" fill="#13181b"/><path d="M-18-8L0 12L18-8" fill="none" stroke="#f0cf33" stroke-width="9"/><rect x="-18" y="30" width="13" height="38" fill="#20262a"/><rect x="5" y="30" width="13" height="38" fill="#20262a"/></g><g fill="#f7e159"><circle cx="372" cy="338" r="18"/><circle cx="454" cy="412" r="11"/><circle cx="547" cy="295" r="13"/><circle cx="621" cy="364" r="9"/></g><path d="M126 593L401 410" stroke="#6f5c44" stroke-width="28" stroke-linecap="round"/><path d="M126 593L401 410" stroke="#d2b086" stroke-width="20" stroke-linecap="round"/><g transform="translate(428 400)"><ellipse cy="18" rx="32" ry="8" fill="#23353c" opacity=".18"/><circle cy="-38" r="34" fill="#efb18a"/><path d="M-33-49Q0-92 33-49V-18H-33Z" fill="#6a4c3 …[truncated]
+8809: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800"><defs><linearGradient id="e1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#97ca83"/><stop offset="1" stop-color="#6ba1c0"/></linearGradient></defs><rect width="1400" height="800" fill="url(#e1)"/><path d="M610 800V0h204v800" fill="#ddc89f"/><path d="M0 345h1400v184H0z" fill="#decba6"/><g fill="#f6f1e6" stroke="#68828d" stroke-width="6"><rect x="120" y="120" width="280" height="182" rx="18"/><rect x="1000" y="118" width="280" height="182" rx="18"/><rect x="125" y="558" width="280" height="164" rx="18"/><rect x="995" y="558" width="280" height="164" rx="18"/></g><g fill="#c95e52"><path d="M98 145l164-102 164 102z"/><path d="M978 143l164-102 164 102z"/></g><g transform="translate(708 444)"><ellipse cy="22" rx="39" ry="9" fill="#21363d" opacity=".2"/><circle cy="-48" r="35" fill="#efb18a"/><path d="M-35-60Q0-104 35-60V-20H-35Z" fill="#45332c"/><rect x="-29" y="-9" width="58" height="51" rx="10" fill="#e55f4d"/><rect x="-20" y="42" width="13" height="38" fill="#395b70"/><rect x="7" y="42" width="13" height="38" fill="#395b70"/><g fill="#fff"><ellipse cx="-10" cy="-48" rx="6" ry="8"/><ellipse cx="10" cy="-48" rx="6" ry="8"/></g><g fill="#263d49"><circle cx="-9" cy="-47" r="3"/><circle cx="11" cy="-47" r="3"/></g><path d="M-8-38Q0-31 8-38" stroke="#9d5c52" stroke-width="2" fill="none"/><rect x="-38" y="-86" width="76" height="14" rx="4" fill="#d34e40"/><rect x="-22" y="-96" width="44" height="12" rx="4" fil …[truncated]
+### game/index.html line 12978 — 169
+12973: /* V102Y — INTÉGRATION DIRECTE DU FICHIER MOBILIER_REFERENCE_VALDORA.JSON
+12974:    Le mobilier, les positions, tailles, rotations, flips, collisions et fonctions
+12975:    proviennent tous de l'export V102X fourni par l'utilisateur. */
+12976: (()=>{
+12977: 'use strict';
+12978: const MOBREF = {"schema":"valdora-mobilier-reference-v1","project":"Éclats Sauvages — Valdora","baseGame":"V102Z_AMELIORATIONS_GAMEPLAY_TEAM_TARON","editor":"V102X","coordinateSystem":{"width":1200,"height":800,"previewScale":0.8},"exportedAt":"2026-08-13T23:42:53.908Z","rooms":{"home":[{"instanceId":"home_lit_simple_1786664003541_1","id":"lit_simple","x":11,"y":55,"w":116,"h":169,"rotation":0,"flipX":false,"flipY":false,"z":2,"bloquant":true,"interactif":true,"fonction":"repos_15s_soin_complet","description":"Un lit douillet pour se reposer.","collision":{"x":11,"y":55,"w":116,"h":169}},{"instanceId":"home_console_salon_1786664020291_2","id":"console_salon","x":864,"y":55,"w":204,"h":155,"rotation":0,"flipX":false,"flipY":false,"z":3,"bloquant":true,"interactif":true,"fonction":"ouvrir_stockage","description":"Un terminal domestique relié à la télévision et au stockage des créatures.","collision":{"x":864,"y":55,"w":204,"h":155}},{"instanceId":"home_bibliotheque_1786664039281_3","id":"bibliotheque","x":376,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":4,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","description":"Elle est remplie de livres d'aventures, de guides et d'indices.","collision":{"x":376,"y":55,"w":135,"h":210}},{"instanceId":"home_bibliotheque_1786664046064_4","id":"bibliotheque","x":520,"y":55,"w":135,"h":210,"rotation":0,"flipX":false,"flipY":false,"z":5,"bloquant":true,"interactif":true,"fonction":"lire_lore_indices","de …[truncated]
+12979: window.MOBILIER_REFERENCE_VALDORA = MOBREF;
+12980: const MOBREF_CATALOG = Object.fromEntries((MOBREF.catalog||[]).map(x=>[x.id,x]));
+12981: window.MOBREF_CATALOG_V105J=MOBREF_CATALOG;window.MOBREF_DATA_V105J=MOBREF;
+12982: const MOBREF_IMAGES = {};
+12983: for(const item of MOBREF.catalog||[]){
+12984:   const im=new Image(); im.decoding='async'; im.src=item.asset; MOBREF_IMAGES[item.id]=im;
+12985: }
+12986: if(typeof window.joueurBloque!=='boolean') window.joueurBloque=false;
+12987: 
+### game/index.html line 14424 — 169
+14419: })();
+14420: </script>
+14421: 
+14422: <!-- V105O-SPRITES-START -->
+14423: <script>
+14424: // V108L — catalogue étendu à 169 créatures, dont 8 mascottes spéciales Phantasialand sans évolution.
+14425: (function(){
+14426: const DEFINITIONS=[{"id":1,"name":"Florin","type":"Nature","family":0,"stage":0,"evolve":16},{"id":2,"name":"Floror","type":"Nature","family":0,"stage":1,"evolve":32},{"id":3,"name":"Florex","type":"Nature","family":0,"stage":2,"evolve":null},{"id":4,"name":"Pyroin","type":"Feu","family":1,"stage":0,"evolve":16},{"id":5,"name":"Pyroor","type":"Feu","family":1,"stage":1,"evolve":32},{"id":6,"name":"Pyroex","type":"Feu","family":1,"stage":2,"evolve":null},{"id":7,"name":"Aquain","type":"Eau","family":2,"stage":0,"evolve":16},{"id":8,"name":"Aquaor","type":"Eau","family":2,"stage":1,"evolve":32},{"id":9,"name":"Aquaex","type":"Eau","family":2,"stage":2,"evolve":null},{"id":10,"name":"Voltin","type":"Foudre","family":3,"stage":0,"evolve":16},{"id":11,"name":"Voltor","type":"Foudre","family":3,"stage":1,"evolve":32},{"id":12,"name":"Voltex","type":"Foudre","family":3,"stage":2,"evolve":null},{"id":13,"name":"Noctin","type":"Ombre","family":4,"stage":0,"evolve":16},{"id":14,"name":"Noctor","type":"Ombre","family":4,"stage":1,"evolve":32},{"id":15,"name":"Noctex","type":"Ombre","family":4,"stage":2,"evolve":null},{"id":16,"name":"Rocin","type":"Roche","family":5,"stage":0,"evolve":16},{"id":17,"name":"Rocor","type":"Roche","family":5,"stage":1,"evolve":32},{"id":18,"name":"Rocex","type":"Roche","family":5,"stage":2,"evolve":null},{"id":19,"name":"Zephin","type":"Air","family":6,"stage":0,"evolve":16},{"id":20,"name":"Zephor","type":"Air","family":6,"stage":1,"evolve":32},{"id":21,"n …[truncated]
+14427: const SLUGS={"1":"001_Florin","2":"002_Floror","3":"003_Florex","4":"004_Pyroin","5":"005_Pyroor","6":"006_Pyroex","7":"007_Aquain","8":"008_Aquaor","9":"009_Aquaex","10":"010_Voltin","11":"011_Voltor","12":"012_Voltex","13":"013_Noctin","14":"014_Noctor","15":"015_Noctex","16":"016_Rocin","17":"017_Rocor","18":"018_Rocex","19":"019_Zephin","20":"020_Zephor","21":"021_Zephex","22":"022_Myrin","23":"023_Myror","24":"024_Myrex","25":"025_Cervin","26":"026_Cervor","27":"027_Cervex","28":"028_Brumin","29":"029_Brumor","30":"030_Brumex","31":"031_Solarin","32":"032_Solaror","33":"033_Solarex","34":"034_Cryoin","35":"035_Cryoor","36":"036_Cryoex","37":"037_Lunain","38":"038_Lunaor","39":"039_Lunaex","40":"040_Terrain","41":"041_Terraor","42":"042_Terraex","43":"043_Fulgin","44":"044_Fulgor","45":"045_Fulgex","46":"046_Sylvin","47":"047_Sylvor","48":"048_Sylvex","49":"049_Coralin","50":"050_Coralor","51":"051_Coralex","52":"052_Cendrin","53":"053_Cendror","54":"054_Cendrex","55":"055_Onyxin","56":"056_Onyxor","57":"057_Onyxex","58":"058_Azurin","59":"059_Azuror","60":"060_Azurex","61":"061_Nivin","62":"062_Nivor","63":"063_Nivex","64":"064_Muscin","65":"065_Muscor","66":"066_Muscex","67":"067_Runain","68":"068_Runaor","69":"069_Runaex","70":"070_Aeroin","71":"071_Aeroor","72":"072_Aeroex","73":"073_Dunain","74":"074_Dunaor","75":"075_Dunaex","76":"076_Prismin","77":"077_Prismor","78":"078_Prismex","79":"079_Sporain","80":"080_Sporaor","81":"081_Sporaex","82":"082_Feralin","83":"083_ …[truncated]
+14428: const TRAITS={"34":["caméléon végétal","queue en liane et crête de pétales"],"35":["taupe de magma","griffes volcaniques et plaques incandescentes"],"36":["ornithorynque des rivières","queue en nénuphar et nageoires de roseaux"],"37":["rapace d’orage","plumage électrique et crête foudroyante"],"38":["chauve-souris spectrale","ailes vaporeuses et marques lunaires"],"39":["pangolin cristallin","écailles facettées et queue de quartz"],"40":["agneau des nuages","laine de brume et cornes de vent"],"41":["hérisson truffier","piquants fongiques et points de mycélium"],"42":["phoque polaire","nageoires de glacier et moustaches en flocons"],"43":["grue lumineuse","plumes d’aurore et ailes dorées"],"44":["lynx","oreilles touffues et pelage tacheté"],"45":["poisson abyssal","leurre bioluminescent et nageoires de velours"],"46":["tortue de lave","carapace volcanique traversée de veines de magma"],"47":["paresseux de la canopée","fourrure feuillue et lianes fleuries"],"48":["cheval de tempête","crinière de foudre et sabots nuageux"],"49":["tapir onirique","rubans de rêve et marques en croissant"],"50":["dragon-serpent cosmique","écailles étoilées et perles orbitales"]};
+14429: Object.assign(TRAITS,{"0":["faon-esprit forestier","oreilles en feuilles, bourgeon frontal et bois végétaux"],"1":["salamandre-dragon","crête de braises, marques de charbon et queue en flamme"],"2":["loutre aquatique","oreilles en nageoires, motifs de vagues et queue en goutte d’eau"],"3":["lièvre électrique","oreilles en éclair, marques en zigzag et queue foudroyante"],"4":["chat d’ombre","marques en croissant, pattes brumeuses et queue vaporeuse"],"5":["tortue minérale","carapace de galets, plaques rocheuses et cristaux"],"6":["oiseau des vents","plumage nuageux et plumes en spirale"],"7":["souris fongique","coiffe de champignon et spores lumineuses"],"8":["hybride cerf-scarabée","armure d’écorce, bois feuillus et élytres d’émeraude"],"9":["ours arctique","fourrure givrée et cristaux de glace aux épaules"],"10":["lion solaire","crinière en soleil, marques dorées et pattes de braise"],"11":["manchot de glace","crête cristalline et nageoires en éclats de glacier"],"12":["hibou nocturne","marques lunaires et ailes bordées de brume"],"13":["tatou de terre","plaques de terracotta et armure de canyon"],"14":["loup de foudre","crinière électrique et marques lumineuses"],"15":["écureuil végétal","oreilles de fougère et immense queue feuillue"],"16":["hippocampe corallien","bois de corail, perles et nageoires turquoise"],"17":["bélier de feu","cornes d’obsidienne et laine de braises"],"18":["panthère d’onyx","armure cristalline noire et brume violette"],"19":["dauphin azur","rubans  …[truncated]
+14430: Object.assign(TRAITS,{"51":["dragon sombre à cornes","chaînes, sacoche et ailes membraneuses"],"52":["dragon doré royal","cornes spiralées, plumage blanc et parure dorée"],"53":["dragon mésoaméricain élancé","crinière turquoise, cornes dorées et ornements solaires"],"54":["dragon-phénix doré","plumage blanc, ailes lumineuses et sceptre turquoise"],"55":["dragon-crocodile trapu","écailles végétales vertes et pointes orangées"],"56":["dragon chinois serpentin","lanterne rouge, crinière claire et queue turquoise"]});
+14431: const DIRECTIONS=['front','left','right','back'];
+14432: const CACHE=new Map();
+14433: const BOUNDS=new WeakMap();
+### game/index.html line 14525 — 169
+14520:   const team=(state&&state.team)||[];
+14521:   for(const member of team)for(const direction of DIRECTIONS)spriteEntry(member.id,direction);
+14522:   const creator=typeof v61CreatorMode==='function'&&v61CreatorMode();
+14523:   const brand=document.querySelector('.brand b');
+14524:   if(brand)brand.textContent='VALDORA V107R — '+(creator?'CRÉATEUR':'JOUEUR');
+14525:   document.title='VALDORA V108T — 169 créatures chibi 3D';
+14526:   document.documentElement.dataset.valdoraVersion='V107R';
+14527:   document.documentElement.dataset.creatureSprites='624-directional'
+14528: }
+14529: applyV105O();
+14530: setTimeout(applyV105O,7800);setTimeout(applyV105O,9200);
+14531: })();
+14532: </script>
+14533: <!-- V105O-SPRITES-END -->
+14534: <!-- V105U-COMBAT-INTEGRE-START -->
+### game/index.html line 16288 — caughtCount
+16283:  {id:160,name:'Solaryx',type:'Lumière',zone:'legend_lumiere',biome:'Observatoire Solaire',level:67,desc:'un observatoire antique baigné de lumière'},
+16284:  {id:161,name:'Equinoxe',type:'Neutre',zone:'legend_neutre',biome:'Sanctuaire des Origines',level:68,desc:'une plaine minérale où toutes les énergies s’équilibrent'}
+16285: ];
+16286: const V107B_LEGENDS_BY_ZONE=Object.fromEntries(V107B_LEGENDS.map(x=>[x.zone,x]));
+16287: for(const [i,l] of V107B_LEGENDS.entries())if(!BY[l.id]){const c={id:l.id,name:l.name,type:l.type,family:200+i,stage:3,evolve:null,legendary:true};CREATURES.push(c);BY[l.id]=c;CREATURE_TRAITS[l.id]={body:'legendary',ornament:l.type==='Lumière'?'corne cristalline':l.type==='Eau'?'nageoires':l.type==='Air'?'oreilles en ailes':l.type==='Feu'?'crinière de flammes':l.type==='Nature'?'queue en feuille':''}}
+16288: function v107bLegendCaughtCount(){return V107B_LEGENDS.filter(l=>!!state.dex?.[l.id]?.caught).length}
+16289: function v107bLegendRequired(){return Math.ceil(V107B_LEGENDS.length/2)}
+16290: 
+16291: function v107bCloneLegendScenes(){
+16292:   const template=SCENES.route0;if(!template)return;
+16293:   for(const [i,l] of V107B_LEGENDS.entries()){
+16294:     if(SCENES[l.zone])continue;
+16295:     const src=SCENES['route'+(i%7)]||template,w=src.width||3000,h=src.height||1800;
+16296:     SCENES[l.zone]={...src,name:l.biome,kind:'route',routeKind:'legendary',legendaryBiome:true,legendaryType:l.type,biome:'legendary',image:src.image,trainers:[],objects:[],obstacles:Array.isArray(src.obstacles)?src.obstacles.slice(0,18):[],mObstacles:[],grass:Array.isArray(src.grass)?src.grass.slice():[],v105dTrees:Array.isArray(src.v105dTrees)?src.v105dTrees.slice():[],v105dRoad:src.v105dRoad instanceof Set?new Set(src.v105dRoad):src.v105dRoad,v104Path:Array.isArray(src.v104Path)?src.v104Path.map(p=>Array.isArray(p)?[...p]:({...p})):src.v104Path,v76Path:Array.isArray(src.v76Path)?src.v76Path.map(p=>Array.isArray(p)?[...p]:({...p})):src.v76Path,kPath:Array.isArray(src.kPath)?src.kPath.map(p=>Array.isArray(p)?[...p]:({...p})):src.kPath,exits:[{x:w/2-110,y:0,w:220,h:95,side:'north',to:'town14',label:'Retour à Aubeval'}]};
+16297:   }
+### game/index.html line 16343 — caughtCount
+16338:   return true
+16339: };window.questInteractionV106C=questInteractionV106C;
+16340: 
+16341: // Citadelle : exigences historiques + Aubeval + moitié des légendaires.
+16342: const V107B_REQ_BASE=window.v106pCitadelRequirements;
+16343: window.v106pCitadelRequirements=function(){const r=V107B_REQ_BASE?V107B_REQ_BASE():{caught:0,seals:0,vol:false,ready:false},legends=v107bLegendCaughtCount(),legendRequired=v107bLegendRequired(),aubeval=!!state.flags?.aubevalExpeditionLicense;return {...r,legends,legendRequired,aubeval,ready:!!r.ready&&aubeval&&legends>=legendRequired}};try{v106pCitadelRequirements=window.v106pCitadelRequirements}catch(_){}
+16344: window.finalTempleAvailableV77=function(){return window.v106pCitadelRequirements().ready};try{finalTempleAvailableV77=window.finalTempleAvailableV77}catch(_){}
+16345: window.v83CitadelGateText=function(){const r=window.v106pCitadelRequirements();if(r.ready)return 'La Citadelle est accessible.';const m=[];if(r.caught<75)m.push(`75 espèces (${r.caught}/75)`);if(r.seals<7)m.push(`7 Sceaux (${r.seals}/7)`);if(!r.vol)m.push('maîtriser Vol');if((r.taron||0)<6)m.push(`démanteler le Projet Résonance (${r.taron||0}/6)`);if(!r.aubeval)m.push('réussir l’Épreuve des Horizons à Aubeval');if(r.legends<r.legendRequired)m.push(`capturer ${r.legendRequired} légendaires (${r.legends}/${r.legendRequired})`);return 'Accès à la Citadelle bloqué : '+m.join(' • ')+'.'};try{v83CitadelGateText=window.v83CitadelGateText}catch(_){}
+16346: const V107B_OBJECTIVES_BASE=typeof objectivesV84==='function'?objectivesV84:null;
+16347: if(V107B_OBJECTIVES_BASE){objectivesV84=function(){const q=V107B_OBJECTIVES_BASE(),r=window.v106pCitadelRequirements();q.unshift({title:'Aubeval — Épreuve des Horizons',progress:r.aubeval?'Permis obtenu':'Obligatoire',txt:r.aubeval?'Le Bureau des Horizons donne accès aux onze expéditions légendaires.':'Parle à Solène à Aubeval et remporte son épreuve.'});q.push({title:'Légendaires de Valdora',progress:`${r.legends}/${V107B_LEGENDS.length} capturés`,txt:`Capture au moins ${r.legendRequired} légendaires pour ouvrir la Citadelle. Chaque type possède son biome exclusif.`});return q};window.objectivesV84=objectivesV84}
+16348: 
+16349: function v107bInit(){v107bCloneLegendScenes();state.flags=state.flags||{};if(v106cQuestState?.()[V107B_AUBE_QUEST.id]?.status==='done')state.flags.aubevalExpeditionLicense=true;window.ValdoraV107B={version:V107B_VERSION,routeBands:V107B_ROUTE_BANDS,legends:V107B_LEGENDS,legendCaught:v107bLegendCaughtCount,legendRequired:v107bLegendRequired}}
+16350: window.addEventListener('DOMContentLoaded',()=>{setTimeout(v107bInit,2100)});setTimeout(v107bInit,3400);setTimeout(v107bInit,10000);setTimeout(v107bInit,11600);
+16351: })();
+16352: </script>
+### game/index.html line 16836 — 169
+16831:     const m=mon(id,levels[id]||60); if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
+16832:     state.box.push(m); state.dex[id]={...(state.dex[id]||{}),seen:true,caught:true}; changed=true; owned.add(id);
+16833:   }
+16834:   // V108L : les huit mascottes Phantasialand sont disponibles dans le PC Créateur uniquement.
+16835:   // Elles ne sont jamais injectées automatiquement dans l'équipe.
+16836:   const mascotLevels={162:30,163:30,164:30,165:30,166:30,167:30,168:30,169:30};
+16837:   for(const id of Object.keys(mascotLevels).map(Number)){
+16838:     if(!BY[id]||owned.has(id))continue;
+16839:     const m=mon(id,mascotLevels[id]); if(typeof defaultMoves==='function')m.moves=defaultMoves(id,m.level);
+16840:     state.box.push(m); state.dex[id]={...(state.dex[id]||{}),seen:true,caught:true}; changed=true; owned.add(id);
+16841:   }
+16842:   if(changed){try{save(false)}catch(_){}}
+16843: }
+16844: function migrateDragonsV107W(){
+16845:   try{
+### game/index.html line 16971 — 169
+16966: <!-- V107K-PROGRESSION-NAMES-START -->
+16967: <script>
+16968: (function(){
+16969: 'use strict';
+16970: const V107K_VERSION='V107K';
+16971: const V107K_NAMES={"1":"Brindel","2":"Feuilcerf","3":"Sylvarch","4":"Tisonnet","5":"Salambrase","6":"Dracendre","7":"Rivelot","8":"Ondeloutre","9":"Néréonde","10":"Zipou","11":"Foudrille","12":"Voltélan","13":"Murne","14":"Ombrelune","15":"Noxéline","16":"Galetou","17":"Rocapace","18":"Lithorace","19":"Plumiz","20":"Zéphrel","21":"Alcyvent","22":"Mycotte","23":"Sporonge","24":"Fongrelune","25":"Scarfaon","26":"Boiscarab","27":"Cervémeraude","28":"Frimousse","29":"Ursigivre","30":"Boréalours","31":"Solion","32":"Flambéroi","33":"Héliocrin","34":"Glaçou","35":"Pingivre","36":"Cryopenn","37":"Hulune","38":"Strigombre","39":"Nocturiel","40":"Terratou","41":"Armadroc","42":"Canyoncuir","43":"Éclaloup","44":"Fulgriffe","45":"Tonnerage","46":"Fougri","47":"Sylvécure","48":"Canopiflair","49":"Corailou","50":"Hippocor","51":"Récifâme","52":"Brasin","53":"Bélierbraise","54":"Cornobsid","55":"Nyxou","56":"Panthonyx","57":"Obscélyx","58":"Azufin","59":"Delphonde","60":"Céruléon","61":"Nivette","62":"Givrenard","63":"Polarynne","64":"Mycolim","65":"Sporacoque","66":"Fongastrop","67":"Runet","68":"Lithorune","69":"Arkégolem","70":"Griflou","71":"Aérocroc","72":"Célestigrif","73":"Dromin","74":"Grésadaire","75":"Dunarche","76":"Prislume","77":"Paprisme","78":"Iridélya","79":"Crapospore","80":"Mycrobate","81":"Lumifonge","82":"Groinou","83":"Sanglierce","84":"Brocferal","85":"Halopin","86":"Lucièvre","87":"Astralapin","88":"Marécaille","89":"Tortivague","90":"Pélagor","91":"Colivif","92":"Br …[truncated]
+16972: 
+16973: function v107kCreator(){
+16974:   return /CREATEUR/i.test(location.pathname) || window.CREATOR_MODE===true;
+16975: }
+16976: function v107kQuestDone(q){
+16977:   try{return typeof v106cQuestDone==='function' ? !!v106cQuestDone(q) : false}catch(_){return false}
+16978: }
+16979: function v107kRequiredTownQuests(zone){
+16980:   if(typeof V106C_QUESTS==='undefined')return [];
+### game/index.html line 18653 — 169
+18648: <script src="VALDORA_CREATOR_GATE_V121.js?v=121-creator-2"></script>
+18649: <script src="V122_REGRESSION_FIXES.js?v=122-regression-2"></script>
+18650: </body></html
+18651: >
+18652: 
+18653: <!-- V108L-PHANTASIALAND {"162":{"name":"Schneck","type":"Ombre"},"163":{"name":"Drago","type":"Foudre"},"164":{"name":"Quetzal","type":"Feu"},"165":{"name":"Phœny","type":"Lumière"},"166":{"name":"Kroka","type":"Nature"},"167":{"name":"Wang","type":"Spore"},"168":{"name":"Hack","type":"Roche"},"169":{"name":"Buddl","type":"Neutre"}} -->
+18654: 
+18655: <!-- V108C-CLAIRVAL-SIMPLE-PROGRESSION: starter + 3 creatures level>=10; wild types Nature/Feu/Eau/Foudre/Neutre -->

@@ -1,0 +1,1074 @@
+V122 REMAINING DIAGNOSTIC — SHOP
+====================================================================================================
+### game/CREATEUR.html line 1717 — Rappel
+1712: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1713: 
+1714: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1715: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1716: const SAVE='valdora_v41_creator'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1717: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1718: 
+1719: 
+1720: function creatureStats(m){
+1721:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1722:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1723:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1724:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1725:   const identity=(fam%7)-3;
+1726:   return {
+### game/CREATEUR.html line 2303 — Rappel
+2298: }
+2299: 
+2300: 
+2301: function ensureInventoryV81(st=state){
+2302:   st.inventory=st.inventory||{};
+2303:   for(const k of ['Potion','SuperPotion','Orbe','SuperOrbe','MegaOrbe','Antidote','Baie','Repas','FioleAttaque','FioleDefense','Rappel']){
+2304:     if(st.inventory[k]==null)st.inventory[k]=0
+2305:   }
+2306:   return st
+2307: }
+2308: 
+2309: 
+2310: 
+2311: function mon(id,l){
+2312:   const level=Math.max(Number(l)||1,minLevelForSpeciesV81(id));
+### game/CREATEUR.html line 6991 — Rappel
+6986: 
+6987: function battleHealingTargetsV86(item){
+6988:   const heal=item==='Potion'?30:item==='SuperPotion'?80:item==='Repas'?50:0;
+6989:   return state.team.map((m,i)=>({m,i})).filter(x=>{
+6990:     if(!x.m)return false;
+6991:     if(item==='Rappel')return x.m.hp<=0;
+6992:     if(x.m.hp<=0)return false;
+6993:     if(heal>0)return x.m.hp<maxHP(x.m);
+6994:     if(item==='Antidote')return x.m.status==='empoisonné';
+6995:     if(item==='Baie')return !!x.m.status && x.m.status!=='empoisonné';
+6996:     return true
+6997:   })
+6998: }
+6999: 
+7000: function openBattleItemTargetV86(item){
+### game/CREATEUR.html line 7027 — Rappel
+7022:   const m=state.team[index];
+7023:   if(!m||(state.inventory[item]||0)<=0)return;
+7024: 
+7025:   let used=false,msg='';
+7026: 
+7027:   if(item==='Rappel'){
+7028:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+7029:     state.inventory.Rappel--;
+7030:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+7031:     m.status=null;
+7032:     used=true;
+7033:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7034:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7035:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+7036:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+### game/CREATEUR.html line 7036 — Rappel
+7031:     m.status=null;
+7032:     used=true;
+7033:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7034:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7035:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+7036:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+7037:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+7038:     state.inventory[item]--;
+7039:     const n=Math.min(heal,maxHP(m)-m.hp);
+7040:     m.hp+=n;used=true;
+7041:     msg=BY[m.id].name+' récupère '+n+' PV.'
+7042:   }else if(item==='Baie'){
+7043:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7044:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+7045:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+### game/CREATEUR.html line 7049 — Rappel
+7044:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+7045:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+7046:     state.inventory.Baie--;m.status=null;used=true;
+7047:     msg=BY[m.id].name+' est débarrassé de son statut.'
+7048:   }else if(item==='Antidote'){
+7049:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7050:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+7051:     state.inventory.Antidote--;m.status=null;used=true;
+7052:     msg=BY[m.id].name+' n’est plus empoisonné.'
+7053:   }
+7054: 
+7055:   if(!used)return;
+7056: 
+7057:   document.getElementById('menuov').style.display='none';
+7058:   save(false);hud();syncBattleMessageV84();
+### game/CREATEUR.html line 7060 — SHOP_ITEMS
+7055:   if(!used)return;
+7056: 
+7057:   document.getElementById('menuov').style.display='none';
+7058:   save(false);hud();syncBattleMessageV84();
+7059:   battle.busy=true;
+7060:   battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';
+7061:   buildBattleButtons();syncBattleMessageV84();
+7062: 
+7063:   v84Schedule(520,()=>{
+7064:     if(!battleAlive())return;
+7065:     battle.message=msg;
+7066:     hud();syncBattleMessageV84();
+7067:     v84Schedule(520,()=>v84FinishAction(true))
+7068:   })
+7069: }
+### game/CREATEUR.html line 7232 — Rappel
+7227:   if(!battleAlive()||battle.busy)return;
+7228:   ensureInventoryV81();
+7229:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+7230:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>+30 PV</small></button>`;
+7231:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>+80 PV</small></button>`;
+7232:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime à 50 % des PV</small></button>`;
+7233:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un statut sauf poison</small></button>`;
+7234:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison</small></button>`;
+7235:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleAttaque')"><b>🔴 Fiole d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>ATQ +2</small></button>`;
+7236:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleDefense')"><b>🔵 Fiole de Défense</b><br>${state.inventory.FioleDefense}<br><small>DEF +2</small></button>`;
+7237:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>+50 PV</small></button>`;
+7238:   if(!battle.trainer){
+7239:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('Orbe')"><b>◈ Orbe d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard</small></button>`;
+7240:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('SuperOrbe')"><b>◆ Super Orbe</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée</small></button>`
+7241:   }
+### game/CREATEUR.html line 8430 — SHOP_ITEMS
+8425: },true);
+8426: window.addEventListener('keyup',e=>{if(e.code===held){held=null;clearInterval(timer);timer=null}},true);
+8427: function startMusicLegacyV76(){if(!musicOn)return;if(!musicCtx)musicCtx=new (window.AudioContext||window.webkitAudioContext)();if(musicCtx.state==='suspended')musicCtx.resume();if(musicTimer)return;let notes=[261.6,329.6,392,523.3,392,329.6,293.7,349.2,440,587.3,440,349.2],i=0;musicTimer=setInterval(()=>{if(scene==='battle')return;let o=musicCtx.createOscillator(),g=musicCtx.createGain();o.type='triangle';o.frequency.value=notes[i++%notes.length];g.gain.value=.025;o.connect(g);g.connect(musicCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,musicCtx.currentTime+.22);o.stop(musicCtx.currentTime+.23)},270)}
+8428: 
+8429: 
+8430: const SHOP_ITEMS={
+8431:   Potion:{label:'Potion',price:10,desc:'Restaure jusqu’à 30 PV.'},
+8432:   SuperPotion:{label:'Super Potion',price:50,desc:'Restaure jusqu’à 80 PV.'},
+8433:   Orbe:{label:'Orbe d’Éclat',price:50,desc:'Permet de capturer une Éclat sauvage.'},
+8434:   SuperOrbe:{label:'Super Orbe',price:100,desc:'Orbe renforcée : capture nettement facilitée.'},
+8435:   Antidote:{label:'Antidote',price:30,desc:'Soigne le poison.'},
+8436:   Baie:{label:'Baie de soin',price:30,desc:'Soigne certains changements de statut.'},
+8437:   FioleAttaque:{label:'Fiole d’Attaque',price:100,desc:'Augmente fortement l’attaque pendant un combat.'},
+8438:   FioleDefense:{label:'Fiole de Défense',price:100,desc:'Augmente fortement la défense pendant un combat.'},
+8439:   Rappel:{label:'Rappel',price:150,desc:'Réanime un Éclat K.O. avec 50 % de ses PV.'}
+### game/CREATEUR.html line 8439 — Rappel
+8434:   SuperOrbe:{label:'Super Orbe',price:100,desc:'Orbe renforcée : capture nettement facilitée.'},
+8435:   Antidote:{label:'Antidote',price:30,desc:'Soigne le poison.'},
+8436:   Baie:{label:'Baie de soin',price:30,desc:'Soigne certains changements de statut.'},
+8437:   FioleAttaque:{label:'Fiole d’Attaque',price:100,desc:'Augmente fortement l’attaque pendant un combat.'},
+8438:   FioleDefense:{label:'Fiole de Défense',price:100,desc:'Augmente fortement la défense pendant un combat.'},
+8439:   Rappel:{label:'Rappel',price:150,desc:'Réanime un Éclat K.O. avec 50 % de ses PV.'}
+8440: };
+8441: 
+8442: 
+8443: 
+8444: 
+8445: function openShop(){
+8446:   ensureInventoryV81();
+8447:   const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+8448:   const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+### game/CREATEUR.html line 8448 — shopTier
+8443: 
+8444: 
+8445: function openShop(){
+8446:   ensureInventoryV81();
+8447:   const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+8448:   const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+8449:   const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+8450: 
+8451:   let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+8452:     Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+8453:     <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+8454:     <div style="display:flex;gap:8px;margin-bottom:12px">
+8455:       <button onclick="openShop()">Acheter</button>
+8456:       <button onclick="openSellShopV101D()">Revendre</button>
+8457:     </div><div class="baggrid">`;
+### game/CREATEUR.html line 8460 — SHOP_ITEMS
+8455:       <button onclick="openShop()">Acheter</button>
+8456:       <button onclick="openSellShopV101D()">Revendre</button>
+8457:     </div><div class="baggrid">`;
+8458: 
+8459:   for(const id of ids){
+8460:     const it=SHOP_ITEMS[id];if(!it)continue;
+8461:     const qty=state.inventory[id]||0;
+8462:     h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+8463:       <b>${it.label}</b><br>${it.price} Voltrons<br>
+8464:       <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+8465:     </button>`
+8466:   }
+8467: 
+8468:   h+='</div>';
+8469:   openSimpleMenu('Boutique — '+city,h)
+### game/CREATEUR.html line 8478 — SHOP_ITEMS
+8473: 
+8474: 
+8475: 
+8476: 
+8477: function buyShopItem(id){
+8478:   const it=SHOP_ITEMS[id];if(!it)return;
+8479:   if(window.HOME_FURNITURE_ITEMS_V105J?.[id]){if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}const fid=window.HOME_FURNITURE_ITEMS_V105J[id];state.money-=it.price;state.homeFurnitureOwnedV105J=state.homeFurnitureOwnedV105J||{};state.homeFurnitureOwnedV105J[fid]=(state.homeFurnitureOwnedV105J[fid]||0)+1;save(false);hud();openShop();toast(it.label+' acheté pour ta maison !');return}
+8480:   if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}
+8481:   state.money-=it.price;state.inventory[id]=(state.inventory[id]||0)+1;
+8482:   save(false);hud();openShop();toast(it.label+' acheté pour '+it.price+' Voltrons !')
+8483: }
+8484: 
+8485: 
+8486: function openSimpleMenu(title,html){$('menuov').style.display='flex';$('menucard').innerHTML='<h2>'+title+'</h2>'+html+'<br><button onclick="$(\'menuov\').style.display=\'none\'">Fermer</button>'}
+8487: 
+### game/CREATEUR.html line 8985 — Rappel
+8980: 
+8981: function applyBagItem(index){
+8982:   const item=pendingBagItem,m=state.team[index];if(!item||!m)return;
+8983:   ensureInventoryV81();
+8984: 
+8985:   if(item==='Rappel'){
+8986:     if((state.inventory.Rappel||0)<=0){toast('Plus de Rappels.');return}
+8987:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+8988:     state.inventory.Rappel--;
+8989:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+8990:     m.status=null;
+8991:     save(false);hud();toast(BY[m.id].name+' est réanimé !');openBag();return
+8992:   }
+8993: 
+8994:   if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+### game/CREATEUR.html line 8997 — Rappel
+8992:   }
+8993: 
+8994:   if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+8995:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+8996:     if((state.inventory[item]||0)<=0){toast('Tu n’en as plus.');return}
+8997:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+8998:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+8999:     state.inventory[item]--;
+9000:     const n=Math.min(heal,maxHP(m)-m.hp);m.hp+=n;
+9001:     save(false);toast(BY[m.id].name+' récupère '+n+' PV.');openBag();return
+9002:   }
+9003: 
+9004:   if(item==='Baie'){
+9005:     if((state.inventory.Baie||0)<=0){toast('Plus de Baies.');return}
+9006:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+### game/CREATEUR.html line 9006 — Rappel
+9001:     save(false);toast(BY[m.id].name+' récupère '+n+' PV.');openBag();return
+9002:   }
+9003: 
+9004:   if(item==='Baie'){
+9005:     if((state.inventory.Baie||0)<=0){toast('Plus de Baies.');return}
+9006:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9007:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+9008:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+9009:     state.inventory.Baie--;m.status=null;save(false);toast(BY[m.id].name+' est soigné.');openBag();return
+9010:   }
+9011: 
+9012:   if(item==='Antidote'){
+9013:     if((state.inventory.Antidote||0)<=0){toast('Plus d’Antidotes.');return}
+9014:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9015:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+### game/CREATEUR.html line 9014 — Rappel
+9009:     state.inventory.Baie--;m.status=null;save(false);toast(BY[m.id].name+' est soigné.');openBag();return
+9010:   }
+9011: 
+9012:   if(item==='Antidote'){
+9013:     if((state.inventory.Antidote||0)<=0){toast('Plus d’Antidotes.');return}
+9014:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9015:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+9016:     state.inventory.Antidote--;m.status=null;save(false);toast('Poison soigné.');openBag();return
+9017:   }
+9018: }
+9019: 
+9020: 
+9021: 
+9022: 
+9023: 
+### game/CREATEUR.html line 9030 — Rappel
+9025: function openBag(){
+9026:   ensureInventoryV81();
+9027:   let h='<div class="baggrid">';
+9028:   h+=`<button class="bagitem" onclick="selectBagTarget('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>Restaure jusqu’à 30 PV.</small></button>`;
+9029:   h+=`<button class="bagitem" onclick="selectBagTarget('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>Restaure jusqu’à 80 PV.</small></button>`;
+9030:   h+=`<button class="bagitem" onclick="selectBagTarget('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime un Éclat K.O. avec 50 % de ses PV.</small></button>`;
+9031:   h+=`<button class="bagitem" onclick="selectBagTarget('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un changement de statut, sauf le poison.</small></button>`;
+9032:   h+=`<button class="bagitem" onclick="selectBagTarget('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison.</small></button>`;
+9033:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="selectBagTarget('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>Restaure jusqu’à 50 PV.</small></button>`;
+9034:   h+=`<div class="bagitem"><b>◈ Orbes d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard en combat sauvage.</small></div>`;
+9035:   h+=`<div class="bagitem"><b>◆ Super Orbes</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée en combat sauvage.</small></div>`;
+9036:   h+=`<div class="bagitem"><b>🔴 Fioles d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>Utilisables en combat.</small></div>`;
+9037:   h+=`<div class="bagitem"><b>🔵 Fioles de Défense</b><br>${state.inventory.FioleDefense}<br><small>Utilisables en combat.</small></div>`;
+9038:   h+='</div><h3>Capsules de capacité</h3>';
+9039:   h+=(state.capsules||[]).length
+### game/CREATEUR.html line 10454 — SHOP_ITEMS
+10449:   state.routeFindsV93[o.id]=true;ensureInventoryV81();
+10450: 
+10451:   if(o.type==='chest'){
+10452:     const money=35+(o.routeIndex%5)*15,item=o.routeIndex%3===0?'SuperPotion':o.routeIndex%3===1?'Orbe':'Antidote';
+10453:     state.money=(state.money||0)+money;state.inventory[item]=(state.inventory[item]||0)+1;save(false);hud();
+10454:     dialog('<b>Petit coffre trouvé !</b><br>Tu récupères <b>'+money+' Voltrons</b> et <b>1 '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10455:   }else if(o.type==='bush'){
+10456:     const r=o.routeIndex%4,item=r===0?'Baie':r===1?'Potion':r===2?'Orbe':'Antidote',qty=r===0?2:1;
+10457:     state.inventory[item]=(state.inventory[item]||0)+qty;save(false);hud();
+10458:     dialog('<b>Buisson fouillé</b><br>Tu trouves <b>'+qty+' '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10459:   }else{
+10460:     state.money=(state.money||0)+5;save(false);hud();
+10461:     dialog('<b>Panneau de Valdora</b><br>'+ROUTE_FIND_HINTS_V93[o.routeIndex%ROUTE_FIND_HINTS_V93.length]+'<br><br><small>Première lecture : +5 Voltrons.</small>')
+10462:   }
+10463:   return true
+### game/CREATEUR.html line 11253 — Rappel
+11248:   const base=V98_AFTER[h%V98_AFTER.length];
+11249:   const hints=[
+11250:     'Pense à regarder les types avant de choisir ton prochain Éclat.',
+11251:     'Un Centre de soins n’est jamais très loin d’une grande étape.',
+11252:     'Les buissons et petits coffres au bord des chemins valent parfois le détour.',
+11253:     'Garde au moins un Rappel si tu pars avec une équipe déjà fatiguée.',
+11254:     'Les dresseurs plus loin seront plus forts que ceux d’ici.',
+11255:     'Une capacité peu puissante mais super efficace peut faire très mal.',
+11256:     'Reviens me parler si tu repasses : je ne te provoquerai plus.',
+11257:     'Les objets utilisés en combat consomment un tour, il faut bien choisir le moment.',
+11258:     'Une équipe variée aide énormément contre les prochains Gardiens.',
+11259:     'Les gares sont pratiques une fois les villes correspondantes découvertes.'
+11260:   ];
+11261:   return base+'<br><br><b>Conseil :</b> '+hints[(h>>>7)%hints.length]
+11262: };
+### game/CREATEUR.html line 12206 — SHOP_ITEMS
+12201:       <button onclick="openShop()">Acheter</button>
+12202:       <button disabled>Revendre</button>
+12203:     </div><div class="baggrid">`;
+12204: 
+12205:   let count=0;
+12206:   for(const [id,it] of Object.entries(SHOP_ITEMS)){
+12207:     const qty=state.inventory[id]||0;
+12208:     if(qty<=0)continue;
+12209:     count++;
+12210:     const price=Math.max(1,Math.floor(it.price*.5));
+12211:     h+=`<button class="bagitem" onclick="sellShopItemV101D('${id}')">
+12212:       <b>${it.label}</b><br>Reprise : ${price} Voltrons<br><small>Possédé : ${qty}</small>
+12213:     </button>`;
+12214:   }
+12215:   if(!count)h+='<div class="quest">Tu n’as aucun objet revendable.</div>';
+### game/CREATEUR.html line 12221 — SHOP_ITEMS
+12216:   h+='</div>';
+12217:   openSimpleMenu('Boutique — Revente',h);
+12218: };
+12219: 
+12220: window.sellShopItemV101D=function(id){
+12221:   const it=SHOP_ITEMS[id];
+12222:   if(!it||(state.inventory[id]||0)<=0)return;
+12223:   const price=Math.max(1,Math.floor(it.price*.5));
+12224:   state.inventory[id]--;
+12225:   state.money=(state.money||0)+price;
+12226:   save(false);hud();
+12227:   openSellShopV101D();
+12228:   toast(it.label+' revendu pour '+price+' Voltrons.');
+12229: };
+12230: 
+### game/CREATEUR.html line 12800 — SHOP_ITEMS
+12795:   state.townBushFindsV106G=state.townBushFindsV106G||{};
+12796:   if(state.townBushFindsV106G[o.key]){toast('Tu as déjà fouillé ce buisson.');return true}
+12797:   state.townBushFindsV106G[o.key]=true;state.inventory=state.inventory||{};
+12798:   const h=v106gWorldFindHash(o.key);if((h%100)>=30){save(false);dialog('<b>Buisson fouillé</b><br>Tu écartes les branches et regardes au pied du buisson, mais il n’y a rien à récupérer ici.');return true}
+12799:   const rewards=[['Baie',2],['Potion',1],['Orbe',1],['Antidote',1],['money',25+(h%51)]],r=rewards[(h>>>7)%rewards.length];
+12800:   let label='';if(r[0]==='money'){state.money=(Number(state.money)||0)+r[1];label=r[1]+' Voltrons'}else{state.inventory[r[0]]=(Number(state.inventory[r[0]])||0)+r[1];label=r[1]+' '+(SHOP_ITEMS?.[r[0]]?.label||r[0])}
+12801:   save(false);hud();dialog('<b>Buisson fouillé</b><br>Quelque chose était caché entre les branches : <b>'+label+'</b>.');return true
+12802: }
+12803: window.townBushSearchableV106G=townBushSearchableV106G;
+12804: const _interactV101F=window.interact;
+12805: window.interact=function(){
+12806:  if(scene==='world'){
+12807:    if(currentScene()?.kind==='town'){
+12808:      const hiddenBush=nearTownBushV106G();if(hiddenBush){searchTownBushV106G(hiddenBush);return}
+12809:    }
+### game/CREATEUR.html line 13088 — Rappel
+13083:   "Documentaire : certaines créatures changent de comportement selon leur habitat et l'heure de la journée.",
+13084:   "Info régionale : les gares permettent de revenir rapidement dans les villes déjà découvertes.",
+13085:   "Émission scientifique : le Professeur Aurine poursuit ses recherches sur les perturbations de Valdora."
+13086: ];
+13087: const MUSEUM=[
+13088:   "Cette pièce est antérieure aux premières cités de Valdora et rappelle une espèce aujourd'hui disparue.",
+13089:   "Les premiers habitants vénéraient les créatures capables de manipuler la lumière et les éléments.",
+13090:   "Des fragments découverts sous le musée portent le même motif que plusieurs ruines de la région.",
+13091:   "Les archives indiquent qu'un ancien temple se trouvait exactement sous cette salle.",
+13092:   "Ce spécimen montre que certaines lignées de créatures ont profondément changé au fil des siècles."
+13093: ];
+13094: const pick=a=>a[Math.floor(Math.random()*a.length)];
+13095: const team=()=>Array.isArray(state.team)?state.team:[];
+13096: function healAll(){team().forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});hud();save(false)}
+13097: function meal(){
+### game/CREATEUR.html line 13173 — SHOP_ITEMS
+13168:   const place=m.id==='bibliotheque'?'entre les livres':m.id==='etagere_produits'?'derrière les produits':m.id==='cartons_decor'?'dans les cartons':m.id==='chariot_bagages'?'dans une poche oubliée du chariot':m.id==='vitrine_verre'?'près du socle de la vitrine':m.id==='bureau_conservateur'?'dans un tiroir mal fermé':'derrière le pot';
+13169:   if((h%100)>=62){save(false);dialog('<b>Fouille</b><br>Tu cherches '+place+', mais tu ne trouves rien cette fois.');return true}
+13170:   const rewards=[['Baie',1],['Potion',1],['Orbe',1],['Antidote',1],['SuperPotion',1],['money',30+(h%71)]];
+13171:   const [kind,qty]=rewards[(h>>>8)%rewards.length];let label='';
+13172:   if(kind==='money'){state.money=(Number(state.money)||0)+qty;label=qty+' Voltrons'}
+13173:   else{state.inventory[kind]=(Number(state.inventory[kind])||0)+qty;label=qty+' '+(SHOP_ITEMS?.[kind]?.label||kind)}
+13174:   save(false);hud();dialog('<b>Objet trouvé !</b><br>En fouillant '+place+', tu récupères <b>'+label+'</b>.');return true
+13175: }
+13176: function triggerFurniture(m){
+13177:   state.mobilierInstanceIdV102Y=m.instanceId;
+13178:   if(tryFurnitureFindV106G(m))return;
+13179:   switch(m.fonction){
+13180:     case 'repos_15s_soin_complet': sleepAt(m);break;
+13181:     case 'ouvrir_stockage': openPC();break;
+13182:     case 'lire_lore_indices': dialog('<b>Bibliothèque</b><br>'+pick(BOOKS));break;
+### game/CREATEUR.html line 13282 — ElixirVital
+13277: 
+13278: function zPick(a){return a[Math.floor(Math.random()*a.length)]}
+13279: function zHash(s){let h=2166136261>>>0;for(const c of String(s||'')){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+13280: function zEnsure(){
+13281:   state.inventory=state.inventory||{};
+13282:   for(const k of ['FioleGuerison','ElixirVital','Artefact1','Artefact2','Artefact3','Artefact4','Artefact5'])
+13283:     if(!Number.isFinite(state.inventory[k]))state.inventory[k]=0;
+13284:   state.v102z=state.v102z||{story:{},taronBossWins:{},combatWins:0};
+13285:   state.v102z.story=state.v102z.story||{};
+13286:   state.v102z.taronBossWins=state.v102z.taronBossWins||{};
+13287:   return state.v102z;
+13288: }
+13289: 
+13290: // ----------------------------------------------------------------------
+13291: // 1. ATTAQUES PLUS VARIÉES PAR TYPE
+### game/CREATEUR.html line 13379 — Rappel
+13374:     if(mid){state.capsules=state.capsules||[];state.capsules.push(mid);lines.push('Capsule de capacité obtenue : '+MOVE_DB[mid].name+'.')}
+13375:   }
+13376:   const itemChance=boss?1:(trainer?.34:.20);
+13377:   if(Math.random()<itemChance){
+13378:     const tier=Math.max(0,Math.min(6,Math.floor((e.level||1)/10)));
+13379:     const pool=['Potion','Baie','Antidote',...(tier>=1?['SuperPotion']:[]),...(tier>=2?['FioleGuerison']:[]),...(tier>=3?['SuperOrbe']:[]),...(tier>=4?['Rappel']:[])];
+13380:     const it=zPick(pool);state.inventory[it]=(state.inventory[it]||0)+1;lines.push('Objet récupéré : '+(SHOP_ITEMS[it]?.label||it)+'.')
+13381:   }
+13382:   // Petit bonus régulier : évite l'impression que les récompenses spéciales n'existent jamais.
+13383:   if(!boss && state.v102z.combatWins%7===0){
+13384:     const mid=zCapsuleForEnemy(e);if(mid){state.capsules.push(mid);lines.push('Bonus de série : Capsule '+MOVE_DB[mid].name+'.')}
+13385:   }
+13386:   return lines
+13387: }
+13388: 
+### game/CREATEUR.html line 13525 — SHOP_ITEMS
+13520:   state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+13521:   const route=Number(String(t.zone).replace('route',''))||0;
+13522:   const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+13523:   const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+13524:   logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+13525:   dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+13526: };
+13527: 
+13528: // ----------------------------------------------------------------------
+13529: // 7. STORYTELLING SUPPLÉMENTAIRE, DÉCOUVERT PROGRESSIVEMENT
+13530: // ----------------------------------------------------------------------
+13531: const Z_STORY={
+13532:   route0:'Au bord de la Route 1, plusieurs voyageurs parlent de caisses marquées d’un losange jaune. Personne ne sait encore à qui elles appartiennent.',
+13533:   town1:'À Rochebrune, les habitants évoquent pour la première fois un groupe appelé Team Taron. Ils achèteraient des informations sur les Éclats rares.',
+13534:   route2:'Des traces de véhicules et des balises brouillées indiquent qu’une opération organisée a lieu sur cette route.',
+### game/V105Z_CORRECTIONS.js line 253 — Rappel, ElixirVital
+248:   function combatActive(){return typeof scene!=='undefined'&&scene==='battle'&&typeof battle!=='undefined'&&!!battle}
+249:   function menu(){return document.getElementById('menuov')}
+250:   function closeMenu(){const m=menu();if(m)m.style.display='none'}
+251:   function ensureInventory(){
+252:     state.inventory=state.inventory||{};
+253:     for(const id of ['Potion','SuperPotion','Rappel','Baie','Antidote','Repas','FioleGuerison','ElixirVital','FioleAttaque','FioleDefense','Orbe','SuperOrbe','MegaOrbe'])if(state.inventory[id]==null)state.inventory[id]=0;
+254:   }
+255:   function itemLabel(id){return SHOP_ITEMS?.[id]?.label||({Potion:'Potion',SuperPotion:'Super Potion',Rappel:'Rappel',Baie:'Baie',Antidote:'Antidote',Repas:'Repas maison',FioleGuerison:'Fiole de Guérison',ElixirVital:'Élixir Vital',FioleAttaque:'Fiole d’Attaque',FioleDefense:'Fiole de Défense',Orbe:'Orbe d’Éclat',SuperOrbe:'Super Orbe',MegaOrbe:'Méga Orbe'}[id]||id)}
+256:   function battleMessage(text){
+257:     if(!battle)return;battle.message=text;
+258:     for(const id of ['battleMessageV105R','battleMessageV84']){const el=document.getElementById(id);if(el){el.textContent=text;if(id==='battleMessageV105R')el.style.setProperty('display','block','important')}}
+259:   }
+260:   function rebuildBattleBar(){try{window.buildBattleButtons?.()}catch(_){try{buildBattleButtons()}catch(__){ }}}
+261:   function consumeTurn(text){
+262:     if(!combatActive())return;
+### game/V105Z_CORRECTIONS.js line 270 — Rappel
+265:     const token=battle.token;
+266:     setTimeout(()=>{if(!combatActive()||battle.token!==token)return;try{window.enemyTurn?.()}catch(err){console.error('V105Z tour objet',err);battle.busy=false;rebuildBattleBar()}},650);
+267:   }
+268:   function canUseOn(id,m){
+269:     if(!m)return false;
+270:     if(id==='Rappel')return m.hp<=0;
+271:     if(m.hp<=0)return false;
+272:     if(['Potion','SuperPotion','Repas','FioleGuerison','ElixirVital'].includes(id))return m.hp<maxHP(m)||(['FioleGuerison','ElixirVital'].includes(id)&&!!m.status);
+273:     if(id==='Baie')return !!m.status&&m.status!=='empoisonné';
+274:     if(id==='Antidote')return m.status==='empoisonné';
+275:     return true;
+276:   }
+277:   function targetHtml(id){
+278:     const choices=(state.team||[]).map((m,i)=>({m,i})).filter(x=>canUseOn(id,x.m));
+279:     if(!choices.length){toast('Aucun Éclat ne peut bénéficier de cet objet.');return}
+### game/V105Z_CORRECTIONS.js line 289 — Rappel
+284:   }
+285:   function applyBattleItem(id,index){
+286:     if(!combatActive()||battle.busy)return;ensureInventory();
+287:     const inv=state.inventory,m=state.team?.[index];if(!m||!(inv[id]>0)||!canUseOn(id,m)){toast('Cet objet ne peut pas être utilisé ici.');return}
+288:     inv[id]--;let text='';
+289:     if(id==='Rappel'){m.hp=Math.max(1,Math.floor(maxHP(m)*.5));m.status=null;text=`${BY[m.id]?.name||'L’Éclat'} revient avec ${m.hp} PV.`}
+290:     else if(id==='Baie'){m.status=null;text=`Le statut de ${BY[m.id]?.name||'l’Éclat'} est soigné.`}
+291:     else if(id==='Antidote'){m.status=null;text=`Le poison de ${BY[m.id]?.name||'l’Éclat'} est soigné.`}
+292:     else{
+293:       const amount={Potion:30,SuperPotion:80,Repas:50,FioleGuerison:120,ElixirVital:Infinity}[id]||0,before=m.hp;
+294:       m.hp=id==='ElixirVital'?maxHP(m):Math.min(maxHP(m),m.hp+amount);
+295:       if(id==='FioleGuerison'||id==='ElixirVital')m.status=null;
+296:       text=`${itemLabel(id)} rend ${m.hp-before} PV à ${BY[m.id]?.name||'l’Éclat'}.`;
+297:     }
+298:     consumeTurn(text);
+### game/V105Z_CORRECTIONS.js line 319 — Rappel
+314:   function openBattleBag(){
+315:     if(!combatActive()||battle.busy)return;ensureInventory();
+316:     let h='<div id="v105zBattleBagMarker" class="quest"><b>Sac unifié</b><br>Ce sac contient exactement les objets disponibles depuis le panneau de droite. Utiliser un objet consomme un tour.</div><div class="baggrid">';
+317:     h+=bagButton('Potion','🧪','Restaure 30 PV.');
+318:     h+=bagButton('SuperPotion','🧪✨','Restaure 80 PV.');
+319:     h+=bagButton('Rappel','✨','Réanime à 50 % des PV.');
+320:     h+=bagButton('Baie','🍓','Soigne un statut, sauf le poison.');
+321:     h+=bagButton('Antidote','⚗️','Soigne le poison.');
+322:     if((state.inventory.Repas||0)>0)h+=bagButton('Repas','🍲','Restaure 50 PV.');
+323:     h+=bagButton('FioleGuerison','💗','Restaure 120 PV et soigne le statut.');
+324:     h+=bagButton('ElixirVital','💎','Restaure tous les PV et soigne le statut.');
+325:     h+=bagButton('FioleAttaque','🔴','Augmente l’attaque.','boost');
+326:     h+=bagButton('FioleDefense','🔵','Augmente la défense.','boost');
+327:     h+=bagButton('Orbe','◈',battle.trainer?'Indisponible contre un dresseur.':'Capture standard.','orb',!!battle.trainer);
+328:     h+=bagButton('SuperOrbe','◆',battle.trainer?'Indisponible contre un dresseur.':'Capture améliorée.','orb',!!battle.trainer);
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 223 — Rappel
+218:     battle.v109wEnemyParticipants=[];
+219:   };
+220: }catch(e){console.warn('V109W EXP grant',e)}
+221: 
+222: // ------------------------------------------------------------------
+223: // 6) BOUTIQUES : vrais paliers + Rappel/Élixir plus tôt + aucun objet perdu.
+224: // ------------------------------------------------------------------
+225: function highestTown(){
+226:   const vals=(state.discovered||[]).map(z=>{const m=String(z).match(/^town(\d+)$/);return m?+m[1]:-1}).filter(n=>n>=0);
+227:   const cur=String(state.zone||'').match(/^town(\d+)$/);if(cur)vals.push(+cur[1]);return Math.max(0,...vals)
+228: }
+229: function shopTier(){
+230:   if(creatorMode())return 6;const town=highestTown(),seals=(state.seals||[]).length;
+231:   if(town>=13||seals>=7)return 6;if(town>=11||seals>=6)return 5;if(town>=9||seals>=5)return 4;if(town>=6||seals>=3)return 3;if(town>=3||seals>=1)return 2;if(town>=1)return 1;return 0;
+232: }
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 233 — shopTier
+228: }
+229: function shopTier(){
+230:   if(creatorMode())return 6;const town=highestTown(),seals=(state.seals||[]).length;
+231:   if(town>=13||seals>=7)return 6;if(town>=11||seals>=6)return 5;if(town>=9||seals>=5)return 4;if(town>=6||seals>=3)return 3;if(town>=3||seals>=1)return 2;if(town>=1)return 1;return 0;
+232: }
+233: window.pShopTierV101P=shopTier;
+234: window.pNormalShopIdsV101P=function(){
+235:   const t=shopTier(),ids=['Potion','Orbe','Antidote','Baie'];
+236:   if(t>=1)ids.push('SuperPotion','FioleAttaque','FioleDefense','Rappel');
+237:   if(t>=2)ids.push('SuperOrbe','FioleGuerison','ElixirVital','Artefact1');
+238:   if(t>=3)ids.push('Artefact2');
+239:   if(t>=4)ids.push('MegaOrbe','Artefact3');
+240:   if(t>=5)ids.push('Artefact4');
+241:   if(t>=6)ids.push('Artefact5');
+242:   return uniq(ids.filter(id=>typeof SHOP_ITEMS==='undefined'||SHOP_ITEMS[id]));
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 242 — SHOP_ITEMS
+237:   if(t>=2)ids.push('SuperOrbe','FioleGuerison','ElixirVital','Artefact1');
+238:   if(t>=3)ids.push('Artefact2');
+239:   if(t>=4)ids.push('MegaOrbe','Artefact3');
+240:   if(t>=5)ids.push('Artefact4');
+241:   if(t>=6)ids.push('Artefact5');
+242:   return uniq(ids.filter(id=>typeof SHOP_ITEMS==='undefined'||SHOP_ITEMS[id]));
+243: };
+244: try{
+245:   if(typeof pMarketItemIdsV101P==='function'||window.pMarketItemIdsV101P){
+246:     const baseMarket=window.pMarketItemIdsV101P||pMarketItemIdsV101P;
+247:     window.pMarketItemIdsV101P=function(){return uniq([...(baseMarket?.()||[]),...window.pNormalShopIdsV101P()])};
+248:     try{pMarketItemIdsV101P=window.pMarketItemIdsV101P}catch(_){}
+249:   }
+250: }catch(_){}
+251: 
+### game/V109W_CORRECTIFS_GAMEPLAY.js line 483 — shopTier
+478:   document.title=`Éclats Sauvages — Valdora ${VERSION}`;
+479: }
+480: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{setTimeout(install,3000);setTimeout(install,8000);setTimeout(install,11500)});else{setTimeout(install,2500);setTimeout(install,7500);setTimeout(install,11000)}
+481: 
+482: window.ValdoraGameplayV109W={
+483:   version:VERSION,install,completeTemple,configureSimdor,ensureVolAgent,shopTier,pendingRoadTrainers,ensureTaronisLinkV109Y,ensureLateQuestNpcs,totalCreatures:totalCreaturesV109W,
+484:   audit(){
+485:     const issues=[];
+486:     const temple=SCENES?.temple_final,ids=new Set((temple?.trainers||[]).map(t=>t.id));for(let i=1;i<=10;i++)if(!ids.has('temple_guard_'+i))issues.push('Citadelle : gardien '+i+' absent');
+487:     const pairs=[['route_simdor','route_m1'],['route_m1','town8']];for(const [a,b] of pairs){if(!(SCENES?.[a]?.exits||[]).some(e=>dest(e)===b)||!(SCENES?.[b]?.exits||[]).some(e=>dest(e)===a))issues.push(`${a} <-> ${b} non réciproque`)}
+488:     if(!(SCENES?.route3?.trainers||[]).some(t=>t.id===VOL_AGENT_ID))issues.push('Route 4 : agent Vol absent');
+489:     const tiers={rappel:window.pNormalShopIdsV101P().includes('Rappel'),elixir:shopTier()>=2?window.pNormalShopIdsV101P().includes('ElixirVital'):true};if(!tiers.rappel&&shopTier()>=1)issues.push('Rappel absent du palier attendu');if(!tiers.elixir)issues.push('Élixir Vital absent du palier attendu');
+490:     if(typeof NPCDATA!=='undefined'){for(const npc of V109W_LATE_NPCS)if(!NPCDATA.some(n=>n?.id===npc.id))issues.push('PNJ final absent : '+npc.id)}
+491:     if(!(SCENES?.town12?.exits||[]).some(e=>dest(e)==='route12'))issues.push('Sylvaris -> Route de Taronis absent');
+492:     if(!(SCENES?.route12?.exits||[]).some(e=>dest(e)==='town13'))issues.push('Route de Taronis -> Taronis absent');
+### game/assets/v105r-combat.js line 185 — Rappel
+180:     const inv=state.inventory||{};
+181:     bar.appendChild(button(`Potion (${inv.Potion||0})`,()=>useItem('Potion'),locked||!(inv.Potion>0)||p.hp>=maxHP(p)));
+182:     bar.appendChild(button(`Super Potion (${inv.SuperPotion||0})`,()=>useItem('SuperPotion'),locked||!(inv.SuperPotion>0)||p.hp>=maxHP(p)));
+183:     bar.appendChild(button(`Baie (${inv.Baie||0})`,()=>useItem('Baie'),locked||!(inv.Baie>0)||p.hp>=maxHP(p)));
+184:     bar.appendChild(button(`Antidote (${inv.Antidote||0})`,()=>useItem('Antidote'),locked||!(inv.Antidote>0)||!p.status));
+185:     bar.appendChild(button(`Rappel (${inv.Rappel||0})`,()=>openRevive(),locked||!(inv.Rappel>0)||!(state.team||[]).some(m=>m.hp<=0)));
+186:     bar.appendChild(button(`Orbe (${inv.Orbe||0})`,()=>throwOrb('Orbe'),locked||!!battle.trainer||!(inv.Orbe>0)));
+187:     bar.appendChild(button(`Super Orbe (${inv.SuperOrbe||0})`,()=>throwOrb('SuperOrbe'),locked||!!battle.trainer||!(inv.SuperOrbe>0)));
+188:     bar.appendChild(button(`Méga Orbe (${inv.MegaOrbe||0})`,()=>throwOrb('MegaOrbe'),locked||!!battle.trainer||!(inv.MegaOrbe>0)));
+189:     bar.appendChild(button('Retour',()=>{battle.menu='actions';buildButtons()},locked));
+190:     return
+191:   }
+192: 
+193:   const moves=(p?.moves||[]).slice(0,4);
+194:   for(let i=0;i<4;i++){
+### game/assets/v105r-combat.js line 431 — Rappel
+426:   battle.busy=true;battle.menu='actions';setMessage(text);safeCall(hud);buildButtons();schedule(560,enemyTurnV105R)
+427: }
+428: 
+429: function openRevive(){battle.menu='revive';buildButtons()}
+430: function useRevive(target){
+431:   if(!combatReady()||battle.busy||target.hp>0||!(state.inventory?.Rappel>0))return;
+432:   state.inventory.Rappel--;target.hp=Math.max(1,Math.floor(maxHP(target)*.45));target.status=null;
+433:   battle.busy=true;battle.menu='actions';setMessage(`${nameOf(target)} revient avec ${target.hp} PV.`);safeCall(hud);buildButtons();schedule(560,enemyTurnV105R)
+434: }
+435: 
+436: function completeOrbCapture(enemy){
+437:   const xp=Math.max(8,Math.floor((enemy.level*11+12+(BY[enemy.id]?.stage||0)*8)*.80));
+438:   const events=safeCall(gainXP,currentPlayer(),xp)||[];
+439:   battle.eventQueue.push(`${nameOf(currentPlayer())} gagne ${xp} EXP pour la capture.`,...events);
+440:   battle.captureXP=xp;battle.result='capture';setMessage(`${nameOf(enemy)} est capturé !`);
+### game/assets/v105r-combat.js line 779 — SHOP_ITEMS
+774:   document.title=`VALDORA ${VERSION} — combats réécrits`;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.combatEngine=VERSION
+775: }
+776: 
+777: function installOrbEconomy(){
+778:   ensureOrbInventory();preloadOrbImages();
+779:   if(typeof SHOP_ITEMS==='object'){
+780:     SHOP_ITEMS.Orbe={...(SHOP_ITEMS.Orbe||{}),label:"Orbe d'Éclat",price:50,desc:'Capture standard à noyau ambré.'};
+781:     SHOP_ITEMS.SuperOrbe={...(SHOP_ITEMS.SuperOrbe||{}),label:'Super Orbe',price:240,desc:'Flux renforcé pour les captures difficiles.'};
+782:     SHOP_ITEMS.MegaOrbe={label:'Méga Orbe',price:1800,desc:'Orbe d’élite vendue seulement très tard dans l’aventure.'}
+783:   }
+784:   if(!window.__v105uShopInstalled){
+785:     window.__v105uShopInstalled=true;
+786:     const priorNormal=window.pNormalShopIdsV101P;
+787:     window.pNormalShopIdsV101P=function(){
+788:       const ids=priorNormal?priorNormal():['Potion','Orbe','Antidote','Baie'];
+### game/index.html line 1716 — Rappel
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+1717: 
+1718: 
+1719: function creatureStats(m){
+1720:   const c=BY[m.id]||{},stage=Math.max(0,c.stage||0),fam=c.family||0,lvl=Math.max(1,m.level||1);
+1721:   // Profils spéciaux Phantasialand : adaptés au modèle de stats réellement utilisé par Valdora.
+1722:   if(Number(m.id)===168)return {hp:Math.floor(38+lvl*3.25),atk:Math.floor(10+lvl*1.48),def:Math.floor(13+lvl*1.58),spd:Math.floor(6+lvl*.90)};
+1723:   if(Number(m.id)===169)return {hp:Math.floor(34+lvl*3.05),atk:Math.floor(9+lvl*1.40),def:Math.floor(9+lvl*1.32),spd:Math.floor(9+lvl*1.28)};
+1724:   const identity=(fam%7)-3;
+1725:   return {
+### game/index.html line 2302 — Rappel
+2297: }
+2298: 
+2299: 
+2300: function ensureInventoryV81(st=state){
+2301:   st.inventory=st.inventory||{};
+2302:   for(const k of ['Potion','SuperPotion','Orbe','SuperOrbe','MegaOrbe','Antidote','Baie','Repas','FioleAttaque','FioleDefense','Rappel']){
+2303:     if(st.inventory[k]==null)st.inventory[k]=0
+2304:   }
+2305:   return st
+2306: }
+2307: 
+2308: 
+2309: 
+2310: function mon(id,l){
+2311:   const level=Math.max(Number(l)||1,minLevelForSpeciesV81(id));
+### game/index.html line 6990 — Rappel
+6985: 
+6986: function battleHealingTargetsV86(item){
+6987:   const heal=item==='Potion'?30:item==='SuperPotion'?80:item==='Repas'?50:0;
+6988:   return state.team.map((m,i)=>({m,i})).filter(x=>{
+6989:     if(!x.m)return false;
+6990:     if(item==='Rappel')return x.m.hp<=0;
+6991:     if(x.m.hp<=0)return false;
+6992:     if(heal>0)return x.m.hp<maxHP(x.m);
+6993:     if(item==='Antidote')return x.m.status==='empoisonné';
+6994:     if(item==='Baie')return !!x.m.status && x.m.status!=='empoisonné';
+6995:     return true
+6996:   })
+6997: }
+6998: 
+6999: function openBattleItemTargetV86(item){
+### game/index.html line 7026 — Rappel
+7021:   const m=state.team[index];
+7022:   if(!m||(state.inventory[item]||0)<=0)return;
+7023: 
+7024:   let used=false,msg='';
+7025: 
+7026:   if(item==='Rappel'){
+7027:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+7028:     state.inventory.Rappel--;
+7029:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+7030:     m.status=null;
+7031:     used=true;
+7032:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7033:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7034:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+7035:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+### game/index.html line 7035 — Rappel
+7030:     m.status=null;
+7031:     used=true;
+7032:     msg=BY[m.id].name+' revient au combat avec '+m.hp+' PV !'
+7033:   }else if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+7034:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+7035:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+7036:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+7037:     state.inventory[item]--;
+7038:     const n=Math.min(heal,maxHP(m)-m.hp);
+7039:     m.hp+=n;used=true;
+7040:     msg=BY[m.id].name+' récupère '+n+' PV.'
+7041:   }else if(item==='Baie'){
+7042:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7043:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+7044:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+### game/index.html line 7048 — Rappel
+7043:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+7044:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+7045:     state.inventory.Baie--;m.status=null;used=true;
+7046:     msg=BY[m.id].name+' est débarrassé de son statut.'
+7047:   }else if(item==='Antidote'){
+7048:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+7049:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+7050:     state.inventory.Antidote--;m.status=null;used=true;
+7051:     msg=BY[m.id].name+' n’est plus empoisonné.'
+7052:   }
+7053: 
+7054:   if(!used)return;
+7055: 
+7056:   document.getElementById('menuov').style.display='none';
+7057:   save(false);hud();syncBattleMessageV84();
+### game/index.html line 7059 — SHOP_ITEMS
+7054:   if(!used)return;
+7055: 
+7056:   document.getElementById('menuov').style.display='none';
+7057:   save(false);hud();syncBattleMessageV84();
+7058:   battle.busy=true;
+7059:   battle.message='Tu utilises '+(SHOP_ITEMS[item]?.label||item)+' sur '+BY[m.id].name+' !';
+7060:   buildBattleButtons();syncBattleMessageV84();
+7061: 
+7062:   v84Schedule(520,()=>{
+7063:     if(!battleAlive())return;
+7064:     battle.message=msg;
+7065:     hud();syncBattleMessageV84();
+7066:     v84Schedule(520,()=>v84FinishAction(true))
+7067:   })
+7068: }
+### game/index.html line 7231 — Rappel
+7226:   if(!battleAlive()||battle.busy)return;
+7227:   ensureInventoryV81();
+7228:   let h='<div class="quest"><b>Utiliser un objet consomme ton tour.</b><br>Choisis ensuite l’Éclat à cibler.</div><div class="baggrid">';
+7229:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>+30 PV</small></button>`;
+7230:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>+80 PV</small></button>`;
+7231:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime à 50 % des PV</small></button>`;
+7232:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un statut sauf poison</small></button>`;
+7233:   h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison</small></button>`;
+7234:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleAttaque')"><b>🔴 Fiole d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>ATQ +2</small></button>`;
+7235:   h+=`<button class="bagitem" onclick="useBattleBagItem('FioleDefense')"><b>🔵 Fiole de Défense</b><br>${state.inventory.FioleDefense}<br><small>DEF +2</small></button>`;
+7236:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="openBattleItemTargetV86('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>+50 PV</small></button>`;
+7237:   if(!battle.trainer){
+7238:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('Orbe')"><b>◈ Orbe d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard</small></button>`;
+7239:     h+=`<button class="bagitem" onclick="closeBattleBagAndOrb('SuperOrbe')"><b>◆ Super Orbe</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée</small></button>`
+7240:   }
+### game/index.html line 8429 — SHOP_ITEMS
+8424: },true);
+8425: window.addEventListener('keyup',e=>{if(e.code===held){held=null;clearInterval(timer);timer=null}},true);
+8426: function startMusicLegacyV76(){if(!musicOn)return;if(!musicCtx)musicCtx=new (window.AudioContext||window.webkitAudioContext)();if(musicCtx.state==='suspended')musicCtx.resume();if(musicTimer)return;let notes=[261.6,329.6,392,523.3,392,329.6,293.7,349.2,440,587.3,440,349.2],i=0;musicTimer=setInterval(()=>{if(scene==='battle')return;let o=musicCtx.createOscillator(),g=musicCtx.createGain();o.type='triangle';o.frequency.value=notes[i++%notes.length];g.gain.value=.025;o.connect(g);g.connect(musicCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,musicCtx.currentTime+.22);o.stop(musicCtx.currentTime+.23)},270)}
+8427: 
+8428: 
+8429: const SHOP_ITEMS={
+8430:   Potion:{label:'Potion',price:10,desc:'Restaure jusqu’à 30 PV.'},
+8431:   SuperPotion:{label:'Super Potion',price:50,desc:'Restaure jusqu’à 80 PV.'},
+8432:   Orbe:{label:'Orbe d’Éclat',price:50,desc:'Permet de capturer une Éclat sauvage.'},
+8433:   SuperOrbe:{label:'Super Orbe',price:100,desc:'Orbe renforcée : capture nettement facilitée.'},
+8434:   Antidote:{label:'Antidote',price:30,desc:'Soigne le poison.'},
+8435:   Baie:{label:'Baie de soin',price:30,desc:'Soigne certains changements de statut.'},
+8436:   FioleAttaque:{label:'Fiole d’Attaque',price:100,desc:'Augmente fortement l’attaque pendant un combat.'},
+8437:   FioleDefense:{label:'Fiole de Défense',price:100,desc:'Augmente fortement la défense pendant un combat.'},
+8438:   Rappel:{label:'Rappel',price:150,desc:'Réanime un Éclat K.O. avec 50 % de ses PV.'}
+### game/index.html line 8438 — Rappel
+8433:   SuperOrbe:{label:'Super Orbe',price:100,desc:'Orbe renforcée : capture nettement facilitée.'},
+8434:   Antidote:{label:'Antidote',price:30,desc:'Soigne le poison.'},
+8435:   Baie:{label:'Baie de soin',price:30,desc:'Soigne certains changements de statut.'},
+8436:   FioleAttaque:{label:'Fiole d’Attaque',price:100,desc:'Augmente fortement l’attaque pendant un combat.'},
+8437:   FioleDefense:{label:'Fiole de Défense',price:100,desc:'Augmente fortement la défense pendant un combat.'},
+8438:   Rappel:{label:'Rappel',price:150,desc:'Réanime un Éclat K.O. avec 50 % de ses PV.'}
+8439: };
+8440: 
+8441: 
+8442: 
+8443: 
+8444: function openShop(){
+8445:   ensureInventoryV81();
+8446:   const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+8447:   const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+### game/index.html line 8447 — shopTier
+8442: 
+8443: 
+8444: function openShop(){
+8445:   ensureInventoryV81();
+8446:   const ids=window.pNormalShopIdsV101P?window.pNormalShopIdsV101P():['Potion','Orbe','Antidote','Baie'];if(window.HOME_SHOP_IDS_V105J)for(const id of window.HOME_SHOP_IDS_V105J)if(!ids.includes(id))ids.push(id);
+8447:   const tier=window.pShopTierV101P?window.pShopTierV101P():0;
+8448:   const city=window.pShopCityLabelV101P?window.pShopCityLabelV101P():'Valdora';
+8449: 
+8450:   let h=`<div class="quest"><b>Boutique de ${city}</b><br>
+8451:     Stock local niveau ${tier+1}. Les marchandises disponibles évoluent selon la ville.<br>
+8452:     <b>Ton argent : ${voltronLabelV85(state.money)}</b></div>
+8453:     <div style="display:flex;gap:8px;margin-bottom:12px">
+8454:       <button onclick="openShop()">Acheter</button>
+8455:       <button onclick="openSellShopV101D()">Revendre</button>
+8456:     </div><div class="baggrid">`;
+### game/index.html line 8459 — SHOP_ITEMS
+8454:       <button onclick="openShop()">Acheter</button>
+8455:       <button onclick="openSellShopV101D()">Revendre</button>
+8456:     </div><div class="baggrid">`;
+8457: 
+8458:   for(const id of ids){
+8459:     const it=SHOP_ITEMS[id];if(!it)continue;
+8460:     const qty=state.inventory[id]||0;
+8461:     h+=`<button class="bagitem" onclick="buyShopItem('${id}')">
+8462:       <b>${it.label}</b><br>${it.price} Voltrons<br>
+8463:       <small>${it.desc}</small><br><small>Possédé : ${qty}</small>
+8464:     </button>`
+8465:   }
+8466: 
+8467:   h+='</div>';
+8468:   openSimpleMenu('Boutique — '+city,h)
+### game/index.html line 8477 — SHOP_ITEMS
+8472: 
+8473: 
+8474: 
+8475: 
+8476: function buyShopItem(id){
+8477:   const it=SHOP_ITEMS[id];if(!it)return;
+8478:   if(window.HOME_FURNITURE_ITEMS_V105J?.[id]){if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}const fid=window.HOME_FURNITURE_ITEMS_V105J[id];state.money-=it.price;state.homeFurnitureOwnedV105J=state.homeFurnitureOwnedV105J||{};state.homeFurnitureOwnedV105J[fid]=(state.homeFurnitureOwnedV105J[fid]||0)+1;save(false);hud();openShop();toast(it.label+' acheté pour ta maison !');return}
+8479:   if(state.money<it.price){toast('Tu n’as pas assez de Voltrons.');return}
+8480:   state.money-=it.price;state.inventory[id]=(state.inventory[id]||0)+1;
+8481:   save(false);hud();openShop();toast(it.label+' acheté pour '+it.price+' Voltrons !')
+8482: }
+8483: 
+8484: 
+8485: function openSimpleMenu(title,html){$('menuov').style.display='flex';$('menucard').innerHTML='<h2>'+title+'</h2>'+html+'<br><button onclick="$(\'menuov\').style.display=\'none\'">Fermer</button>'}
+8486: 
+### game/index.html line 8984 — Rappel
+8979: 
+8980: function applyBagItem(index){
+8981:   const item=pendingBagItem,m=state.team[index];if(!item||!m)return;
+8982:   ensureInventoryV81();
+8983: 
+8984:   if(item==='Rappel'){
+8985:     if((state.inventory.Rappel||0)<=0){toast('Plus de Rappels.');return}
+8986:     if(m.hp>0){toast(BY[m.id].name+' n’est pas K.O.');return}
+8987:     state.inventory.Rappel--;
+8988:     m.hp=Math.max(1,Math.floor(maxHP(m)*.5));
+8989:     m.status=null;
+8990:     save(false);hud();toast(BY[m.id].name+' est réanimé !');openBag();return
+8991:   }
+8992: 
+8993:   if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+### game/index.html line 8996 — Rappel
+8991:   }
+8992: 
+8993:   if(item==='Potion'||item==='SuperPotion'||item==='Repas'){
+8994:     const heal=item==='Potion'?30:item==='SuperPotion'?80:50;
+8995:     if((state.inventory[item]||0)<=0){toast('Tu n’en as plus.');return}
+8996:     if(m.hp<=0){toast('Utilise un Rappel pour un Éclat K.O.');return}
+8997:     if(m.hp>=maxHP(m)){toast(BY[m.id].name+' a déjà tous ses PV.');return}
+8998:     state.inventory[item]--;
+8999:     const n=Math.min(heal,maxHP(m)-m.hp);m.hp+=n;
+9000:     save(false);toast(BY[m.id].name+' récupère '+n+' PV.');openBag();return
+9001:   }
+9002: 
+9003:   if(item==='Baie'){
+9004:     if((state.inventory.Baie||0)<=0){toast('Plus de Baies.');return}
+9005:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+### game/index.html line 9005 — Rappel
+9000:     save(false);toast(BY[m.id].name+' récupère '+n+' PV.');openBag();return
+9001:   }
+9002: 
+9003:   if(item==='Baie'){
+9004:     if((state.inventory.Baie||0)<=0){toast('Plus de Baies.');return}
+9005:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9006:     if(!m.status){toast(BY[m.id].name+' n’a aucun statut à soigner.');return}
+9007:     if(m.status==='empoisonné'){toast('Une Baie ne soigne pas le poison. Utilise un Antidote.');return}
+9008:     state.inventory.Baie--;m.status=null;save(false);toast(BY[m.id].name+' est soigné.');openBag();return
+9009:   }
+9010: 
+9011:   if(item==='Antidote'){
+9012:     if((state.inventory.Antidote||0)<=0){toast('Plus d’Antidotes.');return}
+9013:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9014:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+### game/index.html line 9013 — Rappel
+9008:     state.inventory.Baie--;m.status=null;save(false);toast(BY[m.id].name+' est soigné.');openBag();return
+9009:   }
+9010: 
+9011:   if(item==='Antidote'){
+9012:     if((state.inventory.Antidote||0)<=0){toast('Plus d’Antidotes.');return}
+9013:     if(m.hp<=0){toast('Un Éclat K.O. doit d’abord recevoir un Rappel.');return}
+9014:     if(m.status!=='empoisonné'){toast(BY[m.id].name+' n’est pas empoisonné.');return}
+9015:     state.inventory.Antidote--;m.status=null;save(false);toast('Poison soigné.');openBag();return
+9016:   }
+9017: }
+9018: 
+9019: 
+9020: 
+9021: 
+9022: 
+### game/index.html line 9029 — Rappel
+9024: function openBag(){
+9025:   ensureInventoryV81();
+9026:   let h='<div class="baggrid">';
+9027:   h+=`<button class="bagitem" onclick="selectBagTarget('Potion')"><b>🧪 Potion</b><br>${state.inventory.Potion}<br><small>Restaure jusqu’à 30 PV.</small></button>`;
+9028:   h+=`<button class="bagitem" onclick="selectBagTarget('SuperPotion')"><b>🧪✨ Super Potion</b><br>${state.inventory.SuperPotion}<br><small>Restaure jusqu’à 80 PV.</small></button>`;
+9029:   h+=`<button class="bagitem" onclick="selectBagTarget('Rappel')"><b>✨ Rappel</b><br>${state.inventory.Rappel}<br><small>Réanime un Éclat K.O. avec 50 % de ses PV.</small></button>`;
+9030:   h+=`<button class="bagitem" onclick="selectBagTarget('Baie')"><b>🍓 Baie</b><br>${state.inventory.Baie}<br><small>Soigne un changement de statut, sauf le poison.</small></button>`;
+9031:   h+=`<button class="bagitem" onclick="selectBagTarget('Antidote')"><b>⚗️ Antidote</b><br>${state.inventory.Antidote}<br><small>Soigne le poison.</small></button>`;
+9032:   if((state.inventory.Repas||0)>0)h+=`<button class="bagitem" onclick="selectBagTarget('Repas')"><b>🍲 Repas maison</b><br>${state.inventory.Repas}<br><small>Restaure jusqu’à 50 PV.</small></button>`;
+9033:   h+=`<div class="bagitem"><b>◈ Orbes d’Éclat</b><br>${state.inventory.Orbe}<br><small>Capture standard en combat sauvage.</small></div>`;
+9034:   h+=`<div class="bagitem"><b>◆ Super Orbes</b><br>${state.inventory.SuperOrbe}<br><small>Capture améliorée en combat sauvage.</small></div>`;
+9035:   h+=`<div class="bagitem"><b>🔴 Fioles d’Attaque</b><br>${state.inventory.FioleAttaque}<br><small>Utilisables en combat.</small></div>`;
+9036:   h+=`<div class="bagitem"><b>🔵 Fioles de Défense</b><br>${state.inventory.FioleDefense}<br><small>Utilisables en combat.</small></div>`;
+9037:   h+='</div><h3>Capsules de capacité</h3>';
+9038:   h+=(state.capsules||[]).length
+### game/index.html line 10453 — SHOP_ITEMS
+10448:   state.routeFindsV93[o.id]=true;ensureInventoryV81();
+10449: 
+10450:   if(o.type==='chest'){
+10451:     const money=35+(o.routeIndex%5)*15,item=o.routeIndex%3===0?'SuperPotion':o.routeIndex%3===1?'Orbe':'Antidote';
+10452:     state.money=(state.money||0)+money;state.inventory[item]=(state.inventory[item]||0)+1;save(false);hud();
+10453:     dialog('<b>Petit coffre trouvé !</b><br>Tu récupères <b>'+money+' Voltrons</b> et <b>1 '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10454:   }else if(o.type==='bush'){
+10455:     const r=o.routeIndex%4,item=r===0?'Baie':r===1?'Potion':r===2?'Orbe':'Antidote',qty=r===0?2:1;
+10456:     state.inventory[item]=(state.inventory[item]||0)+qty;save(false);hud();
+10457:     dialog('<b>Buisson fouillé</b><br>Tu trouves <b>'+qty+' '+(SHOP_ITEMS[item]?.label||item)+'</b>.')
+10458:   }else{
+10459:     state.money=(state.money||0)+5;save(false);hud();
+10460:     dialog('<b>Panneau de Valdora</b><br>'+ROUTE_FIND_HINTS_V93[o.routeIndex%ROUTE_FIND_HINTS_V93.length]+'<br><br><small>Première lecture : +5 Voltrons.</small>')
+10461:   }
+10462:   return true
+### game/index.html line 11252 — Rappel
+11247:   const base=V98_AFTER[h%V98_AFTER.length];
+11248:   const hints=[
+11249:     'Pense à regarder les types avant de choisir ton prochain Éclat.',
+11250:     'Un Centre de soins n’est jamais très loin d’une grande étape.',
+11251:     'Les buissons et petits coffres au bord des chemins valent parfois le détour.',
+11252:     'Garde au moins un Rappel si tu pars avec une équipe déjà fatiguée.',
+11253:     'Les dresseurs plus loin seront plus forts que ceux d’ici.',
+11254:     'Une capacité peu puissante mais super efficace peut faire très mal.',
+11255:     'Reviens me parler si tu repasses : je ne te provoquerai plus.',
+11256:     'Les objets utilisés en combat consomment un tour, il faut bien choisir le moment.',
+11257:     'Une équipe variée aide énormément contre les prochains Gardiens.',
+11258:     'Les gares sont pratiques une fois les villes correspondantes découvertes.'
+11259:   ];
+11260:   return base+'<br><br><b>Conseil :</b> '+hints[(h>>>7)%hints.length]
+11261: };
+### game/index.html line 12205 — SHOP_ITEMS
+12200:       <button onclick="openShop()">Acheter</button>
+12201:       <button disabled>Revendre</button>
+12202:     </div><div class="baggrid">`;
+12203: 
+12204:   let count=0;
+12205:   for(const [id,it] of Object.entries(SHOP_ITEMS)){
+12206:     const qty=state.inventory[id]||0;
+12207:     if(qty<=0)continue;
+12208:     count++;
+12209:     const price=Math.max(1,Math.floor(it.price*.5));
+12210:     h+=`<button class="bagitem" onclick="sellShopItemV101D('${id}')">
+12211:       <b>${it.label}</b><br>Reprise : ${price} Voltrons<br><small>Possédé : ${qty}</small>
+12212:     </button>`;
+12213:   }
+12214:   if(!count)h+='<div class="quest">Tu n’as aucun objet revendable.</div>';
+### game/index.html line 12220 — SHOP_ITEMS
+12215:   h+='</div>';
+12216:   openSimpleMenu('Boutique — Revente',h);
+12217: };
+12218: 
+12219: window.sellShopItemV101D=function(id){
+12220:   const it=SHOP_ITEMS[id];
+12221:   if(!it||(state.inventory[id]||0)<=0)return;
+12222:   const price=Math.max(1,Math.floor(it.price*.5));
+12223:   state.inventory[id]--;
+12224:   state.money=(state.money||0)+price;
+12225:   save(false);hud();
+12226:   openSellShopV101D();
+12227:   toast(it.label+' revendu pour '+price+' Voltrons.');
+12228: };
+12229: 
+### game/index.html line 12799 — SHOP_ITEMS
+12794:   state.townBushFindsV106G=state.townBushFindsV106G||{};
+12795:   if(state.townBushFindsV106G[o.key]){toast('Tu as déjà fouillé ce buisson.');return true}
+12796:   state.townBushFindsV106G[o.key]=true;state.inventory=state.inventory||{};
+12797:   const h=v106gWorldFindHash(o.key);if((h%100)>=30){save(false);dialog('<b>Buisson fouillé</b><br>Tu écartes les branches et regardes au pied du buisson, mais il n’y a rien à récupérer ici.');return true}
+12798:   const rewards=[['Baie',2],['Potion',1],['Orbe',1],['Antidote',1],['money',25+(h%51)]],r=rewards[(h>>>7)%rewards.length];
+12799:   let label='';if(r[0]==='money'){state.money=(Number(state.money)||0)+r[1];label=r[1]+' Voltrons'}else{state.inventory[r[0]]=(Number(state.inventory[r[0]])||0)+r[1];label=r[1]+' '+(SHOP_ITEMS?.[r[0]]?.label||r[0])}
+12800:   save(false);hud();dialog('<b>Buisson fouillé</b><br>Quelque chose était caché entre les branches : <b>'+label+'</b>.');return true
+12801: }
+12802: window.townBushSearchableV106G=townBushSearchableV106G;
+12803: const _interactV101F=window.interact;
+12804: window.interact=function(){
+12805:  if(scene==='world'){
+12806:    if(currentScene()?.kind==='town'){
+12807:      const hiddenBush=nearTownBushV106G();if(hiddenBush){searchTownBushV106G(hiddenBush);return}
+12808:    }
+### game/index.html line 13087 — Rappel
+13082:   "Documentaire : certaines créatures changent de comportement selon leur habitat et l'heure de la journée.",
+13083:   "Info régionale : les gares permettent de revenir rapidement dans les villes déjà découvertes.",
+13084:   "Émission scientifique : le Professeur Aurine poursuit ses recherches sur les perturbations de Valdora."
+13085: ];
+13086: const MUSEUM=[
+13087:   "Cette pièce est antérieure aux premières cités de Valdora et rappelle une espèce aujourd'hui disparue.",
+13088:   "Les premiers habitants vénéraient les créatures capables de manipuler la lumière et les éléments.",
+13089:   "Des fragments découverts sous le musée portent le même motif que plusieurs ruines de la région.",
+13090:   "Les archives indiquent qu'un ancien temple se trouvait exactement sous cette salle.",
+13091:   "Ce spécimen montre que certaines lignées de créatures ont profondément changé au fil des siècles."
+13092: ];
+13093: const pick=a=>a[Math.floor(Math.random()*a.length)];
+13094: const team=()=>Array.isArray(state.team)?state.team:[];
+13095: function healAll(){team().forEach(m=>{m.hp=maxHP(m);m.status=null;restoreMovePPV106U(m)});hud();save(false)}
+13096: function meal(){
+### game/index.html line 13172 — SHOP_ITEMS
+13167:   const place=m.id==='bibliotheque'?'entre les livres':m.id==='etagere_produits'?'derrière les produits':m.id==='cartons_decor'?'dans les cartons':m.id==='chariot_bagages'?'dans une poche oubliée du chariot':m.id==='vitrine_verre'?'près du socle de la vitrine':m.id==='bureau_conservateur'?'dans un tiroir mal fermé':'derrière le pot';
+13168:   if((h%100)>=62){save(false);dialog('<b>Fouille</b><br>Tu cherches '+place+', mais tu ne trouves rien cette fois.');return true}
+13169:   const rewards=[['Baie',1],['Potion',1],['Orbe',1],['Antidote',1],['SuperPotion',1],['money',30+(h%71)]];
+13170:   const [kind,qty]=rewards[(h>>>8)%rewards.length];let label='';
+13171:   if(kind==='money'){state.money=(Number(state.money)||0)+qty;label=qty+' Voltrons'}
+13172:   else{state.inventory[kind]=(Number(state.inventory[kind])||0)+qty;label=qty+' '+(SHOP_ITEMS?.[kind]?.label||kind)}
+13173:   save(false);hud();dialog('<b>Objet trouvé !</b><br>En fouillant '+place+', tu récupères <b>'+label+'</b>.');return true
+13174: }
+13175: function triggerFurniture(m){
+13176:   state.mobilierInstanceIdV102Y=m.instanceId;
+13177:   if(tryFurnitureFindV106G(m))return;
+13178:   switch(m.fonction){
+13179:     case 'repos_15s_soin_complet': sleepAt(m);break;
+13180:     case 'ouvrir_stockage': openPC();break;
+13181:     case 'lire_lore_indices': dialog('<b>Bibliothèque</b><br>'+pick(BOOKS));break;
+### game/index.html line 13281 — ElixirVital
+13276: 
+13277: function zPick(a){return a[Math.floor(Math.random()*a.length)]}
+13278: function zHash(s){let h=2166136261>>>0;for(const c of String(s||'')){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+13279: function zEnsure(){
+13280:   state.inventory=state.inventory||{};
+13281:   for(const k of ['FioleGuerison','ElixirVital','Artefact1','Artefact2','Artefact3','Artefact4','Artefact5'])
+13282:     if(!Number.isFinite(state.inventory[k]))state.inventory[k]=0;
+13283:   state.v102z=state.v102z||{story:{},taronBossWins:{},combatWins:0};
+13284:   state.v102z.story=state.v102z.story||{};
+13285:   state.v102z.taronBossWins=state.v102z.taronBossWins||{};
+13286:   return state.v102z;
+13287: }
+13288: 
+13289: // ----------------------------------------------------------------------
+13290: // 1. ATTAQUES PLUS VARIÉES PAR TYPE
+### game/index.html line 13378 — Rappel
+13373:     if(mid){state.capsules=state.capsules||[];state.capsules.push(mid);lines.push('Capsule de capacité obtenue : '+MOVE_DB[mid].name+'.')}
+13374:   }
+13375:   const itemChance=boss?1:(trainer?.34:.20);
+13376:   if(Math.random()<itemChance){
+13377:     const tier=Math.max(0,Math.min(6,Math.floor((e.level||1)/10)));
+13378:     const pool=['Potion','Baie','Antidote',...(tier>=1?['SuperPotion']:[]),...(tier>=2?['FioleGuerison']:[]),...(tier>=3?['SuperOrbe']:[]),...(tier>=4?['Rappel']:[])];
+13379:     const it=zPick(pool);state.inventory[it]=(state.inventory[it]||0)+1;lines.push('Objet récupéré : '+(SHOP_ITEMS[it]?.label||it)+'.')
+13380:   }
+13381:   // Petit bonus régulier : évite l'impression que les récompenses spéciales n'existent jamais.
+13382:   if(!boss && state.v102z.combatWins%7===0){
+13383:     const mid=zCapsuleForEnemy(e);if(mid){state.capsules.push(mid);lines.push('Bonus de série : Capsule '+MOVE_DB[mid].name+'.')}
+13384:   }
+13385:   return lines
+13386: }
+13387: 
+### game/index.html line 13524 — SHOP_ITEMS
+13519:   state.taron=state.taron||{wins:0,missions:0,active:null};state.taron.wins=(state.taron.wins||0)+1;
+13520:   const route=Number(String(t.zone).replace('route',''))||0;
+13521:   const art=Math.max(1,Math.min(5,1+Math.floor(route/3)));const aid='Artefact'+art;state.inventory[aid]=(state.inventory[aid]||0)+1;
+13522:   const mid=zPick((TYPE_MOVES.Ombre||[]).filter(x=>MOVE_DB[x]));if(mid){state.capsules=state.capsules||[];state.capsules.push(mid)}
+13523:   logEvent('Boss de la Team Taron vaincu : '+t.dialog+'.');save(false);hud();
+13524:   dialog('<b>'+t.dialog+' vaincu !</b><br>Tu mets fin à cette opération de la Team Taron.<br><br>Butin : <b>'+SHOP_ITEMS[aid].label+'</b>'+(mid?' + Capsule <b>'+MOVE_DB[mid].name+'</b>':'')+'.<br><br>Des documents évoquent un projet appelé <b>Projet Résonance</b>, lié à Taronis et aux Éclats les plus puissants.')
+13525: };
+13526: 
+13527: // ----------------------------------------------------------------------
+13528: // 7. STORYTELLING SUPPLÉMENTAIRE, DÉCOUVERT PROGRESSIVEMENT
+13529: // ----------------------------------------------------------------------
+13530: const Z_STORY={
+13531:   route0:'Au bord de la Route 1, plusieurs voyageurs parlent de caisses marquées d’un losange jaune. Personne ne sait encore à qui elles appartiennent.',
+13532:   town1:'À Rochebrune, les habitants évoquent pour la première fois un groupe appelé Team Taron. Ils achèteraient des informations sur les Éclats rares.',
+13533:   route2:'Des traces de véhicules et des balises brouillées indiquent qu’une opération organisée a lieu sur cette route.',

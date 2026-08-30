@@ -1,0 +1,1402 @@
+V122 REMAINING DIAGNOSTIC — MUSEUM
+====================================================================================================
+### game/CREATEUR.html line 409 — museum, musée
+404: }
+405: function cityFloorsV60(cityId){const c=VALDORA_CITIES_V60.find(c=>c.id===cityId);return c?c.floors:1}
+406: 
+407: 'use strict';
+408: const PLAYER_PROGRESSION_LOCK=false;
+409: const SCENES={"town0":{"kind":"town","name":"Clairval","image":"assets/town_0_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"lab","label":"Laboratoire"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"healer","label":"Centre soins"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"shop","label":"Boutique"},{"x":1210,"y":690,"w":260,"h":175,"doorX":1340,"doorY":856,"type":"station","label":"Gare"}],"biome":"prairie","exits":[{"x":835,"y":1030,"w":130,"h":70,"side":"south","target":"route_next"}]},"town1":{"kind":"town","name":"Bois-Murmure","image":"assets/town_1_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"healer","label":"Centre soins"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"shop","label":"Boutique"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"arena","label":"Arène"},{"x":760,"y":680,"w":260,"h":175,"doorX":890,"doorY":846,"type":"inn","label":"Auberge"}],"biome":"forest","exits":[{"x":835,"y":0,"w":130,"h":70,"side":"north","target":"route_prev"},{"x":1730,"y":485,"w":70,"h":130,"side":"east","target":"route_next"}]},"town2":{"kind":"town","name":"Lac Azur","image":"assets/town …[truncated]
+410: 
+411: const TOWN_THEMES={
+412:   prairie:{ground:'#8fcf78',road:'#e5d2a2',tree:'#4c9453',roof:'#d86855'},
+413:   forest:{ground:'#76b86e',road:'#d2c295',tree:'#357b49',roof:'#7d5f46'},
+414:   lake:{ground:'#86c987',road:'#ddd1a7',tree:'#4d9258',roof:'#5ea7d8'},
+415:   autumn:{ground:'#b6b06b',road:'#d8c495',tree:'#b36d3b',roof:'#a85542'},
+416:   mountain:{ground:'#a9b28d',road:'#cbbb9b',tree:'#557a50',roof:'#777f8d'},
+417:   desert:{ground:'#d9c37d',road:'#ead9a7',tree:'#8d9860',roof:'#d68b48'},
+418:   snow:{ground:'#d8eced',road:'#c9d6d9',tree:'#668f7f',roof:'#699fcf'},
+### game/CREATEUR.html line 493 — museum, musée
+488:   railY:340,platform:{x:100,y:295,w:300,h:42},stationRoad:{x:245,y:285,w:110,h:260}
+489:  },
+490:  town5:{
+491:   fountain:{x:900,y:565},
+492:   buildings:[
+493:    {x:115,y:110,w:270,h:180,type:'museum',label:'Musée'},
+494:    {x:1415,y:110,w:270,h:180,type:'healer',label:'Centre de soins'},
+495:    {x:115,y:720,w:270,h:180,type:'shop',label:'Boutique'},
+496:    {x:1415,y:720,w:270,h:180,type:'arena',label:'Arène'},
+497:    {x:455,y:110,w:220,h:150,type:'home',label:'Maison'},
+498:    {x:1125,y:110,w:220,h:150,type:'home',label:'Maison'},
+499:    {x:455,y:720,w:220,h:150,type:'inn',label:'Hôtel'}
+500:   ]
+501:  },
+502:  town6:{
+### game/CREATEUR.html line 520 — museum, musée
+515:   fountain:{x:900,y:565},
+516:   buildings:[
+517:    {x:105,y:105,w:310,h:195,type:'station',label:'Gare centrale'},
+518:    {x:1385,y:105,w:310,h:195,type:'healer',label:'Centre de soins'},
+519:    {x:105,y:705,w:310,h:195,type:'shop',label:'Grande boutique'},
+520:    {x:1385,y:705,w:310,h:195,type:'museum',label:'Musée'},
+521:    {x:500,y:105,w:235,h:160,type:'home',label:'Maison'},
+522:    {x:1065,y:105,w:235,h:160,type:'home',label:'Maison'},
+523:    {x:500,y:720,w:235,h:160,type:'inn',label:'Hôtel'},
+524:    {x:1065,y:720,w:235,h:160,type:'home',label:'Maison'}
+525:   ],
+526:   railY:350,platform:{x:95,y:300,w:340,h:42},stationRoad:{x:250,y:300,w:115,h:245}
+527:  }
+528: };
+529: 
+### game/CREATEUR.html line 541 — museum
+536:   }
+537: }
+538: normalizeTownLayouts();
+539: 
+540: function townSymbol(type){
+541:   return {healer:'✚',care:'✚',lab:'⚗',station:'🚉',shop:'◆',arena:'★',museum:'◉',school:'✎',inn:'☾'}[type]||''
+542: }
+543: function roofColor(type,theme){
+544:   if(type==='healer'||type==='care')return '#d95b62';
+545:   if(type==='lab')return '#7b7fd8';
+546:   if(type==='station')return '#536f8c';
+547:   if(type==='shop')return '#d6a849';
+548:   if(type==='arena')return '#d07549';
+549:   if(type==='museum')return '#9b7a64';
+550:   if(type==='school')return '#5d8bb8';
+### game/CREATEUR.html line 549 — museum
+544:   if(type==='healer'||type==='care')return '#d95b62';
+545:   if(type==='lab')return '#7b7fd8';
+546:   if(type==='station')return '#536f8c';
+547:   if(type==='shop')return '#d6a849';
+548:   if(type==='arena')return '#d07549';
+549:   if(type==='museum')return '#9b7a64';
+550:   if(type==='school')return '#5d8bb8';
+551:   if(type==='inn')return '#6e8a63';
+552:   return theme.roof
+553: }
+554: 
+555: const TOWN_TREE_CANDIDATES=[
+556:   [58,82],[425,78],[690,72],[1110,72],[1375,78],[1742,82],
+557:   [58,335],[1742,335],
+558:   [58,715],[1742,715],
+### game/CREATEUR.html line 671 — museum
+666: 
+667: 
+668: function megaBuildingRoleV64(i){
+669:   const roles=[
+670:     'station','hotel','clinic','mall','office','apartments','apartments','cafe',
+671:     'office','museum','apartments','shop','school','office','apartments',
+672:     'restaurant','apartments','office','shop','apartments','library','apartments',
+673:     'office','cafe','apartments','shop','apartments','office','apartments','shop'
+674:   ];
+675:   return roles[i%roles.length]
+676: }
+677: 
+678: function buildMegaCityV64(sceneKey){
+679:   const sc=SCENES[sceneKey]; if(!sc)return;
+680:   sc.kind='town';sc.megacity=true;sc.cityKind='metropole';sc.width=3600;sc.height=2400;
+### game/CREATEUR.html line 690 — museum, musée
+685:     const role=megaBuildingRoleV64(i);
+686:     const b={
+687:       id:'mega65_'+sceneKey+'_'+i,x:lot.x,y:lot.y,w:lot.w,h:lot.h,
+688:       type:role==='station'?'station':role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'||role==='mall'?'shop':'urban',
+689:       urbanType:role,
+690:       label:role==='station'?'Gare':role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':role==='mall'?'Galerie':role==='museum'?'Musée':role==='library'?'Bibliothèque':'Immeuble',
+691:       floors:role==='station'?2:role==='mall'?4:5+(i%7),
+692:       doorX:lot.x+lot.w/2,doorY:lot.y+lot.h,solid:true,megaInterior:true,
+693:       eventSeed:(i*7+sceneKey.charCodeAt(sceneKey.length-1))%17
+694:     };
+695:     sc.buildings.push(b)
+696:   });
+697:   // Add civic towers until there are at least 30 buildings if filtering removed too many.
+698:   let k=0;
+699:   while(sc.buildings.length<30 && k<60){
+### game/CREATEUR.html line 811 — museum
+806:        const bx=count===2?(n===0?x1+10:x2-bw-10):x1+(W-bw)/2;
+807:        const by=y1+(H-bh)/2;
+808:        const role=buildings.length===0?'station':
+809:          buildings.length===1?'hotel':
+810:          buildings.length===2?'clinic':
+811:          ['apartments','office','shop','cafe','museum','apartments','restaurant','school','office','library','apartments','shop'][i%12];
+812:        buildings.push({
+813:          id:'v66_'+sceneKey+'_'+i++,x:bx,y:by,w:bw,h:bh,
+814:          type:role==='station'?'station':role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'?'shop':'urban',
+815:          urbanType:role,label:role==='station'?'Gare':role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':
+816:            role==='museum'?'Musée':role==='library'?'Bibliothèque':role==='school'?'École':'Immeuble',
+817:          floors:role==='station'?2:role==='hotel'?6:4+(i%9),doorX:bx+bw/2,doorY:by+bh,
+818:          solid:true,megaInterior:true,eventSeed:(i*13+sceneKey.charCodeAt(sceneKey.length-1))%29
+819:        })
+820:      }
+### game/CREATEUR.html line 871 — museum
+866:    if(state.zone==='town6'){ctx.beginPath();ctx.roundRect(wx,wy,16,12,4);ctx.fill()}
+867:    else if(state.zone==='town13'){ctx.fillRect(wx,wy,18,8)}
+868:    else{ctx.fillRect(wx,wy,16,11)}
+869:  }
+870:  ctx.fillStyle='#594436';ctx.beginPath();ctx.roundRect(x+w/2-15,y+h-29,30,29,4);ctx.fill();
+871:  let sym=b.urbanType==='station'?'🚉':b.urbanType==='hotel'?'H':b.urbanType==='clinic'?'✚':b.urbanType==='museum'?'◉':b.urbanType==='school'?'✎':b.urbanType==='library'?'▤':'';
+872:  if(sym){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+w/2,y+18,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#223b49';ctx.font='700 12px Segoe UI';ctx.textAlign='center';ctx.fillText(sym,x+w/2,y+22)}
+873:  ctx.restore();ctx.textAlign='start'
+874: }
+875: 
+876: function drawRailV66(sc,camX,camY,sx,sy){
+877:  const city=cityForSceneV622?.(state.zone);
+878:  if(!city||!cityHasStationV63(city.id))return;
+879:  let railY=sc.megacity?(sc.megaRailY||2260):(sc.height||1100)-75;
+880:  const y=(railY-camY)*sy;
+### game/CREATEUR.html line 1213 — museum
+1208:   let sym='';
+1209:   if(b.urbanType==='station')sym='🚉';
+1210:   else if(b.urbanType==='hotel')sym='H';
+1211:   else if(b.urbanType==='clinic')sym='✚';
+1212:   else if(b.urbanType==='mall')sym='◆';
+1213:   else if(b.urbanType==='museum')sym='◉';
+1214:   else if(b.urbanType==='school')sym='✎';
+1215:   else if(b.urbanType==='library')sym='▤';
+1216:   if(sym){
+1217:     ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+w/2,y+18,14,0,Math.PI*2);ctx.fill();
+1218:     ctx.fillStyle='#263c4a';ctx.font='700 13px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sym,x+w/2,y+19);
+1219:   }
+1220:   ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic'
+1221: }
+1222: 
+### game/CREATEUR.html line 1374 — museum
+1369:   const type=b.type;
+1370:   const palettes={
+1371:     healer:['#d95761','#ed8588'],care:['#d95761','#ed8588'],
+1372:     lab:['#6678d5','#8e9bed'],station:['#486a82','#7696aa'],
+1373:     shop:['#d4a03e','#efc264'],arena:['#c96b4b','#ea9070'],
+1374:     museum:['#8d735f','#b09781'],school:['#5188b7','#75add9'],
+1375:     inn:['#6b835f','#8baa80'],playerhome:['#5c86a5','#81aac3'],home:[theme.roof||'#c97861','#e9a18b']
+1376:   };
+1377:   const [roof,roofHi]=palettes[type]||palettes.home;
+1378:   const symbol={healer:'✚',care:'✚',lab:'⚗',station:'🚉',shop:'◆',arena:'★',museum:'◉',school:'✎',inn:'H',playerhome:'⌂'}[type]||'';
+1379: 
+1380:   ctx.save();
+1381: 
+1382:   // soft ground shadow and stone foundation
+1383:   ctx.fillStyle='rgba(25,40,46,.21)';
+### game/CREATEUR.html line 1529 — musee
+1524:   laboratoire:v102eLoadImage('ASSETS_BATIMENTS_V103C/laboratoire_face.png'),
+1525:   boutique:v102eLoadImage('ASSETS_BATIMENTS_V103C/boutique_face.png'),
+1526:   restaurant:v102eLoadImage('ASSETS_BATIMENTS_V103C/restaurant_face.png'),
+1527:   gare:v102eLoadImage('ASSETS_BATIMENTS_V103C/gare_face.png'),
+1528:   hotel:v102eLoadImage('ASSETS_BATIMENTS_V103C/hotel_face.png'),
+1529:   musee:v102eLoadImage('ASSETS_BATIMENTS_V103C/musee_face.png'),
+1530:   petit_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/petit_immeuble_face.png'),
+1531:   moyen_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/moyen_immeuble_face.png'),
+1532:   grand_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/grand_immeuble_face.png'),
+1533:   sceau_aube:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_aube_face.png'),
+1534:   sceau_roche:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_roche_face.png'),
+1535:   sceau_brumes:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_brumes_face.png'),
+1536:   sceau_vent:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_vent_face.png'),
+1537:   sceau_marees:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_marees_face.png'),
+1538:   sceau_eclat:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_eclat_face.png'),
+### game/CREATEUR.html line 1556 — museum, musee
+1551:   if(type==='healer'||type==='care')return 'centre_soins';
+1552:   if(type==='lab')return 'laboratoire';
+1553:   if(type==='shop')return 'boutique';
+1554:   if(type==='station')return 'gare';
+1555:   if(type==='inn')return 'hotel';
+1556:   if(type==='museum')return 'musee';
+1557:   if(type==='school')return (Number(b?.floors||0)>=4?'moyen_immeuble':'petit_immeuble');
+1558:   if(type==='arena'){
+1559:     const seals=['sceau_aube','sceau_roche','sceau_brumes','sceau_vent','sceau_marees','sceau_eclat','sceau_coeur'];
+1560:     const sealIndex=Math.max(1,Math.min(7,v103cTownNumber()));
+1561:     return seals[sealIndex-1]
+1562:   }
+1563:   // V104A : les mégalopoles utilisent bien les petits/moyens/grands immeubles
+1564:   // et les bâtiments de service, au lieu de retomber sur une maison de village.
+1565:   if(['urban','office','library','market','atelier','cafe','restaurant','brasserie','v70building','megabuilding66','mFrenchBlock'].includes(type)){
+### game/CREATEUR.html line 1578 — museum, musee
+1573:   if(b?.v105hTower)return Number(b?.floors||5)>=7?'grand_immeuble':'moyen_immeuble';
+1574:   if(t==='station')return 'gare';
+1575:   if(t==='hotel')return 'hotel';
+1576:   if(t==='clinic')return 'centre_soins';
+1577:   if(t==='shop')return 'boutique';
+1578:   if(t==='museum')return 'musee';
+1579:   if(t==='cafe'||t==='restaurant')return 'restaurant';
+1580:   const f=Number(b?.floors||3);
+1581:   if(f>=7)return 'grand_immeuble';
+1582:   if(f>=4)return 'moyen_immeuble';
+1583:   return 'petit_immeuble'
+1584: }
+1585: function v103cDrawBuildingAsset(b,camX,camY,sx,sy,key){
+1586:   const im=V103C_BUILDING_IMAGES[key];
+1587:   if(!v102eImageReady(im))return false;
+### game/CREATEUR.html line 1599 — musee
+1594:   const scale=Math.min(boxW/im.naturalWidth,boxH/im.naturalHeight);
+1595:   const dw=im.naturalWidth*scale,dh=im.naturalHeight*scale;
+1596:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1597:   const doorAnchors={
+1598:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1599:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1600:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1601:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+1602:     sceau_marees:[.50,.95],sceau_eclat:[.50,.95],sceau_coeur:[.50,.95]
+1603:   };
+1604:   const a=doorAnchors[key]||[.50,.95];
+1605:   const targetDoorX=((Number.isFinite(b.doorX)?b.doorX:b.x+b.w/2)-camX)*sx;
+1606:   const targetDoorY=((Number.isFinite(b.doorY)?b.doorY:b.y+b.h)-camY)*sy;
+1607:   dx+=targetDoorX-(dx+dw*a[0]);
+1608:   dy+=targetDoorY-(dy+dh*a[1]);
+### game/CREATEUR.html line 1708 — museum
+1703: for(const [v102eKey,v102eSc] of Object.entries(SCENES)){
+1704:   if(v102eSc&&v102eSc.kind==='route'&&Array.isArray(v102eSc.trainers)){
+1705:     v102eSc.trainers.forEach((t,i)=>{t.look=V102F_ROUTE_LOOKS[(i+(parseInt(v102eKey.replace(/\D/g,''))||0))%V102F_ROUTE_LOOKS.length]})
+1706:   }
+1707: }
+1708: const ROOMS={"home":{"image":"assets/room_home_v416.jpg","obstacles":[{"x":120,"y":190,"w":240,"h":120},{"x":820,"y":180,"w":250,"h":175},{"x":150,"y":430,"w":330,"h":135},{"x":650,"y":420,"w":300,"h":165}],"npcs":[]},"lab":{"image":"assets/room_lab_v416.jpg","obstacles":[{"x":90,"y":190,"w":150,"h":120},{"x":270,"y":190,"w":150,"h":120},{"x":880,"y":175,"w":220,"h":165},{"x":430,"y":385,"w":340,"h":130}],"npcs":[{"id":"prof","x":600,"y":315,"look":40,"name":"Professeur Aurine"}]},"healer":{"image":"assets/room_healer_v416.jpg","obstacles":[{"x":125,"y":185,"w":950,"h":105},{"x":160,"y":430,"w":250,"h":120},{"x":790,"y":430,"w":250,"h":120},{"x":515,"y":400,"w":170,"h":135}],"npcs":[{"id":"healer","x":600,"y":340,"look":21,"name":"Infirmière Élise"}]},"shop":{"image":"assets/room_shop_v416.jpg","obstacles":[{"x":100,"y":185,"w":260,"h":175},{"x":840,"y":185,"w":260,"h":175},{"x":420,"y":390,"w":360,"h":105}],"npcs":[{"id":"seller","x":600,"y":330,"look":26,"name":"Marchand"}]},"station":{"image":"assets/room_station_v416.jpg","obstacles":[{"x":120,"y":180,"w":960,"h":95},{"x":170,"y":388,"w":300,"h":147},{"x":730,"y":388,"w":300,"h":147}],"npcs":[{"id":"agent","x":600,"y":320,"look":24,"name":"Agent de gare"}]},"museum":{"image":"assets/room_museum_v416.jpg","obstacles":[{"x":85,"y":210,"w":180,"h":125},{"x":380,"y":210,"w":180,"h":125},{"x":675,"y":210,"w":180,"h":125},{"x":970,"y":210,"w":180,"h":125},{"x":450,"y":478,"w":300,"h":147}],"npcs":[{"id":"guide","x":600,"y":430, …[truncated]
+1709: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1710: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"}," …[truncated]
+1711: 
+1712: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1713: 
+1714: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1715: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1716: const SAVE='valdora_v41_creator'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1717: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+### game/CREATEUR.html line 2555 — museum
+2550: 
+2551: 
+2552: 
+2553: function v101sRoomBackdrop(type='home'){
+2554:   const pal={
+2555:     home:['#f0e7dd','#d9c8b3','#805e49'],lab:['#eaf2f4','#c9d9de','#557684'],healer:['#eef7f5','#cbe0da','#4d8c76'],shop:['#f3eadb','#dcc6a3','#8b6747'],station:['#eeeeea','#d3d4cf','#596a72'],museum:['#f0e8dc','#d5c7b2','#66584b'],school:['#f1eddf','#d8d3b9','#5c735c'],arena:['#efebe4','#d0c6b8','#765b51'],inn:['#f2e8dd','#d9c8b8','#755844']
+2556:   }[type]||['#eee7de','#d6c9b9','#6f665d'];
+2557:   ctx.fillStyle='#243846';ctx.fillRect(0,0,960,600);
+2558:   ctx.fillStyle=pal[0];ctx.beginPath();ctx.roundRect(35,42,890,525,18);ctx.fill();
+2559:   ctx.fillStyle=pal[1];ctx.beginPath();ctx.roundRect(65,92,830,430,12);ctx.fill();
+2560:   ctx.strokeStyle='rgba(90,75,60,.11)';ctx.lineWidth=1;
+2561:   for(let y=108;y<515;y+=34){ctx.beginPath();ctx.moveTo(72,y);ctx.lineTo(888,y);ctx.stroke()}
+2562:   ctx.fillStyle=pal[2];ctx.beginPath();ctx.roundRect(270,105,420,56,11);ctx.fill();
+2563:   ctx.fillStyle='#fff';ctx.font='900 17px Segoe UI';ctx.textAlign='center';
+2564:   const labels={home:'MAISON',lab:'LABORATOIRE',healer:'CENTRE DE SOINS',shop:'BOUTIQUE',station:'GARE',museum:'MUSÉE',school:'ÉCOLE',arena:'SALLE DU GARDIEN',inn:'AUBERGE'};
+### game/CREATEUR.html line 2564 — museum, musée
+2559:   ctx.fillStyle=pal[1];ctx.beginPath();ctx.roundRect(65,92,830,430,12);ctx.fill();
+2560:   ctx.strokeStyle='rgba(90,75,60,.11)';ctx.lineWidth=1;
+2561:   for(let y=108;y<515;y+=34){ctx.beginPath();ctx.moveTo(72,y);ctx.lineTo(888,y);ctx.stroke()}
+2562:   ctx.fillStyle=pal[2];ctx.beginPath();ctx.roundRect(270,105,420,56,11);ctx.fill();
+2563:   ctx.fillStyle='#fff';ctx.font='900 17px Segoe UI';ctx.textAlign='center';
+2564:   const labels={home:'MAISON',lab:'LABORATOIRE',healer:'CENTRE DE SOINS',shop:'BOUTIQUE',station:'GARE',museum:'MUSÉE',school:'ÉCOLE',arena:'SALLE DU GARDIEN',inn:'AUBERGE'};
+2565:   ctx.fillText(labels[type]||'BÂTIMENT',480,140);ctx.textAlign='start';
+2566:   // sortie visible, unique et toujours libre
+2567:   ctx.fillStyle='#4c5c63';ctx.beginPath();ctx.roundRect(405,475,150,80,8);ctx.fill();ctx.fillStyle='#76523e';ctx.beginPath();ctx.roundRect(418,487,124,68,5);ctx.fill();
+2568:   ctx.fillStyle='#f1d177';ctx.beginPath();ctx.arc(527,521,4,0,Math.PI*2);ctx.fill();
+2569:   ctx.fillStyle='#314957';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText('SORTIE',480,470);ctx.textAlign='start'
+2570: }
+2571: function v101sBattleBackdrop(){
+2572:   const grd=ctx.createLinearGradient(0,0,0,600);grd.addColorStop(0,'#a9dbe2');grd.addColorStop(.48,'#dff0e5');grd.addColorStop(.49,'#8fbd76');grd.addColorStop(1,'#5d925a');ctx.fillStyle=grd;ctx.fillRect(0,0,960,600);
+2573:   ctx.fillStyle='rgba(255,255,255,.55)';for(const [x,y,r] of [[110,80,55],[190,65,38],[760,88,65],[845,75,38]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+### game/CREATEUR.html line 3500 — museum
+3495: 
+3496:   for(const x of cfg.xs)sc.v67Roads.push(v67RoadRect(x-70,0,140,sc.height));
+3497:   for(const y of cfg.ys)sc.v67Roads.push(v67RoadRect(0,y-70,sc.width,140));
+3498: 
+3499:   const xcuts=[0,...cfg.xs,sc.width],ycuts=[0,...cfg.ys,sc.height];
+3500:   const roles=['station','hotel','clinic','apartments','office','shop','cafe','museum','apartments','restaurant','school','library','office','apartments','shop'];
+3501:   let bi=0;
+3502: 
+3503:   for(let yi=0;yi<ycuts.length-1;yi++){
+3504:     for(let xi=0;xi<xcuts.length-1;xi++){
+3505:       const lx=xcuts[xi]+100,rx=xcuts[xi+1]-100,ty=ycuts[yi]+100,by=ycuts[yi+1]-100;
+3506:       if(rx-lx<220||by-ty<180)continue;
+3507: 
+3508:       const two=(rx-lx)>620;
+3509:       const count=two?2:1;
+### game/CREATEUR.html line 3528 — museum, musée
+3523:         sc.buildings.push({
+3524:           id:'v67_'+sceneKey+'_'+bi,
+3525:           x:bx,y:byy,w:bw,h:bh,
+3526:           type:role==='station'?'station':role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'?'shop':'urban',
+3527:           urbanType:role,
+3528:           label:role==='station'?'Gare':role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':role==='museum'?'Musée':role==='library'?'Bibliothèque':role==='school'?'École':'Immeuble',
+3529:           floors:role==='station'?2:role==='hotel'?6:4+(bi%8),
+3530:           doorX:bx+bw/2,
+3531:           doorY:byy+bh,
+3532:           megaInterior:true,
+3533:           eventSeed:(bi*17+sceneKey.length)%31
+3534:         });
+3535:         bi++;
+3536:       }
+3537:     }
+### game/CREATEUR.html line 3600 — museum
+3595:  const floors=Math.max(1,Math.min(9,b.floors||1)),cols=Math.max(2,Math.floor(w/45));
+3596:  for(let r=0;r<floors;r++)for(let c=0;c<cols;c++){
+3597:    ctx.fillStyle=p.glass;ctx.fillRect(x+12+c*(w-24)/cols,y+30+r*(h-65)/floors,17,11)
+3598:  }
+3599:  ctx.fillStyle='#5b4335';ctx.beginPath();ctx.roundRect(x+w/2-15,y+h-31,30,31,4);ctx.fill();
+3600:  let sym=b.urbanType==='station'?'🚉':b.urbanType==='hotel'?'H':b.urbanType==='clinic'?'✚':b.urbanType==='shop'?'◆':b.urbanType==='museum'?'◉':b.urbanType==='library'?'▤':'';
+3601:  if(sym){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+w/2,y+19,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#243c49';ctx.font='700 12px Segoe UI';ctx.textAlign='center';ctx.fillText(sym,x+w/2,y+23)}
+3602:  ctx.restore();ctx.textAlign='start'
+3603: }
+3604: function drawCityV67(sc,camX,camY,sx,sy){
+3605:  const p=v67CityPalette();ctx.fillStyle=p.ground;ctx.fillRect(0,0,960,600);
+3606:  // landmark first
+3607:  if(sc.v67Landmark==='garden'){ctx.fillStyle='#83bd72';ctx.beginPath();ctx.roundRect((1480-camX)*sx,(830-camY)*sy,560*sx,300*sy,22);ctx.fill()}
+3608:  if(sc.v67Landmark==='modern'){ctx.fillStyle='#c9e0e5';ctx.beginPath();ctx.roundRect((1480-camX)*sx,(780-camY)*sy,620*sx,340*sy,24);ctx.fill()}
+3609:  if(sc.v67Landmark==='harbor'){ctx.fillStyle='#63b7d4';ctx.fillRect((3050-camX)*sx,0,600*sx,600)}
+### game/CREATEUR.html line 4243 — museum, musée
+4238:     // Bâtiments fixes. Aucune coordonnée n'empiète sur une route.
+4239:     sc.buildings=[
+4240:       // Rangée nord
+4241:       {id:'taronis_hotel',x:140,y:70,w:430,h:300,type:'inn',urbanType:'hotel',label:'Hôtel Taronis',floors:6,doorX:355,doorY:370,megaInterior:true,eventSeed:11},
+4242:       {id:'taronis_residence_nw',x:880,y:75,w:500,h:295,type:'urban',urbanType:'apartments',label:'Résidence du Nord',floors:7,doorX:1130,doorY:370,megaInterior:true,eventSeed:12},
+4243:       {id:'taronis_museum',x:2200,y:75,w:450,h:295,type:'urban',urbanType:'museum',label:'Musée des Éclats',floors:4,doorX:2425,doorY:370,megaInterior:true,eventSeed:13},
+4244:       {id:'taronis_residence_ne',x:3030,y:75,w:420,h:295,type:'urban',urbanType:'apartments',label:'Tours Boréales',floors:8,doorX:3240,doorY:370,megaInterior:true,eventSeed:14},
+4245: 
+4246:       // Quartier central supérieur
+4247:       {id:'taronis_clinic',x:120,y:655,w:470,h:220,type:'healer',urbanType:'clinic',label:'Centre de soins',floors:3,doorX:355,doorY:875,megaInterior:true,eventSeed:15},
+4248:       {id:'taronis_office_w',x:880,y:650,w:500,h:225,type:'urban',urbanType:'office',label:'Tour Voltron',floors:9,doorX:1130,doorY:875,megaInterior:true,eventSeed:16},
+4249:       {id:'taronis_library',x:2200,y:650,w:460,h:225,type:'urban',urbanType:'library',label:'Grande Bibliothèque',floors:5,doorX:2430,doorY:875,megaInterior:true,eventSeed:17},
+4250:       {id:'taronis_shop_ne',x:3030,y:650,w:420,h:225,type:'shop',urbanType:'shop',label:'Galeries Taronis',floors:4,doorX:3240,doorY:875,megaInterior:true,eventSeed:18},
+4251: 
+4252:       // Quartier central inférieur
+### game/CREATEUR.html line 4313 — museum
+4308:         lots.push({x:x2-Math.min(310,W*.43)-20,y:y1+15,w:Math.min(310,W*.43),h:Math.min(320,H-30)})
+4309:       }else lots.push({x:x1+(W-Math.min(360,W-30))/2,y:y1+15,w:Math.min(360,W-30),h:Math.min(320,H-30)})
+4310:     }
+4311:   }
+4312: 
+4313:   const roles=['hotel','clinic','apartments','office','shop','cafe','museum','apartments','restaurant','school','library','apartments','office','shop','apartments','cafe'];
+4314:   sc.buildings=[{
+4315:     id:'v70_station_'+sceneKey,x:sc.v70Rail.stationX,y:sc.v70Rail.stationY,w:sc.v70Rail.stationW,h:sc.v70Rail.stationH,
+4316:     type:'station',urbanType:'station',label:'Gare Centrale',floors:2,
+4317:     doorX:sc.v70Rail.stationX+sc.v70Rail.stationW/2,doorY:sc.v70Rail.stationY+sc.v70Rail.stationH,megaInterior:false
+4318:   }];
+4319: 
+4320:   let i=0;
+4321:   for(const lot of lots){
+4322:     if(sc.buildings.length>=31)break;
+### game/CREATEUR.html line 4327 — museum, musée
+4322:     if(sc.buildings.length>=31)break;
+4323:     const role=roles[i%roles.length];
+4324:     sc.buildings.push({
+4325:       id:'v70_'+sceneKey+'_'+i,x:lot.x,y:lot.y,w:lot.w,h:lot.h,
+4326:       type:role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'?'shop':'urban',
+4327:       urbanType:role,label:role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':role==='museum'?'Musée':role==='library'?'Bibliothèque':role==='school'?'École':'Immeuble',
+4328:       floors:role==='hotel'?6:4+(i%7),doorX:lot.x+lot.w/2,doorY:lot.y+lot.h,
+4329:       megaInterior:true,eventSeed:(i*23+sceneKey.length)%41
+4330:     });i++
+4331:   }
+4332: 
+4333:   sc.megaNPCs=[];let ni=0;
+4334:   for(const r of sc.v70Roads){
+4335:     const vertical=r.axis==='v';
+4336:     for(let j=1;j<=5;j++){
+### game/CREATEUR.html line 4467 — museum
+4462:   // symbole
+4463:   let sym='';
+4464:   if(b.urbanType==='hotel')sym='H';
+4465:   else if(b.urbanType==='clinic')sym='✚';
+4466:   else if(b.urbanType==='shop')sym='◆';
+4467:   else if(b.urbanType==='museum')sym='◉';
+4468:   else if(b.urbanType==='library')sym='▤';
+4469:   else if(b.urbanType==='school')sym='✎';
+4470: 
+4471:   if(sym){
+4472:     ctx.fillStyle='#fff';
+4473:     ctx.beginPath();ctx.arc(x+w-24,y+25,14,0,Math.PI*2);ctx.fill();
+4474:     ctx.fillStyle='#203a49';ctx.font='800 12px Segoe UI';ctx.textAlign='center';
+4475:     ctx.fillText(sym,x+w-24,y+29);
+4476:   }
+### game/CREATEUR.html line 4626 — museum
+4621: };
+4622: 
+4623: const V70_TYPES=Object.keys(V70_ROOM_LIBRARY);
+4624: 
+4625: function enterBuildingV70(b){
+4626:   if(window.ValdoraMuseumV109H?.isMuseum?.(b))return window.ValdoraMuseumV109H.enter(b);
+4627:   V70_INT={
+4628:     building:b,
+4629:     returnZone:state.zone,
+4630:     floor:0,
+4631:     mode:'corridor',
+4632:     room:null,
+4633:     floors:Math.max(2,b.floors||4),
+4634:     eventSeed:b.eventSeed||0
+4635:   };
+### game/CREATEUR.html line 10256 — museum, musée
+10251:     ],
+10252: 
+10253:     buildings:[
+10254:       {id:'ta93_hotel',x:100,y:70,w:420,h:310,type:'inn',urbanType:'hotel',label:'Hôtel Central',floors:6,doorX:310,doorY:380,megaInterior:true,eventSeed:201},
+10255:       {id:'ta93_resA',x:900,y:70,w:510,h:310,type:'urban',urbanType:'apartments',label:'Résidence Atlas',floors:7,doorX:1155,doorY:380,megaInterior:true,eventSeed:202},
+10256:       {id:'ta93_museum',x:2180,y:70,w:470,h:310,type:'urban',urbanType:'museum',label:'Musée des Éclats',floors:5,doorX:2415,doorY:380,megaInterior:true,eventSeed:203},
+10257:       {id:'ta93_resB',x:3040,y:70,w:430,h:310,type:'urban',urbanType:'apartments',label:'Tour Boréale',floors:8,doorX:3255,doorY:380,megaInterior:true,eventSeed:204},
+10258: 
+10259:       {id:'ta93_healer',x:100,y:690,w:430,h:260,type:'healer',urbanType:'clinic',label:'Centre de soins',floors:3,doorX:315,doorY:950,megaInterior:true,eventSeed:205},
+10260:       {id:'ta93_office',x:900,y:690,w:510,h:260,type:'urban',urbanType:'office',label:'Tour Voltron',floors:9,doorX:1155,doorY:950,megaInterior:true,eventSeed:206},
+10261:       {id:'ta93_library',x:2180,y:690,w:470,h:260,type:'urban',urbanType:'library',label:'Bibliothèque Centrale',floors:5,doorX:2415,doorY:950,megaInterior:true,eventSeed:207},
+10262:       {id:'ta93_shop',x:3040,y:690,w:430,h:260,type:'shop',urbanType:'shop',label:'Galeries Taronis',floors:4,doorX:3255,doorY:950,megaInterior:true,eventSeed:208},
+10263: 
+10264:       {id:'ta93_cafe',x:100,y:1260,w:430,h:190,type:'urban',urbanType:'cafe',label:'Café des Voyageurs',floors:2,doorX:315,doorY:1450,megaInterior:true,eventSeed:209},
+10265:       {id:'ta93_school',x:900,y:1260,w:510,h:190,type:'urban',urbanType:'school',label:'Académie Taronis',floors:4,doorX:1155,doorY:1450,megaInterior:true,eventSeed:210},
+### game/CREATEUR.html line 12755 — musée
+12750:  town8:['Cimes-d’Or a grandi autour des prospecteurs et des mineurs.','On trouve encore des éclats dorés dans la roche après les fortes pluies.','Les gens d’ici savent reconnaître une pierre intéressante au premier regard.'],
+12751:  town5:['Soléria ne dort presque jamais.','Les jardins de Soléria sont aussi importants que ses grandes avenues.','Ici, même les habitués découvrent encore de nouvelles rues.'],
+12752:  town6:['Nova-Cité change si vite que les vieux plans deviennent rapidement inutiles.','Les lumières de Nova-Cité attirent des dresseurs de toute la région.','Les chercheurs adorent tester leurs nouvelles technologies ici.'],
+12753:  town9:['À Port-Écume, on connaît l’humeur de la mer rien qu’à son odeur.','Les quais sont pleins d’histoires rapportées par les marins.','Certains Éclats suivent les bateaux pendant des kilomètres.'],
+12754:  town10:['Luminor paraît différente selon l’heure de la journée.','Les habitants de l’île tiennent beaucoup à leurs traditions.','Le reflet des lumières sur l’eau donne son caractère à Luminor.'],
+12755:  town13:['Taronis est immense : personne n’en connaît vraiment chaque recoin.','Les habitants de Taronis ont appris à vivre avec une ville toujours en mouvement.','Le musée conserve des récits que même les chercheurs connaissent mal.']
+12756: };
+12757: const _npcDialogueV101F=window.npcDialogue;
+12758: window.npcDialogue=function(n){
+12759:  n._v101fTalk=(n._v101fTalk||0)+1;
+12760:  const city=V101F_CITY_LINES[state.zone]||[
+12761:    'Chaque ville de Valdora a ses habitudes. Il faut prendre le temps de les comprendre.',
+12762:    'Les voyageurs apportent toujours de nouvelles histoires.',
+12763:    'Un bon dresseur écoute autant qu’il combat.'
+12764:  ];
+### game/V105W_INTERIEURS.js line 77 — egg
+72:       label:'Laboratoire',wall:'#edf2f4',floor:'#b8cdd1',accent:'#26a8bd',
+73:       items:[
+74:         item('laboratoire','table_starters',370,110,460,175,'starters','Table des compagnons'),
+75:         item('laboratoire','supercalculateur',70,285,320,235,'computer','Supercalculateur'),
+76:         item('laboratoire','tableau_blanc',430,115,340,135,'research','Tableau de recherche',false),
+77:         item('laboratoire','incubateur',830,285,255,260,'egg','Incubateur'),
+78:         plant(65,505),plant(1030,505)
+79:       ]
+80:     },
+81:     museum:{
+82:       label:'Musée',wall:'#f0e7d7',floor:'#c7aa81',accent:'#9b7344',
+83:       items:[
+84:         item('musee','vitrine_verre',75,130,280,200,'museum','Vitrine historique'),
+85:         item('musee','socle_statue',455,135,290,230,'museum','Statue ancienne'),
+86:         item('musee','cordon_securite',380,510,440,120,'museum','Espace protégé'),
+### game/V105W_INTERIEURS.js line 85 — museum, musee
+80:     },
+81:     museum:{
+82:       label:'Musée',wall:'#f0e7d7',floor:'#c7aa81',accent:'#9b7344',
+83:       items:[
+84:         item('musee','vitrine_verre',75,130,280,200,'museum','Vitrine historique'),
+85:         item('musee','socle_statue',455,135,290,230,'museum','Statue ancienne'),
+86:         item('musee','cordon_securite',380,510,440,120,'museum','Espace protégé'),
+87:         item('musee','bureau_conservateur',820,350,275,190,'museum','Bureau de conservation'),
+88:         plant(65,505),plant(1030,505)
+89:       ]
+90:     },
+91:     school:{
+92:       label:'École',wall:'#f1e4d2',floor:'#cfad80',accent:'#238d91',
+93:       items:[
+94:         item('ecole','bureau_professeur',410,95,380,160,'school','Bureau du professeur'),
+### game/V105W_INTERIEURS.js line 234 — museum
+229:     }
+230:   };
+231: 
+232:   const KIND_TEMPLATE={
+233:     home:'house',lab:'lab',healer:'healer',clinic:'healer',shop:'shop',station:'station',
+234:     museum:'museum',school:'school',arena:'guardian',guardian:'guardian',inn:'hotel_lobby',hotel:'hotel_lobby',
+235:     apartments:'apartment',apartment:'apartment',urban:'apartment',office:'office',library:'library',
+236:     cafe:'restaurant',restaurant:'restaurant',brasserie:'restaurant',citadel:'citadel'
+237:   };
+238: 
+239:   function imageFor(src){
+240:     if(!IMG_CACHE.has(src)){
+241:       const img=new Image(); img.decoding='async'; img.src=src; IMG_CACHE.set(src,img);
+242:     }
+243:     return IMG_CACHE.get(src);
+### game/V105W_INTERIEURS.js line 366 — museum
+361:   function floorLabel(){return INT.floor===0?'Rez-de-chaussée':`Étage ${INT.floor}`}
+362: 
+363:   function standardNpcs(){
+364:     if(INT.multi)return [];
+365:     try{
+366:       const positions={home:[600,350],lab:[600,325],healer:[600,345],shop:[600,340],station:[600,340],museum:[600,445],school:[600,585],arena:[600,585]};
+367:       const pos=positions[building?.type];
+368:       return (currentRoom()?.npcs||[]).map((n,i)=>({...n,x:pos&&i===0?pos[0]:n.x,y:pos&&i===0?pos[1]:n.y,custom:false}))
+369:     }catch(_){return []}
+370:   }
+371:   function customNpcKey(){return `${INT.floor}:${INT.roomIndex}:${roomTemplate(INT.floor,INT.roomIndex)}`}
+372:   function customNpcs(){
+373:     if(!INT.multi||INT.mode!=='room')return [];
+374:     const key=customNpcKey();
+375:     if(!INT.npcs[key]){
+### game/V105W_INTERIEURS.js line 377 — museum
+372:   function customNpcs(){
+373:     if(!INT.multi||INT.mode!=='room')return [];
+374:     const key=customNpcKey();
+375:     if(!INT.npcs[key]){
+376:       const tpl=roomTemplate(INT.floor,INT.roomIndex);
+377:       const names={hotel_lobby:'Réceptionniste',hotel_room:'Voyageuse',apartment:'Résident',office:'Employée',library:'Bibliothécaire',restaurant:'Serveuse',clinic:'Soigneur',studio:'Artiste',storage:'Magasinier',archive:'Archiviste',guardian:'Gardien',museum:'Conservatrice',school:'Professeure'};
+378:       const count=['hotel_lobby','restaurant','office','library'].includes(tpl)?2:1;
+379:       INT.npcs[key]=Array.from({length:count},(_,i)=>({
+380:         id:`v105w_${key}_${i}`,name:i?`${names[tpl]||'Habitant'} ${i+1}`:(names[tpl]||'Habitant'),look:(INT.floor*7+INT.roomIndex*3+i+6)%41,
+381:         x:350+i*420,y:430-i*90,axis:(INT.floor+INT.roomIndex+i)%2?'y':'x',dir:2,moving:true,min:260,max:930,speed:26+i*4
+382:       }));
+383:     }
+384:     return INT.npcs[key]
+385:   }
+386:   function updateCustomNpcs(list){
+### game/V105W_INTERIEURS.js line 507 — museum
+502:     const texts={
+503:       decor:'Cet élément apporte une touche vivante et chaleureuse à la pièce.',rest:'Un endroit confortable pour souffler un moment.',tv:'La chaîne locale diffuse les nouvelles de Valdora.',
+504:       books:'Les rayonnages contiennent des récits, des guides et des archives de Valdora.',meal:'Tout est prêt pour accueillir les visiteurs et préparer un bon repas.',
+505:       desk:'Les documents sont rangés avec soin.',archive:'Des dossiers classés retracent la vie du bâtiment.',storage:'Tout le matériel utile est rangé ici.',
+506:       wardrobe:'L’armoire est propre et bien organisée.',meeting:'Cette table sert aux réunions et aux projets collectifs.',missions:'Plusieurs avis et missions locales sont affichés.',
+507:       museum:'La fiche présente l’origine et l’histoire de cette pièce de collection.',school:'Le matériel de cours est prêt pour la prochaine leçon.',
+508:       guardian:'L’objet porte l’emblème du Gardien de la ville.',hotel:'Le personnel veille à l’accueil et au confort des voyageurs.',studio:'Le matériel est installé pour travailler et créer.',
+509:       medical_info:'La borne permet de consulter des conseils de soins.',research:'Des notes et des schémas de recherche couvrent le tableau.',egg:'Les capteurs de l’incubateur indiquent une activité stable.',
+510:       citadel:'Une énergie ancienne semble vibrer autour de cet objet.',map:'La carte montre les principales régions et routes de Valdora.'
+511:     };
+512:     dialog(`<b>${m.label}</b><br>${texts[m.action]||'Cet objet fait partie de l’aménagement du bâtiment.'}`)
+513:   }
+514:   function useItem(m){
+515:     switch(m.action){
+516:       case 'heal':
+### game/V109V_INTERIEUR_REWRITE.js line 16 — museum, musee
+11: function norm(v){return String(v??'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+12: function textOf(b){return [b?.type,b?.urbanType,b?.role,b?.kind,b?.id,b?.label,b?.name].map(norm).join('|')}
+13: function refKeyFor(b){
+14:   const s=textOf(b);
+15:   if(/citadelle|citadel/.test(s))return 'citadelle';
+16:   if(/musee|museum/.test(s))return 'musee';
+17:   if(/centre.?de.?soins|healer|clinic|dispensaire|medical|secours/.test(s))return 'centre_soins';
+18:   if(/laboratoire|\blab\b/.test(s))return 'laboratoire';
+19:   if(/gare|station/.test(s))return 'gare';
+20:   if(/bibliotheque.?publique|public.?library/.test(s))return 'bibliotheque_publique';
+21:   if(/guilde|guild/.test(s))return 'bureau_guilde';
+22:   if(/grand.?immeuble|highrise/.test(s))return 'grand_immeuble';
+23:   if(/immeuble.?moyen|midrise/.test(s))return 'immeuble_moyen';
+24:   if(/residence|appartement/.test(s))return 'residence';
+25:   if(/restaurant|cafe|brasserie/.test(s))return 'restaurant_cafe';
+### game/V109V_INTERIEUR_REWRITE.js line 67 — musée
+62: function blocked(x,y,ignoreNpc=null){const g=geometry();if(x<18||y<18||x>g.w-18||y>g.h-18)return true;if(blockedByFurniture(x,y,17))return true;if(npcBlocked(x,y,ignoreNpc))return true;return false}
+63: function nearestFree(x,y){const g=geometry(),cx=Math.max(24,Math.min(g.w-24,Number(x)||g.w/2)),cy=Math.max(24,Math.min(g.h-24,Number(y)||g.h-80));if(!blocked(cx,cy))return[cx,cy];for(let rad=20;rad<Math.max(g.w,g.h);rad+=20){for(let a=0;a<Math.PI*2;a+=Math.PI/12){const px=Math.max(24,Math.min(g.w-24,cx+Math.cos(a)*rad)),py=Math.max(24,Math.min(g.h-24,cy+Math.sin(a)*rad));if(!blocked(px,py))return[px,py]}}return[g.w/2,g.h/2]}
+64: 
+65: const FLOOR_THEMES={
+66:   // Palette reconstruite depuis le rendu visuel V105X : bois chaud pour les logements,
+67:   // carrelage blanc/bleu pour soins/labo, crème pour boutique/gare, pierre beige pour musée.
+68:   maison:{wall:'#d79a56',wall2:'#a8622f',a:'#df984d',b:'#e7a75d',line:'#b86f33',kind:'wood',border:'#704127'},
+69:   residence:{wall:'#d19a61',wall2:'#8d5935',a:'#dfa361',b:'#e9b371',line:'#b8753e',kind:'wood',border:'#70472d'},
+70:   hotel:{wall:'#d8a35e',wall2:'#85502d',a:'#e9ad68',b:'#f0bd7d',line:'#bd7942',kind:'wood',border:'#684027'},
+71:   restaurant_cafe:{wall:'#d8a15c',wall2:'#84512e',a:'#e6ad69',b:'#efbd7d',line:'#bd7c45',kind:'wood',border:'#6d4329'},
+72:   bibliotheque_publique:{wall:'#c99656',wall2:'#704629',a:'#d69a55',b:'#e3aa66',line:'#ab6733',kind:'wood',border:'#5d3b28'},
+73:   centre_soins:{wall:'#a9c9de',wall2:'#507fa3',a:'#e5e5e2',b:'#d5d8d9',line:'#b8c6cf',kind:'medical',border:'#486f8a'},
+74:   laboratoire:{wall:'#a9c8dc',wall2:'#536f88',a:'#bed3e1',b:'#d0dfE8',line:'#91b4c9',kind:'medical',border:'#4f687d'},
+75:   boutique:{wall:'#d5c49f',wall2:'#8d7651',a:'#e5dcc2',b:'#d6cbaa',line:'#c2b58f',kind:'tile',border:'#735d3e'},
+76:   gare:{wall:'#8aa5bd',wall2:'#425a72',a:'#eed79f',b:'#e5cb91',line:'#c4ad78',kind:'station',border:'#46586a'},
+### game/V109V_INTERIEUR_REWRITE.js line 77 — museum, musee
+72:   bibliotheque_publique:{wall:'#c99656',wall2:'#704629',a:'#d69a55',b:'#e3aa66',line:'#ab6733',kind:'wood',border:'#5d3b28'},
+73:   centre_soins:{wall:'#a9c9de',wall2:'#507fa3',a:'#e5e5e2',b:'#d5d8d9',line:'#b8c6cf',kind:'medical',border:'#486f8a'},
+74:   laboratoire:{wall:'#a9c8dc',wall2:'#536f88',a:'#bed3e1',b:'#d0dfE8',line:'#91b4c9',kind:'medical',border:'#4f687d'},
+75:   boutique:{wall:'#d5c49f',wall2:'#8d7651',a:'#e5dcc2',b:'#d6cbaa',line:'#c2b58f',kind:'tile',border:'#735d3e'},
+76:   gare:{wall:'#8aa5bd',wall2:'#425a72',a:'#eed79f',b:'#e5cb91',line:'#c4ad78',kind:'station',border:'#46586a'},
+77:   musee:{wall:'#d8c2aa',wall2:'#755940',a:'#e7d2bd',b:'#ddc4a9',line:'#c4a98b',kind:'museum',border:'#654d39'},
+78:   ecole:{wall:'#d7cfab',wall2:'#5f725b',a:'#e7dfbd',b:'#d9d0aa',line:'#bbb081',kind:'tile',border:'#536650'},
+79:   gardien:{wall:'#b9aa9a',wall2:'#60483d',a:'#cec1b3',b:'#b5a494',line:'#8f7a6a',kind:'stone',border:'#5c473e'},
+80:   citadelle:{wall:'#8e8170',wall2:'#40362e',a:'#b7aa94',b:'#9f927d',line:'#786b5a',kind:'citadel',border:'#372f29'},
+81:   bureau_guilde:{wall:'#b8aa9a',wall2:'#5f5148',a:'#cfc2b2',b:'#b9aa97',line:'#948572',kind:'carpet',border:'#5a4b42'},
+82:   immeuble_moyen:{wall:'#c6c8c7',wall2:'#616b70',a:'#d6d2cb',b:'#c5c0b7',line:'#a7a097',kind:'tile',border:'#555f63'},
+83:   grand_immeuble:{wall:'#bcc7c6',wall2:'#526466',a:'#d1d8d6',b:'#bdc8c5',line:'#98a8a5',kind:'tile',border:'#4d5d5f'}
+84: };
+85: function drawFloor(){
+86:   const g=geometry(),t=FLOOR_THEMES[session?.key]||FLOOR_THEMES.maison;
+### game/V109V_INTERIEUR_REWRITE.js line 97 — museum
+92:   // Bande de mur périphérique puis sol : aucune modification des coordonnées du JSON.
+93:   ctx.fillStyle=t.wall;ctx.fillRect(X+wall*.18,Y+wall*.18,W-wall*.36,H-wall*.36);
+94:   const fx=X+wall,fy=Y+wall,fw=Math.max(1,W-wall*2),fh=Math.max(1,H-wall*2);
+95:   ctx.fillStyle=t.a;ctx.fillRect(fx,fy,fw,fh);
+96:   ctx.save();ctx.beginPath();ctx.rect(fx,fy,fw,fh);ctx.clip();
+97:   const unit=(t.kind==='wood'?34:t.kind==='medical'?42:t.kind==='station'?48:t.kind==='museum'?58:t.kind==='tile'?50:t.kind==='stone'?62:t.kind==='citadel'?58:60)*g.scale;
+98:   ctx.lineWidth=Math.max(.65,g.scale*1.05);ctx.strokeStyle=t.line;
+99:   if(t.kind==='wood'){
+100:     // Lames de parquet en quinconce, proches du rendu Maison/Hôtel de la planche V105X.
+101:     let row=0;for(let y=fy;y<=fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke();const off=(row++%2)*unit*1.7;for(let x=fx-off;x<fx+fw;x+=unit*3.4){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+unit);ctx.stroke()}}
+102:     ctx.fillStyle='rgba(255,224,169,.08)';for(let y=fy+unit*.3;y<fy+fh;y+=unit*2){ctx.fillRect(fx,y,fw,unit*.18)}
+103:   }else if(t.kind==='medical'){
+104:     // Petits carreaux blancs/bleutés de Centre de soins/Laboratoire.
+105:     ctx.fillStyle=t.b;ctx.globalAlpha=.34;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+106:     for(let x=fx;x<=fx+fw;x+=unit){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+fh);ctx.stroke()}
+### game/V109V_INTERIEUR_REWRITE.js line 115 — museum
+110:     // Dalles crème avec bordure bleutée, comme la gare de référence.
+111:     ctx.fillStyle=t.b;ctx.globalAlpha=.36;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+112:     for(let x=fx;x<=fx+fw;x+=unit){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+fh);ctx.stroke()}
+113:     for(let y=fy;y<=fy+fh;y+=unit){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke()}
+114:     ctx.fillStyle='rgba(67,88,111,.18)';ctx.fillRect(fx,fy,fw,Math.max(4,unit*.22));ctx.fillRect(fx,fy+fh-Math.max(4,unit*.22),fw,Math.max(4,unit*.22));
+115:   }else if(t.kind==='museum'){
+116:     // Grandes dalles pierre beige légèrement nuancées.
+117:     ctx.fillStyle=t.b;ctx.globalAlpha=.33;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+118:     for(let y=fy,rr=0;y<=fy+fh;y+=unit,rr++){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke();const off=(rr%2)*unit*.55;for(let x=fx-off;x<fx+fw;x+=unit*1.1){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+unit);ctx.stroke()}}
+119:     ctx.fillStyle='rgba(255,255,255,.08)';for(let y=fy+unit*.15;y<fy+fh;y+=unit*2)ctx.fillRect(fx,y,fw,unit*.2);
+120:   }else if(t.kind==='carpet'){
+121:     ctx.fillStyle=t.b;ctx.globalAlpha=.52;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;for(let y=fy;y<fy+fh;y+=unit*.45){ctx.beginPath();ctx.moveTo(fx,y);ctx.lineTo(fx+fw,y);ctx.stroke()}
+122:   }else{
+123:     ctx.fillStyle=t.b;ctx.globalAlpha=.30;ctx.fillRect(fx,fy,fw,fh);ctx.globalAlpha=1;
+124:     for(let x=fx;x<=fx+fw;x+=unit){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x,fy+fh);ctx.stroke()}
+### game/V109V_INTERIEUR_REWRITE.js line 140 — directeur, museum, musee, musée
+135:   const g=geometry(),cx=g.ox+(Number(m.x)+Number(m.w)/2)*g.scale,cy=g.oy+(Number(m.y)+Number(m.h)/2)*g.scale;
+136:   ctx.save();ctx.translate(cx,cy);ctx.rotate((Number(m.rotation)||0)*Math.PI/180);ctx.scale(m.flipX?-1:1,m.flipY?-1:1);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(im,-Number(m.w)*g.scale/2,-Number(m.h)*g.scale/2,Number(m.w)*g.scale,Number(m.h)*g.scale);ctx.restore();
+137: }
+138: 
+139: const SERVICE={
+140:   centre_soins:{id:'healer',look:21,name:'Infirmière Élise',anchors:['comptoir_medical','machine_soin']},laboratoire:{id:'prof',look:40,name:'Professeur Aurine',anchors:['table_starters','supercalculateur']},boutique:{id:'seller',look:26,name:'Marchand',anchors:['comptoir_vente']},gare:{id:'agent',look:24,name:'Agent de gare',anchors:['guichet_billets']},musee:{id:'museum_director',look:9,name:'Directeur du musée',anchors:['bureau_conservateur']},ecole:{id:'teacher',look:0,name:'Professeure Emma',anchors:['bureau_professeur']},gardien:{id:'guard',look:20,name:'Gardien',anchors:['pupitre_gardien']},hotel:{id:'host',look:6,name:'Aubergiste Clara',anchors:['reception_hotel']},restaurant_cafe:{id:'server',look:34,name:'Serveuse',anchors:['comptoir_restaurant']},bureau_guilde:{id:'guild_master',look:23,name:'Responsable de Guilde',anchors:['bureau_direction']},bibliotheque_publique:{id:'librarian',look:13,name:'Bibliothécaire',anchors:['comptoir_bibliotheque']}
+141: };
+142: function serviceNpc(){
+143:   const def=SERVICE[session?.key];if(!def)return [];
+144:   const list=furn();let a=null;for(const id of def.anchors){a=list.find(m=>m.id===id);if(a)break}
+145:   const g=geometry();let x=a?Number(a.x)+Number(a.w)/2:g.w/2,y=a?Number(a.y)+Number(a.h)+38:g.h*.35;[x,y]=nearestFree(x,y);
+146:   return[{...def,x,y,homeX:x,homeY:y,dir:0,moving:false,service:true,targetX:x,targetY:y,nextDecision:0}]
+147: }
+148: function updateNpcs(){
+149:   if(!session)return;const now=performance.now(),dt=Math.min(.06,Math.max(0,(now-npcLast)/1000));npcLast=now;
+### game/V109V_INTERIEUR_REWRITE.js line 240 — musee, oeuf
+235: function rummage(m){state.flags=state.flags||{};state.inventory=state.inventory||{};const k='v109v_search_'+(m.instanceId||m.id);if(state.flags[k])return dialogSafe(m.label||'Rangement','Tu l’as déjà fouillé.');state.flags[k]=true;state.inventory.Baie=(state.inventory.Baie||0)+1;try{hud();save(false)}catch(_){}dialogSafe(m.label||'Rangement','Tu trouves une Baie.')}
+236: function study(m){if(state.team?.length){state.team[0].xp=(state.team[0].xp||0)+15;try{hud();save(false)}catch(_){}dialogSafe(m.label||'Étude','La première créature de ton équipe gagne 15 EXP.')}else dialogSafe(m.label||'Étude',m.description||'Tu étudies les documents.')}
+237: function archives(m){dialogSafe(m.label||m.nom||'Archives',m.description||'Des documents anciens racontent l’histoire de Valdora.')}
+238: function roomAction(m){return moveToRoom(m.targetFloor||session.floorId,m.targetRoom||session.roomId,m.arrivalX,m.arrivalY)}
+239: function elevator(){const list=destinations();if(!list.length)return dialogSafe('Ascenseur','Aucune destination.');let html='<div class="quest"><b>Ascenseur</b><br>Choisis une destination.</div><div class="baggrid">'+list.map(x=>`<button class="bagitem" onclick="ValdoraInteriorV109V.moveToRoom('${x.floorId}','${x.roomId}')">${x.label}</button>`).join('')+'</div>';if(typeof openSimpleMenu==='function')openSimpleMenu('Ascenseur',html);else dialogSafe('Ascenseur',list.map(x=>x.label).join(' • '))}
+240: const HANDLED=new Set(['acheter_dessert','ascenseur_etages','carte_citadelle','choix_starters','collision_mur','commander_repas','consulter_archives','consulter_reunion','controle_ticket','cuisiner','decor','dialogue_citadelle','dialogue_direction','distributeur_boissons','emprunter_livre','etudier','horaires_train','infos_carte_region','infos_oeuf','infos_valdora','interaction_finale','lancer_defi_gardien','lecon','lire_lore_indices','lore_citadelle','lore_gardien','lore_musee','lore_recherche','missions_guilde','ouvrir_boutique','ouvrir_casier','ouvrir_rangement','ouvrir_stockage','parler_professeur','passage_etage','passage_piece_sol','prendre_repas','recevoir_sceau','recherche_codex','repas_recup_pv','repos_15s_soin_complet','reservation_hotel','s_asseoir','soins_centre','voir_trophees','voyage_train']);
+241: function interactFurniture(m){
+242:   if(!m)return false;const fn=String(m.fonction||'decor'),title=m.label||m.nom||m.id||'Mobilier';state.mobilierInstanceIdV102Y=m.instanceId;
+243:   switch(fn){
+244:     case 'ouvrir_stockage': if(typeof window.openPC==='function')window.openPC(); else dialogSafe('PC','Le stockage est indisponible.'); break;
+245:     case 'soins_centre': if(typeof startHealingSequence==='function')startHealingSequence();else{healAll();dialogSafe('Centre de soins','Ton équipe est soignée.')}break;
+246:     case 'ouvrir_boutique': if(typeof openShop==='function')openShop();else dialogSafe('Boutique','Le service est indisponible.');break;
+247:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dialogSafe(title,'Ton équipe récupère complètement.')}break;
+248:     case 's_asseoir': if(typeof sitAt==='function')sitAt(m);else dialogSafe(title,m.description||'Tu t’assois un instant.');break;
+249:     case 'repas_recup_pv':case 'prendre_repas':case 'commander_repas':case 'cuisiner':case 'acheter_dessert':partialHeal(.25);dialogSafe(title,m.description||'Ton équipe récupère un peu d’énergie.');break;
+### game/V109V_INTERIEUR_REWRITE.js line 251 — musee
+246:     case 'ouvrir_boutique': if(typeof openShop==='function')openShop();else dialogSafe('Boutique','Le service est indisponible.');break;
+247:     case 'repos_15s_soin_complet': if(typeof sleepAt==='function')sleepAt(m);else{healAll();dialogSafe(title,'Ton équipe récupère complètement.')}break;
+248:     case 's_asseoir': if(typeof sitAt==='function')sitAt(m);else dialogSafe(title,m.description||'Tu t’assois un instant.');break;
+249:     case 'repas_recup_pv':case 'prendre_repas':case 'commander_repas':case 'cuisiner':case 'acheter_dessert':partialHeal(.25);dialogSafe(title,m.description||'Ton équipe récupère un peu d’énergie.');break;
+250:     case 'infos_valdora':dialogSafe(title,m.description||'Informations sur Valdora.');break;
+251:     case 'lire_lore_indices':case 'consulter_archives':case 'consulter_reunion':case 'lore_recherche':case 'lore_musee':case 'lore_gardien':case 'lore_citadelle':case 'emprunter_livre':archives(m);break;
+252:     case 'infos_carte_region':dialogSafe(title,m.description||'Une carte détaillée de Valdora.');break;
+253:     case 'reservation_hotel': if(typeof reserveHotel==='function')reserveHotel();else dialogSafe(title,m.description||'Réception.');break;
+254:     case 'voyage_train':case 'controle_ticket':window.ValdoraTrainV109D?.open?.();break;
+255:     case 'horaires_train':if(typeof stationBoard==='function')stationBoard();else dialogSafe(title,m.description||'Horaires des trains.');break;
+256:     case 'distributeur_boissons':if(typeof vending==='function')vending();else dialogSafe(title,m.description||'Distributeur.');break;
+257:     case 'choix_starters':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe(title,'Ton premier compagnon a déjà été choisi.');break;
+258:     case 'recherche_codex':if(typeof superComputer==='function')superComputer();else dialogSafe(title,m.description||'Recherche Codex.');break;
+259:     case 'infos_oeuf':dialogSafe(title,m.description||'Les capteurs surveillent l’œuf.');break;
+260:     case 'passage_piece_sol':case 'passage_etage':roomAction(m);break;
+### game/V109V_INTERIEUR_REWRITE.js line 259 — oeuf, œuf
+254:     case 'voyage_train':case 'controle_ticket':window.ValdoraTrainV109D?.open?.();break;
+255:     case 'horaires_train':if(typeof stationBoard==='function')stationBoard();else dialogSafe(title,m.description||'Horaires des trains.');break;
+256:     case 'distributeur_boissons':if(typeof vending==='function')vending();else dialogSafe(title,m.description||'Distributeur.');break;
+257:     case 'choix_starters':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe(title,'Ton premier compagnon a déjà été choisi.');break;
+258:     case 'recherche_codex':if(typeof superComputer==='function')superComputer();else dialogSafe(title,m.description||'Recherche Codex.');break;
+259:     case 'infos_oeuf':dialogSafe(title,m.description||'Les capteurs surveillent l’œuf.');break;
+260:     case 'passage_piece_sol':case 'passage_etage':roomAction(m);break;
+261:     case 'ascenseur_etages':elevator();break;
+262:     case 'ouvrir_casier':case 'ouvrir_rangement':rummage(m);break;
+263:     case 'etudier':case 'lecon':study(m);break;
+264:     case 'parler_professeur':dialogSafe('Professeure Emma',m.description||'Le professeur te parle du cours.');break;
+265:     case 'lancer_defi_gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));else dialogSafe(title,m.description||'Le défi du Gardien.');break;
+266:     case 'recevoir_sceau':dialogSafe(title,'Le Sceau est remis après la victoire contre le Gardien.');break;
+267:     case 'voir_trophees':dialogSafe(title,m.description||'Les trophées des anciens défis.');break;
+268:     case 'missions_guilde':if(typeof openObjectivesV84==='function')openObjectivesV84();else dialogSafe(title,m.description||'Missions de la Guilde.');break;
+### game/V109V_INTERIEUR_REWRITE.js line 281 — museum, musee, musée
+276: }
+277: function faceNpc(n){if(!n)return;const dx=state.roomX-n.x,dy=state.roomY-n.y;n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);n.pauseUntil=Date.now()+2600;n.moving=false}
+278: function serviceNpcInteract(n){
+279:   faceNpc(n);
+280:   if(!n?.service){dialogSafe(n?.name||'Habitant','Bonjour !');return true}
+281:   switch(session?.key){case 'centre_soins':return interactFurniture(furn().find(m=>m.fonction==='soins_centre')||{fonction:'soins_centre',label:'Centre de soins'});case 'laboratoire':if(!(state.team||[]).length&&typeof showStarters==='function')showStarters();else dialogSafe('Professeur Aurine','Continue ton enquête sur Valdora.');return true;case 'boutique':if(typeof openShop==='function')openShop();return true;case 'gare':window.ValdoraTrainV109D?.open?.();return true;case 'musee':if(typeof window.openMuseumDirectorV109A==='function')window.openMuseumDirectorV109A();else dialogSafe(n.name,'Bienvenue au musée.');return true;case 'gardien':if(typeof arenaChallenge==='function')arenaChallenge(+String(state.zone).replace('town',''));return true;default:dialogSafe(n.name,'Bonjour !');return true}
+282: }
+283: function interact(){if(!session)return;const q=nearestInteractionTarget();if(q?.kind==='furniture')return interactFurniture(q.target);if(q?.kind==='npc')return serviceNpcInteract(q.target);try{toast('Approche-toi d’un élément ou d’un personnage : E / Entrée.')}catch(_){}}
+284: 
+285: // Interaction monde : la porte du bâtiment utilise exclusivement ce nouveau moteur.
+286: const WORLD_INTERACT_BEFORE=window.interact;
+287: function worldInteract(){if(scene==='world'){const b=nearDoor();if(b)return enter(b)}return WORLD_INTERACT_BEFORE?.apply(this,arguments)}
+288: 
+289: // Citadelle monde : déplacement dédié, sans dépendance au réseau routier des villes.
+290: const WORLD_MOVE_BEFORE=window.move;
+### game/VALDORA_LIVING_WORLD_V118.js line 135 — musée
+130:   'Bonjour, voyageur.','Tiens, te voilà !','Hé, une petite minute.','Bienvenue dans le quartier.','On se croise enfin.','Je faisais justement une pause.','Tu arrives au bon moment.','Entre voyageurs, on peut partager une information.','Quel plaisir de voir une nouvelle tête.','Tu as l’air d’avoir beaucoup marché.','Je surveille souvent les allées et venues.','Approche, j’ai peut-être quelque chose d’utile à te dire.','La journée est animée, pas vrai ?','J’aime prendre le temps de parler aux dresseurs.','On n’apprend jamais autant qu’en discutant.','Les nouvelles circulent vite à Valdora.'
+131: ];
+132: const CONTEXTS=[
+133:   'Depuis quelques jours, les habitants remarquent des changements subtils dans le comportement des Éclats.',
+134:   'Les commerçants disent que les voyageurs préparent leurs équipes avec beaucoup plus de soin qu’avant.',
+135:   'Les anciens du quartier comparent chaque nouvelle rumeur aux récits conservés dans les musées.',
+136:   'Les enfants inventent déjà des histoires sur les dresseurs capables de traverser toute la région.',
+137:   'On reconnaît les bons explorateurs à leur manière de regarder les chemins secondaires.',
+138:   'La Team Taron préfère les endroits où personne ne prend le temps de poser des questions.',
+139:   'Les transports rapprochent les villes, mais chaque route garde encore ses propres secrets.',
+140:   'Certains phénomènes de Résonance semblent plus intenses lorsque plusieurs types d’Éclats voyagent ensemble.',
+141:   'Les Gardiens observent autant la patience et la curiosité que la force brute.',
+142:   'Les habitants se souviennent des dresseurs qui reviennent prendre de leurs nouvelles.',
+143:   'Les directeurs de musée échangent discrètement des rapports sur les découvertes récentes.',
+144:   'Les boutiques adaptent parfois leurs conseils à la progression des voyageurs.',
+### game/VALDORA_LIVING_WORLD_V118.js line 143 — directeur, musée
+138:   'La Team Taron préfère les endroits où personne ne prend le temps de poser des questions.',
+139:   'Les transports rapprochent les villes, mais chaque route garde encore ses propres secrets.',
+140:   'Certains phénomènes de Résonance semblent plus intenses lorsque plusieurs types d’Éclats voyagent ensemble.',
+141:   'Les Gardiens observent autant la patience et la curiosité que la force brute.',
+142:   'Les habitants se souviennent des dresseurs qui reviennent prendre de leurs nouvelles.',
+143:   'Les directeurs de musée échangent discrètement des rapports sur les découvertes récentes.',
+144:   'Les boutiques adaptent parfois leurs conseils à la progression des voyageurs.',
+145:   'Une équipe bien préparée peut transformer un détour difficile en véritable opportunité.',
+146:   'Les détails les plus importants sont souvent cachés dans une conversation ordinaire.',
+147:   'Les saisons, l’heure et la météo changent la façon dont la ville semble respirer.'
+148: ];
+149: const TIPS=[
+150:   'Pense à consulter ton Codex après plusieurs captures : les informations accumulées finissent par révéler des tendances.',
+151:   'Parler aux habitants des anciennes villes peut débloquer de nouvelles rumeurs après un événement important.',
+152:   'Un détour par une maison ou un lieu public permet parfois de trouver un objet, un indice ou une activité locale.',
+### game/VALDORA_LIVING_WORLD_V118.js line 174 — musée
+169:   town0:['À Clairval, tout commence par de petites habitudes : soigner, observer puis oser prendre la Route 1','Les herbes de Clairval sont un terrain idéal pour apprendre sans brûler les étapes','Le laboratoire attire des curieux depuis que le Professeur étudie la Résonance','Les habitants protègent l’atmosphère paisible de la place tout en préparant les nouveaux départs','La Route 1 paraît familière, mais elle teste déjà la préparation des jeunes équipes','Les maisons de Clairval conservent des souvenirs des toutes premières expéditions'],
+170:   town1:['Rochebrune vit au rythme de la pierre, des sentiers et des voyageurs venus de la Route 1','Les habitants savent lire les fissures de la roche comme d’autres lisent une carte','Les bois voisins abritent des espèces qui n’aiment pas les passages trop bruyants','Les artisans locaux échangent volontiers des conseils contre une bonne histoire de voyage','La Route 2 demande plus d’attention qu’elle n’en donne l’impression','Les pierres anciennes autour de la ville portent encore des marques difficiles à dater'],
+171:   town2:['Azurive change d’humeur avec le vent qui traverse le lac','Les pêcheurs observent les remous pour prévoir l’activité des Éclats Eau','La Route 3 longe des zones où les traces disparaissent très vite','Les habitants entretiennent des pontons et des chemins pour protéger les rives','Les chercheurs comparent la couleur de l’eau aux phénomènes de Résonance','Les nuits calmes d’Azurive sont parfois interrompues par des lueurs sous la surface'],
+172:   town3:['Montfaucon est un carrefour où l’on hésite souvent entre la corniche et la Route 4','Les hauteurs donnent une vue superbe, mais le vent peut fatiguer une équipe mal préparée','Les habitants connaissent des histoires différentes selon le chemin par lequel on arrive','La corniche de Simdor attire les marcheurs qui aiment les itinéraires exigeants','Les oiseaux et les Éclats Air utilisent les courants qui longent les falaises','Le marché local mélange produits des montagnes et marchandises venues de Belrive'],
+173:   town4:['Belrive sert de respiration avant la Route 5 et les étapes plus longues','Les jardins de la ville sont entretenus pour laisser les chemins parfaitement dégagés','Les habitants suivent avec attention les nouvelles venues de Soleria','Les voyageurs comparent souvent la douceur de Belrive aux reliefs qu’ils viennent de quitter','Certains objets rares arrivent ici par de petites caravanes','Les dresseurs locaux aiment tester des équipes équilibrées plutôt que spécialisées'],
+174:   town5:['Soleria rayonne autour de ses places claires et de ses routes très fréquentées','Le passage vers Simdor offre un raccourci spectaculaire mais exigeant','La Route 6 marque pour beaucoup le début d’un voyage plus ambitieux','Les habitants décorent leurs façades avec des couleurs inspirées du soleil','Les musées locaux étudient des fragments trouvés dans les terres sèches','Les soirées de Soleria rassemblent commerçants, chercheurs et dresseurs itinérants'],
+175:   town6:['Novacité ne s’arrête presque jamais, même lorsque les routes se calment','Les quartiers modernes côtoient encore de vieux passages connus des habitants','La Route 7 concentre beaucoup de dresseurs désireux de mesurer leurs progrès','Les transports urbains facilitent les retours vers les premières régions','Les chercheurs de Novacité testent de nouvelles façons de suivre les migrations','Les lumières de la ville rendent les promenades nocturnes très différentes'],
+176:   town7:['Valombre garde une ambiance mystérieuse jusque sur ses places les plus animées','La Route des Ombres n’est pas le seul passage qui mérite d’être exploré','Les habitants parlent à voix basse des mouvements de la Team Taron','Les brumes donnent aux rues une apparence différente selon l’heure','Les dresseurs locaux apprennent à ne pas dépendre uniquement de la vision','Le chemin vers les Cimes d’Or récompense les équipes patientes'],
+177:   town8:["Les Cimes d’Or dominent une grande partie de Valdora et changent de couleur au coucher du soleil","La Route du littoral commence après des reliefs où le vent devient imprévisible","Les habitants savent reconnaître les signes annonçant un changement brutal de météo","Les ponts de montagne sont surveillés avec soin pour rester praticables","Les Éclats Air et Roche se croisent souvent autour des hauteurs","Les voyageurs racontent que la vue aide à comprendre la forme entière de la région"],
+178:   town9:['Port-Écume vit au rythme des marées, des départs et des cargaisons','La Route du littoral laisse le sel jusque sur les vêtements des voyageurs','Le détroit de Luminon attire des espèces marines difficiles à observer ailleurs','Les marins échangent des rumeurs venues de régions très éloignées','Les maisons proches de la plage sont conçues pour résister aux vents forts','Les quais s’animent davantage lorsque les transports arrivent ensemble'],
+179:   town10:['Luminon éclaire ses rues jusque tard et attire de nombreux chercheurs','Le détroit apporte chaque jour des voyageurs et des histoires différentes','La Route des Brumes commence dans une lumière trompeusement douce','Les habitants étudient les phénomènes lumineux sans négliger les créatures de l’ombre','Les ateliers testent des matériaux capables de réagir aux Éclats','Les places de Luminon accueillent souvent des démonstrations de combat'],
+180:   town11:['Brumlac se découvre lentement, entre eau calme et nappes de brume','La Route Sylvestre commence là où les roseaux laissent place aux arbres','Les habitants connaissent des repères invisibles aux voyageurs pressés','Les sons portent très loin au-dessus du lac lorsque la brume tombe','Les chercheurs surveillent les variations d’humidité autour des habitats sauvages','Les anciennes maisons conservent des cartes dessinées avant les routes modernes'],
+181:   town12:['Silvaris est une véritable porte vers les forêts profondes','La végétation change rapidement dès qu’on quitte les rues entretenues','La Route de Taronis est surveillée depuis les dernières opérations ennemies','Les habitants savent reconnaître les plantes utiles sans abîmer les sous-bois','Les espèces Nature et Spore partagent des territoires très différents','Les sentiers forestiers révèlent davantage de détails à ceux qui reviennent plusieurs fois'],
+182:   town13:['Taronis porte encore les traces des opérations de la Team Taron','La métropole réunit des habitants venus de toutes les étapes du voyage','La Route des Aubes est surveillée comme un passage stratégique','Les bâtiments publics restent animés jusque tard à cause des enquêtes en cours','Les dresseurs échangent des informations avant de poursuivre vers Aubeval','Les quartiers rénovés côtoient des zones où l’histoire récente reste visible'],
+183:   town14:['Aubeval est la dernière grande halte avant la Citadelle du Cœur et les expéditions légendaires','Les voyageurs viennent ici vérifier une dernière fois leur équipe et leurs réserves','La Route des Aubes donne à chaque arrivée une impression de nouveau départ','Les habitants collectionnent les récits de ceux qui ont parcouru toute Valdora','Les biomes légendaires ne s’ouvrent qu’aux équipes réellement préparées','La lumière du matin donne à la ville une atmosphère différente de toutes les autres']
+### game/VALDORA_LIVING_WORLD_V118.js line 373 — museum
+368: worldInteractV118.__v107dInteract=true;worldInteractV118.__v118StableInteract=true;
+369: // Les anciens modules d'ambiance se réinstallent encore à intervalles fixes.
+370: // Ces marqueurs leur indiquent que V118 contient déjà leurs interactions et
+371: // évitent qu'ils réenveloppent ce moteur en formant une boucle récursive.
+372: worldInteractV118.__v107dInteract=true;
+373: worldInteractV118.__v113Museum=true;
+374: 
+375: // ---------------------------------------------------------------------
+376: // Intérieurs habités : plusieurs personnes par pièce, placement sur les
+377: // zones réellement libres du mobilier V105X et interactions individuelles.
+378: // ---------------------------------------------------------------------
+379: const INTERIOR_ROLES={
+380:   maison:['habitante','parent','jeune dresseuse','voisin en visite'],residence:['résidente','voisin','gardienne de l’immeuble','livreur'],immeuble_moyen:['résidente','employé de bureau','technicienne','visiteur'],grand_immeuble:['résidente','agent d’entretien','consultante','visiteur'],
+381:   centre_soins:['patient','accompagnatrice','stagiaire médicale','dresseur en convalescence'],laboratoire:['assistante de recherche','étudiant','technicienne','observateur du Codex'],boutique:['cliente','fournisseur','apprentie marchande','collectionneur'],gare:['voyageuse','contrôleur','employée des quais','touriste'],musee:['visiteuse','archiviste','guide','chercheuse'],ecole:['élève','professeur invité','surveillante','parent'],gardien:['aspirante','arbitre','supporter','dresseur local'],hotel:['cliente','concierge','voyageuse','bagagiste'],restaurant_cafe:['cliente','cuisinier','serveuse','habitué'],bureau_guilde:['éclaireuse','cartographe','contractuelle','responsable de mission'],bibliotheque_publique:['lectrice','archiviste','étudiante','bibliothécaire adjointe'],citadelle:['gardienne','érudit','émissaire','stratège']
+382: };
+### game/VALDORA_LIVING_WORLD_V118.js line 381 — musee
+376: // Intérieurs habités : plusieurs personnes par pièce, placement sur les
+377: // zones réellement libres du mobilier V105X et interactions individuelles.
+378: // ---------------------------------------------------------------------
+379: const INTERIOR_ROLES={
+380:   maison:['habitante','parent','jeune dresseuse','voisin en visite'],residence:['résidente','voisin','gardienne de l’immeuble','livreur'],immeuble_moyen:['résidente','employé de bureau','technicienne','visiteur'],grand_immeuble:['résidente','agent d’entretien','consultante','visiteur'],
+381:   centre_soins:['patient','accompagnatrice','stagiaire médicale','dresseur en convalescence'],laboratoire:['assistante de recherche','étudiant','technicienne','observateur du Codex'],boutique:['cliente','fournisseur','apprentie marchande','collectionneur'],gare:['voyageuse','contrôleur','employée des quais','touriste'],musee:['visiteuse','archiviste','guide','chercheuse'],ecole:['élève','professeur invité','surveillante','parent'],gardien:['aspirante','arbitre','supporter','dresseur local'],hotel:['cliente','concierge','voyageuse','bagagiste'],restaurant_cafe:['cliente','cuisinier','serveuse','habitué'],bureau_guilde:['éclaireuse','cartographe','contractuelle','responsable de mission'],bibliotheque_publique:['lectrice','archiviste','étudiante','bibliothécaire adjointe'],citadelle:['gardienne','érudit','émissaire','stratège']
+382: };
+383: const INTERIOR_COUNT={maison:3,residence:4,immeuble_moyen:4,grand_immeuble:5,centre_soins:4,laboratoire:4,boutique:3,gare:5,musee:5,ecole:5,gardien:4,hotel:4,restaurant_cafe:5,bureau_guilde:4,bibliotheque_publique:5,citadelle:4};
+384: function interiorSession(){try{return BASE.interior?.session?.()||null}catch(_){return null}}
+385: function roomGeometry(){const rr=BASE.interior?.rawRoom?.(),room=rr?.room||{};return{rr,w:Math.max(1,Number(room.width)||1200),h:Math.max(1,Number(room.height)||800)}}
+386: function furnRect(m){if(m?.collision)return{x:Number(m.collision.x)||0,y:Number(m.collision.y)||0,w:Number(m.collision.w)||0,h:Number(m.collision.h)||0};return{x:Number(m?.x)||0,y:Number(m?.y)||0,w:Number(m?.w)||0,h:Number(m?.h)||0}}
+387: function interiorCandidates(g,furniture){
+388:   const out=[];for(let y=92;y<g.h-92;y+=72)for(let x=74;x<g.w-74;x+=84){if(y>g.h-150&&Math.abs(x-g.w/2)<150)continue;const p={x,y};if(furniture.some(m=>{const r=furnRect(m);return x>r.x-36&&x<r.x+r.w+36&&y>r.y-42&&y<r.y+r.h+38}))continue;out.push(p)}return out
+389: }
+390: function ensureInteriorPopulation(record=false){
+### game/VALDORA_LIVING_WORLD_V118.js line 439 — musee
+434: // ---------------------------------------------------------------------
+435: // V120 — Charte graphique mondiale : une même famille de bâtiment conserve
+436: // le même gabarit dans toutes les villes. La taille de la ville ne change
+437: // jamais l'échelle des bâtiments. Les services uniques sont dédupliqués.
+438: // ---------------------------------------------------------------------
+439: const SINGLETON_BUILDINGS_V120=new Set(['centre_soins','gare','laboratoire','musee','gardien']);
+440: let BUILDING_SIZE_CHARTER_V120=null;
+441: function buildingFieldsV120(b){return [b?.type,b?.urbanType,b?.id,b?.label,b?.name,b?.interiorKey,b?.key].filter(Boolean).join(' ').toLowerCase()}
+442: function buildingFamilyV120(b){
+443:   const f=buildingFieldsV120(b);
+444:   if(/centre[_ -]?soins|centre de soins|soins_centre|clinique/.test(f))return'centre_soins';
+445:   if(!/bus|arr[eê]t|d[eé]p[oô]t/.test(f)&&/\bgare\b|station ferroviaire|rail station/.test(f))return'gare';
+446:   if(/laboratoire|\blabo\b/.test(f))return'laboratoire';
+447:   if(/mus[eé]e/.test(f))return'musee';
+448:   if(/gardien|ar[eè]ne/.test(f))return'gardien';
+### game/VALDORA_LIVING_WORLD_V118.js line 447 — musee
+442: function buildingFamilyV120(b){
+443:   const f=buildingFieldsV120(b);
+444:   if(/centre[_ -]?soins|centre de soins|soins_centre|clinique/.test(f))return'centre_soins';
+445:   if(!/bus|arr[eê]t|d[eé]p[oô]t/.test(f)&&/\bgare\b|station ferroviaire|rail station/.test(f))return'gare';
+446:   if(/laboratoire|\blabo\b/.test(f))return'laboratoire';
+447:   if(/mus[eé]e/.test(f))return'musee';
+448:   if(/gardien|ar[eè]ne/.test(f))return'gardien';
+449:   if(/boutique|shop|magasin/.test(f))return'boutique';
+450:   if(/h[oô]tel|auberge|\binn\b/.test(f))return'hotel';
+451:   if(/restaurant|caf[eé]/.test(f))return'restaurant_cafe';
+452:   if(/[eé]cole|school/.test(f))return'ecole';
+453:   if(/biblioth[eè]que|library/.test(f))return'bibliotheque';
+454:   if(/guilde|guild/.test(f))return'guilde';
+455:   if(/grand[_ -]?immeuble|tower|tour r[eé]sidentielle/.test(f))return'grand_immeuble';
+456:   if(/immeuble|appartement|apartment/.test(f))return'immeuble';
+### game/VALDORA_POLISH_V113.js line 94 — museum, musee, musée
+89: }
+90: function drawAtmosphere(sc){const key=themeKey(sc),t=Date.now()/1000,p=palette(sc);ctx.save();ctx.globalAlpha=.42;if(['mist','simdor','air'].includes(key)){ctx.fillStyle='rgba(235,250,247,.13)';for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(180+i*250,120+i*112+Math.sin(t*.35+i)*16,240,31,0,0,Math.PI*2);ctx.fill()}}else{ctx.fillStyle=p[1];for(let i=0;i<13;i++){const x=(i*149+t*(key==='industrial'?24:8))%1000,y=(i*83+t*7)%590;ctx.globalAlpha=.13+(i%3)*.05;ctx.beginPath();ctx.arc(x,y,1.5+i%2,0,Math.PI*2);ctx.fill()}}ctx.restore()}
+91: function drawCoastline(sc){if(sc?.kind!=='town'||themeKey(sc)!=='coast')return;const t=Date.now()/1000,shore=468;ctx.save();ctx.fillStyle='#d4ad70';ctx.fillRect(0,shore-18,960,48);ctx.fillStyle='#f0d38f';ctx.beginPath();ctx.moveTo(0,shore);for(let x=0;x<=960;x+=42)ctx.lineTo(x,shore+8+Math.sin(x*.025)*6);ctx.lineTo(960,525);ctx.lineTo(0,525);ctx.closePath();ctx.fill();const sea=ctx.createLinearGradient(0,510,0,600);sea.addColorStop(0,'#62dfd4');sea.addColorStop(1,'#1786aa');ctx.fillStyle=sea;ctx.fillRect(0,510,960,90);ctx.strokeStyle='rgba(240,255,250,.82)';ctx.lineWidth=3;for(let y=521;y<598;y+=23){ctx.beginPath();for(let x=-25;x<995;x+=24){const py=y+Math.sin(x*.036+t*1.8+y)*3;if(x===-25)ctx.moveTo(x,py);else ctx.lineTo(x,py)}ctx.stroke()}ctx.fillStyle='#9b6b42';ctx.fillRect(0,443,960,14);ctx.fillStyle='#e6c98f';for(let x=12;x<960;x+=42)ctx.fillRect(x,443,4,14);for(const [x,color] of[[108,'#ff7065'],[810,'#57a9ee']]){ctx.fillStyle='#8d663f';ctx.fillRect(x-2,472,4,38);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,468);ctx.lineTo(x-38,490);ctx.lineTo(x+38,490);ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(x,468);ctx.lineTo(x,490);ctx.lineTo(x+19,490);ctx.closePath();ctx.fill()}ctx.restore()}
+92: function overlay(){if(typeof scene!=='undefined'&&scene!=='world')return;const sc=typeof currentScene==='function'?currentScene():SCENES?.[state.zone];if(!sc)return;ctx.save();if(state.zone==='route4bis')drawLake(sc);else{drawCoastline(sc);drawAtmosphere(sc)}ctx.restore()}
+93: 
+94: function museumSession(){const apis=[window.ValdoraInteriorV109V,window.ValdoraBuildingV109I];for(const api of apis){try{const s=api?.session?.();if(s&&(s.key==='musee'||s.type==='museum'))return{s,api}}catch(_){}}const b=typeof building!=='undefined'?building:null;if(b&&/museum|musee|musée/i.test([b.type,b.urbanType,b.id,b.label].join(' ')))return{s:null,api:window.ValdoraInteriorV109V||window.ValdoraBuildingV109I};return null}
+95: function directorNear(info,range=175){const s=info?.s,npcs=s?.npcs||s?.room?.npcs||[];let director=npcs.find(n=>String(n.id)==='museum_director');if(!director){try{director=info?.api?.nearNpc?.()}catch(_){}}if(!director)return null;const d=Math.hypot(Number(state.roomX||0)-Number(director.x||0),Number(state.roomY||0)-Number(director.y||0));return d<=range?director:null}
+96: function tryMuseumDirector(){if(typeof scene!=='undefined'&&scene!=='interior')return false;const info=museumSession();if(!info)return false;const n=directorNear(info);if(!n)return false;try{if(typeof closeDialog==='function'&&document.getElementById('dialog')?.classList.contains('show'))return false}catch(_){}try{window.ValdoraInteriorNPCV108R?.beginInteraction?.(n)}catch(_){}if(typeof window.openMuseumDirectorV109A==='function'){window.openMuseumDirectorV109A();return true}if(typeof dialog==='function'){dialog('<b>'+String(n.name||'Direction du musée')+'</b><br>Bienvenue au musée de Valdora.');return true}return false}
+97: function creatorEnterMuseum(){if(!creator())return false;let found=null;for(const zone of['town13','town10','town9','town7','town5']){const sc=SCENES?.[zone],b=(sc?.buildings||[]).find(x=>/museum|musee|musée/i.test([x.type,x.urbanType,x.id,x.label].join(' ')));if(b){found={zone,b};break}}if(!found)return false;const d={x:Number(found.b.doorX??found.b.x+found.b.w/2),y:Number(found.b.doorY??found.b.y+found.b.h)};state.zone=found.zone;state.x=d.x;state.y=d.y+70;try{scene='world'}catch(_){}const interior=window.ValdoraInteriorV109V||window.ValdoraBuildingV109I;let entered=false;try{entered=!!interior?.enter?.(found.b)}catch(e){console.warn('V113 aperçu musée',e)}if(!entered)return false;setTimeout(()=>{try{const s=interior.session?.(),n=(s?.npcs||s?.room?.npcs||[]).find(x=>x.id==='museum_director');if(n){state.roomX=n.x;state.roomY=n.y+68;state.dir=3}window.drawInterior?.();toast?.('Aperçu musée V113 — approche validée')}catch(_){}},120);return true}
+98: function installCreatorTool(){if(!creator()||document.getElementById('v113-museum-preview'))return;const b=document.createElement('button');b.id='v113-museum-preview';b.type='button';b.textContent='Aperçu musée V113';b.title='Entrer directement dans un musée et tester le directeur';b.style.cssText='position:fixed;left:14px;bottom:14px;z-index:85000;border:2px solid #8be3cf;background:#163f49;color:#fff;border-radius:12px;padding:10px 14px;font:900 12px Segoe UI;box-shadow:0 7px 22px #0018;cursor:pointer';b.onclick=()=>creatorEnterMuseum();document.body.appendChild(b)}
+99: function hookInteraction(){
+100:  let base=window.interact;try{base=window.interact||interact}catch(_){}if(typeof base==='function'&&!base.__v113Museum){const wrapped=function(){if(tryMuseumDirector())return true;return base.apply(this,arguments)};wrapped.__v113Museum=true;wrapped.__v113Base=base;window.interact=wrapped;try{interact=wrapped}catch(_){}}
+101:  let inner=window.interactInterior;try{inner=window.interactInterior||interactInterior}catch(_){}if(typeof inner==='function'&&!inner.__v113Museum){const wrapped=function(){if(tryMuseumDirector())return true;return inner.apply(this,arguments)};wrapped.__v113Museum=true;wrapped.__v113Base=inner;window.interactInterior=wrapped;try{interactInterior=wrapped}catch(_){}}
+102: }
+103: 
+### game/VALDORA_POLISH_V113.js line 143 — directeur, museum, musée
+138:  window.startMusic=startAdaptiveMusic;window.refreshMusicV77=refreshAdaptiveMusic;window.startBattleMusic=startAdaptiveBattle;window.stopBattleMusic=stopAdaptiveBattle;
+139:  try{startMusic=startAdaptiveMusic}catch(_){}try{refreshMusicV77=refreshAdaptiveMusic}catch(_){}try{startBattleMusic=startAdaptiveBattle}catch(_){}try{stopBattleMusic=stopAdaptiveBattle}catch(_){}
+140: }
+141: 
+142: function enforceIdentity(){const title='Éclats Sauvages — Valdora V113 Professionnel';if(document.title!==title)document.title=title;const brand=document.querySelector('.brand'),label=`ÉCLATS SAUVAGES — VALDORA V113 — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==label)brand.textContent=label;document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.valdoraPolish=VERSION}
+143: function audit(){const issues=[],assetState={};for(const [k,img] of Object.entries(IMG)){assetState[k]=ready(img);if(!assetState[k])issues.push('asset '+k+' indisponible')}const museum={menu:typeof window.openMuseumDirectorV109A==='function',worldHook:!!window.interact?.__v113Museum,interiorHook:!!window.interactInterior?.__v113Museum};if(!museum.menu)issues.push('menu directeur musée indisponible');if(!museum.worldHook&&!museum.interiorHook)issues.push('interaction musée non branchée');const music={themes:Object.keys(THEMES).length,start:window.startMusic===startAdaptiveMusic,battle:window.startBattleMusic===startAdaptiveBattle,scheduler:!!audio.timer||true};if(!music.start||!music.battle)issues.push('moteur musical non prioritaire');return{version:VERSION,ok:issues.length===0,issues,assets:assetState,directionalSprites:{player:['front','right','left-mirror','back'],npc:['front','right','left-mirror','back']},renderers:{ground:true,roads:true,grass:true,trees:true,bushes:true,lake:true,citadel:true},museum,music,canonicalCitadelSource:ASSET_PATHS.citadelSource,baseAudit:window.ValdoraProV112?.audit?.()||null}}
+144: function publishAudit(){try{document.documentElement.dataset.valdoraV113Audit=JSON.stringify(audit())}catch(_){} }
+145: function fixCitadelActors(){const boss=SCENES?.temple_final?.trainers?.find(t=>t.finalBoss||t.id==='final_boss');if(boss){boss.x=1200;boss.y=560;boss.homeX=1200;boss.homeY=560}}
+146: function install(){if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;fixCitadelActors();hookInteraction();hookMusic();installCreatorTool();enforceIdentity();publishAudit()}
+147: 
+148: const api={active:true,version:VERSION,assets:ASSET_PATHS,drawGround,drawRoads,drawTree,drawBush,drawGrass,drawCitadel,overlay,tryMuseumDirector,creatorEnterMuseum,enforceIdentity,startMusic:startAdaptiveMusic,audit};
+149: window.ValdoraPolishV113=api;
+150: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[350,1100,2800,6200,10500].forEach(ms=>setTimeout(install,ms));setInterval(()=>{try{if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;hookInteraction();enforceIdentity();publishAudit()}catch(_){}},1200);
+151: console.log('V113 : rendu chibi 3D, nageurs directionnels, Citadelle canonique, musée et musique adaptative actifs.');
+152: })();
+### game/VALDORA_POLISH_V113.js line 151 — musée
+146: function install(){if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;fixCitadelActors();hookInteraction();hookMusic();installCreatorTool();enforceIdentity();publishAudit()}
+147: 
+148: const api={active:true,version:VERSION,assets:ASSET_PATHS,drawGround,drawRoads,drawTree,drawBush,drawGrass,drawCitadel,overlay,tryMuseumDirector,creatorEnterMuseum,enforceIdentity,startMusic:startAdaptiveMusic,audit};
+149: window.ValdoraPolishV113=api;
+150: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[350,1100,2800,6200,10500].forEach(ms=>setTimeout(install,ms));setInterval(()=>{try{if(window.ValdoraWorldV114?.active)return;window.ValdoraPolishV113=api;hookInteraction();enforceIdentity();publishAudit()}catch(_){}},1200);
+151: console.log('V113 : rendu chibi 3D, nageurs directionnels, Citadelle canonique, musée et musique adaptative actifs.');
+152: })();
+### game/VALDORA_PRO_V111.js line 16 — œuf, egg
+11:     ['town9','Port-Écume',25,74],['town10','Luminor',55,58],['town11','Brumelac',61,31],
+12:     ['town12','Sylvaris',84,24],['town13','Taronis',70,62],['town14','Aubeval',82,72]
+13:   ];
+14:   const ROUTE_CHAIN = TOWNS.slice(0, -1).map((town, index) => [town[0], TOWNS[index + 1][0], `route${index}`]);
+15:   const DOSSIERS = [
+16:     {id:'egg',icon:'◉',title:'L’œuf inconnu',subtitle:'Signatures environnementales',zones:['town2','town4','town6'],
+17:       intro:'Un œuf ancien réagit à l’eau, à la roche et au froid. Les relevés de terrain permettent de trianguler son origine.',
+18:       ready:s=>s.egg?.status==='done',progress:s=>Math.min(3,s.egg?.zones?.length||0),goal:3,reward:{MegaOrbe:1},rewardText:'1 Méga Orbe d’analyse'},
+19:     {id:'archives',icon:'▤',title:'Les archives disparues',subtitle:'Témoignages recoupés',zones:['town1','town3','town5'],
+20:       intro:'Une page du Projet Résonance a été volée. Trois témoignages indépendants doivent être comparés avant toute conclusion.',
+21:       ready:s=>s.archives?.status==='done',progress:s=>Math.min(3,s.archives?.witnesses?.length||0),goal:3,reward:{money:900},rewardText:'900 Voltrons'},
+22:     {id:'inscriptions',icon:'⌁',title:'Les sept inscriptions',subtitle:'Alphabet des anciens Gardiens',zones:['town1','town2','town3','town4','town5','town6','town7'],
+23:       intro:'Sept inscriptions décrivent un itinéraire invisible. Chaque relevé ajoute un symbole au calque de la carte.',
+24:       ready:s=>(s.inscriptions?.length||0)>=7,progress:s=>Math.min(7,s.inscriptions?.length||0),goal:7,reward:{SuperOrbe:3},rewardText:'3 Super Orbes'},
+25:     {id:'fragments',icon:'✦',title:'Le message incomplet',subtitle:'Transmission Résonance',zones:['route2','route5','route8','route11'],
+### game/VALDORA_PRO_V111.js line 126 — egg
+121:   function claim(id) {
+122:     const d=DOSSIERS.find(x=>x.id===id),b=book(); if(!d||b.claimed[id]||!dossierReady(d)){toastSafe('Le dossier n’est pas encore résolu.');return}
+123:     state.inventory=state.inventory||{}; for(const [key,value] of Object.entries(d.reward||{})){if(key==='money')state.money=(Number(state.money)||0)+value;else state.inventory[key]=(Number(state.inventory[key])||0)+value}
+124:     b.claimed[id]=Date.now(); b.opened[id]=true; if(id==='mastery')state.flags={...(state.flags||{}),v111MasterCartographer:true}; persist(); toastSafe('Analyse validée — récompense obtenue.'); openBook(id);
+125:   }
+126:   function trackDossier(id) { const d=DOSSIERS.find(x=>x.id===id); if(!d)return; const done=new Set([...(legacy().inscriptions||[]),...(legacy().fragments||[]),...(legacy().egg?.zones||[]),...(legacy().archives?.witnesses||[])]); const zone=d.zones.find(z=>!done.has(z))||d.zones[0]; book().trackedZone=zone;book().active=id;persist();close('v111-book');window.ValdoraProV112?.openMap?.(zone)||openMap(zone); }
+127:   function bookPage(d) {
+128:     const progress=dossierProgress(d),ready=dossierReady(d),claimed=!!book().claimed[d.id],pct=Math.max(0,Math.min(100,progress/d.goal*100));
+129:     const foundSet=new Set([...(legacy().inscriptions||[]),...(legacy().fragments||[]),...(legacy().egg?.zones||[]),...(legacy().archives?.witnesses||[])]);
+130:     return `<div class="subtitle">${esc(d.subtitle)}</div><h1>${d.icon} ${esc(d.title)}</h1><p>${esc(d.intro)}</p><div class="v111-progress"><i style="width:${pct}%"></i></div><p><b>Progression : ${progress}/${d.goal}</b> — ${ready?'Analyse complète.':'Des éléments restent à découvrir.'}</p><div class="v111-clues">${d.zones.map(zone=>`<div class="v111-clue ${foundSet.has(zone)||discovered(zone)?'found':''}"><b>${foundSet.has(zone)?'✓':'◇'} ${esc(SCENES?.[zone]?.name||zone)}</b><br><small>${foundSet.has(zone)?'Indice enregistré':'À examiner sur le terrain'}</small></div>`).join('')}</div><div class="v111-reward"><b>Récompense d’analyse</b><br>${esc(d.rewardText)}${claimed?' — ✓ obtenue':''}</div><div class="v111-actions"><button class="v111-action" data-track-dossier>Afficher la prochaine piste sur la carte</button><button class="v111-action" data-claim ${ready&&!claimed?'':'disabled'}>${claimed?'Analyse déjà validée':'Valider l’analyse et recevoir la récompense'}</button>${d.id==='mastery'?'<button class="v111-action" data-pdf>Consulter le fac-similé PDF</button>':''}</div>`;
+131:   }
+132:   function selectBookPage(root,id) { const d=DOSSIERS.find(x=>x.id===id)||DOSSIERS[0];book().active=d.id;book().opened[d.id]=true;root.querySelectorAll('.v111-tab').forEach(x=>x.classList.toggle('active',x.dataset.id===d.id));const page=root.querySelector('.v111-page');page.innerHTML=bookPage(d);page.querySelector('[data-track-dossier]').onclick=()=>trackDossier(d.id);page.querySelector('[data-claim]').onclick=()=>claim(d.id);const pdf=page.querySelector('[data-pdf]');if(pdf)pdf.onclick=()=>window.open('LIVRET_SECRET_VALDORA.pdf','_blank');persist(); }
+133:   function openBook(id) {
+134:     if(!unlocked()){toastSafe('Le Livret secret est remis après le troisième Sceau.');return}
+135:     injectStyle(); const active=id||book().active||DOSSIERS[0].id;
+### game/VALDORA_ROUTES_BIOMES_V114.js line 243 — museum
+238:   return best;
+239: }
+240: function enterBuildingV114(b){const api=window.ValdoraInteriorV109V||window.ValdoraBuildingV109I;if(!b||typeof api?.enter!=='function')return false;const ok=api.enter(b);if(ok){try{toast?.((b.label||b.name||'Bâtiment')+' — entrée ouverte')}catch(_){}}return !!ok}
+241: function interactV114(){
+242:   if(typeof scene!=='undefined'&&scene==='interior'){
+243:     try{if(LEGACY.tryMuseumDirector?.())return true}catch(_){}const api=window.ValdoraInteriorV109V||window.ValdoraBuildingV109I;if(typeof api?.interact==='function')return api.interact();
+244:   }
+245:   if(typeof scene!=='undefined'&&scene==='world'){
+246:     const dialogBox=document.getElementById('dialog');if(dialogBox?.classList.contains('show'))return false;
+247:     try{if(typeof tryFinalAltarV77==='function'&&tryFinalAltarV77())return true}catch(_){}
+248:     const b=nearDoorV114();if(b)return enterBuildingV114(b);
+249:     const sc=typeof currentScene==='function'?currentScene():SCENES?.[state?.zone];
+250:     try{if(sc?.kind==='town'&&typeof v107dBusStop==='function'){const stop=v107dBusStop(sc,state.zone);if(stop&&typeof near==='function'&&near(stop,125)&&window.ValdoraGameplayV106Y?.openBus){window.ValdoraGameplayV106Y.openBus();return true}}}catch(_){}
+251:     try{const o=sc?.kind==='town'&&typeof townNearest==='function'?townNearest():sc?.kind==='route'&&typeof routeNearest==='function'?routeNearest():null;if(o&&typeof interactFind==='function'){interactFind(o);return true}}catch(_){}
+252:     let n=null;try{n=typeof nearNPC==='function'?nearNPC():null}catch(_){}if(n){try{faceNPCToPlayer?.(n)}catch(_){}if(n.taron&&typeof interactTaron==='function'){interactTaron(n);return true}try{if(typeof questInteractionV106C==='function'&&questInteractionV106C(n))return true}catch(_){}try{if(typeof v107bAubeNPCInteraction==='function'&&v107bAubeNPCInteraction(n))return true}catch(_){}try{if(typeof v109kTalkToOutdoorNPC==='function'&&v109kTalkToOutdoorNPC(n))return true}catch(_){}try{dialog?.('<b>'+(n.name||n.dialog||'Habitant')+'</b><br>'+(typeof npcDialogue==='function'?npcDialogue(n):'Bonjour !'));return true}catch(_){}}
+### game/VALDORA_ROUTES_BIOMES_V114.js line 305 — museum
+300:   const worldInteract=v116?.active&&typeof v116.interact==='function'?v116.interact:interactV114;
+301:   const worldCollision=v116?.active&&typeof v116.collision==='function'?v116.collision:collisionV114;
+302:   const worldMove=v116?.active&&typeof v116.move==='function'?v116.move:moveV114;
+303:   window.interact=worldInteract;try{interact=worldInteract}catch(_){}window.collision=worldCollision;try{collision=worldCollision}catch(_){}window.checkPortal=checkPortalV114;try{checkPortal=checkPortalV114}catch(_){}window.move=worldMove;try{move=worldMove}catch(_){}window.v109eNearEntryBuilding=nearDoorV114;window.nearBuilding=nearDoorV114;
+304: }
+305: interactV114.__v107dInteract=true;interactV114.__v113Museum=true;collisionV114.__v107eBusCollision=true;
+306: function enforceIdentity(){
+307:   if(document.documentElement.dataset.valdoraV115||window.ValdoraWorldV115?.active)return;
+308:   const title='Éclats Sauvages — Valdora V114 Routes & Biomes';if(document.title!==title)document.title=title;const brand=document.querySelector('.brand'),label=`ÉCLATS SAUVAGES — VALDORA V114 — ${creator()?'CRÉATEUR':'JOUEUR'}`;if(brand&&brand.textContent!==label)brand.textContent=label;
+309:   document.documentElement.dataset.valdoraVersion=VERSION;document.documentElement.dataset.valdoraPolish=VERSION;const map=document.getElementById('v111MapBtn');if(map&&map.textContent!=='Carte du monde V114')map.textContent='Carte du monde V114';
+310: }
+311: function portalAligned(sc,ex){if(!(sc?.v105dRoad instanceof Set)||!ex?.v114RoadCell)return false;return sc.v105dRoad.has(ex.v114RoadCell)}
+312: function audit(){
+313:   const issues=[],portals=[],doors=[];for(const [zone,sc] of Object.entries(SCENES||{})){
+314:     const seen=new Set();for(const ex of sc.exits||[]){const to=exitTarget(ex),sig=[Math.round(ex.x),Math.round(ex.y),Math.round(ex.w),Math.round(ex.h)].join('|');if(seen.has(sig))issues.push(`${zone}: portails superposés`);seen.add(sig);const aligned=!(sc.v105dRoad instanceof Set)||portalAligned(sc,ex);if(sc.v105dRoad instanceof Set&&!aligned)issues.push(`${zone} -> ${to}: sortie hors route`);if(to&&SCENES[to]&&!SCENES[to].exits?.some(back=>exitTarget(back)===zone))issues.push(`${zone} -> ${to}: retour absent`);portals.push({zone,to,side:ex.side,cell:ex.v114RoadCell,aligned})}
+### game/VALDORA_ROUTES_BIOMES_V114.js line 334 — museum, musée
+329: function previewBuilding(zone,kind='lab'){
+330:   if(!creator()||!SCENES?.[zone])return false;repairTopology();const sc=SCENES[zone],b=(sc.buildings||[]).find(x=>[x.type,x.urbanType,x.id,x.label].join(' ').toLowerCase().includes(kind))||(sc.buildings||[])[0];if(!b)return false;try{scene='world';building=null}catch(_){}state.zone=zone;const d=doorPoint(b);state.x=d.x;state.y=Number.isFinite(d.roadY)?d.roadY:d.y+110;state.dir=3;try{hideGameOverlays();resetFollowerTrail?.();toast?.(`Test porte — ${b.label||b.type}`)}catch(_){}return true;
+331: }
+332: function installCreatorTool(){
+333:   if(!creator()||document.getElementById('v114-diagnostic'))return;
+334:   const panel=document.createElement('div');panel.id='v114-diagnostic-panel';panel.style.cssText='position:fixed;inset:0;z-index:99998;background:rgba(3,14,21,.78);display:none;place-items:center;padding:20px';panel.innerHTML='<div style="width:min(580px,94vw);background:#f7f1df;color:#173548;border:4px solid #173548;border-radius:22px;padding:22px;box-shadow:0 24px 70px #0009"><h2 style="margin:0 0 8px">Diagnostic routes et bâtiments</h2><p>Choisis un parcours ciblé. Le joueur sera placé sur le chemin praticable, juste avant le point à tester.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button data-v114-portal="town5|route4bis">Soléria → Lac</button><button data-v114-portal="route4bis|town5">Lac → Soléria</button><button data-v114-portal="town4|route4bis">Belrive → Lac</button><button data-v114-portal="route4bis|town4">Lac → Belrive</button><button data-v114-building="town0|lab">Laboratoire</button><button data-v114-building="town5|museum">Musée</button></div><button data-v114-close style="margin-top:12px;width:100%">Fermer</button></div>';document.body.appendChild(panel);
+335:   panel.querySelectorAll('button').forEach(el=>el.style.cssText='padding:12px;border:2px solid #173548;border-radius:11px;background:#fff;color:#173548;font-weight:900;cursor:pointer');panel.querySelector('[data-v114-close]').onclick=()=>panel.style.display='none';panel.querySelectorAll('[data-v114-portal]').forEach(el=>el.onclick=()=>{const [zone,to]=el.dataset.v114Portal.split('|');panel.style.display='none';previewPortal(zone,to)});panel.querySelectorAll('[data-v114-building]').forEach(el=>el.onclick=()=>{const [zone,kind]=el.dataset.v114Building.split('|');panel.style.display='none';previewBuilding(zone,kind)});
+336:   const button=document.createElement('button');button.id='v114-diagnostic';button.type='button';button.textContent='Diagnostic V114';button.style.cssText='position:fixed;left:14px;bottom:60px;z-index:85000;border:2px solid #ffd77c;background:#473817;color:#fff;border-radius:12px;padding:10px 14px;font:900 12px Segoe UI;box-shadow:0 7px 22px #0018;cursor:pointer';button.onclick=()=>panel.style.display='grid';document.body.appendChild(button);
+337: }
+338: function install(){repairTopology();installHooks();if(!document.documentElement.dataset.valdoraV115&&!window.ValdoraWorldV115?.active)window.ValdoraPolishV113=api;enforceIdentity();installCreatorTool();publishAudit()}
+339: 
+340: const api={active:true,version:VERSION,assets:ASSETS,repairTopology,drawGround,drawRoads,drawTree,drawBush,drawGrass,drawCitadel,overlay,nearDoor:nearDoorV114,enterBuilding:enterBuildingV114,checkPortal:checkPortalV114,previewPortal,previewBuilding,enforceIdentity,audit};
+341: window.ValdoraWorldV114=api;window.ValdoraPolishV113=api;
+342: install();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[300,950,2200,4800,8200,11200,15000].forEach(ms=>setTimeout(install,ms));setInterval(()=>{try{repairTopology();installHooks();if(!document.documentElement.dataset.valdoraV115&&!window.ValdoraWorldV115?.active)window.ValdoraPolishV113=api;enforceIdentity();installCreatorTool();publishAudit()}catch(e){console.warn('V114 maintenance',e)}},2400);
+343: console.log('V114 : sorties alignées, bâtiments accessibles et biomes chibi 3D actifs.');
+### game/VALDORA_SANCTUARIES_V117.js line 186 — museum
+181: function overlay(){const sc=current(),meta=META[zone()];if(!meta){if(typeof BASE.overlay==='function')BASE.overlay();return}if(typeof BASE.overlay==='function')BASE.overlay();if(!sc?.v116Lair)return;const near=Math.hypot(state.x-sc.v116Lair.x,state.y-sc.v116Lair.y)<215;if(near&&!state.dex?.[meta.id]?.caught&&typeof scene!=='undefined'&&scene==='world'){ctx.save();ctx.fillStyle='rgba(12,29,40,.88)';ctx.beginPath();ctx.roundRect(314,535,332,42,12);ctx.fill();ctx.strokeStyle='#f1d274';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#fff';ctx.font='800 13px Segoe UI';ctx.textAlign='center';ctx.fillText('E / Entrée — éveiller '+meta.name,480,561);ctx.restore();ctx.textAlign='start'}}
+182: 
+183: function startWildV116(){const meta=META[zone()];if(meta&&!state.v116LegendArmed){try{toast?.('Le légendaire ne peut être affronté qu’au sanctuaire, au bout du biome.')}catch(_){}return false}try{return typeof BASE_START_WILD==='function'?BASE_START_WILD():false}finally{state.v116LegendArmed=false}}
+184: function awaken(meta){if(!state.flags?.aubevalExpeditionLicense&&!creator()){dialog?.('<b>Sanctuaire scellé</b><br>Le Permis des Horizons est requis avant d’éveiller ce légendaire.');return true}if(!state.team?.length||(state.team||[]).every(m=>Number(m.hp)<=0)){dialog?.('<b>Sanctuaire silencieux</b><br>Ton équipe doit pouvoir combattre. Passe d’abord par un Centre de soins.');return true}if(state.dex?.[meta.id]?.caught){dialog?.(`<b>${meta.name}</b><br>Le sanctuaire est apaisé. Le lien qui vous unit reste perceptible.`);return true}dialog?.(`<b>Sanctuaire de ${meta.name}</b><br>La présence légendaire répond. Approche confirmée : aucun autre endroit du biome ne peut déclencher ce combat.<br><br>Prépare-toi.`,()=>{state.v116LegendArmed=true;startWildV116()});return true}
+185: function interactV116(){if(typeof scene!=='undefined'&&scene==='world'){const meta=META[zone()],sc=current();if(meta&&sc?.v116Lair&&Math.hypot(state.x-sc.v116Lair.x,state.y-sc.v116Lair.y)<215)return awaken(meta)}return typeof BASE_INTERACT==='function'?BASE_INTERACT.apply(this,arguments):false}
+186: interactV116.__v107dInteract=true;interactV116.__v113Museum=true;collisionV116.__v107eBusCollision=true;
+187: 
+188: function hideOverlays(){for(const id of['title','menuov','starterov','dialog','battleUI']){const el=document.getElementById(id);if(el)el.style.setProperty('display','none','important')}}
+189: function preview(id,where='entry'){if(!creator()||!SCENES?.[id])return false;configureScene(id);const sc=SCENES[id],meta=META[id],l=sc.v116Lair;state.zone=id;try{scene='world';building=null}catch(_){}if(where==='lair'||where==='fight'){if(meta.entry==='south'){state.x=l.x;state.y=l.y+175;state.dir=3}else if(meta.entry==='west'){state.x=l.x-175;state.y=l.y;state.dir=2}else{state.x=l.x+175;state.y=l.y;state.dir=1}}else if(where==='river'){state.x=1310;state.y=700;state.dir=2}else if(where==='bridge'){state.x=1310;state.y=1100;state.dir=2}else{const ex=sc.exits?.find(e=>String(e.to||e.target||'')==='route_legends');if(ex){state.x=ex.x+ex.w/2;state.y=meta.entry==='south'?sc.height-210:sc.height/2}else{state.x=1500;state.y=1700}}hideOverlays();try{resetFollowerTrail?.();hud?.();drawWorld?.();BASE.startMusic?.();toast?.(`${meta.title} — ${where==='lair'||where==='fight'?'sanctuaire':where==='river'?'rive bloquée':where==='bridge'?'pont praticable':'entrée du parcours'}`)}catch(_){}if(where==='fight'){state.flags=state.flags||{};state.flags.aubevalExpeditionLicense=true;state.dex=state.dex||{};state.dex[meta.id]={...(state.dex[meta.id]||{}),caught:false};if(!state.team?.length&&typeof mon==='function'){state.team=[mon(1,70)];state.team[0].hp=maxHP(state.team[0])}setTimeout(()=>awaken(meta),160)}publishAudit();return true}
+190: function runMotionTest(kind){preview('legend_foudre',kind);const start=state.x;for(let i=0;i<42;i++)moveV116(12,0,2);const end=state.x,pass=kind==='river'?end<1390:end>1650;motionDiagnostics[kind]={start:Math.round(start),end:Math.round(end),pass};document.documentElement.dataset['v116'+(kind==='river'?'RiverMotion':'BridgeMotion')]=JSON.stringify(motionDiagnostics[kind]);try{drawWorld?.();toast?.(kind==='river'?(pass?'Rive testée : le joueur est bien bloqué.':'Échec du blocage de la rive.'):(pass?'Pont testé : traversée réussie.':'Échec de la traversée du pont.'))}catch(_){}publishAudit();return motionDiagnostics[kind]}
+191: function installCreatorTool(){if(!creator())return;const old=document.getElementById('v115-biomes');if(old&&old.style.display!=='none')old.style.display='none';if(document.getElementById('v117-sanctuaries'))return;const panel=document.createElement('div');panel.id='v117-sanctuaries-panel';panel.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(2,9,18,.86);display:none;place-items:center;padding:18px';panel.innerHTML='<div style="width:min(900px,96vw);max-height:92vh;overflow:auto;background:#f7f1e4;color:#173548;border:4px solid #173548;border-radius:22px;padding:22px;box-shadow:0 28px 90px #000b"><h2 style="margin:0 0 7px">Sanctuaires stables V117</h2><p>Chaque biome possède un repaire permanent, une composition propre et quatre familles d’assets thématiques.</p><div data-list style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px"></div><h3>Tests du Plateau des Orages</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:9px"><button data-test="river">Tester la rive infranchissable</button><button data-test="bridge">Tester le pont praticable</button></div><button data-close style="margin-top:14px;width:100%">Fermer</button></div>';document.body.appendChild(panel);const list=panel.querySelector('[data-list]');for(const id of ZONES){const row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:1fr auto auto;gap:5px';row.innerHTML=`<button data-zone="${id}">${META[id].title}</button><button data-lair …[truncated]
+192: 
+193: const MENU_ORDER=['objectivesBtnV84','teamBtn','dexBtn','journalBtn','bag','musicBtn','save','flyBtnV106Y','challengeBtnV106Y','adventurePlusV106Z','v107fSaveMenu','v107fHelp','v111MapBtn','v109aLivretBtn','voiceBtn','v96ImportSave','sealCaseBtnV93','creatorNavV105N'];
+194: function stabilizeSidebar(){
+195:   if(window.ValdoraLivingWorldV118?.stabilizeSidebar)return window.ValdoraLivingWorldV118.stabilizeSidebar();
+### game/index.html line 408 — museum, musée
+403: }
+404: function cityFloorsV60(cityId){const c=VALDORA_CITIES_V60.find(c=>c.id===cityId);return c?c.floors:1}
+405: 
+406: 'use strict';
+407: const PLAYER_PROGRESSION_LOCK=true;
+408: const SCENES={"town0":{"kind":"town","name":"Clairval","image":"assets/town_0_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"lab","label":"Laboratoire"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"healer","label":"Centre soins"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"shop","label":"Boutique"},{"x":1210,"y":690,"w":260,"h":175,"doorX":1340,"doorY":856,"type":"station","label":"Gare"}],"biome":"prairie","exits":[{"x":835,"y":1030,"w":130,"h":70,"side":"south","target":"route_next"}]},"town1":{"kind":"town","name":"Bois-Murmure","image":"assets/town_1_v415.jpg","width":1800,"height":1100,"buildings":[{"x":100,"y":110,"w":260,"h":175,"doorX":230,"doorY":276,"type":"home","label":"Maison"},{"x":1240,"y":110,"w":260,"h":175,"doorX":1370,"doorY":276,"type":"healer","label":"Centre soins"},{"x":110,"y":700,"w":260,"h":175,"doorX":240,"doorY":866,"type":"shop","label":"Boutique"},{"x":1230,"y":700,"w":260,"h":175,"doorX":1360,"doorY":866,"type":"arena","label":"Arène"},{"x":760,"y":680,"w":260,"h":175,"doorX":890,"doorY":846,"type":"inn","label":"Auberge"}],"biome":"forest","exits":[{"x":835,"y":0,"w":130,"h":70,"side":"north","target":"route_prev"},{"x":1730,"y":485,"w":70,"h":130,"side":"east","target":"route_next"}]},"town2":{"kind":"town","name":"Lac Azur","image":"assets/town …[truncated]
+409: 
+410: const TOWN_THEMES={
+411:   prairie:{ground:'#8fcf78',road:'#e5d2a2',tree:'#4c9453',roof:'#d86855'},
+412:   forest:{ground:'#76b86e',road:'#d2c295',tree:'#357b49',roof:'#7d5f46'},
+413:   lake:{ground:'#86c987',road:'#ddd1a7',tree:'#4d9258',roof:'#5ea7d8'},
+414:   autumn:{ground:'#b6b06b',road:'#d8c495',tree:'#b36d3b',roof:'#a85542'},
+415:   mountain:{ground:'#a9b28d',road:'#cbbb9b',tree:'#557a50',roof:'#777f8d'},
+416:   desert:{ground:'#d9c37d',road:'#ead9a7',tree:'#8d9860',roof:'#d68b48'},
+417:   snow:{ground:'#d8eced',road:'#c9d6d9',tree:'#668f7f',roof:'#699fcf'},
+### game/index.html line 492 — museum, musée
+487:   railY:340,platform:{x:100,y:295,w:300,h:42},stationRoad:{x:245,y:285,w:110,h:260}
+488:  },
+489:  town5:{
+490:   fountain:{x:900,y:565},
+491:   buildings:[
+492:    {x:115,y:110,w:270,h:180,type:'museum',label:'Musée'},
+493:    {x:1415,y:110,w:270,h:180,type:'healer',label:'Centre de soins'},
+494:    {x:115,y:720,w:270,h:180,type:'shop',label:'Boutique'},
+495:    {x:1415,y:720,w:270,h:180,type:'arena',label:'Arène'},
+496:    {x:455,y:110,w:220,h:150,type:'home',label:'Maison'},
+497:    {x:1125,y:110,w:220,h:150,type:'home',label:'Maison'},
+498:    {x:455,y:720,w:220,h:150,type:'inn',label:'Hôtel'}
+499:   ]
+500:  },
+501:  town6:{
+### game/index.html line 519 — museum, musée
+514:   fountain:{x:900,y:565},
+515:   buildings:[
+516:    {x:105,y:105,w:310,h:195,type:'station',label:'Gare centrale'},
+517:    {x:1385,y:105,w:310,h:195,type:'healer',label:'Centre de soins'},
+518:    {x:105,y:705,w:310,h:195,type:'shop',label:'Grande boutique'},
+519:    {x:1385,y:705,w:310,h:195,type:'museum',label:'Musée'},
+520:    {x:500,y:105,w:235,h:160,type:'home',label:'Maison'},
+521:    {x:1065,y:105,w:235,h:160,type:'home',label:'Maison'},
+522:    {x:500,y:720,w:235,h:160,type:'inn',label:'Hôtel'},
+523:    {x:1065,y:720,w:235,h:160,type:'home',label:'Maison'}
+524:   ],
+525:   railY:350,platform:{x:95,y:300,w:340,h:42},stationRoad:{x:250,y:300,w:115,h:245}
+526:  }
+527: };
+528: 
+### game/index.html line 540 — museum
+535:   }
+536: }
+537: normalizeTownLayouts();
+538: 
+539: function townSymbol(type){
+540:   return {healer:'✚',care:'✚',lab:'⚗',station:'🚉',shop:'◆',arena:'★',museum:'◉',school:'✎',inn:'☾'}[type]||''
+541: }
+542: function roofColor(type,theme){
+543:   if(type==='healer'||type==='care')return '#d95b62';
+544:   if(type==='lab')return '#7b7fd8';
+545:   if(type==='station')return '#536f8c';
+546:   if(type==='shop')return '#d6a849';
+547:   if(type==='arena')return '#d07549';
+548:   if(type==='museum')return '#9b7a64';
+549:   if(type==='school')return '#5d8bb8';
+### game/index.html line 548 — museum
+543:   if(type==='healer'||type==='care')return '#d95b62';
+544:   if(type==='lab')return '#7b7fd8';
+545:   if(type==='station')return '#536f8c';
+546:   if(type==='shop')return '#d6a849';
+547:   if(type==='arena')return '#d07549';
+548:   if(type==='museum')return '#9b7a64';
+549:   if(type==='school')return '#5d8bb8';
+550:   if(type==='inn')return '#6e8a63';
+551:   return theme.roof
+552: }
+553: 
+554: const TOWN_TREE_CANDIDATES=[
+555:   [58,82],[425,78],[690,72],[1110,72],[1375,78],[1742,82],
+556:   [58,335],[1742,335],
+557:   [58,715],[1742,715],
+### game/index.html line 670 — museum
+665: 
+666: 
+667: function megaBuildingRoleV64(i){
+668:   const roles=[
+669:     'station','hotel','clinic','mall','office','apartments','apartments','cafe',
+670:     'office','museum','apartments','shop','school','office','apartments',
+671:     'restaurant','apartments','office','shop','apartments','library','apartments',
+672:     'office','cafe','apartments','shop','apartments','office','apartments','shop'
+673:   ];
+674:   return roles[i%roles.length]
+675: }
+676: 
+677: function buildMegaCityV64(sceneKey){
+678:   const sc=SCENES[sceneKey]; if(!sc)return;
+679:   sc.kind='town';sc.megacity=true;sc.cityKind='metropole';sc.width=3600;sc.height=2400;
+### game/index.html line 689 — museum, musée
+684:     const role=megaBuildingRoleV64(i);
+685:     const b={
+686:       id:'mega65_'+sceneKey+'_'+i,x:lot.x,y:lot.y,w:lot.w,h:lot.h,
+687:       type:role==='station'?'station':role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'||role==='mall'?'shop':'urban',
+688:       urbanType:role,
+689:       label:role==='station'?'Gare':role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':role==='mall'?'Galerie':role==='museum'?'Musée':role==='library'?'Bibliothèque':'Immeuble',
+690:       floors:role==='station'?2:role==='mall'?4:5+(i%7),
+691:       doorX:lot.x+lot.w/2,doorY:lot.y+lot.h,solid:true,megaInterior:true,
+692:       eventSeed:(i*7+sceneKey.charCodeAt(sceneKey.length-1))%17
+693:     };
+694:     sc.buildings.push(b)
+695:   });
+696:   // Add civic towers until there are at least 30 buildings if filtering removed too many.
+697:   let k=0;
+698:   while(sc.buildings.length<30 && k<60){
+### game/index.html line 810 — museum
+805:        const bx=count===2?(n===0?x1+10:x2-bw-10):x1+(W-bw)/2;
+806:        const by=y1+(H-bh)/2;
+807:        const role=buildings.length===0?'station':
+808:          buildings.length===1?'hotel':
+809:          buildings.length===2?'clinic':
+810:          ['apartments','office','shop','cafe','museum','apartments','restaurant','school','office','library','apartments','shop'][i%12];
+811:        buildings.push({
+812:          id:'v66_'+sceneKey+'_'+i++,x:bx,y:by,w:bw,h:bh,
+813:          type:role==='station'?'station':role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'?'shop':'urban',
+814:          urbanType:role,label:role==='station'?'Gare':role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':
+815:            role==='museum'?'Musée':role==='library'?'Bibliothèque':role==='school'?'École':'Immeuble',
+816:          floors:role==='station'?2:role==='hotel'?6:4+(i%9),doorX:bx+bw/2,doorY:by+bh,
+817:          solid:true,megaInterior:true,eventSeed:(i*13+sceneKey.charCodeAt(sceneKey.length-1))%29
+818:        })
+819:      }
+### game/index.html line 870 — museum
+865:    if(state.zone==='town6'){ctx.beginPath();ctx.roundRect(wx,wy,16,12,4);ctx.fill()}
+866:    else if(state.zone==='town13'){ctx.fillRect(wx,wy,18,8)}
+867:    else{ctx.fillRect(wx,wy,16,11)}
+868:  }
+869:  ctx.fillStyle='#594436';ctx.beginPath();ctx.roundRect(x+w/2-15,y+h-29,30,29,4);ctx.fill();
+870:  let sym=b.urbanType==='station'?'🚉':b.urbanType==='hotel'?'H':b.urbanType==='clinic'?'✚':b.urbanType==='museum'?'◉':b.urbanType==='school'?'✎':b.urbanType==='library'?'▤':'';
+871:  if(sym){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+w/2,y+18,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#223b49';ctx.font='700 12px Segoe UI';ctx.textAlign='center';ctx.fillText(sym,x+w/2,y+22)}
+872:  ctx.restore();ctx.textAlign='start'
+873: }
+874: 
+875: function drawRailV66(sc,camX,camY,sx,sy){
+876:  const city=cityForSceneV622?.(state.zone);
+877:  if(!city||!cityHasStationV63(city.id))return;
+878:  let railY=sc.megacity?(sc.megaRailY||2260):(sc.height||1100)-75;
+879:  const y=(railY-camY)*sy;
+### game/index.html line 1212 — museum
+1207:   let sym='';
+1208:   if(b.urbanType==='station')sym='🚉';
+1209:   else if(b.urbanType==='hotel')sym='H';
+1210:   else if(b.urbanType==='clinic')sym='✚';
+1211:   else if(b.urbanType==='mall')sym='◆';
+1212:   else if(b.urbanType==='museum')sym='◉';
+1213:   else if(b.urbanType==='school')sym='✎';
+1214:   else if(b.urbanType==='library')sym='▤';
+1215:   if(sym){
+1216:     ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+w/2,y+18,14,0,Math.PI*2);ctx.fill();
+1217:     ctx.fillStyle='#263c4a';ctx.font='700 13px Segoe UI';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sym,x+w/2,y+19);
+1218:   }
+1219:   ctx.restore();ctx.textAlign='start';ctx.textBaseline='alphabetic'
+1220: }
+1221: 
+### game/index.html line 1373 — museum
+1368:   const type=b.type;
+1369:   const palettes={
+1370:     healer:['#d95761','#ed8588'],care:['#d95761','#ed8588'],
+1371:     lab:['#6678d5','#8e9bed'],station:['#486a82','#7696aa'],
+1372:     shop:['#d4a03e','#efc264'],arena:['#c96b4b','#ea9070'],
+1373:     museum:['#8d735f','#b09781'],school:['#5188b7','#75add9'],
+1374:     inn:['#6b835f','#8baa80'],playerhome:['#5c86a5','#81aac3'],home:[theme.roof||'#c97861','#e9a18b']
+1375:   };
+1376:   const [roof,roofHi]=palettes[type]||palettes.home;
+1377:   const symbol={healer:'✚',care:'✚',lab:'⚗',station:'🚉',shop:'◆',arena:'★',museum:'◉',school:'✎',inn:'H',playerhome:'⌂'}[type]||'';
+1378: 
+1379:   ctx.save();
+1380: 
+1381:   // soft ground shadow and stone foundation
+1382:   ctx.fillStyle='rgba(25,40,46,.21)';
+### game/index.html line 1528 — musee
+1523:   laboratoire:v102eLoadImage('ASSETS_BATIMENTS_V103C/laboratoire_face.png'),
+1524:   boutique:v102eLoadImage('ASSETS_BATIMENTS_V103C/boutique_face.png'),
+1525:   restaurant:v102eLoadImage('ASSETS_BATIMENTS_V103C/restaurant_face.png'),
+1526:   gare:v102eLoadImage('ASSETS_BATIMENTS_V103C/gare_face.png'),
+1527:   hotel:v102eLoadImage('ASSETS_BATIMENTS_V103C/hotel_face.png'),
+1528:   musee:v102eLoadImage('ASSETS_BATIMENTS_V103C/musee_face.png'),
+1529:   petit_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/petit_immeuble_face.png'),
+1530:   moyen_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/moyen_immeuble_face.png'),
+1531:   grand_immeuble:v102eLoadImage('ASSETS_BATIMENTS_V103C/grand_immeuble_face.png'),
+1532:   sceau_aube:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_aube_face.png'),
+1533:   sceau_roche:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_roche_face.png'),
+1534:   sceau_brumes:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_brumes_face.png'),
+1535:   sceau_vent:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_vent_face.png'),
+1536:   sceau_marees:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_marees_face.png'),
+1537:   sceau_eclat:v102eLoadImage('ASSETS_BATIMENTS_V103C/sceau_eclat_face.png'),
+### game/index.html line 1555 — museum, musee
+1550:   if(type==='healer'||type==='care')return 'centre_soins';
+1551:   if(type==='lab')return 'laboratoire';
+1552:   if(type==='shop')return 'boutique';
+1553:   if(type==='station')return 'gare';
+1554:   if(type==='inn')return 'hotel';
+1555:   if(type==='museum')return 'musee';
+1556:   if(type==='school')return (Number(b?.floors||0)>=4?'moyen_immeuble':'petit_immeuble');
+1557:   if(type==='arena'){
+1558:     const seals=['sceau_aube','sceau_roche','sceau_brumes','sceau_vent','sceau_marees','sceau_eclat','sceau_coeur'];
+1559:     const sealIndex=Math.max(1,Math.min(7,v103cTownNumber()));
+1560:     return seals[sealIndex-1]
+1561:   }
+1562:   // V104A : les mégalopoles utilisent bien les petits/moyens/grands immeubles
+1563:   // et les bâtiments de service, au lieu de retomber sur une maison de village.
+1564:   if(['urban','office','library','market','atelier','cafe','restaurant','brasserie','v70building','megabuilding66','mFrenchBlock'].includes(type)){
+### game/index.html line 1577 — museum, musee
+1572:   if(b?.v105hTower)return Number(b?.floors||5)>=7?'grand_immeuble':'moyen_immeuble';
+1573:   if(t==='station')return 'gare';
+1574:   if(t==='hotel')return 'hotel';
+1575:   if(t==='clinic')return 'centre_soins';
+1576:   if(t==='shop')return 'boutique';
+1577:   if(t==='museum')return 'musee';
+1578:   if(t==='cafe'||t==='restaurant')return 'restaurant';
+1579:   const f=Number(b?.floors||3);
+1580:   if(f>=7)return 'grand_immeuble';
+1581:   if(f>=4)return 'moyen_immeuble';
+1582:   return 'petit_immeuble'
+1583: }
+1584: function v103cDrawBuildingAsset(b,camX,camY,sx,sy,key){
+1585:   const im=V103C_BUILDING_IMAGES[key];
+1586:   if(!v102eImageReady(im))return false;
+### game/index.html line 1598 — musee
+1593:   const scale=Math.min(boxW/im.naturalWidth,boxH/im.naturalHeight);
+1594:   const dw=im.naturalWidth*scale,dh=im.naturalHeight*scale;
+1595:   let dx=x+w/2-dw/2,dy=y+h-dh;
+1596:   const doorAnchors={
+1597:     maison_village:[.50,.94],maison_familiale:[.755,.94],centre_soins:[.50,.94],laboratoire:[.50,.94],
+1598:     boutique:[.50,.94],restaurant:[.50,.94],gare:[.50,.93],hotel:[.50,.94],musee:[.50,.94],
+1599:     petit_immeuble:[.50,.95],moyen_immeuble:[.50,.95],grand_immeuble:[.50,.96],
+1600:     sceau_aube:[.50,.95],sceau_roche:[.50,.95],sceau_brumes:[.50,.95],sceau_vent:[.50,.95],
+1601:     sceau_marees:[.50,.95],sceau_eclat:[.50,.95],sceau_coeur:[.50,.95]
+1602:   };
+1603:   const a=doorAnchors[key]||[.50,.95];
+1604:   const targetDoorX=((Number.isFinite(b.doorX)?b.doorX:b.x+b.w/2)-camX)*sx;
+1605:   const targetDoorY=((Number.isFinite(b.doorY)?b.doorY:b.y+b.h)-camY)*sy;
+1606:   dx+=targetDoorX-(dx+dw*a[0]);
+1607:   dy+=targetDoorY-(dy+dh*a[1]);
+### game/index.html line 1707 — museum
+1702: for(const [v102eKey,v102eSc] of Object.entries(SCENES)){
+1703:   if(v102eSc&&v102eSc.kind==='route'&&Array.isArray(v102eSc.trainers)){
+1704:     v102eSc.trainers.forEach((t,i)=>{t.look=V102F_ROUTE_LOOKS[(i+(parseInt(v102eKey.replace(/\D/g,''))||0))%V102F_ROUTE_LOOKS.length]})
+1705:   }
+1706: }
+1707: const ROOMS={"home":{"image":"assets/room_home_v416.jpg","obstacles":[{"x":120,"y":190,"w":240,"h":120},{"x":820,"y":180,"w":250,"h":175},{"x":150,"y":430,"w":330,"h":135},{"x":650,"y":420,"w":300,"h":165}],"npcs":[]},"lab":{"image":"assets/room_lab_v416.jpg","obstacles":[{"x":90,"y":190,"w":150,"h":120},{"x":270,"y":190,"w":150,"h":120},{"x":880,"y":175,"w":220,"h":165},{"x":430,"y":385,"w":340,"h":130}],"npcs":[{"id":"prof","x":600,"y":315,"look":40,"name":"Professeur Aurine"}]},"healer":{"image":"assets/room_healer_v416.jpg","obstacles":[{"x":125,"y":185,"w":950,"h":105},{"x":160,"y":430,"w":250,"h":120},{"x":790,"y":430,"w":250,"h":120},{"x":515,"y":400,"w":170,"h":135}],"npcs":[{"id":"healer","x":600,"y":340,"look":21,"name":"Infirmière Élise"}]},"shop":{"image":"assets/room_shop_v416.jpg","obstacles":[{"x":100,"y":185,"w":260,"h":175},{"x":840,"y":185,"w":260,"h":175},{"x":420,"y":390,"w":360,"h":105}],"npcs":[{"id":"seller","x":600,"y":330,"look":26,"name":"Marchand"}]},"station":{"image":"assets/room_station_v416.jpg","obstacles":[{"x":120,"y":180,"w":960,"h":95},{"x":170,"y":388,"w":300,"h":147},{"x":730,"y":388,"w":300,"h":147}],"npcs":[{"id":"agent","x":600,"y":320,"look":24,"name":"Agent de gare"}]},"museum":{"image":"assets/room_museum_v416.jpg","obstacles":[{"x":85,"y":210,"w":180,"h":125},{"x":380,"y":210,"w":180,"h":125},{"x":675,"y":210,"w":180,"h":125},{"x":970,"y":210,"w":180,"h":125},{"x":450,"y":478,"w":300,"h":147}],"npcs":[{"id":"guide","x":600,"y":430, …[truncated]
+1708: const TRAINER_CAPS={"rt0_3":"charge","rt1_3":"lumiere","rt2_3":"surf","rt3_3":"rafale","rt4_3":"vol","rt5_3":"fournaise","rt6_3":"blizzard"};
+1709: const CREATURE_TRAITS={"1":{"body":"scarabée","ornament":"anneau lumineux","pattern":"rayures","accent":"bleu"},"2":{"body":"cerf","ornament":"coquille marine","pattern":"dégradé","accent":"vert"},"3":{"body":"oiseau","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"4":{"body":"golem","ornament":"graine géante","pattern":"plaques","accent":"violet"},"5":{"body":"hibou","ornament":"capuchon de feuilles","pattern":"feuilles","accent":"turquoise"},"6":{"body":"tortue","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"7":{"body":"esprit","ornament":"ailes translucides","pattern":"plumes","accent":"orange"},"8":{"body":"grenouille","ornament":"arbuste sur le dos","pattern":"taches","accent":"rouge"},"9":{"body":"félin","ornament":"lianes autour des pattes","pattern":"rayures","accent":"bleu"},"10":{"body":"renard","ornament":"racines visibles","pattern":"dégradé","accent":"vert"},"11":{"body":"mouton","ornament":"queue en feuille","pattern":"points lumineux","accent":"or"},"12":{"body":"scarabée","ornament":"fleur clochette","pattern":"plaques","accent":"violet"},"13":{"body":"cerf","ornament":"collerette de pétales","pattern":"feuilles","accent":"turquoise"},"14":{"body":"oiseau","ornament":"champignon dorsal","pattern":"écailles","accent":"ivoire"},"15":{"body":"amphibien","ornament":"moustaches électriques","pattern":"plumes","accent":"orange"},"16":{"body":"hibou","ornament":"carapace bombée","pattern":"taches","accent":"rouge"}," …[truncated]
+1710: 
+1711: const TYPE_MOVES={"Nature":["pousse","liane","sève","bourgeon"],"Feu":["braise","flamme","rugissement","fournaise"],"Eau":["jet","vague","écume","torrent"],"Foudre":["étincelle","charge","onde","tonnerre"],"Ombre":["griffe","brume","morsure","éclipse"],"Roche":["roc","carapace","fracas","séisme"],"Air":["souffle","aile","rafale","vol"],"Spore":["spore","pollen","mycose","nuage"],"Glace":["givre","éclat","gel","blizzard"],"Lumière":["lueur","lumiere","rayon","halo"],"Neutre":["charge","croc","concentration","impact"]};
+1712: 
+1713: const cv=document.getElementById('game'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);ctx.imageSmoothingEnabled=true;
+1714: const hero=null,npcs=null,catlas=null,battleBg=null;const imgs={},roomImgs={};
+1715: const SAVE='valdora_v41_player'; let scene='title',battle=null,building=null,keys={},lastMove=0,dialogCb=null,toastTimer=null,walkFrame=0,musicCtx=null,musicTimer=null,musicOn=true;
+1716: let state={zone:'town0',x:900,y:930,dir:0,team:[],box:[],dex:{},money:500,seals:[],story:0,inventory:{Potion:0,Orbe:0,Antidote:2,Baie:3,Repas:0,Rappel:0},trainerWins:{},bike:false,fly:false,light:false};
+### game/index.html line 2554 — museum
+2549: 
+2550: 
+2551: 
+2552: function v101sRoomBackdrop(type='home'){
+2553:   const pal={
+2554:     home:['#f0e7dd','#d9c8b3','#805e49'],lab:['#eaf2f4','#c9d9de','#557684'],healer:['#eef7f5','#cbe0da','#4d8c76'],shop:['#f3eadb','#dcc6a3','#8b6747'],station:['#eeeeea','#d3d4cf','#596a72'],museum:['#f0e8dc','#d5c7b2','#66584b'],school:['#f1eddf','#d8d3b9','#5c735c'],arena:['#efebe4','#d0c6b8','#765b51'],inn:['#f2e8dd','#d9c8b8','#755844']
+2555:   }[type]||['#eee7de','#d6c9b9','#6f665d'];
+2556:   ctx.fillStyle='#243846';ctx.fillRect(0,0,960,600);
+2557:   ctx.fillStyle=pal[0];ctx.beginPath();ctx.roundRect(35,42,890,525,18);ctx.fill();
+2558:   ctx.fillStyle=pal[1];ctx.beginPath();ctx.roundRect(65,92,830,430,12);ctx.fill();
+2559:   ctx.strokeStyle='rgba(90,75,60,.11)';ctx.lineWidth=1;
+2560:   for(let y=108;y<515;y+=34){ctx.beginPath();ctx.moveTo(72,y);ctx.lineTo(888,y);ctx.stroke()}
+2561:   ctx.fillStyle=pal[2];ctx.beginPath();ctx.roundRect(270,105,420,56,11);ctx.fill();
+2562:   ctx.fillStyle='#fff';ctx.font='900 17px Segoe UI';ctx.textAlign='center';
+2563:   const labels={home:'MAISON',lab:'LABORATOIRE',healer:'CENTRE DE SOINS',shop:'BOUTIQUE',station:'GARE',museum:'MUSÉE',school:'ÉCOLE',arena:'SALLE DU GARDIEN',inn:'AUBERGE'};
+### game/index.html line 2563 — museum, musée
+2558:   ctx.fillStyle=pal[1];ctx.beginPath();ctx.roundRect(65,92,830,430,12);ctx.fill();
+2559:   ctx.strokeStyle='rgba(90,75,60,.11)';ctx.lineWidth=1;
+2560:   for(let y=108;y<515;y+=34){ctx.beginPath();ctx.moveTo(72,y);ctx.lineTo(888,y);ctx.stroke()}
+2561:   ctx.fillStyle=pal[2];ctx.beginPath();ctx.roundRect(270,105,420,56,11);ctx.fill();
+2562:   ctx.fillStyle='#fff';ctx.font='900 17px Segoe UI';ctx.textAlign='center';
+2563:   const labels={home:'MAISON',lab:'LABORATOIRE',healer:'CENTRE DE SOINS',shop:'BOUTIQUE',station:'GARE',museum:'MUSÉE',school:'ÉCOLE',arena:'SALLE DU GARDIEN',inn:'AUBERGE'};
+2564:   ctx.fillText(labels[type]||'BÂTIMENT',480,140);ctx.textAlign='start';
+2565:   // sortie visible, unique et toujours libre
+2566:   ctx.fillStyle='#4c5c63';ctx.beginPath();ctx.roundRect(405,475,150,80,8);ctx.fill();ctx.fillStyle='#76523e';ctx.beginPath();ctx.roundRect(418,487,124,68,5);ctx.fill();
+2567:   ctx.fillStyle='#f1d177';ctx.beginPath();ctx.arc(527,521,4,0,Math.PI*2);ctx.fill();
+2568:   ctx.fillStyle='#314957';ctx.font='800 10px Segoe UI';ctx.textAlign='center';ctx.fillText('SORTIE',480,470);ctx.textAlign='start'
+2569: }
+2570: function v101sBattleBackdrop(){
+2571:   const grd=ctx.createLinearGradient(0,0,0,600);grd.addColorStop(0,'#a9dbe2');grd.addColorStop(.48,'#dff0e5');grd.addColorStop(.49,'#8fbd76');grd.addColorStop(1,'#5d925a');ctx.fillStyle=grd;ctx.fillRect(0,0,960,600);
+2572:   ctx.fillStyle='rgba(255,255,255,.55)';for(const [x,y,r] of [[110,80,55],[190,65,38],[760,88,65],[845,75,38]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+### game/index.html line 3499 — museum
+3494: 
+3495:   for(const x of cfg.xs)sc.v67Roads.push(v67RoadRect(x-70,0,140,sc.height));
+3496:   for(const y of cfg.ys)sc.v67Roads.push(v67RoadRect(0,y-70,sc.width,140));
+3497: 
+3498:   const xcuts=[0,...cfg.xs,sc.width],ycuts=[0,...cfg.ys,sc.height];
+3499:   const roles=['station','hotel','clinic','apartments','office','shop','cafe','museum','apartments','restaurant','school','library','office','apartments','shop'];
+3500:   let bi=0;
+3501: 
+3502:   for(let yi=0;yi<ycuts.length-1;yi++){
+3503:     for(let xi=0;xi<xcuts.length-1;xi++){
+3504:       const lx=xcuts[xi]+100,rx=xcuts[xi+1]-100,ty=ycuts[yi]+100,by=ycuts[yi+1]-100;
+3505:       if(rx-lx<220||by-ty<180)continue;
+3506: 
+3507:       const two=(rx-lx)>620;
+3508:       const count=two?2:1;
+### game/index.html line 3527 — museum, musée
+3522:         sc.buildings.push({
+3523:           id:'v67_'+sceneKey+'_'+bi,
+3524:           x:bx,y:byy,w:bw,h:bh,
+3525:           type:role==='station'?'station':role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'?'shop':'urban',
+3526:           urbanType:role,
+3527:           label:role==='station'?'Gare':role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':role==='museum'?'Musée':role==='library'?'Bibliothèque':role==='school'?'École':'Immeuble',
+3528:           floors:role==='station'?2:role==='hotel'?6:4+(bi%8),
+3529:           doorX:bx+bw/2,
+3530:           doorY:byy+bh,
+3531:           megaInterior:true,
+3532:           eventSeed:(bi*17+sceneKey.length)%31
+3533:         });
+3534:         bi++;
+3535:       }
+3536:     }
+### game/index.html line 3599 — museum
+3594:  const floors=Math.max(1,Math.min(9,b.floors||1)),cols=Math.max(2,Math.floor(w/45));
+3595:  for(let r=0;r<floors;r++)for(let c=0;c<cols;c++){
+3596:    ctx.fillStyle=p.glass;ctx.fillRect(x+12+c*(w-24)/cols,y+30+r*(h-65)/floors,17,11)
+3597:  }
+3598:  ctx.fillStyle='#5b4335';ctx.beginPath();ctx.roundRect(x+w/2-15,y+h-31,30,31,4);ctx.fill();
+3599:  let sym=b.urbanType==='station'?'🚉':b.urbanType==='hotel'?'H':b.urbanType==='clinic'?'✚':b.urbanType==='shop'?'◆':b.urbanType==='museum'?'◉':b.urbanType==='library'?'▤':'';
+3600:  if(sym){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+w/2,y+19,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#243c49';ctx.font='700 12px Segoe UI';ctx.textAlign='center';ctx.fillText(sym,x+w/2,y+23)}
+3601:  ctx.restore();ctx.textAlign='start'
+3602: }
+3603: function drawCityV67(sc,camX,camY,sx,sy){
+3604:  const p=v67CityPalette();ctx.fillStyle=p.ground;ctx.fillRect(0,0,960,600);
+3605:  // landmark first
+3606:  if(sc.v67Landmark==='garden'){ctx.fillStyle='#83bd72';ctx.beginPath();ctx.roundRect((1480-camX)*sx,(830-camY)*sy,560*sx,300*sy,22);ctx.fill()}
+3607:  if(sc.v67Landmark==='modern'){ctx.fillStyle='#c9e0e5';ctx.beginPath();ctx.roundRect((1480-camX)*sx,(780-camY)*sy,620*sx,340*sy,24);ctx.fill()}
+3608:  if(sc.v67Landmark==='harbor'){ctx.fillStyle='#63b7d4';ctx.fillRect((3050-camX)*sx,0,600*sx,600)}
+### game/index.html line 4242 — museum, musée
+4237:     // Bâtiments fixes. Aucune coordonnée n'empiète sur une route.
+4238:     sc.buildings=[
+4239:       // Rangée nord
+4240:       {id:'taronis_hotel',x:140,y:70,w:430,h:300,type:'inn',urbanType:'hotel',label:'Hôtel Taronis',floors:6,doorX:355,doorY:370,megaInterior:true,eventSeed:11},
+4241:       {id:'taronis_residence_nw',x:880,y:75,w:500,h:295,type:'urban',urbanType:'apartments',label:'Résidence du Nord',floors:7,doorX:1130,doorY:370,megaInterior:true,eventSeed:12},
+4242:       {id:'taronis_museum',x:2200,y:75,w:450,h:295,type:'urban',urbanType:'museum',label:'Musée des Éclats',floors:4,doorX:2425,doorY:370,megaInterior:true,eventSeed:13},
+4243:       {id:'taronis_residence_ne',x:3030,y:75,w:420,h:295,type:'urban',urbanType:'apartments',label:'Tours Boréales',floors:8,doorX:3240,doorY:370,megaInterior:true,eventSeed:14},
+4244: 
+4245:       // Quartier central supérieur
+4246:       {id:'taronis_clinic',x:120,y:655,w:470,h:220,type:'healer',urbanType:'clinic',label:'Centre de soins',floors:3,doorX:355,doorY:875,megaInterior:true,eventSeed:15},
+4247:       {id:'taronis_office_w',x:880,y:650,w:500,h:225,type:'urban',urbanType:'office',label:'Tour Voltron',floors:9,doorX:1130,doorY:875,megaInterior:true,eventSeed:16},
+4248:       {id:'taronis_library',x:2200,y:650,w:460,h:225,type:'urban',urbanType:'library',label:'Grande Bibliothèque',floors:5,doorX:2430,doorY:875,megaInterior:true,eventSeed:17},
+4249:       {id:'taronis_shop_ne',x:3030,y:650,w:420,h:225,type:'shop',urbanType:'shop',label:'Galeries Taronis',floors:4,doorX:3240,doorY:875,megaInterior:true,eventSeed:18},
+4250: 
+4251:       // Quartier central inférieur
+### game/index.html line 4312 — museum
+4307:         lots.push({x:x2-Math.min(310,W*.43)-20,y:y1+15,w:Math.min(310,W*.43),h:Math.min(320,H-30)})
+4308:       }else lots.push({x:x1+(W-Math.min(360,W-30))/2,y:y1+15,w:Math.min(360,W-30),h:Math.min(320,H-30)})
+4309:     }
+4310:   }
+4311: 
+4312:   const roles=['hotel','clinic','apartments','office','shop','cafe','museum','apartments','restaurant','school','library','apartments','office','shop','apartments','cafe'];
+4313:   sc.buildings=[{
+4314:     id:'v70_station_'+sceneKey,x:sc.v70Rail.stationX,y:sc.v70Rail.stationY,w:sc.v70Rail.stationW,h:sc.v70Rail.stationH,
+4315:     type:'station',urbanType:'station',label:'Gare Centrale',floors:2,
+4316:     doorX:sc.v70Rail.stationX+sc.v70Rail.stationW/2,doorY:sc.v70Rail.stationY+sc.v70Rail.stationH,megaInterior:false
+4317:   }];
+4318: 
+4319:   let i=0;
+4320:   for(const lot of lots){
+4321:     if(sc.buildings.length>=31)break;
+### game/index.html line 4326 — museum, musée
+4321:     if(sc.buildings.length>=31)break;
+4322:     const role=roles[i%roles.length];
+4323:     sc.buildings.push({
+4324:       id:'v70_'+sceneKey+'_'+i,x:lot.x,y:lot.y,w:lot.w,h:lot.h,
+4325:       type:role==='hotel'?'inn':role==='clinic'?'healer':role==='shop'?'shop':'urban',
+4326:       urbanType:role,label:role==='hotel'?'Hôtel':role==='clinic'?'Centre de soins':role==='museum'?'Musée':role==='library'?'Bibliothèque':role==='school'?'École':'Immeuble',
+4327:       floors:role==='hotel'?6:4+(i%7),doorX:lot.x+lot.w/2,doorY:lot.y+lot.h,
+4328:       megaInterior:true,eventSeed:(i*23+sceneKey.length)%41
+4329:     });i++
+4330:   }
+4331: 
+4332:   sc.megaNPCs=[];let ni=0;
+4333:   for(const r of sc.v70Roads){
+4334:     const vertical=r.axis==='v';
+4335:     for(let j=1;j<=5;j++){
+### game/index.html line 4466 — museum
+4461:   // symbole
+4462:   let sym='';
+4463:   if(b.urbanType==='hotel')sym='H';
+4464:   else if(b.urbanType==='clinic')sym='✚';
+4465:   else if(b.urbanType==='shop')sym='◆';
+4466:   else if(b.urbanType==='museum')sym='◉';
+4467:   else if(b.urbanType==='library')sym='▤';
+4468:   else if(b.urbanType==='school')sym='✎';
+4469: 
+4470:   if(sym){
+4471:     ctx.fillStyle='#fff';
+4472:     ctx.beginPath();ctx.arc(x+w-24,y+25,14,0,Math.PI*2);ctx.fill();
+4473:     ctx.fillStyle='#203a49';ctx.font='800 12px Segoe UI';ctx.textAlign='center';
+4474:     ctx.fillText(sym,x+w-24,y+29);
+4475:   }
+### game/index.html line 4625 — museum
+4620: };
+4621: 
+4622: const V70_TYPES=Object.keys(V70_ROOM_LIBRARY);
+4623: 
+4624: function enterBuildingV70(b){
+4625:   if(window.ValdoraMuseumV109H?.isMuseum?.(b))return window.ValdoraMuseumV109H.enter(b);
+4626:   V70_INT={
+4627:     building:b,
+4628:     returnZone:state.zone,
+4629:     floor:0,
+4630:     mode:'corridor',
+4631:     room:null,
+4632:     floors:Math.max(2,b.floors||4),
+4633:     eventSeed:b.eventSeed||0
+4634:   };
+### game/index.html line 10255 — museum, musée
+10250:     ],
+10251: 
+10252:     buildings:[
+10253:       {id:'ta93_hotel',x:100,y:70,w:420,h:310,type:'inn',urbanType:'hotel',label:'Hôtel Central',floors:6,doorX:310,doorY:380,megaInterior:true,eventSeed:201},
+10254:       {id:'ta93_resA',x:900,y:70,w:510,h:310,type:'urban',urbanType:'apartments',label:'Résidence Atlas',floors:7,doorX:1155,doorY:380,megaInterior:true,eventSeed:202},
+10255:       {id:'ta93_museum',x:2180,y:70,w:470,h:310,type:'urban',urbanType:'museum',label:'Musée des Éclats',floors:5,doorX:2415,doorY:380,megaInterior:true,eventSeed:203},
+10256:       {id:'ta93_resB',x:3040,y:70,w:430,h:310,type:'urban',urbanType:'apartments',label:'Tour Boréale',floors:8,doorX:3255,doorY:380,megaInterior:true,eventSeed:204},
+10257: 
+10258:       {id:'ta93_healer',x:100,y:690,w:430,h:260,type:'healer',urbanType:'clinic',label:'Centre de soins',floors:3,doorX:315,doorY:950,megaInterior:true,eventSeed:205},
+10259:       {id:'ta93_office',x:900,y:690,w:510,h:260,type:'urban',urbanType:'office',label:'Tour Voltron',floors:9,doorX:1155,doorY:950,megaInterior:true,eventSeed:206},
+10260:       {id:'ta93_library',x:2180,y:690,w:470,h:260,type:'urban',urbanType:'library',label:'Bibliothèque Centrale',floors:5,doorX:2415,doorY:950,megaInterior:true,eventSeed:207},
+10261:       {id:'ta93_shop',x:3040,y:690,w:430,h:260,type:'shop',urbanType:'shop',label:'Galeries Taronis',floors:4,doorX:3255,doorY:950,megaInterior:true,eventSeed:208},
+10262: 
+10263:       {id:'ta93_cafe',x:100,y:1260,w:430,h:190,type:'urban',urbanType:'cafe',label:'Café des Voyageurs',floors:2,doorX:315,doorY:1450,megaInterior:true,eventSeed:209},
+10264:       {id:'ta93_school',x:900,y:1260,w:510,h:190,type:'urban',urbanType:'school',label:'Académie Taronis',floors:4,doorX:1155,doorY:1450,megaInterior:true,eventSeed:210},
+### game/index.html line 12754 — musée
+12749:  town8:['Cimes-d’Or a grandi autour des prospecteurs et des mineurs.','On trouve encore des éclats dorés dans la roche après les fortes pluies.','Les gens d’ici savent reconnaître une pierre intéressante au premier regard.'],
+12750:  town5:['Soléria ne dort presque jamais.','Les jardins de Soléria sont aussi importants que ses grandes avenues.','Ici, même les habitués découvrent encore de nouvelles rues.'],
+12751:  town6:['Nova-Cité change si vite que les vieux plans deviennent rapidement inutiles.','Les lumières de Nova-Cité attirent des dresseurs de toute la région.','Les chercheurs adorent tester leurs nouvelles technologies ici.'],
+12752:  town9:['À Port-Écume, on connaît l’humeur de la mer rien qu’à son odeur.','Les quais sont pleins d’histoires rapportées par les marins.','Certains Éclats suivent les bateaux pendant des kilomètres.'],
+12753:  town10:['Luminor paraît différente selon l’heure de la journée.','Les habitants de l’île tiennent beaucoup à leurs traditions.','Le reflet des lumières sur l’eau donne son caractère à Luminor.'],
+12754:  town13:['Taronis est immense : personne n’en connaît vraiment chaque recoin.','Les habitants de Taronis ont appris à vivre avec une ville toujours en mouvement.','Le musée conserve des récits que même les chercheurs connaissent mal.']
+12755: };
+12756: const _npcDialogueV101F=window.npcDialogue;
+12757: window.npcDialogue=function(n){
+12758:  n._v101fTalk=(n._v101fTalk||0)+1;
+12759:  const city=V101F_CITY_LINES[state.zone]||[
+12760:    'Chaque ville de Valdora a ses habitudes. Il faut prendre le temps de les comprendre.',
+12761:    'Les voyageurs apportent toujours de nouvelles histoires.',
+12762:    'Un bon dresseur écoute autant qu’il combat.'
+12763:  ];
