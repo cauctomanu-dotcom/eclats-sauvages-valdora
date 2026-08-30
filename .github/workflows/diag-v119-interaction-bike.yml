@@ -1,0 +1,23 @@
+name: Diagnose Valdora interaction and bicycle systems
+on:
+  push:
+    paths:
+      - '.github/workflows/diag-v119-interaction-bike.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect interaction and bicycle code
+        shell: bash
+        run: |
+          set -e
+          echo '=== BIKE MATCHES ==='
+          grep -RniE "state\.bike|bike|bicyc|vélo|velo|cyclable" game --include='*.js' --include='*.html' | head -n 160 || true
+          echo '=== INTERIOR TARGETING ==='
+          grep -nE "nearestInteractionTarget|nearestFurnitureWithDistance|nearestNpcWithDistance|function interact\(|serviceNpcInteract|interactInteriorV118" game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js || true
+          echo '=== SCENE KEYS / PATHS ==='
+          grep -nE "route[0-9]+|v104Path|v76Path" game/V109W_CORRECTIFS_GAMEPLAY.js | head -n 120 || true
