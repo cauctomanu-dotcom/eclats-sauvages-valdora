@@ -34,126 +34,84 @@ function overlapArea(a,b){const w=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(
 function sceneFor(zone){return typeof SCENES==='object'?SCENES?.[zone]:null}
 function current(){try{return typeof currentScene==='function'?currentScene():sceneFor(state.zone)}catch(_){return sceneFor(state?.zone)}}
 // ---------------------------------------------------------------------
-// V120 — Réseau cyclable utile. La bicyclette est débloquée après 3 Sceaux,
-// circule sur quelques axes dédiés et apporte réellement un gain de vitesse.
+// V121 — VRAIES ROUTES CYCLABLES, façon Pokémon.
+// La bicyclette ne se superpose plus aux routes normales : elle ouvre des
+// chemins dédiés qui relient rapidement deux zones déjà connues.
 // ---------------------------------------------------------------------
-const CYCLE_TOWNS_V119=new Set(['town0','town2','town4','town6','town9','town10','town13']);
-const CYCLE_ROUTES_V119=new Set(['route0','route2','route3','route4','route6','route8','route10','route12']);
+const CYCLE_LINKS_V121=[
+  {id:'cycle_clairval_rochebrune',a:'town0',b:'town2'},
+  {id:'cycle_soleria_novacite',a:'town4',b:'town6'},
+  {id:'cycle_route4_route7',a:'route3',b:'route6'},
+  {id:'cycle_town9_town10',a:'town9',b:'town10'},
+  {id:'cycle_route9_route11',a:'route8',b:'route10'},
+  {id:'cycle_route11_route13',a:'route10',b:'route12'}
+];
 let bikeNoticeAtV119=0;
 function bikeUnlockedV119(){return creator()||!!state?.flags?.v119BikeUnlocked||(Array.isArray(state?.seals)&&state.seals.length>=3)}
+function cycleZoneV121(zone=state?.zone){return CYCLE_LINKS_V121.some(l=>l.id===zone)}
+function cycleKnownV121(zone){
+  if(creator()||state?.zone===zone)return true;
+  const lists=[state?.discovered,state?.visited,state?.visitedZones,state?.visitedCities];
+  return lists.some(a=>Array.isArray(a)&&a.includes(zone))
+}
+function cycleSceneV121(link){
+  const width=2800,height=1400,path=[[130,700],[480,560],[850,760],[1220,610],[1580,790],[1950,590],[2320,750],[2670,700]];
+  return{name:`Voie cyclable — ${sceneFor(link.a)?.name||link.a} / ${sceneFor(link.b)?.name||link.b}`,kind:'route',cycleOnlyV121:true,routeEngine:'V121-CYCLE',width,height,buildings:[],trainers:[],objects:[],obstacles:[],mObstacles:[],grass:[],v105dTrees:[],v105dBushes:[],v105dCell:220,v105dCore:118,v105dRoad:new Set(),v76Path:path,v104Path:path,kPath:path,exits:[
+    {x:0,y:610,w:150,h:180,side:'west',to:link.a,label:sceneFor(link.a)?.name||'Retour',v121CycleExit:true},
+    {x:2650,y:610,w:150,h:180,side:'east',to:link.b,label:sceneFor(link.b)?.name||'Sortie',v121CycleExit:true}
+  ]}
+}
+function cycleEntryRectV121(sc,side,slot){
+  const w=Number(sc?.width)||1800,h=Number(sc?.height)||1100,span=150,depth=92,p=slot?0.68:0.32;
+  if(side==='west')return{x:0,y:Math.round(h*p-span/2),w:depth,h:span,side};
+  return{x:Math.max(0,w-depth),y:Math.round(h*p-span/2),w:depth,h:span,side:'east'}
+}
+function cycleUpsertExitV121(sc,to,value){
+  if(!sc)return;sc.exits=Array.isArray(sc.exits)?sc.exits:[];const i=sc.exits.findIndex(e=>e?.v121CycleEntry&&String(e.to||e.target)===to);
+  if(i>=0)sc.exits[i]={...sc.exits[i],...value,to};else sc.exits.push({...value,to})
+}
+function cycleRemoveExitV121(sc,to){if(sc?.exits)sc.exits=sc.exits.filter(e=>!(e?.v121CycleEntry&&String(e.to||e.target)===to))}
+function ensureCycleNetworkV121(){
+  if(typeof SCENES!=='object'||!SCENES)return false;const unlocked=bikeUnlockedV119();
+  for(const [i,link] of CYCLE_LINKS_V121.entries()){
+    const a=sceneFor(link.a),b=sceneFor(link.b);if(!a||!b)continue;
+    const available=unlocked&&(creator()||(cycleKnownV121(link.a)&&cycleKnownV121(link.b)));
+    if(!SCENES[link.id]||!SCENES[link.id].cycleOnlyV121)SCENES[link.id]=cycleSceneV121(link);
+    else{SCENES[link.id].name=`Voie cyclable — ${a.name||link.a} / ${b.name||link.b}`;SCENES[link.id].exits[0].label=a.name||'Retour';SCENES[link.id].exits[1].label=b.name||'Sortie'}
+    if(available){
+      cycleUpsertExitV121(a,link.id,{...cycleEntryRectV121(a,'east',i%2),label:`🚲 Voie cyclable vers ${b.name||link.b}`,v121CycleEntry:true});
+      cycleUpsertExitV121(b,link.id,{...cycleEntryRectV121(b,'west',(i+1)%2),label:`🚲 Voie cyclable vers ${a.name||link.a}`,v121CycleEntry:true})
+    }else{cycleRemoveExitV121(a,link.id);cycleRemoveExitV121(b,link.id)}
+  }
+  return true
+}
 function ensureBikeUnlockV119(){
   state.flags=state.flags||{};
   if(Array.isArray(state.seals)&&state.seals.length>=3&&!state.flags.v119BikeUnlocked){
     state.flags.v119BikeUnlocked=true;state.bike=false;
-    if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! Elle s’utilise uniquement sur les pistes cyclables.')}catch(_){} }
+    if(!state.flags.v119BikeUnlockNotified){state.flags.v119BikeUnlockNotified=true;try{toast?.('Bicyclette débloquée ! De nouvelles voies cyclables permettent maintenant de relier rapidement des zones déjà découvertes.')}catch(_){} }
     try{save?.(false)}catch(_){}
   }
-  if(!bikeUnlockedV119()&&state.bike)state.bike=false;
-  return bikeUnlockedV119()
+  if(!bikeUnlockedV119()&&state.bike)state.bike=false;ensureCycleNetworkV121();return bikeUnlockedV119()
 }
-function cycleRoutePathV119(sc,zone){
-  if(!CYCLE_ROUTES_V119.has(zone)||sc?.kind!=='route'||sc?.v116Sanctuary)return[];
-  const p=Array.isArray(sc.v104Path)&&sc.v104Path.length?sc.v104Path:Array.isArray(sc.v76Path)&&sc.v76Path.length?sc.v76Path:Array.isArray(sc.kPath)?sc.kPath:[];
-  return p.map(q=>Array.isArray(q)?{x:Number(q[0]),y:Number(q[1])}:{x:Number(q?.x),y:Number(q?.y)}).filter(q=>Number.isFinite(q.x)&&Number.isFinite(q.y))
-}
-
-// V120 — Le réseau cyclable est un vrai réseau de déplacement : quelques
-// axes utiles, continus et lisibles. On ne transforme plus chaque rue en piste.
-const CYCLE_SERVICE_PRIORITY_V120=['gare','centre_soins','gardien','laboratoire','musee'];
-function cycleBuildingFamilyV120(b){
-  const f=[b?.type,b?.urbanType,b?.id,b?.label,b?.name,b?.interiorKey,b?.key].filter(Boolean).join(' ').toLowerCase();
-  if(/centre[_ -]?soins|centre de soins|soins_centre|clinique/.test(f))return'centre_soins';
-  if(!/bus|arr[eê]t|d[eé]p[oô]t/.test(f)&&/\bgare\b|station ferroviaire|rail station/.test(f))return'gare';
-  if(/laboratoire|\blabo\b/.test(f))return'laboratoire';
-  if(/mus[eé]e/.test(f))return'musee';
-  if(/gardien|ar[eè]ne/.test(f))return'gardien';
-  return null
-}
-function cycleNearestNodeV120(g,x,y){
-  let best=null,bd=Infinity;for(const n of g.list||[]){const d=Math.hypot(n.x-x,n.y-y);if(d<bd){bd=d;best=n}}return best
-}
-function cycleBfsV120(g,startKey,endKey){
-  if(!startKey||!endKey)return[];if(startKey===endKey)return[startKey];
-  const q=[startKey],prev=new Map([[startKey,null]]);let qi=0;
-  while(qi<q.length){const key=q[qi++],node=g.map.get(key);if(!node)continue;for(const next of node.neighbors||[]){if(prev.has(next)||!g.map.has(next))continue;prev.set(next,key);if(next===endKey){const out=[endKey];let k=key;while(k){out.push(k);k=prev.get(k)}return out.reverse()}q.push(next)}}
-  return[]
-}
-function cycleTownAnchorsV120(sc,g){
-  const anchors=[];
-  for(const e of sc.exits||[]){const n=cycleNearestNodeV120(g,e.x+e.w/2,e.y+e.h/2);if(n)anchors.push({key:n.key,kind:'exit'})}
-  for(const fam of CYCLE_SERVICE_PRIORITY_V120){const b=(sc.buildings||[]).find(x=>cycleBuildingFamilyV120(x)===fam);if(!b)continue;const n=cycleNearestNodeV120(g,Number.isFinite(Number(b.doorX))?Number(b.doorX):b.x+b.w/2,Number.isFinite(Number(b.doorY))?Number(b.doorY):b.y+b.h);if(n)anchors.push({key:n.key,kind:fam})}
-  const unique=[];const seen=new Set();for(const a of anchors)if(!seen.has(a.key)){seen.add(a.key);unique.push(a)}
-  if(unique.length>=2)return unique.slice(0,5);
-  const nodes=g.list||[];if(nodes.length<2)return unique;
-  const byX=[...nodes].sort((a,b)=>a.x-b.x),byY=[...nodes].sort((a,b)=>a.y-b.y),fallback=[byX[0],byX.at(-1),byY[0],byY.at(-1)];
-  for(const n of fallback)if(n&&!seen.has(n.key)){seen.add(n.key);unique.push({key:n.key,kind:'axis'});if(unique.length>=3)break}
-  return unique
-}
-function cycleTownBackboneV120(sc){
-  const g=roadNodes(sc),anchors=cycleTownAnchorsV120(sc,g);if(anchors.length<2)return[];
-  const connected=new Set([anchors[0].key]),remaining=new Set(anchors.slice(1).map(a=>a.key)),edges=new Map();
-  while(remaining.size){let best=null,bd=Infinity;for(const from of connected)for(const to of remaining){const a=g.map.get(from),b=g.map.get(to);if(!a||!b)continue;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<bd){bd=d;best={from,to}}}if(!best)break;const path=cycleBfsV120(g,best.from,best.to);if(path.length<2){remaining.delete(best.to);continue}for(let i=0;i<path.length-1;i++){const a=g.map.get(path[i]),b=g.map.get(path[i+1]);if(!a||!b)continue;const key=[a.key,b.key].sort().join('|');edges.set(key,[{x:a.x,y:a.y,key:a.key},{x:b.x,y:b.y,key:b.key}])}connected.add(best.to);remaining.delete(best.to)}
-  return[...edges.values()]
-}
-function cycleOffsetSegmentV120(a,b,offset=30){
-  let p=a,q=b;if((p.x>q.x)||(p.x===q.x&&p.y>q.y)){p=b;q=a}const dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;return[{x:a.x+nx*offset,y:a.y+ny*offset},{x:b.x+nx*offset,y:b.y+ny*offset}]
-}
-function cycleOffsetPolylineV120(points,offset=34){
-  if(points.length<2)return[];const shifted=[];
-  for(let i=0;i<points.length;i++){const prev=points[Math.max(0,i-1)],next=points[Math.min(points.length-1,i+1)],dx=next.x-prev.x,dy=next.y-prev.y,len=Math.hypot(dx,dy)||1;shifted.push({x:points[i].x-dy/len*offset,y:points[i].y+dx/len*offset})}
-  const out=[];for(let i=0;i<shifted.length-1;i++)out.push([shifted[i],shifted[i+1]]);return out
-}
-function cycleSegmentsV119(sc=current(),zone=state?.zone){
-  if(!sc)return[];
-  if(CYCLE_ROUTES_V119.has(zone))return cycleOffsetPolylineV120(cycleRoutePathV119(sc,zone),34);
-  if(CYCLE_TOWNS_V119.has(zone)&&sc.kind==='town')return cycleTownBackboneV120(sc).map(([a,b])=>cycleOffsetSegmentV120(a,b,30));
-  return[]
-}
-function pointSegmentDistanceV119(px,py,a,b){
-  const vx=b.x-a.x,vy=b.y-a.y,wx=px-a.x,wy=py-a.y,l2=vx*vx+vy*vy;if(l2<1)return Math.hypot(wx,wy);
-  const t=Math.max(0,Math.min(1,(wx*vx+wy*vy)/l2)),x=a.x+t*vx,y=a.y+t*vy;return Math.hypot(px-x,py-y)
-}
-function onCycleTrackV119(zone=state?.zone,x=state?.x,y=state?.y){
-  const sc=sceneFor(zone);if(!sc||typeof scene!=='undefined'&&scene!=='world')return false;
-  const px=Number(x),py=Number(y);if(!Number.isFinite(px)||!Number.isFinite(py))return false;
-  return cycleSegmentsV119(sc,zone).some(([a,b])=>pointSegmentDistanceV119(px,py,a,b)<=46)
-}
-function cycleCameraV119(sc){
-  const vw=1600,vh=1000,w=Number(sc?.width)||vw,h=Number(sc?.height)||vh;
-  const maxX=Math.max(0,w-vw),maxY=Math.max(0,h-vh),camX=Math.max(0,Math.min(maxX,Number(state?.x||0)-vw/2)),camY=Math.max(0,Math.min(maxY,Number(state?.y||0)-vh/2));
-  return{camX,camY,sx:960/vw,sy:600/vh}
-}
-function drawCycleTracksV119(){
-  if(typeof scene==='undefined'||scene!=='world')return;const sc=current(),segments=cycleSegmentsV119(sc,state?.zone);if(!segments.length)return;
-  const c=cycleCameraV119(sc),holes=[];
-  holes.push({x:(Number(state.x)-c.camX)*c.sx,y:(Number(state.y)-c.camY)*c.sy,w:34,h:48});
-  try{if(sc?.kind==='town')for(const n of allWorldCitizens(sc,state.zone))holes.push({x:(Number(n.x)-c.camX)*c.sx,y:(Number(n.y)-c.camY)*c.sy,w:32,h:46})}catch(_){}
-  ctx.save();ctx.beginPath();ctx.rect(-80,-80,1120,760);for(const h of holes)ctx.rect(h.x-h.w/2,h.y-h.h*.8,h.w,h.h);try{ctx.clip('evenodd')}catch(_){ctx.clip()}
-  ctx.lineCap='round';ctx.lineJoin='round';ctx.globalAlpha=.72;
-  for(const [a,b] of segments){const x1=(a.x-c.camX)*c.sx,y1=(a.y-c.camY)*c.sy,x2=(b.x-c.camX)*c.sx,y2=(b.y-c.camY)*c.sy;if(Math.max(x1,x2)<-40||Math.min(x1,x2)>1000||Math.max(y1,y2)<-40||Math.min(y1,y2)>640)continue;ctx.strokeStyle='rgba(31,126,96,.82)';ctx.lineWidth=7;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.strokeStyle='rgba(246,255,251,.86)';ctx.lineWidth=1.5;ctx.setLineDash([13,15]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
-  ctx.setLineDash([]);ctx.restore()
-}
-function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1300)return;bikeNoticeAtV119=now;try{toast?.(msg)}catch(_){}}
+function cycleSegmentsV119(){return[]}
+function onCycleTrackV119(zone=state?.zone){return cycleZoneV121(zone)}
+function drawCycleTracksV119(){/* V121 : aucun marquage superposé aux routes normales. */}
+function bikeNoticeV119(msg){const now=Date.now();if(now-bikeNoticeAtV119<1200)return;bikeNoticeAtV119=now;try{toast?.(msg)}catch(_){}}
 function refreshBikeUiV119(){
-  ensureBikeUnlockV119();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;
+  const unlocked=ensureBikeUnlockV119(),onPath=cycleZoneV121();if(typeof scene!=='undefined'&&scene!=='world'&&state.bike)state.bike=false;if(onPath)state.bike=true;else if(state.bike)state.bike=false;
   let panel=document.getElementById('v119CyclePanel'),btn=document.getElementById('v119BikeBtn');
-  if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Bicyclette : après 3 Sceaux. Les pistes relient les axes utiles et permettent de rouler plus vite.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
-  if(!btn)return;const unlocked=bikeUnlockedV119(),track=onCycleTrackV119();btn.disabled=false;btn.textContent=!unlocked?'🔒 Bicyclette — 3 Sceaux':state.bike?'🚲 Descendre du vélo':track?'🚲 Monter — vitesse ×2':'🚲 Rejoins une piste cyclable';btn.onclick=toggleBikeV119
+  if(!panel){const aside=document.querySelector('aside');if(aside){panel=document.createElement('div');panel.id='v119CyclePanel';panel.className='panel';panel.innerHTML='<h3>Déplacement</h3><button id="v119BikeBtn" style="width:100%"></button><div class="small" style="margin-top:7px">Après 3 Sceaux, la bicyclette ouvre des voies dédiées servant de raccourcis entre des zones déjà découvertes.</div>';aside.prepend(panel);btn=panel.querySelector('#v119BikeBtn')}}
+  if(!btn)return;btn.disabled=true;btn.textContent=!unlocked?'🔒 Bicyclette — 3 Sceaux':onPath?'🚲 Voie cyclable — vitesse ×2':'🚲 Bicyclette débloquée — cherche les voies cyclables'
 }
-function toggleBikeV119(){
-  if(!ensureBikeUnlockV119()){state.bike=false;bikeNoticeV119('La bicyclette sera débloquée après le 3e Sceau.');refreshBikeUiV119();return false}
-  if(state.bike){state.bike=false;bikeNoticeV119('Tu descends de la bicyclette.');refreshBikeUiV119();return true}
-  if(!onCycleTrackV119()){bikeNoticeV119('La bicyclette ne peut être utilisée que sur une piste cyclable.');refreshBikeUiV119();return false}
-  state.bike=true;bikeNoticeV119('Bicyclette en route !');refreshBikeUiV119();return true
-}
+function toggleBikeV119(){if(cycleZoneV121()){state.bike=true;bikeNoticeV119('La bicyclette est utilisée automatiquement sur cette voie.');return true}bikeNoticeV119('La bicyclette s’utilise sur les voies cyclables dédiées.');return false}
 function cycleMoveV119(dx,dy,dir){
-  ensureBikeUnlockV119();
-  if(typeof scene!=='undefined'&&scene==='world'&&state.bike&&!onCycleTrackV119()){state.bike=false;bikeNoticeV119('Tu dois être sur une piste cyclable pour utiliser la bicyclette.')}
-  const riding=typeof scene!=='undefined'&&scene==='world'&&state.bike&&onCycleTrackV119();let result=false;
-  const passes=riding?2:1;for(let i=0;i<passes;i++){const r=typeof BASE.move==='function'?BASE.move.apply(this,arguments):false;result=!!r||result;if(riding&&!onCycleTrackV119()){state.bike=false;bikeNoticeV119('Tu quittes la piste cyclable : bicyclette rangée.');break}}
-  refreshBikeUiV119();return result
+  ensureBikeUnlockV119();const startZone=state?.zone,onPath=cycleZoneV121(startZone);state.bike=!!onPath;let result=false,passes=onPath?2:1;
+  for(let i=0;i<passes;i++){const r=typeof BASE.move==='function'?BASE.move.apply(this,arguments):false;result=!!r||result;if(state?.zone!==startZone)break}
+  if(!cycleZoneV121(state?.zone))state.bike=false;refreshBikeUiV119();return result
 }
-window.ValdoraCycleV119={version:'V120-CYCLE',unlocked:bikeUnlockedV119,onTrack:onCycleTrackV119,toggle:toggleBikeV119,segments:cycleSegmentsV119,refresh:refreshBikeUiV119};
+window.ValdoraCycleV119={version:'V121-CYCLE-ROUTES',unlocked:bikeUnlockedV119,onTrack:onCycleTrackV119,toggle:toggleBikeV119,segments:cycleSegmentsV119,refresh:refreshBikeUiV119,links:CYCLE_LINKS_V121,repair:ensureCycleNetworkV121};
+try{ensureCycleNetworkV121()}catch(_){}
 
 function stateV118(){
   state.v118Living=state.v118Living||{};const s=state.v118Living;
@@ -303,7 +261,7 @@ function baseCitizens(sc,zone,includeTaron=true){
   })
 }
 function allWorldCitizens(sc,zone){return baseCitizens(sc,zone,true)}
-function movable(n){return !!n&&!n.taron&&!n.guardian&&!n.service&&!n.stationaryV118}
+function movable(n){return !!n&&(n.v118Generated===true||n.v121Roamer===true)&&!n.taron&&!n.guardian&&!n.service&&!n.stationaryV118}
 function safeSpawn(node,occupied,min=68){return node&&occupied.every(o=>Math.hypot(node.x-o.x,node.y-o.y)>=min)}
 function nearestNode(nodes,x,y){let best=null,bd=Infinity;for(const n of nodes.list){const d=Math.hypot(n.x-x,n.y-y);if(d<bd){bd=d;best=n}}return best}
 function roadSpawnSlots(sc,nodes){
@@ -317,16 +275,29 @@ function roadSpawnSlots(sc,nodes){
 }
 function placeTownCitizens(zone,force=false){
   const sc=sceneFor(zone);if(!sc||sc.kind!=='town')return;const nodes=roadNodes(sc);if(!nodes.list.length)return;
-  const target=sc.megacity?18:12;sc.v118Citizens=Array.isArray(sc.v118Citizens)?sc.v118Citizens:[];
-  let people=baseCitizens(sc,zone,false);for(let i=people.length;i<target;i++){const id=npcIdentity(zone,i);sc.v118Citizens.push({id:`v118_${zone}_${i}`,zone,x:0,y:0,homeX:0,homeY:0,look:id.look,name:id.name,v118Role:id.role,dir:i%4,moving:false,v118Generated:true})}
-  people=baseCitizens(sc,zone,false);if(sc._v118PopulationReady&&!force){const stable=people.every(n=>!movable(n)||n._v118Placed);if(stable)return}
-  const slots=roadSpawnSlots(sc,nodes),occupied=people.filter(n=>!movable(n)&&Number.isFinite(n.x)&&Number.isFinite(n.y)).map(n=>({x:n.x,y:n.y}));
-  for(const [i,n] of people.entries()){
-    if(!movable(n))continue;let choice=null;const start=hash(`${zone}|${n.id||n.name}|spawn`)%Math.max(1,slots.length);
-    for(const minimum of[62,54,46]){for(let k=0;k<slots.length;k++){const q=slots[(start+k)%slots.length];if(safeSpawn(q,occupied,minimum)){choice=q;break}}if(choice)break}
-    choice=choice||nodes.list[(hash(n.id)+i)%nodes.list.length];const nodeKey=choice.nodeKey||choice.key||nearestNode(nodes,choice.x,choice.y)?.key;n.x=choice.x;n.y=choice.y;n.homeX=choice.x;n.homeY=choice.y;n._v118Node=nodeKey;n._v118Target=null;n._v118Wait=performance.now()+250+(hash(n.id)%900);n.dir=hash(n.id+'dir')%4;n.moving=false;n._v118Placed=true;occupied.push({x:n.x,y:n.y})
+  // V121 : seuls les habitants créés et possédés par ce moteur se déplacent.
+  // Les anciens PNJ (quêtes, services, couches historiques) restent fixes : un
+  // autre module ne peut donc plus les recréer à leur point de départ pendant
+  // que V118/V121 les fait marcher.
+  sc.v118Citizens=Array.isArray(sc.v118Citizens)?sc.v118Citizens:[];
+  for(const n of baseCitizens(sc,zone,false))if(!n?.v118Generated&&!n?.v121Roamer)n.stationaryV118=true;
+  const target=sc.megacity?14:10;let roamers=sc.v118Citizens.filter(n=>n&&n.v118Generated);
+  for(let i=roamers.length;i<target;i++){
+    const ident=npcIdentity(zone,i);sc.v118Citizens.push({id:`v121_roamer_${zone}_${i}`,zone,x:0,y:0,homeX:0,homeY:0,look:ident.look,name:ident.name,v118Role:ident.role,dir:i%4,moving:false,v118Generated:true,v121Roamer:true})
   }
-  sc._v118PopulationReady=VERSION
+  roamers=sc.v118Citizens.filter(n=>n&&n.v118Generated);const all=baseCitizens(sc,zone,false),slots=roadSpawnSlots(sc,nodes),occupied=[];
+  for(const n of all){
+    if(n.v118Generated&&(n._v121Placed||n._v118Placed)&&Number.isFinite(Number(n.x))&&Number.isFinite(Number(n.y))){n._v121Placed=true;n.v121Roamer=true;occupied.push({x:n.x,y:n.y})}
+    else if(!movable(n)&&Number.isFinite(Number(n.x))&&Number.isFinite(Number(n.y)))occupied.push({x:n.x,y:n.y})
+  }
+  for(const [i,n] of roamers.entries()){
+    n.v121Roamer=true;if(n._v121Placed&&Number.isFinite(Number(n.x))&&Number.isFinite(Number(n.y)))continue;
+    let choice=null;const start=hash(`${zone}|${n.id||n.name}|v121-spawn`)%Math.max(1,slots.length);
+    for(const minimum of[64,56,48]){for(let k=0;k<slots.length;k++){const q=slots[(start+k)%slots.length];if(safeSpawn(q,occupied,minimum)){choice=q;break}}if(choice)break}
+    choice=choice||nodes.list[(hash(n.id)+i)%nodes.list.length];const nodeKey=choice.nodeKey||choice.key||nearestNode(nodes,choice.x,choice.y)?.key;
+    n.x=choice.x;n.y=choice.y;n.homeX=choice.x;n.homeY=choice.y;n._v118Node=nodeKey;n._v118Target=null;n._v118FreeTarget=null;n._v118Wait=performance.now()+250+(hash(n.id)%900);n.dir=hash(n.id+'dir')%4;n.moving=false;n._v118Placed=true;n._v121Placed=true;occupied.push({x:n.x,y:n.y})
+  }
+  sc._v118PopulationReady='V121-PERSISTENT-ROAMERS'
 }
 function worldPointFree(sc,n,x,y,all){
   if(x<26||y<26||x>(sc.width||1800)-26||y>(sc.height||1100)-26)return false;if((sc.buildings||[]).some(b=>x>b.x-24&&x<b.x+b.w+24&&y>b.y-20&&y<b.y+b.h+30))return false;if((sc.v105dTrees||[]).some(t=>Math.hypot(x-t.x,y-t.y)<43*(t.s||1)))return false;if(all.some(o=>o!==n&&Math.hypot(x-o.x,y-o.y)<46))return false;return true
@@ -713,7 +684,7 @@ function configureAll(force=false){for(const zone of TOWNS)placeTownCitizens(zon
 function scheduleTownPopulation(force=false,delay=260){TOWNS.forEach((zone,i)=>setTimeout(()=>{try{placeTownCitizens(zone,force);if(i===TOWNS.length-1)publishAudit()}catch(e){console.warn('V118 population '+zone,e)}},delay+i*95))}
 let lastBuildingRepair=Date.now();
 function refreshBuildings(){const now=Date.now();if(now-lastBuildingRepair<9000)return 0;lastBuildingRepair=now;const moved=repairAllBuildings();if(moved)scheduleTownPopulation(false,80);return moved}
-function install(){configureCurrent(false);installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}
+function install(){configureCurrent(false);ensureCycleNetworkV121();installHooks();stabilizeSidebar();enforceIdentity();publishAudit()}
 
 const api={version:VERSION,active:true,dialogues:DIALOGUE_BANK,contracts:CONTRACTS,install,installHooks,configure:configureAll,stabilizeSidebar,enforceIdentity,openPanel,previewHouse,publishAudit,audit,allWorldCitizens,nearWorldNpc,ensureInteriorPopulation,repairAllBuildings,cycle:window.ValdoraCycleV119};
 window.ValdoraLivingWorldV118=api;stateV118();install();scheduleTownPopulation(false,320);if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);[80,420,1100,2400,4200,7200,10800,17600].forEach(ms=>setTimeout(install,ms));setTimeout(()=>{try{lastBuildingRepair=0;refreshBuildings();install();}catch(e){console.warn('V118 implantation',e)}},11800);setInterval(()=>{try{installHooks();stabilizeSidebar();enforceIdentity();configureCurrent(false);refreshBuildings();publishAudit()}catch(e){console.warn('V118 maintenance',e)}},3500);

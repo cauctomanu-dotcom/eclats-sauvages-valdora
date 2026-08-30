@@ -1,4 +1,4 @@
-const VERSION = 'v118-pwa-10';
+const VERSION = 'v121-pwa-1';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -21,7 +21,8 @@ const SHELL = [
   './VALDORA_ROUTES_BIOMES_V114.js?v=115-base-2',
   './VALDORA_BIOMES_AUDIO_V115.js?v=118-audio-2',
   './VALDORA_SANCTUARIES_V117.js?v=117-stable-1',
-  './VALDORA_LIVING_WORLD_V118.js?v=118-living-14'
+  './VALDORA_LIVING_WORLD_V118.js?v=121-living-1',
+  './VALDORA_CREATOR_GATE_V121.js?v=121-creator-1'
 ];
 
 self.addEventListener('install', event => {
