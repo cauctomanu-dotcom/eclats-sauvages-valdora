@@ -247,3 +247,25 @@
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
+
+// Pont de compatibilité minimal : l'ancien monde vivant recrée encore ses anciens
+// citoyens toutes les 3,5 s pour d'autres fonctions. Dès que la réécriture est active,
+// ces anciens citoyens sont supprimés au cycle graphique suivant afin qu'ils ne puissent
+// ni être dessinés, ni créer une collision invisible, ni reprendre une patrouille V122.
+(function guardLegacyTownNpcPopulation(){
+  function legacy(n){
+    const id=String(n?.id||'');
+    return !!n&&(n.v118Generated===true||id.startsWith('v121_roamer_')||id.startsWith('v118_world_')||n._v101AdoptedRoamer===true);
+  }
+  function tick(){
+    try{
+      if(window.__VALDORA_TOWN_NPC_REWRITE_ACTIVE__){
+        const s=(typeof state!=='undefined'&&state)||null;
+        const sc=typeof currentScene==='function'?currentScene():(typeof SCENES==='object'&&s?SCENES[s.zone]:null);
+        if(sc?.kind==='town'&&Array.isArray(sc.v118Citizens))sc.v118Citizens=sc.v118Citizens.filter(n=>!legacy(n));
+      }
+    }catch(_){}
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
