@@ -1,0 +1,21 @@
+name: Diagnose Valdora bicycle systems
+
+on:
+  push:
+    paths:
+      - '.github/workflows/diag-bike-v119.yml'
+  workflow_dispatch:
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find bicycle references
+        shell: bash
+        run: |
+          set -e
+          echo '=== BIKE REFERENCES ==='
+          grep -RniE "state\.bike|bike|bicyclette|vélo|velo" game --include='*.js' --include='*.html' | head -n 300 || true
+          echo '=== SCENE PATH REFERENCES ==='
+          grep -RniE "v104Path|v76Path|v105dRoad" game/V109W_CORRECTIFS_GAMEPLAY.js game/VALDORA_LIVING_WORLD_V118.js game/index.html | head -n 160 || true
