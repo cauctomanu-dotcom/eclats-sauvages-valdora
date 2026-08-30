@@ -1,0 +1,39 @@
+name: Temporary creator and interaction repair
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-creator-interactions-v122.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply creator, Citadel and interaction repair
+        run: python tools/patch_creator_interactions_v122.py
+      - name: Check JavaScript sources
+        run: |
+          node --check game/V105Y_REFERENCE_INTERIEURS.js
+          node --check game/V109V_INTERIEUR_REWRITE.js
+          node --check game/VALDORA_LIVING_WORLD_V118.js
+      - name: Check HTML structure and diff
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          for f in ['game/index.html','game/CREATEUR.html']:
+              t=Path(f).read_text(encoding='utf-8')
+              assert t.count('<script')==t.count('</script>'), f
+              assert t.count('<style')==t.count('</style>'), f
+              print(f, 'scripts', t.count('<script'), 'styles', t.count('<style'))
+          PY
+          git diff --check
+      - name: Commit permanent repair
+        run: |
+          git config user.name "cauctomanu-dotcom"
+          git config user.email "cauctomanu@gmail.com"
+          git add game/index.html game/CREATEUR.html game/V105Y_REFERENCE_INTERIEURS.js game/V109V_INTERIEUR_REWRITE.js game/VALDORA_LIVING_WORLD_V118.js
+          git commit -m "fix: complete creator mode and recalibrate interactions" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
