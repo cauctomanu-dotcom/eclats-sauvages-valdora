@@ -242,10 +242,18 @@ function roadNodes(sc){
 }
 function baseCitizens(sc,zone,includeTaron=true){
   const core=[];try{if(typeof NPCDATA!=='undefined')core.push(...NPCDATA.filter(n=>n.zone===zone))}catch(_){}
-  const target=sc?.megacity?18:12,supplemental=[...(sc?.v118Citizens||[]),...(sc?.megaNPCs||[]),...(sc?.v105dStreetNPCs||[])],all=[...core];
-  for(const n of supplemental){if(all.length>=target)break;all.push(n)}
+  const pools=[sc?.v118Citizens,sc?.megaNPCs,sc?.v105dStreetNPCs,sc?.townNPCs,sc?.v103NPCs,sc?.v105dNPCs,sc?.npcs];
+  const all=[...core];for(const pool of pools)if(Array.isArray(pool))all.push(...pool);
   if(includeTaron&&zone===state.zone)try{const t=typeof currentTaronNPC==='function'?currentTaronNPC():null;if(t)all.push(t)}catch(_){}
-  const seenObject=new Set(),seenId=new Set();return all.filter(n=>{if(!n||seenObject.has(n))return false;seenObject.add(n);const id=String(n.id||'');if(id&&seenId.has(id))return false;if(id)seenId.add(id);return true})
+  const seenObject=new Set(),seenId=new Set();
+  return all.filter(n=>{
+    if(!n||seenObject.has(n))return false;
+    seenObject.add(n);
+    const id=String(n.id||'');
+    if(id&&seenId.has(id))return false;
+    if(id)seenId.add(id);
+    return Number.isFinite(Number(n.x))&&Number.isFinite(Number(n.y))
+  })
 }
 function allWorldCitizens(sc,zone){return baseCitizens(sc,zone,true)}
 function movable(n){return !!n&&!n.taron&&!n.guardian&&!n.service&&!n.stationaryV118}
@@ -323,7 +331,7 @@ function worldInteractV118(){
       const chest=window.ValdoraChestV118Bridge;
       if(chest){chest.ownedByV118=true;if(chest.interact?.(110))return true}
     }catch(e){console.warn('V118 interaction coffre Valdora',e)}
-    const n=nearWorldNpc();if(n&&distance(n,state)<=88)return talkWorldNpc(n);
+    const n=nearWorldNpc();if(n&&distance(n,state)<=94)return talkWorldNpc(n);
     const before=scene,result=typeof BASE.interact==='function'?BASE.interact.apply(this,arguments):false;
     if(before==='world'&&scene==='interior')ensureInteriorPopulation(true);
     return result
@@ -395,19 +403,173 @@ function candidateBuilding(sc,b,x,y,others,roads){
   const r={x,y,w:b.w,h:b.h};if(x<18||y<18||x+b.w>(sc.width||1800)-18||y+b.h>(sc.height||1100)-18)return null;if(others.some(o=>rectHit(r,{x:o.x,y:o.y,w:o.w,h:o.h},10)))return null;if((sc.exits||[]).some(e=>rectHit(r,{x:e.x,y:e.y,w:e.w,h:e.h},38)))return null;
   const ratio=roads.reduce((sum,rr)=>sum+overlapArea(r,rr),0)/Math.max(1,b.w*b.h);if(ratio>.025)return null;const dx=x+b.w/2,dy=y+b.h,roadDistance=Math.min(...roads.map(rr=>pointRectDistance(dx,dy,rr)));if(!Number.isFinite(roadDistance))return null;return{score:Math.hypot(x-b.x,y-b.y)+roadDistance*.18,x,y,roadDistance}
 }
+
+// ---------------------------------------------------------------------
+// V120 — Charte graphique mondiale : une même famille de bâtiment conserve
+// le même gabarit dans toutes les villes. La taille de la ville ne change
+// jamais l'échelle des bâtiments. Les services uniques sont dédupliqués.
+// ---------------------------------------------------------------------
+const SINGLETON_BUILDINGS_V120=new Set(['centre_soins','gare','laboratoire','musee','gardien']);
+let BUILDING_SIZE_CHARTER_V120=null;
+function buildingFieldsV120(b){return [b?.type,b?.urbanType,b?.id,b?.label,b?.name,b?.interiorKey,b?.key].filter(Boolean).join(' ').toLowerCase()}
+function buildingFamilyV120(b){
+  const f=buildingFieldsV120(b);
+  if(/centre[_ -]?soins|centre de soins|soins_centre|clinique/.test(f))return'centre_soins';
+  if(!/bus|arr[eê]t|d[eé]p[oô]t/.test(f)&&/\bgare\b|station ferroviaire|rail station/.test(f))return'gare';
+  if(/laboratoire|\blabo\b/.test(f))return'laboratoire';
+  if(/mus[eé]e/.test(f))return'musee';
+  if(/gardien|ar[eè]ne/.test(f))return'gardien';
+  if(/boutique|shop|magasin/.test(f))return'boutique';
+  if(/h[oô]tel|auberge|\binn\b/.test(f))return'hotel';
+  if(/restaurant|caf[eé]/.test(f))return'restaurant_cafe';
+  if(/[eé]cole|school/.test(f))return'ecole';
+  if(/biblioth[eè]que|library/.test(f))return'bibliotheque';
+  if(/guilde|guild/.test(f))return'guilde';
+  if(/grand[_ -]?immeuble|tower|tour r[eé]sidentielle/.test(f))return'grand_immeuble';
+  if(/immeuble|appartement|apartment/.test(f))return'immeuble';
+  if(/r[eé]sidence/.test(f))return'residence';
+  if(/maison|\bhome\b|house/.test(f))return'maison';
+  const raw=String(b?.urbanType||b?.type||'batiment').toLowerCase().replace(/[^a-z0-9_àâäéèêëïîôöùûüç-]+/g,'_');
+  return raw||'batiment'
+}
+function medianV120(values){
+  const a=values.filter(Number.isFinite).filter(v=>v>0).sort((x,y)=>x-y);
+  if(!a.length)return null;
+  const m=Math.floor(a.length/2);
+  return a.length%2?a[m]:(a[m-1]+a[m])/2
+}
+function buildSizeCharterV120(){
+  const groups=new Map();
+  for(const zone of TOWNS){
+    const sc=sceneFor(zone);
+    for(const b of sc?.buildings||[]){
+      const fam=buildingFamilyV120(b);
+      if(!groups.has(fam))groups.set(fam,{w:[],h:[]});
+      groups.get(fam).w.push(Number(b.w));
+      groups.get(fam).h.push(Number(b.h))
+    }
+  }
+  const out=new Map();
+  for(const [fam,g] of groups){
+    const w=medianV120(g.w),h=medianV120(g.h);
+    if(w&&h)out.set(fam,{w:Math.max(150,Math.round(w)),h:Math.max(112,Math.round(h))})
+  }
+  BUILDING_SIZE_CHARTER_V120=out;
+  return out
+}
+function serviceScoreV120(b){
+  let s=0;
+  if(b?.id)s+=5;
+  if(b?.label||b?.name)s+=4;
+  if(b?.interiorKey||b?.key)s+=4;
+  if(Number.isFinite(Number(b?.doorX))&&Number.isFinite(Number(b?.doorY)))s+=3;
+  if(b?.type)s+=2;
+  if(b?.urbanType)s+=2;
+  return s
+}
+function dedupeTownServicesV120(sc){
+  if(!Array.isArray(sc?.buildings))return 0;
+  const groups=new Map();
+  for(const b of sc.buildings){
+    const fam=buildingFamilyV120(b);
+    if(!SINGLETON_BUILDINGS_V120.has(fam))continue;
+    if(!groups.has(fam))groups.set(fam,[]);
+    groups.get(fam).push(b)
+  }
+  const remove=new Set();
+  for(const list of groups.values()){
+    if(list.length<2)continue;
+    list.sort((a,b)=>serviceScoreV120(b)-serviceScoreV120(a));
+    for(const b of list.slice(1))remove.add(b)
+  }
+  if(!remove.size)return 0;
+  sc.buildings=sc.buildings.filter(b=>!remove.has(b));
+  sc._v118RoadNodes=null;
+  sc._v118SpawnSlots=null;
+  return remove.size
+}
+function normalizeTownBuildingsV120(sc){
+  if(!Array.isArray(sc?.buildings))return{resized:0,removed:0};
+  const charter=BUILDING_SIZE_CHARTER_V120||buildSizeCharterV120();
+  let resized=0;
+  for(const b of sc.buildings){
+    const fam=buildingFamilyV120(b),size=charter.get(fam);
+    if(!size)continue;
+    const oldW=Number(b.w),oldH=Number(b.h);
+    if(!Number.isFinite(oldW)||!Number.isFinite(oldH))continue;
+    if(Math.round(oldW)===size.w&&Math.round(oldH)===size.h){b._v120Family=fam;continue}
+    const cx=Number(b.x)+oldW/2,bottom=Number(b.y)+oldH;
+    b.w=size.w;b.h=size.h;
+    b.x=Math.round(cx-size.w/2);b.y=Math.round(bottom-size.h);
+    b.doorX=Math.round(b.x+b.w/2);b.doorY=Math.round(b.y+b.h);
+    b._v120Family=fam;b._v120CharterSize=true;
+    delete b._v118Resized;
+    resized++
+  }
+  const removed=dedupeTownServicesV120(sc);
+  if(resized||removed){sc._v118RoadNodes=null;sc._v118SpawnSlots=null;sc._v118BuildingInputSig=null}
+  return{resized,removed}
+}
+
 function repairTownBuildings(zone){
-  const sc=sceneFor(zone);if(!sc||sc.kind!=='town'||!Array.isArray(sc.buildings))return 0;const sig=sc.buildings.map(b=>[Math.round(b.x),Math.round(b.y),Math.round(b.w),Math.round(b.h)].join(',')).join(';');if(sc._v118BuildingInputSig===sig)return sc._v118RelocatedCount||0;const roads=roadRects(sc);let moved=0;
+  const sc=sceneFor(zone);
+  if(!sc||sc.kind!=='town'||!Array.isArray(sc.buildings))return 0;
+  const normalized=normalizeTownBuildingsV120(sc);
+  const sig=sc.buildings.map(b=>[Math.round(b.x),Math.round(b.y),Math.round(b.w),Math.round(b.h)].join(',')).join(';');
+  if(sc._v118BuildingInputSig===sig&&!normalized.resized&&!normalized.removed)return sc._v118RelocatedCount||0;
+  const roads=roadRects(sc);
+  let moved=0;
   for(const b of sc.buildings){
     if(/station|gare/i.test([b.type,b.urbanType,b.id,b.label].join(' '))&&sc.rail)continue;
-    const others=sc.buildings.filter(o=>o!==b),isHotel=/hotel|hôtel|auberge|inn/i.test([b.type,b.urbanType,b.id,b.label].join(' ')),roadLimit=isHotel ? .24 : .13,pairOverlap=others.some(o=>rectHit({x:b.x,y:b.y,w:b.w,h:b.h},{x:o.x,y:o.y,w:o.w,h:o.h},6));if(severeRoadOverlap(b,roads)<roadLimit&&!pairOverlap)continue;const candidates=[];
-    for(let rad=24;rad<=480;rad+=24)for(const [dx,dy] of[[0,-rad],[-rad,0],[rad,0],[0,rad],[-rad,-rad],[rad,-rad],[-rad,rad],[rad,rad]]){const c=candidateBuilding(sc,b,b.x+dx,b.y+dy,others,roads);if(c)candidates.push(c)}
-    if(!candidates.length)for(const r of roads){const cx=r.x+r.w/2,cy=r.y+r.h/2;for(const [x,y] of[[cx-b.w/2,r.y-b.h-18],[cx-b.w/2,r.y+r.h+18],[r.x-b.w-18,cy-b.h/2],[r.x+r.w+18,cy-b.h/2]]){const c=candidateBuilding(sc,b,Math.round(x),Math.round(y),others,roads);if(c)candidates.push(c)}}
-    if(!candidates.length&&!b._v118Resized){const old={w:b.w,h:b.h,x:b.x,y:b.y},cx=b.x+b.w/2,bottom=b.y+b.h;b.w=Math.round(b.w*.82);b.h=Math.round(b.h*.82);b.x=Math.round(cx-b.w/2);b.y=Math.round(bottom-b.h);for(const r of roads){const rx=r.x+r.w/2,ry=r.y+r.h/2;for(const [x,y] of[[rx-b.w/2,r.y-b.h-18],[rx-b.w/2,r.y+r.h+18],[r.x-b.w-18,ry-b.h/2],[r.x+r.w+18,ry-b.h/2]]){const c=candidateBuilding(sc,b,Math.round(x),Math.round(y),others,roads);if(c)candidates.push(c)}}if(candidates.length)b._v118Resized=true;else Object.assign(b,old)}
-    if(!candidates.length&&!b._v118Resized){const old={w:b.w,h:b.h,x:b.x,y:b.y},cx=b.x+b.w/2,bottom=b.y+b.h;b.w=Math.round(b.w*.64);b.h=Math.round(b.h*.70);b.x=Math.round(cx-b.w/2);b.y=Math.round(bottom-b.h);for(const r of roads){const rx=r.x+r.w/2,ry=r.y+r.h/2;for(const [x,y] of[[rx-b.w/2,r.y-b.h-16],[rx-b.w/2,r.y+r.h+16],[r.x-b.w-16,ry-b.h/2],[r.x+r.w+16,ry-b.h/2]]){const c=candidateBuilding(sc,b,Math.round(x),Math.round(y),others,roads);if(c)candidates.push(c)}}if(candidates.length)b._v118Resized='compact';else Object.assign(b,old)}
-    candidates.sort((a,z)=>a.score-z.score);const c=candidates[0];if(!c)continue;b._v118Original=b._v118Original||{x:b.x,y:b.y,doorX:b.doorX,doorY:b.doorY};b.x=Math.round(c.x);b.y=Math.round(c.y);b.doorX=Math.round(b.x+b.w/2);b.doorY=Math.round(b.y+b.h);let nearest=null,bd=Infinity;for(const r of roads){const d=pointRectDistance(b.doorX,b.doorY,r);if(d<bd){bd=d;nearest=r}}b.v105dRoadY=nearest?clamp(b.doorY,nearest.y,nearest.y+nearest.h):b.doorY+50;b._v118Relocated=true;moved++
+    const others=sc.buildings.filter(o=>o!==b);
+    const isHotel=/hotel|hôtel|auberge|inn/i.test([b.type,b.urbanType,b.id,b.label].join(' '));
+    const roadLimit=isHotel?.24:.13;
+    const pairOverlap=others.some(o=>rectHit({x:b.x,y:b.y,w:b.w,h:b.h},{x:o.x,y:o.y,w:o.w,h:o.h},6));
+    if(severeRoadOverlap(b,roads)<roadLimit&&!pairOverlap)continue;
+    const candidates=[];
+    for(let rad=24;rad<=900;rad+=24){
+      for(const [dx,dy] of[[0,-rad],[-rad,0],[rad,0],[0,rad],[-rad,-rad],[rad,-rad],[-rad,rad],[rad,rad]]){
+        const c=candidateBuilding(sc,b,b.x+dx,b.y+dy,others,roads);
+        if(c)candidates.push(c)
+      }
+    }
+    if(!candidates.length){
+      for(const r of roads){
+        const cx=r.x+r.w/2,cy=r.y+r.h/2;
+        for(const [x,y] of[[cx-b.w/2,r.y-b.h-18],[cx-b.w/2,r.y+r.h+18],[r.x-b.w-18,cy-b.h/2],[r.x+r.w+18,cy-b.h/2]]){
+          const c=candidateBuilding(sc,b,Math.round(x),Math.round(y),others,roads);
+          if(c)candidates.push(c)
+        }
+      }
+    }
+    if(!candidates.length){
+      for(let y=24;y<=(sc.height||1100)-b.h-24;y+=52){
+        for(let x=24;x<=(sc.width||1800)-b.w-24;x+=52){
+          const c=candidateBuilding(sc,b,x,y,others,roads);
+          if(c)candidates.push(c)
+        }
+      }
+    }
+    candidates.sort((a,z)=>a.score-z.score);
+    const c=candidates[0];
+    if(!c)continue;
+    b._v118Original=b._v118Original||{x:b.x,y:b.y,doorX:b.doorX,doorY:b.doorY};
+    b.x=Math.round(c.x);b.y=Math.round(c.y);
+    b.doorX=Math.round(b.x+b.w/2);b.doorY=Math.round(b.y+b.h);
+    let nearest=null,bd=Infinity;
+    for(const r of roads){const d=pointRectDistance(b.doorX,b.doorY,r);if(d<bd){bd=d;nearest=r}}
+    b.v105dRoadY=nearest?clamp(b.doorY,nearest.y,nearest.y+nearest.h):b.doorY+50;
+    b._v118Relocated=true;
+    moved++
   }
-  if(moved){sc.v105dTrees=(sc.v105dTrees||[]).filter(t=>!sc.buildings.some(b=>b._v118Relocated&&t.x>b.x-42&&t.x<b.x+b.w+42&&t.y>b.y-54&&t.y<b.y+b.h+50));sc.v105dBushes=(sc.v105dBushes||[]).filter(t=>!sc.buildings.some(b=>b._v118Relocated&&t.x>b.x-28&&t.x<b.x+b.w+28&&t.y>b.y-30&&t.y<b.y+b.h+36))}
-  sc._v118RelocatedCount=(sc._v118RelocatedCount||0)+moved;sc._v118BuildingInputSig=sc.buildings.map(b=>[Math.round(b.x),Math.round(b.y),Math.round(b.w),Math.round(b.h)].join(',')).join(';');sc._v118RoadNodes=null;sc._v118SpawnSlots=null;return moved
+  if(moved){
+    sc.v105dTrees=(sc.v105dTrees||[]).filter(t=>!sc.buildings.some(b=>b._v118Relocated&&t.x>b.x-42&&t.x<b.x+b.w+42&&t.y>b.y-54&&t.y<b.y+b.h+50));
+    sc.v105dBushes=(sc.v105dBushes||[]).filter(t=>!sc.buildings.some(b=>b._v118Relocated&&t.x>b.x-28&&t.x<b.x+b.w+28&&t.y>b.y-30&&t.y<b.y+b.h+36))
+  }
+  sc._v118RelocatedCount=(sc._v118RelocatedCount||0)+moved;
+  sc._v118BuildingInputSig=sc.buildings.map(b=>[Math.round(b.x),Math.round(b.y),Math.round(b.w),Math.round(b.h)].join(',')).join(';');
+  sc._v118RoadNodes=null;sc._v118SpawnSlots=null;
+  return moved+normalized.resized+normalized.removed
 }
 function repairAllBuildings(){let count=0;for(const zone of TOWNS)count+=repairTownBuildings(zone);return count}
 
@@ -466,7 +628,27 @@ function enforceIdentity(){
 // ---------------------------------------------------------------------
 // Audit et outils Créateur.
 // ---------------------------------------------------------------------
-function buildingAudit(){const issues=[],rows=[];for(const zone of TOWNS){const sc=sceneFor(zone),roads=roadRects(sc),bs=sc?.buildings||[];let road=0,pairs=0;for(let i=0;i<bs.length;i++){const fields=[bs[i].type,bs[i].urbanType,bs[i].id,bs[i].label].join(' '),station=/station|gare/i.test(fields)&&sc.rail,hotel=/hotel|hôtel|auberge|inn/i.test(fields),limit=hotel ? .24 : .13;if(!station&&severeRoadOverlap(bs[i],roads)>=limit){road++;issues.push(`${zone}: bâtiment sur la route — ${bs[i].label||bs[i].id||i}`)}for(let j=i+1;j<bs.length;j++)if(rectHit(bs[i],bs[j],6)){pairs++;issues.push(`${zone}: bâtiments superposés`)}}rows.push({zone,buildings:bs.length,roadOverlaps:road,buildingOverlaps:pairs,relocated:sc?._v118RelocatedCount||0})}return{issues,rows}}
+function buildingAudit(){
+  const issues=[],rows=[],sizes=new Map();
+  for(const zone of TOWNS){
+    const sc=sceneFor(zone),roads=roadRects(sc),bs=sc?.buildings||[];
+    let road=0,pairs=0;
+    const services={};
+    for(let i=0;i<bs.length;i++){
+      const fam=buildingFamilyV120(bs[i]),fields=[bs[i].type,bs[i].urbanType,bs[i].id,bs[i].label].join(' ');
+      const station=/station|gare/i.test(fields)&&sc.rail,hotel=/hotel|hôtel|auberge|inn/i.test(fields),limit=hotel?.24:.13;
+      if(SINGLETON_BUILDINGS_V120.has(fam))services[fam]=(services[fam]||0)+1;
+      if(!sizes.has(fam))sizes.set(fam,new Set());
+      sizes.get(fam).add(`${Math.round(bs[i].w)}x${Math.round(bs[i].h)}`);
+      if(!station&&severeRoadOverlap(bs[i],roads)>=limit){road++;issues.push(`${zone}: bâtiment sur la route — ${bs[i].label||bs[i].id||i}`)}
+      for(let j=i+1;j<bs.length;j++)if(rectHit(bs[i],bs[j],6)){pairs++;issues.push(`${zone}: bâtiments superposés`)}
+    }
+    for(const [fam,count] of Object.entries(services))if(count>1)issues.push(`${zone}: ${count} bâtiments ${fam}`);
+    rows.push({zone,buildings:bs.length,roadOverlaps:road,buildingOverlaps:pairs,services,relocated:sc?._v118RelocatedCount||0})
+  }
+  for(const [fam,set] of sizes)if(set.size>1)issues.push(`charte taille incohérente ${fam}: ${[...set].join(', ')}`);
+  return{issues,rows,charter:Object.fromEntries([...(BUILDING_SIZE_CHARTER_V120||new Map()).entries()])}
+}
 function populationAudit(){const issues=[],rows=[];for(const zone of TOWNS){const sc=sceneFor(zone),p=baseCitizens(sc,zone,false);let min=Infinity,overlaps=0;for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++){const d=distance(p[i],p[j]);min=Math.min(min,d);if(d<43)overlaps++}const moving=p.filter(movable).length,target=sc?.megacity?18:12;if(p.length<target)issues.push(`${zone}: population ${p.length}/${target}`);if(overlaps)issues.push(`${zone}: ${overlaps} superpositions`);rows.push({zone,name:zoneName(zone),population:p.length,mobile:moving,minDistance:Number.isFinite(min)?Math.round(min):null,overlaps})}return{issues,rows}}
 function audit(){
   const issues=[],dialogues=Object.values(DIALOGUE_BANK).flat(),unique=new Set(dialogues),pop=populationAudit(),buildings=buildingAudit(),s=interiorSession();issues.push(...pop.issues,...buildings.issues);if(dialogues.length<1400||unique.size<1400)issues.push(`banque de dialogues insuffisante : ${unique.size}`);if(window.updateTownNPCs!==updateWorldCitizens)issues.push('moteur de déplacement PNJ non prioritaire');if(window.interact!==worldInteractV118)issues.push('interaction monde V118 non prioritaire');if(window.interactInterior!==interactInteriorV118)issues.push('interaction intérieure V118 non prioritaire');if(window.drawWorld!==drawWorldV118)issues.push('animations ambiantes V118 non prioritaires');if(document.getElementById('v111MapBtn')?.textContent!=='Carte du monde V118')issues.push('identité du menu non stabilisée');const residents=(s?.npcs||[]).filter(n=>n.v118Resident),currentInterior=s?{key:s.key,room:`${s.floorId}/${s.roomId}`,npcs:s.npcs?.length||0,residents:residents.length,mobile:residents.filter(n=>!n.service).length,moving:residents.filter(n=>n.moving).length,overlaps:(s.npcs||[]).flatMap((n,i)=>s.npcs.slice(i+1).map(o=>distance(n,o))).filter(d=>d<42).length}:null;if(currentInterior?.overlaps)issues.push('PNJ intérieurs superposés');return{version:VERSION,ok:issues.length===0,issues,dialogues:{total:dialogues.length,unique:unique.size,perTown:96},gameplay:{townActivities:TOWNS.length*CONTRACTS.length,completed:TOWNS.reduce((n,z)=>n+Object.keys(townState(z).contracts||{}).length,0),reputationTowns:TOWNS.length},population:pop,buildings,currentInterior,hooks:{worldMovement:window.updateTownNPCs===updateWorldCitizens,worldInteraction:window.interact===worldInteractV118,interiorInteraction:window.interactInterior===interactInteriorV118,worldAnimation:window.drawWorld===drawWorldV118},baseSanctuaries:window.ValdoraLegendAuditV117||null}}
