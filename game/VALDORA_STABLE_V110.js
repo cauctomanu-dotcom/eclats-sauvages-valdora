@@ -178,9 +178,6 @@
   setInterval(() => { try { applyPublicBranding(); } catch (_) {} }, 3000);
 })();
 
-// V123 est volontairement chargé depuis un module déjà commun aux versions
-// Joueur et Créateur : les deux modes reçoivent ainsi exactement le même
-// correctif de gameplay sans maintenir deux copies divergentes dans les HTML.
 (function loadValdoraV123(){
   if(document.getElementById('valdoraV123ParityLoader'))return;
   const script=document.createElement('script');
@@ -190,7 +187,6 @@
   (document.head||document.documentElement).appendChild(script);
 })();
 
-// V124 — contrôle tactile direct commun Joueur / Créateur.
 (function loadValdoraV124(){
   if(document.getElementById('valdoraV124TouchLoader'))return;
   const script=document.createElement('script');
@@ -200,7 +196,6 @@
   (document.head||document.documentElement).appendChild(script);
 })();
 
-// V125 — nouveau Chapitre I commun Joueur / Créateur.
 (function loadValdoraV125(){
   if(document.getElementById('valdoraV125StoryLoader'))return;
   const script=document.createElement('script');
@@ -210,8 +205,6 @@
   (document.head||document.documentElement).appendChild(script);
 })();
 
-// V126 — fiche de nouveautés actuelle. Le marquage temporaire V118 empêche
-// l’ancienne popup mobile de s’ouvrir quelques millisecondes avant la nouvelle.
 (function loadValdoraV126(){
   if(document.getElementById('valdoraV126UpdateNotesLoader'))return;
   try{
@@ -234,12 +227,23 @@
   (document.head||document.documentElement).appendChild(script);
 })();
 
-// V1.0.1 — correctifs de gameplay publics : PNJ urbains mobiles + sortie de Clairval assouplie.
+// V1.0.1 — progression + populations intérieures, sans moteur de PNJ extérieur.
 (function loadValdoraV101GameplayFixes(){
   if(document.getElementById('valdoraV101GameplayFixesLoader'))return;
   const script=document.createElement('script');
   script.id='valdoraV101GameplayFixesLoader';
-  script.src='VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-4';
+  script.src='VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-5';
+  script.async=false;
+  (document.head||document.documentElement).appendChild(script);
+})();
+
+// V1.0.1 — réécriture totale des PNJ extérieurs. Chargée en dernier pour devenir
+// l'unique propriétaire du placement, du déplacement, du rendu et des interactions urbaines.
+(function loadValdoraTownNpcRewrite(){
+  if(document.getElementById('valdoraTownNpcRewriteLoader'))return;
+  const script=document.createElement('script');
+  script.id='valdoraTownNpcRewriteLoader';
+  script.src='VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-2';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
