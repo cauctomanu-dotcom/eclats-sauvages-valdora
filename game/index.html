@@ -16728,7 +16728,7 @@ window.ValdoraChestV118Bridge={
 function drawOverlay(){
   if(typeof scene!=='undefined'&&scene!=='world')return;const sc=scNow();if(!sc)return;const {camX,camY,sx,sy}=camera(sc);
   if(sc.kind==='town'){for(const o of townObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy);if(!window.ValdoraBusV118Bridge?.ownedByV118)drawBus(sc,camX,camY,sx,sy)}
-  else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))drawObject(o,camX,camY,sx,sy)}
+  else if(sc.kind==='route'){for(const o of routeObjects(sc,state.zone))if(o.type!=='chest'||!window.ValdoraChestV118Bridge?.ownedByV118)drawObject(o,camX,camY,sx,sy)}
 }
 
 let BASE_DRAW=null;
