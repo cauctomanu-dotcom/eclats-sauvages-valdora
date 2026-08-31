@@ -1,4 +1,4 @@
-const VERSION = 'v1.0.1-pwa-9';
+const VERSION = 'v1.0.1-pwa-10';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -29,7 +29,7 @@ const SHELL = [
   './V125_STORY_FIRST_HOURS.js?v=125-story-1',
   './V126_UPDATE_NOTES.js?v=126-notes-1',
   './VALDORA_V1_0_1_GAMEPLAY_FIXES.js?v=1.0.1-fixes-6',
-  './VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-3'
+  './VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-4'
 ];
 
 self.addEventListener('install', event => {

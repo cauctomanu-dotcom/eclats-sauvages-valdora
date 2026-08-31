@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-TOWN-NPCS-REWRITE-2';
+const VERSION='V1.0.1-TOWN-NPCS-REWRITE-3';
 const TARGET_NORMAL=10;
 const TARGET_MEGA=14;
 const WALK_SPEED_MIN=34;
@@ -152,6 +152,10 @@ function drawPopulation(){if(!isWorldTown()||typeof ctx==='undefined')return;con
 function updateHook(){/* Le déplacement est détenu par la boucle RAF de ce module. */}
 function drawHook(){const r=typeof drawBase==='function'?drawBase.apply(this,arguments):undefined;try{drawPopulation()}catch(e){console.warn('V1.0.1 rendu PNJ ville',e)}return r}
 drawHook.__v101TownNpcRewrite=true;
+// Les anciens installateurs V107D réenveloppent toute fonction non marquée. Sans
+// cette compatibilité, ils enveloppent drawHook, puis installHooks adopte ce wrapper
+// comme base au cycle suivant : drawHook -> wrapper -> drawHook, jusqu'au débordement.
+drawHook.__v107dDraw=true;
 function nearHook(){const n=playerNearWalker(95);if(n)return n;return typeof nearBase==='function'?nearBase.apply(this,arguments):null}
 nearHook.__v101TownNpcRewrite=true;
 function npcCollisionHook(x,y){const n=blockPoint(Number(x),Number(y),36);if(n)return n;return typeof npcCollisionBase==='function'?npcCollisionBase.apply(this,arguments):null}
@@ -167,7 +171,20 @@ interactHook.__v101TownNpcRewrite=true;interactHook.__v122ChestRepair=true;
 
 function installHooks(){
   try{
-    if(window.drawWorld!==drawHook){drawBase=window.drawWorld;window.drawWorld=drawHook;try{drawWorld=drawHook}catch(_){}}
+    if(window.drawWorld!==drawHook){
+      const candidate=window.drawWorld;
+      // Récupération à chaud d'une boucle déjà créée par l'ancienne version.
+      // Ne jamais adopter un wrapper dont la base finit par revenir sur drawHook.
+      let cursor=candidate,loopsToHook=false;
+      const seen=new Set();
+      for(let depth=0;typeof cursor==='function'&&depth<16&&!seen.has(cursor);depth++){
+        if(cursor===drawHook){loopsToHook=true;break}
+        seen.add(cursor);
+        cursor=cursor.__v107dBase||cursor.__v112Base||null;
+      }
+      if(typeof candidate==='function'&&!loopsToHook)drawBase=candidate;
+      window.drawWorld=drawHook;try{drawWorld=drawHook}catch(_){}
+    }
     if(window.interact!==interactHook){let cur=window.interact;if(cur?.__v122ChestRepair&&cur?.__v122Base)cur=cur.__v122Base;interactBase=cur;window.interact=interactHook;try{interact=interactHook}catch(_){}}
     if(window.nearNPC!==nearHook){nearBase=window.nearNPC;window.nearNPC=nearHook;try{nearNPC=nearHook}catch(_){}}
     if(typeof window.npcCollision==='function'&&window.npcCollision!==npcCollisionHook){npcCollisionBase=window.npcCollision;window.npcCollision=npcCollisionHook;try{npcCollision=npcCollisionHook}catch(_){}}
