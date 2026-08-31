@@ -1,4 +1,4 @@
-const VERSION = 'v1.0.1-pwa-11';
+const VERSION = 'v1.0.1-pwa-12';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -84,6 +84,14 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Le moteur PNJ partage la chaîne drawWorld avec les renderers de terrain.
+  // Il doit être revalidé sur le réseau pour éviter de restaurer une ancienne
+  // version qui masque le pavage, les chemins ou l'herbe après une correction.
+  if (url.pathname.endsWith('/VALDORA_TOWN_NPCS_V1_0_1.js')) {
     event.respondWith(networkFirst(request));
     return;
   }
