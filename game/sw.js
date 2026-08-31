@@ -1,4 +1,4 @@
-const VERSION = 'v1.0.1-pwa-10';
+const VERSION = 'v1.0.1-pwa-11';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -14,7 +14,7 @@ const SHELL = [
   './assets/title_valdora_v106r.png',
   './V109V_INTERIEUR_REWRITE.js?v=118-stable-1',
   './V109W_CORRECTIFS_GAMEPLAY.js?v=118-clean-1',
-  './VALDORA_STABLE_V110.js?v=1.0.1-stable-1',
+  './VALDORA_STABLE_V110.js?v=1.0.1-stable-2',
   './VALDORA_PRO_V111.js?v=118-clean-1',
   './VALDORA_BIOMES_V112.js?v=115-base-2',
   './VALDORA_POLISH_V113.js?v=114-final',
