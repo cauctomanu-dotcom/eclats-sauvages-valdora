@@ -26,16 +26,20 @@ async function check(path) {
 
 await walk(root);
 
-// Régression V1.0.1 : l'ancien installateur V107D ne doit jamais pouvoir
-// réenvelopper le hook de rendu des PNJ et créer une récursion infinie.
+// Régression V1.0.1 : un renderer V107D/V112 installé après le moteur PNJ doit
+// rester au-dessus de lui. Le moteur PNJ ne doit ni le masquer, ni le réadopter
+// comme base (ce qui recréerait une récursion drawHook -> renderer -> drawHook).
 try {
   const npcEngine = join(root, 'VALDORA_TOWN_NPCS_V1_0_1.js');
   let baseDrawCalls = 0;
+  let terrainDrawCalls = 0;
+  const raf = [];
   const window = { drawWorld: () => { baseDrawCalls += 1; } };
   const sandbox = {
     window,
+    document: { documentElement: { dataset: {} }, getElementById: () => null },
     performance: { now: () => 0 },
-    requestAnimationFrame: () => 0,
+    requestAnimationFrame: callback => { raf.push(callback); return raf.length; },
     setTimeout: callback => { callback(); return 0; },
     setInterval: () => 0,
     console,
@@ -48,12 +52,32 @@ try {
     Object
   };
   new vm.Script(await readFile(npcEngine, 'utf8'), { filename: npcEngine }).runInNewContext(sandbox);
-  const hook = window.drawWorld;
-  if (typeof hook !== 'function' || hook.__v107dDraw !== true || hook.__v101TownNpcRewrite !== true) {
-    throw new Error('le hook PNJ ne bloque pas le réenveloppement V107D');
+  const townHook = window.drawWorld;
+  if (typeof townHook !== 'function' || townHook.__v101TownNpcRewrite !== true) {
+    throw new Error('le hook PNJ urbain n’est pas installé');
   }
-  hook();
+  if (townHook.__v107dDraw === true) {
+    throw new Error('le hook PNJ se fait encore passer pour le renderer V107D');
+  }
+
+  const terrainRenderer = function () {
+    const result = townHook.apply(this, arguments);
+    terrainDrawCalls += 1;
+    return result;
+  };
+  terrainRenderer.__v107dDraw = true;
+  window.drawWorld = terrainRenderer;
+
+  const frame = raf.shift();
+  if (typeof frame !== 'function') throw new Error('la boucle PNJ ne peut pas être simulée');
+  frame(16);
+  if (window.drawWorld !== terrainRenderer) {
+    throw new Error('le moteur PNJ masque la couche graphique V107D/V112');
+  }
+
+  terrainRenderer();
   if (baseDrawCalls !== 1) throw new Error(`la base de rendu est appelée ${baseDrawCalls} fois au lieu d’une`);
+  if (terrainDrawCalls !== 1) throw new Error(`la couche terrain est appelée ${terrainDrawCalls} fois au lieu d’une`);
 } catch (error) {
   failures.push(`interopération du rendu PNJ/V107D : ${error.message}`);
 }
