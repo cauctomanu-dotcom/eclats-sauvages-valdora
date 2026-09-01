@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-TOWN-NPCS-REWRITE-6-RENDER-SAFE';
+const VERSION='V1.0.1-TOWN-NPCS-REWRITE-7-PINGPONG-SAFE';
 const TARGET_NORMAL=10;
 const TARGET_MEGA=14;
 const WALK_SPEED_MIN=34;
@@ -74,11 +74,18 @@ function buildGraph(sc){
   }
   return {sig:graphSignature(sc),cell,nodes}
 }
-function nearestNode(graph,x,y,occupied=[],preferFree=false){let best=null,score=Infinity;for(const q of graph.nodes){const crowd=preferFree&&occupied.some(o=>dist(q,o)<58)?190:0,v=Math.hypot(q.x-x,q.y-y)+crowd;if(v<score){score=v;best=q}}return best}
-function chooseNext(n,walk,graph){
-  const node=walk.node||nearestNode(graph,n.x,n.y);if(!node)return null;
-  let opts=(node.neighbors||[]).filter(q=>q.id!==walk.prevId);if(!opts.length)opts=node.neighbors||[];if(!opts.length)opts=graph.nodes.filter(q=>q!==node&&dist(node,q)<=graph.cell*2.2);if(!opts.length)return null;
-  const pick=opts[hash(`${n.id}|${walk.trips}|${node.id}`)%opts.length];walk.prevId=node.id;walk.node=pick;walk.trips++;return pick
+function nearestNode(graph,x,y,occupied=[],preferFree=false){let best=null,score=Infinity;for(const q of graph.nodes){const crowd=preferFree&&occupied.some(o=>dist(q,o)<80)?260:0,v=Math.hypot(q.x-x,q.y-y)+crowd;if(v<score){score=v;best=q}}return best}
+function choosePatrolEnd(n,start,graph){
+  if(!start)return null;
+  let opts=(start.neighbors||[]).filter(Boolean);
+  if(!opts.length)opts=graph.nodes.filter(q=>q!==start&&dist(start,q)<=graph.cell*2.2);
+  if(!opts.length)return null;
+  return opts[hash(`${n.id}|patrol|${start.id}`)%opts.length]
+}
+function orientToward(n,target){
+  if(!n||!target)return;
+  const dx=Number(target.x)-Number(n.x),dy=Number(target.y)-Number(n.y);
+  if(Math.abs(dx)>=Math.abs(dy))n.dir=dx>=0?2:1;else n.dir=dy>=0?0:3
 }
 function seedGenerated(zone,index,usedNames){
   const h=hash(`${zone}|rewrite|${index}`);let name=NAMES[h%NAMES.length],step=5+(h%9),k=0;while(usedNames.has(name)&&k++<NAMES.length)name=NAMES[(h+k*step)%NAMES.length];usedNames.add(name);
@@ -86,9 +93,10 @@ function seedGenerated(zone,index,usedNames){
 }
 function attachWalker(n,graph,occupied,seed){
   n.v121Roamer=false;n.v118Generated=false;n._v101AdoptedRoamer=false;n._v122Patrol=null;n._v118FreeTarget=null;n._v118Target=null;n.stationaryV118=true;n._v101TownOwned=true;
-  let node=nearestNode(graph,Number(n.x),Number(n.y),occupied,!!n._v101TownGenerated);if(!node&&graph.nodes.length)node=graph.nodes[hash(seed)%graph.nodes.length];
+  let node=nearestNode(graph,Number(n.x),Number(n.y),occupied,true);if(!node&&graph.nodes.length)node=graph.nodes[hash(seed)%graph.nodes.length];
   if(node){n.x=node.x;n.y=node.y;n.homeX=node.x;n.homeY=node.y;occupied.push(node)}
-  const h=hash(seed);n._v101Walk={node,prevId:null,target:null,trips:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};return n
+  const h=hash(seed),end=choosePatrolEnd(n,node,graph);n._v101Walk={node,origin:node,end,target:end,trips:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};
+  if(end)orientToward(n,end);return n
 }
 function sanitizeLegacy(sc,source){
   if(Array.isArray(sc?.v118Citizens))sc.v118Citizens=sc.v118Citizens.filter(n=>!legacyAmbient(n));
@@ -130,9 +138,13 @@ function updatePopulation(now,dt){
   const pauseAll=dialogOpen();
   for(const n of z.walkers){const w=n._v101Walk;if(!w)continue;n.stationaryV118=true;n.v121Roamer=false;n.v118Generated=false;
     if(pauseAll||now<Number(w.waitUntil||0)||Math.hypot(Number(n.x)-Number(s.x),Number(n.y)-Number(s.y))<48){w.moving=false;n.moving=false;continue}
-    if(!w.target){w.target=chooseNext(n,w,z.graph);if(!w.target){w.waitUntil=now+800;w.moving=false;n.moving=false;continue}}
+    if(!w.target){w.target=w.end||w.origin;if(!w.target){w.waitUntil=now+800;w.moving=false;n.moving=false;continue}orientToward(n,w.target)}
     const dx=w.target.x-Number(n.x),dy=w.target.y-Number(n.y),d=Math.hypot(dx,dy);
-    if(d<2){n.x=w.target.x;n.y=w.target.y;w.target=null;w.moving=false;n.moving=false;w.waitUntil=now+300+(hash(`${n.id}|pause|${w.trips}`)%1100);continue}
+    if(d<2){
+      n.x=w.target.x;n.y=w.target.y;w.node=w.target;w.trips++;
+      if(w.origin&&w.end)w.target=(w.target===w.end||w.target.id===w.end.id)?w.origin:w.end;else w.target=null;
+      w.moving=false;n.moving=false;orientToward(n,w.target);w.waitUntil=now+260+(hash(`${n.id}|turn|${w.trips}`)%540);continue
+    }
     const other=z.walkers.find(o=>o!==n&&Math.hypot(Number(o.x)-Number(n.x),Number(o.y)-Number(n.y))<27&&hash(o.id)<hash(n.id));if(other){w.waitUntil=now+220;w.moving=false;n.moving=false;continue}
     const step=Math.min(d,w.speed*dt);n.x=Number(n.x)+dx/d*step;n.y=Number(n.y)+dy/d*step;w.moving=true;n.moving=true;n.dir=Math.abs(dx)>=Math.abs(dy)?(dx>=0?2:1):(dy>=0?0:3)
   }
