@@ -134,7 +134,7 @@ function attachWalker(n,graph,occupied,seed){
   let node=nearestNode(graph,Number(n.x),Number(n.y),occupied,true);if(!node&&graph.nodes.length)node=spreadNode(graph,occupied,seed);
   if(node){n.x=node.x;n.y=node.y;n.homeX=node.x;n.homeY=node.y;occupied.push(node)}
   const h=hash(seed),route=buildPatrolPath(node,graph,seed);
-  n._v101Walk={node,route,routeIndex:0,routeStep:1,target:route[1]||null,trips:0,turns:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};
+  n._v101Walk={node,route,routeIndex:route.length>1?1:0,routeStep:1,target:route[1]||null,trips:0,turns:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};
   if(n._v101Walk.target)orientTo(n,n._v101Walk.target);return n
 }
 function sanitizeLegacy(sc,source){
