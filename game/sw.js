@@ -1,4 +1,4 @@
-const VERSION = 'v1.0.1-pwa-12';
+const VERSION = 'v1.0.1-pwa-13-loading-hotfix';
 const SHELL_CACHE = `valdora-shell-${VERSION}`;
 const ASSET_CACHE = `valdora-assets-${VERSION}`;
 const SHELL = [
@@ -32,11 +32,22 @@ const SHELL = [
   './VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-4'
 ];
 
+async function warmShell() {
+  const cache = await caches.open(SHELL_CACHE);
+
+  // Un fichier optionnel momentanément indisponible ne doit jamais empêcher
+  // l'installation du nouveau service worker et bloquer tout Valdora.
+  await Promise.allSettled(SHELL.map(async url => {
+    const request = new Request(url, { cache: 'reload' });
+    const response = await fetch(request);
+    if (!response || !response.ok) return;
+    await cache.put(request, response.clone());
+  }));
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(SHELL_CACHE)
-      .then(cache => cache.addAll(SHELL))
-      .then(() => self.skipWaiting())
+    warmShell().then(() => self.skipWaiting())
   );
 });
 
@@ -52,26 +63,30 @@ self.addEventListener('activate', event => {
   );
 });
 
-async function networkFirst(request) {
+async function networkFirst(request, cacheName = SHELL_CACHE) {
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: 'no-store' });
     if (response && response.ok) {
-      const cache = await caches.open(SHELL_CACHE);
-      cache.put(request, response.clone());
+      const cache = await caches.open(cacheName);
+      await cache.put(request, response.clone());
+      return response;
     }
-    return response;
+
+    const cached = await caches.match(request);
+    return cached || response;
   } catch (_) {
-    return (await caches.match(request)) || caches.match('./index.html');
+    return (await caches.match(request)) || (request.mode === 'navigate' ? caches.match('./index.html') : undefined);
   }
 }
 
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
+
   const response = await fetch(request);
   if (response && response.ok) {
     const cache = await caches.open(ASSET_CACHE);
-    cache.put(request, response.clone());
+    await cache.put(request, response.clone());
   }
   return response;
 }
@@ -88,20 +103,17 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Le moteur PNJ partage la chaîne drawWorld avec les renderers de terrain.
-  // Il doit être revalidé sur le réseau pour éviter de restaurer une ancienne
-  // version qui masque le pavage, les chemins ou l'herbe après une correction.
-  if (url.pathname.endsWith('/VALDORA_TOWN_NPCS_V1_0_1.js')) {
+  if (request.destination === 'video') return;
+
+  // Le code de jeu doit toujours être revalidé sur le réseau. Cela évite de
+  // mélanger un nouvel index.html avec d'anciens moteurs JS restés en cache,
+  // ce qui pouvait rendre la nouvelle version impossible à démarrer.
+  if (['script', 'style', 'worker'].includes(request.destination) || url.pathname.endsWith('.js')) {
     event.respondWith(networkFirst(request));
     return;
   }
 
-  if (request.destination === 'video') return;
-  if (request.destination === 'audio') {
-    event.respondWith(cacheFirst(request));
-    return;
-  }
-  if (['script', 'style', 'image', 'font'].includes(request.destination)) {
+  if (request.destination === 'audio' || ['image', 'font'].includes(request.destination)) {
     event.respondWith(cacheFirst(request));
   }
 });
