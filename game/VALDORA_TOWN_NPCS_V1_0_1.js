@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-TOWN-NPCS-REWRITE-5';
+const VERSION='V1.0.1-TOWN-NPCS-REWRITE-6-RENDER-SAFE';
 const TARGET_NORMAL=10;
 const TARGET_MEGA=14;
 const WALK_SPEED_MIN=34;
@@ -74,56 +74,11 @@ function buildGraph(sc){
   }
   return {sig:graphSignature(sc),cell,nodes}
 }
-function nearestNode(graph,x,y,occupied=[],preferFree=false){
-  let best=null,score=Infinity;
-  for(const q of graph.nodes){
-    const nearestCrowd=occupied.length?Math.min(...occupied.map(o=>dist(q,o))):Infinity;
-    const crowd=preferFree&&nearestCrowd<graph.cell*1.65?(graph.cell*1.65-nearestCrowd)*4.2:0;
-    const v=Math.hypot(q.x-x,q.y-y)+crowd;
-    if(v<score){score=v;best=q}
-  }
-  return best
-}
-function spreadNode(graph,occupied,seed){
-  if(!graph.nodes.length)return null;
-  if(!occupied.length)return graph.nodes[hash(seed)%graph.nodes.length];
-  let best=null,bestScore=-Infinity;
-  for(const q of graph.nodes){
-    const clearance=Math.min(...occupied.map(o=>dist(q,o)));
-    const jitter=(hash(`${seed}|${q.id}`)%1000)/1000;
-    const score=clearance+jitter*graph.cell*.18;
-    if(score>bestScore){bestScore=score;best=q}
-  }
-  return best
-}
-function buildPatrolPath(start,graph,seed){
-  if(!start)return [];
-  const desired=Math.max(2,Math.min(9,4+(hash(`${seed}|length`)%6)));
-  const path=[start],visited=new Set([start.id]);
-  let prev=null,node=start;
-  for(let i=1;i<desired;i++){
-    let opts=(node.neighbors||[]).filter(q=>q&&q!==prev&&!visited.has(q.id));
-    if(!opts.length)opts=(node.neighbors||[]).filter(q=>q&&q!==prev);
-    if(!opts.length)opts=(node.neighbors||[]).filter(Boolean);
-    if(!opts.length)break;
-    opts=opts.slice().sort((a,b)=>String(a.id).localeCompare(String(b.id)));
-    const pick=opts[hash(`${seed}|step|${i}|${node.id}`)%opts.length];
-    path.push(pick);visited.add(pick.id);prev=node;node=pick;
-  }
-  if(path.length<2){const fallback=(start.neighbors||[])[0]||graph.nodes.find(q=>q!==start&&dist(q,start)<=graph.cell*2.2);if(fallback)path.push(fallback)}
-  return path
-}
-function orientTo(n,target){
-  if(!n||!target)return;
-  const dx=Number(target.x)-Number(n.x),dy=Number(target.y)-Number(n.y);
-  if(Math.abs(dx)>=Math.abs(dy))n.dir=dx>=0?2:1;else n.dir=dy>=0?0:3
-}
-function nextPatrolTarget(n,w){
-  const route=w.route||[];if(route.length<2)return null;
-  let next=Number(w.routeIndex||0)+Number(w.routeStep||1);
-  if(next>=route.length){w.routeStep=-1;next=route.length-2;w.turns++}
-  else if(next<0){w.routeStep=1;next=1;w.turns++}
-  w.routeIndex=next;const target=route[next]||null;if(target)orientTo(n,target);return target
+function nearestNode(graph,x,y,occupied=[],preferFree=false){let best=null,score=Infinity;for(const q of graph.nodes){const crowd=preferFree&&occupied.some(o=>dist(q,o)<58)?190:0,v=Math.hypot(q.x-x,q.y-y)+crowd;if(v<score){score=v;best=q}}return best}
+function chooseNext(n,walk,graph){
+  const node=walk.node||nearestNode(graph,n.x,n.y);if(!node)return null;
+  let opts=(node.neighbors||[]).filter(q=>q.id!==walk.prevId);if(!opts.length)opts=node.neighbors||[];if(!opts.length)opts=graph.nodes.filter(q=>q!==node&&dist(node,q)<=graph.cell*2.2);if(!opts.length)return null;
+  const pick=opts[hash(`${n.id}|${walk.trips}|${node.id}`)%opts.length];walk.prevId=node.id;walk.node=pick;walk.trips++;return pick
 }
 function seedGenerated(zone,index,usedNames){
   const h=hash(`${zone}|rewrite|${index}`);let name=NAMES[h%NAMES.length],step=5+(h%9),k=0;while(usedNames.has(name)&&k++<NAMES.length)name=NAMES[(h+k*step)%NAMES.length];usedNames.add(name);
@@ -131,11 +86,9 @@ function seedGenerated(zone,index,usedNames){
 }
 function attachWalker(n,graph,occupied,seed){
   n.v121Roamer=false;n.v118Generated=false;n._v101AdoptedRoamer=false;n._v122Patrol=null;n._v118FreeTarget=null;n._v118Target=null;n.stationaryV118=true;n._v101TownOwned=true;
-  let node=nearestNode(graph,Number(n.x),Number(n.y),occupied,true);if(!node&&graph.nodes.length)node=spreadNode(graph,occupied,seed);
+  let node=nearestNode(graph,Number(n.x),Number(n.y),occupied,!!n._v101TownGenerated);if(!node&&graph.nodes.length)node=graph.nodes[hash(seed)%graph.nodes.length];
   if(node){n.x=node.x;n.y=node.y;n.homeX=node.x;n.homeY=node.y;occupied.push(node)}
-  const h=hash(seed),route=buildPatrolPath(node,graph,seed);
-  n._v101Walk={node,route,routeIndex:route.length>1?1:0,routeStep:1,target:route[1]||null,trips:0,turns:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};
-  if(n._v101Walk.target)orientTo(n,n._v101Walk.target);return n
+  const h=hash(seed);n._v101Walk={node,prevId:null,target:null,trips:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};return n
 }
 function sanitizeLegacy(sc,source){
   if(Array.isArray(sc?.v118Citizens))sc.v118Citizens=sc.v118Citizens.filter(n=>!legacyAmbient(n));
@@ -149,7 +102,7 @@ function buildZone(sc,zone,force=false){
   for(const n of ordinary)walkers.push(attachWalker(n,graph,occupied,`${zone}|source|${n.id||n.name}`));
   const target=sc.megacity?TARGET_MEGA:TARGET_NORMAL;
   for(let i=walkers.length;i<target;i++){
-    const n=seedGenerated(zone,i,usedNames),spawn=spreadNode(graph,occupied,`${zone}|spawn|${i}`);if(spawn){n.x=spawn.x;n.y=spawn.y}walkers.push(attachWalker(n,graph,occupied,`${zone}|generated|${i}`))
+    const n=seedGenerated(zone,i,usedNames),spawn=graph.nodes.length?graph.nodes[hash(`${zone}|spawn|${i}`)%graph.nodes.length]:null;if(spawn){n.x=spawn.x;n.y=spawn.y}walkers.push(attachWalker(n,graph,occupied,`${zone}|generated|${i}`))
   }
   const z={zone,scene:sc,sig,graph,walkers,fixed:fixedSourceNpcs(sc,zone),builtAt:Date.now(),checkedAt:Date.now(),lastSanitize:0};zones.set(zone,z);return z
 }
@@ -177,15 +130,9 @@ function updatePopulation(now,dt){
   const pauseAll=dialogOpen();
   for(const n of z.walkers){const w=n._v101Walk;if(!w)continue;n.stationaryV118=true;n.v121Roamer=false;n.v118Generated=false;
     if(pauseAll||now<Number(w.waitUntil||0)||Math.hypot(Number(n.x)-Number(s.x),Number(n.y)-Number(s.y))<48){w.moving=false;n.moving=false;continue}
-    if(!w.target){w.target=nextPatrolTarget(n,w);if(!w.target){w.waitUntil=now+800;w.moving=false;n.moving=false;continue}}
+    if(!w.target){w.target=chooseNext(n,w,z.graph);if(!w.target){w.waitUntil=now+800;w.moving=false;n.moving=false;continue}}
     const dx=w.target.x-Number(n.x),dy=w.target.y-Number(n.y),d=Math.hypot(dx,dy);
-    if(d<2){
-      n.x=w.target.x;n.y=w.target.y;w.node=w.target;w.trips++;
-      const route=w.route||[],atEnd=w.routeIndex===0||w.routeIndex===route.length-1;
-      w.target=nextPatrolTarget(n,w);w.moving=false;n.moving=false;
-      if(atEnd)w.waitUntil=now+260+(hash(`${n.id}|turn|${w.turns}`)%740);
-      continue
-    }
+    if(d<2){n.x=w.target.x;n.y=w.target.y;w.target=null;w.moving=false;n.moving=false;w.waitUntil=now+300+(hash(`${n.id}|pause|${w.trips}`)%1100);continue}
     const other=z.walkers.find(o=>o!==n&&Math.hypot(Number(o.x)-Number(n.x),Number(o.y)-Number(n.y))<27&&hash(o.id)<hash(n.id));if(other){w.waitUntil=now+220;w.moving=false;n.moving=false;continue}
     const step=Math.min(d,w.speed*dt);n.x=Number(n.x)+dx/d*step;n.y=Number(n.y)+dy/d*step;w.moving=true;n.moving=true;n.dir=Math.abs(dx)>=Math.abs(dy)?(dx>=0?2:1):(dy>=0?0:3)
   }
@@ -235,12 +182,12 @@ function installHooks(){
     if(window.interact!==interactHook){let cur=window.interact;if(cur?.__v122ChestRepair&&cur?.__v122Base)cur=cur.__v122Base;interactBase=cur;window.interact=interactHook;try{interact=interactHook}catch(_){}}
     if(window.nearNPC!==nearHook){nearBase=window.nearNPC;window.nearNPC=nearHook;try{nearNPC=nearHook}catch(_){} }
     if(typeof window.npcCollision==='function'&&window.npcCollision!==npcCollisionHook){npcCollisionBase=window.npcCollision;window.npcCollision=npcCollisionHook;try{npcCollision=npcCollisionHook}catch(_){}}
-    if(typeof window.collision==='function'&&window.collision!==collisionHook){collisionBase=window.collision;window.collision=collisionHook;try{collision=collisionHook}catch(_){}}
+    if(typeof window.collision==='function'&&window.collision!==collisionHook){collisionBase=window.collision;window.collision=collisionHook;try{collision=collisionHook}catch(_){} }
     window.updateTownNPCs=updateHook;try{updateTownNPCs=updateHook}catch(_){}window.updateNPCsD=updateHook;try{updateNPCsD=updateHook}catch(_){}
   }catch(e){console.warn('V1.0.1 hooks PNJ ville',e)}
 }
 function patchNotes(){
-  if(notesPatched)return;try{const notes=window.ValdoraUpdateNotesV126?.release?.notes;if(!Array.isArray(notes))return;const line='Les habitants des villes suivent désormais de vraies patrouilles aller-retour, se retournent naturellement à chaque extrémité et sont mieux répartis dans les rues.';if(!notes.includes(line))notes.push(line);notesPatched=true}catch(_){}
+  if(notesPatched)return;try{const notes=window.ValdoraUpdateNotesV126?.release?.notes;if(!Array.isArray(notes))return;const line='Le système des PNJ extérieurs a été entièrement réécrit : une seule population, un seul moteur de déplacement sur les chemins et un rendu de secours empêchent désormais les habitants invisibles.';if(!notes.includes(line))notes.push(line);notesPatched=true}catch(_){}
 }
 function audit(){
   const s=stateSafe();
@@ -254,7 +201,6 @@ function audit(){
     walkers:z?.walkers?.length||0,
     moving:z?.walkers?.filter(n=>n._v101Walk?.moving).length||0,
     generated:z?.walkers?.filter(n=>n._v101TownGenerated).length||0,
-    pingPong:z?.walkers?.filter(n=>(n._v101Walk?.route?.length||0)>=2).length||0,
     legacyRemaining:Array.isArray(sc?.v118Citizens)?sc.v118Citizens.filter(legacyAmbient).length:0,
     invalid:z?.walkers?.filter(n=>!Number.isFinite(Number(n.x))||!Number.isFinite(Number(n.y))).map(n=>n.id)||[]
   };
@@ -270,5 +216,5 @@ function frame(now){
 window.ValdoraTownNPCsV101={version:VERSION,audit,rebuild,population:()=>activeZone()?.walkers||[],near:playerNearWalker};
 requestAnimationFrame(frame);
 [100,500,1500,3500].forEach(ms=>setTimeout(()=>{try{installHooks();rebuild()}catch(_){}},ms));
-console.log('Valdora V1.0.1 : moteur de PNJ urbains aller-retour et dispersion améliorée.');
+console.log('Valdora V1.0.1 : moteur de PNJ urbains entièrement réécrit.');
 })();
