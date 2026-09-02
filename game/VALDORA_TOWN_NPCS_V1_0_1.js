@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-TOWN-NPCS-REWRITE-7-PINGPONG-SAFE';
+const VERSION='V1.0.1-TOWN-NPCS-REWRITE-8-JS-ANIMATION';
 const TARGET_NORMAL=10;
 const TARGET_MEGA=14;
 const WALK_SPEED_MIN=34;
@@ -18,6 +18,7 @@ const FALLBACK_PALETTES=[
 ];
 
 window.__VALDORA_TOWN_NPC_REWRITE_ACTIVE__=true;
+window.__VALDORA_TOWN_NPC_JS_ANIMATION__=true;
 
 const zones=new Map();
 let lastFrame=performance.now();
@@ -95,7 +96,7 @@ function attachWalker(n,graph,occupied,seed){
   n.v121Roamer=false;n.v118Generated=false;n._v101AdoptedRoamer=false;n._v122Patrol=null;n._v118FreeTarget=null;n._v118Target=null;n.stationaryV118=true;n._v101TownOwned=true;
   let node=nearestNode(graph,Number(n.x),Number(n.y),occupied,true);if(!node&&graph.nodes.length)node=graph.nodes[hash(seed)%graph.nodes.length];
   if(node){n.x=node.x;n.y=node.y;n.homeX=node.x;n.homeY=node.y;occupied.push(node)}
-  const h=hash(seed),end=choosePatrolEnd(n,node,graph);n._v101Walk={node,origin:node,end,target:end,trips:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false};
+  const h=hash(seed),end=choosePatrolEnd(n,node,graph);n._v101Walk={node,origin:node,end,target:end,trips:0,waitUntil:performance.now()+180+(h%900),speed:WALK_SPEED_MIN+(h%WALK_SPEED_SPAN),moving:false,animPhase:0};
   if(end)orientToward(n,end);return n
 }
 function sanitizeLegacy(sc,source){
@@ -129,39 +130,67 @@ function lineFor(n){
   try{const bank=window.ValdoraLivingWorldV118?.dialogues?.[stateSafe()?.zone];if(Array.isArray(bank)&&bank.length)return String(bank[hash(`${n.id}|${n._v101Talk||0}`)%bank.length])}catch(_){}
   return 'La ville est plus animée qu’elle n’en a l’air. Prends le temps d’observer les chemins et de parler aux habitants.'
 }
-function facePlayer(n){const s=stateSafe();if(!s||!n)return;const dx=Number(s.x)-Number(n.x),dy=Number(s.y)-Number(n.y);n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);if(n._v101Walk){n._v101Walk.waitUntil=performance.now()+3200;n._v101Walk.moving=false}n.moving=false}
+function facePlayer(n){const s=stateSafe();if(!s||!n)return;const dx=Number(s.x)-Number(n.x),dy=Number(s.y)-Number(n.y);n.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:2):(dy>0?0:3);if(n._v101Walk){n._v101Walk.waitUntil=performance.now()+3200;n._v101Walk.moving=false;n._v101Walk.animPhase=0}n.moving=false}
 function talkTo(n){if(!n)return false;facePlayer(n);n._v101Talk=Number(n._v101Talk||0)+1;const text=lineFor(n);try{dialog(`<b>${n.name||'Habitant'}</b><br>${text}`);return true}catch(_){try{toast(`${n.name||'Habitant'} : ${text}`);return true}catch(__){return false}}}
 
+function stopWalker(w,n){if(w)w.moving=false;if(n)n.moving=false}
 function updatePopulation(now,dt){
   if(!isWorldTown())return;const s=stateSafe(),sc=sceneSafe(),z=activeZone();if(!z)return;
   if(now-z.lastSanitize>SANITIZE_EVERY){sanitizeLegacy(sc,collectSourceNpcs(sc,s.zone));z.lastSanitize=now}
   const pauseAll=dialogOpen();
   for(const n of z.walkers){const w=n._v101Walk;if(!w)continue;n.stationaryV118=true;n.v121Roamer=false;n.v118Generated=false;
-    if(pauseAll||now<Number(w.waitUntil||0)||Math.hypot(Number(n.x)-Number(s.x),Number(n.y)-Number(s.y))<48){w.moving=false;n.moving=false;continue}
-    if(!w.target){w.target=w.end||w.origin;if(!w.target){w.waitUntil=now+800;w.moving=false;n.moving=false;continue}orientToward(n,w.target)}
+    if(pauseAll||now<Number(w.waitUntil||0)||Math.hypot(Number(n.x)-Number(s.x),Number(n.y)-Number(s.y))<48){stopWalker(w,n);continue}
+    if(!w.target){w.target=w.end||w.origin;if(!w.target){w.waitUntil=now+800;stopWalker(w,n);continue}orientToward(n,w.target)}
     const dx=w.target.x-Number(n.x),dy=w.target.y-Number(n.y),d=Math.hypot(dx,dy);
     if(d<2){
       n.x=w.target.x;n.y=w.target.y;w.node=w.target;w.trips++;
       if(w.origin&&w.end)w.target=(w.target===w.end||w.target.id===w.end.id)?w.origin:w.end;else w.target=null;
-      w.moving=false;n.moving=false;orientToward(n,w.target);w.waitUntil=now+260+(hash(`${n.id}|turn|${w.trips}`)%540);continue
+      stopWalker(w,n);w.animPhase=0;orientToward(n,w.target);w.waitUntil=now+260+(hash(`${n.id}|turn|${w.trips}`)%540);continue
     }
-    const other=z.walkers.find(o=>o!==n&&Math.hypot(Number(o.x)-Number(n.x),Number(o.y)-Number(n.y))<27&&hash(o.id)<hash(n.id));if(other){w.waitUntil=now+220;w.moving=false;n.moving=false;continue}
-    const step=Math.min(d,w.speed*dt);n.x=Number(n.x)+dx/d*step;n.y=Number(n.y)+dy/d*step;w.moving=true;n.moving=true;n.dir=Math.abs(dx)>=Math.abs(dy)?(dx>=0?2:1):(dy>=0?0:3)
+    const other=z.walkers.find(o=>o!==n&&Math.hypot(Number(o.x)-Number(n.x),Number(o.y)-Number(n.y))<27&&hash(o.id)<hash(n.id));if(other){w.waitUntil=now+220;stopWalker(w,n);continue}
+    const step=Math.min(d,w.speed*dt);n.x=Number(n.x)+dx/d*step;n.y=Number(n.y)+dy/d*step;w.moving=true;n.moving=true;n.dir=Math.abs(dx)>=Math.abs(dy)?(dx>=0?2:1):(dy>=0?0:3);
+    // Animation 100 % JavaScript, synchronisée avec la distance réellement parcourue.
+    // Si le PNJ ne bouge pas, la phase ne progresse pas. Aucun keyframe CSS n'intervient.
+    w.animPhase=(Number(w.animPhase||0)+step*.23)%(Math.PI*2)
   }
 }
 
 function camera(sc){const s=stateSafe(),mw=Number(sc?.width)||1800,mh=Number(sc?.height)||1100;return {camX:Math.max(0,Math.min(Math.max(0,mw-1600),Number(s?.x||800)-800)),camY:Math.max(0,Math.min(Math.max(0,mh-1000),Number(s?.y||500)-500)),sx:960/1600,sy:600/1000}}
-function exactNpcImageReady(look,dir){
-  try{const kinds=typeof V102F_NPC_KINDS!=='undefined'?V102F_NPC_KINDS:null,images=typeof V102F_NPC_IMAGES!=='undefined'?V102F_NPC_IMAGES:null;if(!Array.isArray(kinds)||!kinds.length||!images)return false;const idx=Math.abs(Math.trunc(Number(look)||0))%kinds.length,kind=kinds[idx],d=typeof v102eDirName==='function'?v102eDirName(dir):'down',im=images?.[kind]?.[d];return !!(im&&im.complete&&Number(im.naturalWidth)>0)}catch(_){return false}
+function exactNpcImage(look,dir){
+  try{
+    const kinds=typeof V102F_NPC_KINDS!=='undefined'?V102F_NPC_KINDS:null,images=typeof V102F_NPC_IMAGES!=='undefined'?V102F_NPC_IMAGES:null;
+    if(!Array.isArray(kinds)||!kinds.length||!images)return null;
+    const idx=Math.abs(Math.trunc(Number(look)||0))%kinds.length,kind=kinds[idx],d=typeof v102eDirName==='function'?v102eDirName(dir):'down',im=images?.[kind]?.[d];
+    return im&&im.complete&&Number(im.naturalWidth)>0?im:null
+  }catch(_){return null}
 }
-function drawFallback(n,x,y){try{if(typeof v101sCharacter!=='function'||typeof ctx==='undefined')return;const p=FALLBACK_PALETTES[hash(n.id)%FALLBACK_PALETTES.length];v101sCharacter(ctx,x,y,{moving:!!n._v101Walk?.moving,dir:n.dir||0,shirt:p[0],pants:'#3f4b55',hair:p[2],cap:p[3],accent:p[1]})}catch(_){}}
+function jsPose(n){
+  const w=n?._v101Walk,moving=!!w?.moving,phase=moving?Number(w.animPhase||0):0;
+  const stride=Math.sin(phase),plant=Math.abs(Math.cos(phase));
+  return {lean:moving?stride*.018:0,shift:moving?stride*.55:0,sx:moving?1+plant*.008:1,sy:moving?1-plant*.006:1}
+}
+function drawExactJs(n,x,y,im){
+  try{
+    const pose=jsPose(n),h=58,w=h*(im.naturalWidth/im.naturalHeight);
+    ctx.save();ctx.translate(x+pose.shift,y+4);ctx.rotate(pose.lean);ctx.scale(pose.sx,pose.sy);ctx.drawImage(im,-w/2,-h,w,h);ctx.restore()
+  }catch(_){try{ctx.restore()}catch(__){}}
+}
+function drawFallback(n,x,y){
+  try{
+    if(typeof v101sCharacter!=='function'||typeof ctx==='undefined')return;
+    const p=FALLBACK_PALETTES[hash(n.id)%FALLBACK_PALETTES.length],pose=jsPose(n);
+    ctx.save();ctx.translate(x+pose.shift,y+4);ctx.rotate(pose.lean);ctx.scale(pose.sx,pose.sy);
+    // Le personnage de secours est dessiné en pose statique ; la marche vient uniquement de jsPose().
+    v101sCharacter(ctx,0,-4,{moving:false,dir:n.dir||0,shirt:p[0],pants:'#3f4b55',hair:p[2],cap:p[3],accent:p[1]});ctx.restore()
+  }catch(_){try{ctx.restore()}catch(__){}}
+}
 function drawOne(n,cam){
   const x=(Number(n.x)-cam.camX)*cam.sx,y=(Number(n.y)-cam.camY)*cam.sy;if(x<-45||x>1005||y<-55||y>655)return;
-  try{if(exactNpcImageReady(n.look,n.dir)&&typeof drawNpc==='function'){drawNpc(n.look,x,y,n.dir||0,!!n._v101Walk?.moving);return}}catch(_){}drawFallback(n,x,y)
+  const im=exactNpcImage(n.look,n.dir);if(im){drawExactJs(n,x,y,im);return}drawFallback(n,x,y)
 }
 function drawPopulation(){if(!isWorldTown()||typeof ctx==='undefined')return;const sc=sceneSafe(),z=activeZone();if(!z)return;const cam=camera(sc);for(const n of z.walkers)drawOne(n,cam)}
 
-function updateHook(){/* Le déplacement est détenu par la boucle RAF de ce module. */}
+function updateHook(){/* Le déplacement et l'animation sont détenus par la boucle RAF JavaScript de ce module. */}
 function drawHook(){const r=typeof drawBase==='function'?drawBase.apply(this,arguments):undefined;try{drawPopulation()}catch(e){console.warn('V1.0.1 rendu PNJ ville',e)}return r}
 drawHook.__v101TownNpcRewrite=true;
 function nearHook(){const n=playerNearWalker(95);if(n)return n;return typeof nearBase==='function'?nearBase.apply(this,arguments):null}
@@ -199,7 +228,7 @@ function installHooks(){
   }catch(e){console.warn('V1.0.1 hooks PNJ ville',e)}
 }
 function patchNotes(){
-  if(notesPatched)return;try{const notes=window.ValdoraUpdateNotesV126?.release?.notes;if(!Array.isArray(notes))return;const line='Le système des PNJ extérieurs a été entièrement réécrit : une seule population, un seul moteur de déplacement sur les chemins et un rendu de secours empêchent désormais les habitants invisibles.';if(!notes.includes(line))notes.push(line);notesPatched=true}catch(_){}
+  if(notesPatched)return;try{const notes=window.ValdoraUpdateNotesV126?.release?.notes;if(!Array.isArray(notes))return;const lines=['Le système des PNJ extérieurs a été entièrement réécrit : une seule population, un seul moteur de déplacement sur les chemins et un rendu de secours empêchent désormais les habitants invisibles.','Les animations de marche des PNJ de ville sont désormais pilotées entièrement en JavaScript et synchronisées avec leur déplacement réel.'];for(const line of lines)if(!notes.includes(line))notes.push(line);notesPatched=true}catch(_){}
 }
 function audit(){
   const s=stateSafe();
@@ -207,6 +236,7 @@ function audit(){
   const z=sc?.kind==='town'?activeZone():null;
   return {
     version:VERSION,
+    animation:'javascript',
     zone:s?.zone||null,
     active:!!z,
     roadNodes:z?.graph?.nodes?.length||0,
@@ -221,12 +251,12 @@ function rebuild(){const s=stateSafe(),sc=sceneSafe();if(!s||!sc||sc.kind!=='tow
 
 function frame(now){
   const dt=Math.min(.05,Math.max(.001,(now-lastFrame)/1000));lastFrame=now;
-  try{installHooks();if(isWorldTown()){activeZone();updatePopulation(now,dt)}patchNotes();document.documentElement.dataset.valdoraTownNpcs=VERSION}catch(e){console.warn('V1.0.1 moteur PNJ ville',e)}
+  try{installHooks();if(isWorldTown()){activeZone();updatePopulation(now,dt)}patchNotes();document.documentElement.dataset.valdoraTownNpcs=VERSION;document.documentElement.dataset.valdoraTownNpcAnimation='javascript'}catch(e){console.warn('V1.0.1 moteur PNJ ville',e)}
   requestAnimationFrame(frame)
 }
 
-window.ValdoraTownNPCsV101={version:VERSION,audit,rebuild,population:()=>activeZone()?.walkers||[],near:playerNearWalker};
+window.ValdoraTownNPCsV101={version:VERSION,animation:'javascript',audit,rebuild,population:()=>activeZone()?.walkers||[],near:playerNearWalker};
 requestAnimationFrame(frame);
 [100,500,1500,3500].forEach(ms=>setTimeout(()=>{try{installHooks();rebuild()}catch(_){}},ms));
-console.log('Valdora V1.0.1 : moteur de PNJ urbains entièrement réécrit.');
+console.log('Valdora V1.0.1 : PNJ urbains, déplacement et animation pilotés en JavaScript.');
 })();
