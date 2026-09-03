@@ -3,7 +3,7 @@
 (function(){
 'use strict';
 
-const VERSION='V1.0.1-TOWN-NPCS-REWRITE-8-JS-ANIMATION';
+const VERSION='V1.0.1-TOWN-NPCS-REWRITE-9-RENDER-GUARD';
 const TARGET_NORMAL=10;
 const TARGET_MEGA=14;
 const WALK_SPEED_MIN=34;
@@ -22,8 +22,8 @@ window.__VALDORA_TOWN_NPC_JS_ANIMATION__=true;
 
 const zones=new Map();
 let lastFrame=performance.now();
-let drawBase=null,interactBase=null,nearBase=null,collisionBase=null,npcCollisionBase=null;
-let drawHookInstalled=false,notesPatched=false;
+let drawBase=null,drawRoot=null,interactBase=null,nearBase=null,collisionBase=null,npcCollisionBase=null;
+let drawHookInstalled=false,drawingBase=false,notesPatched=false;
 
 function stateSafe(){try{return typeof state!=='undefined'&&state&&typeof state==='object'?state:null}catch(_){return null}}
 function sceneSafe(){try{if(typeof currentScene==='function')return currentScene();const s=stateSafe();return typeof SCENES==='object'&&SCENES&&s?SCENES[s.zone]:null}catch(_){return null}}
@@ -191,7 +191,18 @@ function drawOne(n,cam){
 function drawPopulation(){if(!isWorldTown()||typeof ctx==='undefined')return;const sc=sceneSafe(),z=activeZone();if(!z)return;const cam=camera(sc);for(const n of z.walkers)drawOne(n,cam)}
 
 function updateHook(){/* Le déplacement et l'animation sont détenus par la boucle RAF JavaScript de ce module. */}
-function drawHook(){const r=typeof drawBase==='function'?drawBase.apply(this,arguments):undefined;try{drawPopulation()}catch(e){console.warn('V1.0.1 rendu PNJ ville',e)}return r}
+function drawHook(){
+  // Une couche graphique installée tardivement peut avoir mémorisé drawHook comme
+  // base avant d'être elle-même réadoptée. Briser ici cette récursion indirecte
+  // évite que l'erreur remonte jusqu'au filet de sécurité de la boucle principale.
+  if(drawingBase)return typeof drawRoot==='function'?drawRoot.apply(this,arguments):undefined;
+  let r;
+  drawingBase=true;
+  try{r=typeof drawBase==='function'?drawBase.apply(this,arguments):undefined}
+  finally{drawingBase=false}
+  try{drawPopulation()}catch(e){console.warn('V1.0.1 rendu PNJ ville',e)}
+  return r
+}
 drawHook.__v101TownNpcRewrite=true;
 function nearHook(){const n=playerNearWalker(95);if(n)return n;return typeof nearBase==='function'?nearBase.apply(this,arguments):null}
 nearHook.__v101TownNpcRewrite=true;
@@ -215,7 +226,7 @@ function installHooks(){
       // créerait drawHook -> renderer -> drawHook, et la masquer détruit les sols.
       const rendererAboveTown=drawHookInstalled&&typeof candidate==='function'&&!!(candidate.__v107dDraw||candidate.__v112World);
       if(!rendererAboveTown){
-        if(typeof candidate==='function')drawBase=candidate;
+        if(typeof candidate==='function'){if(!drawRoot)drawRoot=candidate;drawBase=candidate}
         window.drawWorld=drawHook;try{drawWorld=drawHook}catch(_){}
         drawHookInstalled=true;
       }

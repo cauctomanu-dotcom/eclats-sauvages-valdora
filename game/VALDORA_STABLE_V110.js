@@ -250,7 +250,7 @@
   if(document.getElementById('valdoraTownNpcRewriteLoader'))return;
   const script=document.createElement('script');
   script.id='valdoraTownNpcRewriteLoader';
-  script.src='VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-4';
+  script.src='VALDORA_TOWN_NPCS_V1_0_1.js?v=1.0.1-town-npcs-5';
   script.async=false;
   (document.head||document.documentElement).appendChild(script);
 })();
